@@ -3,283 +3,154 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import GoalCard from '@/components/ui/GoalCard';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { formatCurrency } from '@/components/dashboard/DashboardData';
+import { Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+interface Goal {
+  id: string;
+  title: string;
+  target_amount: number;
+  saved_amount: number;
+  currency: 'IDR' | 'USD';
+  target_date?: string;
+  emoji?: string;
+}
 
 const GoalsPage = () => {
   const { t } = useLanguage();
-  const { user, isPremium } = useAuth();
-  const { toast } = useToast();
-  const [goals, setGoals] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { isPremium } = useAuth();
+  const { goals, loading, deleteGoal } = useDashboardData();
+  const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   
-  // New goal form state
-  const [newGoal, setNewGoal] = useState({
-    name: '',
-    target: '',
-    currency: 'IDR',
-    deadline: '',
-    emoji: '🎯'
-  });
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  useEffect(() => {
-    if (user) {
-      fetchGoals();
-    }
-  }, [user]);
-  
-  const fetchGoals = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('savings_goals')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      setGoals(data || []);
-    } catch (error) {
-      console.error('Error fetching goals:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load savings goals",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDeleteGoal = (id: string) => {
+    setGoalToDelete(id);
   };
   
-  const handleCreateGoal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newGoal.name || !newGoal.target) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      setIsSubmitting(true);
-      
-      const { error } = await supabase
-        .from('savings_goals')
-        .insert({
-          user_id: user?.id,
-          title: newGoal.name,
-          target_amount: parseFloat(newGoal.target),
-          target_date: newGoal.deadline || null,
-          emoji: newGoal.emoji,
-          currency: newGoal.currency
-        });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Goal created!",
-        description: "Your new savings goal has been created.",
-      });
-      
-      // Reset form and close dialog
-      setNewGoal({
-        name: '',
-        target: '',
-        currency: 'IDR',
-        deadline: '',
-        emoji: '🎯'
-      });
-      setIsCreateDialogOpen(false);
-      
-      // Refresh goals
-      fetchGoals();
-      
-    } catch (error: any) {
-      console.error('Error creating goal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create savings goal",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
+  const confirmDeleteGoal = async () => {
+    if (goalToDelete) {
+      await deleteGoal(goalToDelete);
+      setGoalToDelete(null);
     }
   };
 
-  const handleDeleteGoal = async (goalId: string) => {
-    try {
-      const { error } = await supabase
-        .from('savings_goals')
-        .delete()
-        .eq('id', goalId);
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Goal deleted",
-        description: "Your savings goal has been removed",
-      });
-      
-      // Refresh goals list
-      fetchGoals();
-      
-    } catch (error: any) {
-      console.error('Error deleting goal:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete goal",
-        variant: "destructive"
-      });
-    }
+  const formatCurrency = (amount: number, currency: 'IDR' | 'USD') => {
+    return currency === 'IDR' 
+      ? `Rp${amount.toLocaleString('id-ID')}` 
+      : `$${amount.toLocaleString('en-US')}`;
   };
-  
-  // Array of emoji options for goals
-  const emojiOptions = ['🎯', '🏠', '🚗', '✈️', '🎓', '💻', '👕', '📱', '🎮', '🏝️', '💍', '👶', '🐶'];
-  
+
+  const calculateProgress = (saved: number, target: number) => {
+    return Math.min(Math.round((saved / target) * 100), 100);
+  };
+
+  if (loading.goals) {
+    return (
+      <DashboardLayout isPremium={isPremium}>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{t('nav.goals')}</h1>
-          <p className="text-muted-foreground mt-1">Track your savings progress and achieve your financial goals</p>
-        </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus size={16} className="mr-1" />
-          Add Goal
-        </Button>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">{t('goals.title')}</h1>
+        <p className="text-muted-foreground mt-1">Track progress towards your financial goals</p>
       </div>
-      
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="h-48 animate-pulse">
-              <CardContent className="p-0 h-full bg-gray-100 dark:bg-gray-800"></CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : goals.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {goals.map((goal) => (
-            <GoalCard
-              key={goal.id}
-              id={goal.id}
-              name={goal.title}
-              target={goal.target_amount}
-              current={goal.saved_amount}
-              currency={goal.currency as 'IDR' | 'USD'}
-              deadline={goal.target_date ? new Date(goal.target_date).toLocaleDateString() : undefined}
-              emoji={goal.emoji || '🎯'}
-              onUpdate={fetchGoals}
-              onDelete={() => handleDeleteGoal(goal.id)}
-            />
-          ))}
-        </div>
-      ) : (
-        <Card className="border-dashed bg-muted/50 flex flex-col items-center justify-center p-8 text-center">
-          <div className="text-3xl mb-3">🏁</div>
-          <CardTitle className="mb-2">Start a fun challenge!</CardTitle>
-          <CardDescription className="mb-4">Set your first savings goal</CardDescription>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus size={16} className="mr-1" />
-            Add Goal
-          </Button>
+
+      {goals.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="text-5xl mb-4">🎯</div>
+            <h3 className="text-xl font-medium mb-2">{t('goals.empty')}</h3>
+            <p className="text-muted-foreground text-center max-w-md mb-6">
+              Setting clear goals helps you stay motivated and focused on your financial journey.
+            </p>
+            <Button onClick={() => window.location.href = '/dashboard'}>
+              {t('goals.add')}
+            </Button>
+          </CardContent>
         </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {goals.map((goal) => {
+            const progress = calculateProgress(goal.saved_amount, goal.target_amount);
+            
+            return (
+              <Card key={goal.id} className="overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-2xl">{goal.emoji}</span>
+                      <CardTitle>{goal.title}</CardTitle>
+                    </div>
+                    <Button
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleDeleteGoal(goal.id)}
+                      className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-2">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-muted-foreground">
+                        Saved: {formatCurrency(goal.saved_amount, goal.currency)}
+                      </span>
+                      <span className="text-sm font-medium">
+                        {formatCurrency(goal.target_amount, goal.currency)}
+                      </span>
+                    </div>
+                    <Progress value={progress} />
+                  </div>
+                  
+                  <div className="flex justify-between items-center mt-4 text-sm">
+                    <span className="font-medium">{progress}%</span>
+                    {goal.target_date && (
+                      <span className="text-muted-foreground">Target: {goal.target_date}</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
       
-      {/* Create Goal Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create new savings goal</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleCreateGoal}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 gap-2">
-                <Label htmlFor="emoji" className="text-right pt-2">Emoji</Label>
-                <div className="col-span-3 flex flex-wrap gap-2 p-2 border rounded-md">
-                  {emojiOptions.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => setNewGoal({...newGoal, emoji})}
-                      className={`w-8 h-8 text-xl flex items-center justify-center rounded-md transition-colors ${newGoal.emoji === emoji ? 'bg-primary/20 ring-1 ring-primary' : 'hover:bg-muted'}`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-2">
-                <Label htmlFor="name" className="text-right">Name</Label>
-                <Input
-                  id="name"
-                  value={newGoal.name}
-                  onChange={(e) => setNewGoal({...newGoal, name: e.target.value})}
-                  placeholder="New Car"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-2">
-                <Label htmlFor="target" className="text-right">Target Amount</Label>
-                <div className="col-span-3 flex gap-2">
-                  <select 
-                    value={newGoal.currency}
-                    onChange={(e) => setNewGoal({...newGoal, currency: e.target.value})}
-                    className="bg-background border border-input rounded-md px-3 py-2 text-sm"
-                  >
-                    <option value="IDR">IDR</option>
-                    <option value="USD">USD</option>
-                  </select>
-                  <Input
-                    id="target"
-                    type="number"
-                    value={newGoal.target}
-                    onChange={(e) => setNewGoal({...newGoal, target: e.target.value})}
-                    placeholder="5000000"
-                    className="flex-1"
-                  />
-                </div>
-                {newGoal.target && (
-                  <div className="col-span-3 col-start-2 text-sm text-muted-foreground">
-                    {formatCurrency(parseFloat(newGoal.target) || 0, newGoal.currency as 'IDR' | 'USD')}
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-4 items-center gap-2">
-                <Label htmlFor="deadline" className="text-right">Target Date</Label>
-                <Input
-                  id="deadline"
-                  type="date"
-                  value={newGoal.deadline}
-                  onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Goal"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog open={!!goalToDelete} onOpenChange={(open) => !open && setGoalToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your savings goal and this action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteGoal} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };

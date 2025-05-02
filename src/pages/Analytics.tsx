@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { formatCurrency } from '@/components/dashboard/DashboardData';
+import { formatCurrency } from '@/hooks/useDashboardData';
 import { 
   BarChart,
   ResponsiveContainer, 
@@ -22,45 +24,212 @@ import {
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Calendar, TrendingUp, TrendingDown, PieChart as PieChartIcon } from 'lucide-react';
 
-// Sample data for charts
-const monthlyData = [
-  { name: 'Jan', income: 8000000, expense: 6500000 },
-  { name: 'Feb', income: 7500000, expense: 7000000 },
-  { name: 'Mar', income: 9000000, expense: 6800000 },
-  { name: 'Apr', income: 8800000, expense: 7200000 },
-  { name: 'May', income: 8200000, expense: 6900000 },
-  { name: 'Jun', income: 9500000, expense: 7100000 }
-];
+const COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#ff8042', '#ff5252'];
 
-const pieData = [
-  { name: 'Food', value: 2500000, color: '#8884d8' },
-  { name: 'Transport', value: 1500000, color: '#83a6ed' },
-  { name: 'Entertainment', value: 1000000, color: '#8dd1e1' },
-  { name: 'Shopping', value: 800000, color: '#82ca9d' },
-  { name: 'Bills', value: 2200000, color: '#a4de6c' },
-  { name: 'Other', value: 800000, color: '#d0ed57' }
-];
+interface Transaction {
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  date: string;
+}
 
-const topSpendingCategories = [
-  { category: 'Food', amount: 2500000, icon: '🍔' },
-  { category: 'Bills', amount: 2200000, icon: '📄' },
-  { category: 'Transport', amount: 1500000, icon: '🚗' }
-];
+interface MonthlyData {
+  name: string;
+  income: number;
+  expense: number;
+}
+
+interface CategoryExpense {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface TopSpendingCategory {
+  category: string;
+  amount: number;
+  icon: string;
+}
+
+const categoryIcons: Record<string, string> = {
+  'food': '🍔',
+  'transport': '🚗',
+  'entertainment': '🎬',
+  'shopping': '🛍️',
+  'bills': '📄',
+  'housing': '🏠',
+  'health': '🏥',
+  'education': '🎓',
+  'travel': '✈️',
+  'other': '📦'
+};
 
 const AnalyticsPage = () => {
   const { t } = useLanguage();
-  const { isPremium } = useAuth();
-  const [timeframe, setTimeframe] = useState('month');
+  const { isPremium, user } = useAuth();
+  const [timeframe, setTimeframe] = useState<'month' | 'quarter' | 'year'>('month');
+  
+  const getStartDate = () => {
+    const now = new Date();
+    if (timeframe === 'month') {
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (timeframe === 'quarter') {
+      return new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    } else {
+      return new Date(now.getFullYear(), 0, 1);
+    }
+  };
+  
+  // Query to fetch transactions
+  const { data: transactions = [], isLoading } = useQuery({
+    queryKey: ['analytics-transactions', timeframe, user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      const startDate = getStartDate();
+      
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .gte('date', startDate.toISOString().split('T')[0]);
+        
+      if (error) throw error;
+      
+      return data as Transaction[];
+    },
+    enabled: !!user?.id
+  });
+  
+  // Monthly data for bar chart
+  const monthlyData = React.useMemo(() => {
+    if (!transactions.length) return [];
+    
+    const data: Record<string, MonthlyData> = {};
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.date);
+      const monthYear = timeframe === 'month' 
+        ? `${date.getDate()}/${monthNames[date.getMonth()]}`
+        : monthNames[date.getMonth()];
+      
+      if (!data[monthYear]) {
+        data[monthYear] = { name: monthYear, income: 0, expense: 0 };
+      }
+      
+      if (transaction.type === 'income') {
+        data[monthYear].income += Number(transaction.amount);
+      } else {
+        data[monthYear].expense += Number(transaction.amount);
+      }
+    });
+    
+    return Object.values(data);
+  }, [transactions, timeframe]);
+  
+  // Expense breakdown for pie chart
+  const pieData = React.useMemo(() => {
+    if (!transactions.length) return [];
+    
+    const expensesByCategory: Record<string, number> = {};
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(transaction => {
+        const category = transaction.category;
+        if (!expensesByCategory[category]) {
+          expensesByCategory[category] = 0;
+        }
+        expensesByCategory[category] += Number(transaction.amount);
+      });
+    
+    return Object.entries(expensesByCategory).map(([name, value], index) => ({
+      name,
+      value,
+      color: COLORS[index % COLORS.length]
+    }));
+  }, [transactions]);
+  
+  // Top spending categories
+  const topSpendingCategories = React.useMemo(() => {
+    if (!transactions.length) return [];
+    
+    const expensesByCategory: Record<string, number> = {};
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(transaction => {
+        const category = transaction.category;
+        if (!expensesByCategory[category]) {
+          expensesByCategory[category] = 0;
+        }
+        expensesByCategory[category] += Number(transaction.amount);
+      });
+    
+    return Object.entries(expensesByCategory)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([category, amount]) => ({
+        category,
+        amount,
+        icon: categoryIcons[category.toLowerCase()] || '📊'
+      }));
+  }, [transactions]);
+  
+  // Day with highest spending
+  const highestSpendingDay = React.useMemo(() => {
+    if (!transactions.length) return null;
+    
+    const expensesByDay: Record<string, { total: number, count: number, date: Date }> = {};
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(transaction => {
+        const day = transaction.date;
+        if (!expensesByDay[day]) {
+          expensesByDay[day] = { total: 0, count: 0, date: new Date(day) };
+        }
+        expensesByDay[day].total += Number(transaction.amount);
+        expensesByDay[day].count++;
+      });
+    
+    const highestDay = Object.values(expensesByDay)
+      .sort((a, b) => b.total - a.total)[0];
+    
+    if (!highestDay) return null;
+    
+    return {
+      date: highestDay.date,
+      amount: highestDay.total,
+      count: highestDay.count
+    };
+  }, [transactions]);
   
   // Calculate summary values
-  const totalIncome = 9500000; // Sample data
-  const totalExpense = 7100000; // Sample data
+  const totalIncome = React.useMemo(() => {
+    return transactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+  }, [transactions]);
+  
+  const totalExpense = React.useMemo(() => {
+    return transactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+  }, [transactions]);
+  
   const balance = totalIncome - totalExpense;
   
-  // Format numbers 
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('id-ID').format(num);
-  };
+  // Average expense per day
+  const averageDailyExpense = React.useMemo(() => {
+    if (!transactions.length) return 0;
+    
+    const expenseTransactions = transactions.filter(t => t.type === 'expense');
+    if (!expenseTransactions.length) return 0;
+    
+    const days = new Set(expenseTransactions.map(t => t.date)).size;
+    return days > 0 ? totalExpense / days : 0;
+  }, [transactions, totalExpense]);
   
   return (
     <DashboardLayout isPremium={isPremium}>
@@ -126,58 +295,68 @@ const AnalyticsPage = () => {
             <CardDescription>Comparison over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ChartContainer 
-                config={{ 
-                  income: { label: 'Income', color: '#22c55e' },
-                  expense: { label: 'Expense', color: '#ef4444' }  
-                }}
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={monthlyData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => {
-                        if (value >= 1000000) return `${value / 1000000}M`;
-                        return `${value / 1000}K`;
-                      }}
-                    />
-                    <Tooltip 
-                      content={({active, payload}) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="bg-white p-2 border rounded shadow-sm">
-                              <p className="text-sm font-medium">{payload[0].payload.name}</p>
-                              <p className="text-xs text-green-600">
-                                Income: {formatCurrency(payload[0].value as number, 'IDR')}
-                              </p>
-                              <p className="text-xs text-red-600">
-                                Expense: {formatCurrency(payload[1].value as number, 'IDR')}
-                              </p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Bar dataKey="income" fill="var(--color-income)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="expense" fill="var(--color-expense)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
+            {isLoading ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : monthlyData.length === 0 ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <p>No transaction data available for this period</p>
+              </div>
+            ) : (
+              <div className="h-[300px]">
+                <ChartContainer 
+                  config={{ 
+                    income: { label: 'Income', color: '#22c55e' },
+                    expense: { label: 'Expense', color: '#ef4444' }  
+                  }}
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={monthlyData}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(value) => {
+                          if (value >= 1000000) return `${value / 1000000}M`;
+                          return `${value / 1000}K`;
+                        }}
+                      />
+                      <Tooltip 
+                        content={({active, payload}) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-white p-2 border rounded shadow-sm">
+                                <p className="text-sm font-medium">{payload[0].payload.name}</p>
+                                <p className="text-xs text-green-600">
+                                  Income: {formatCurrency(payload[0].value as number, 'IDR')}
+                                </p>
+                                <p className="text-xs text-red-600">
+                                  Expense: {formatCurrency(payload[1].value as number, 'IDR')}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="income" fill="var(--color-income)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="expense" fill="var(--color-expense)" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
         
@@ -191,30 +370,40 @@ const AnalyticsPage = () => {
             <CardDescription>By category</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    innerRadius={45}
-                    dataKey="value"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => [formatCurrency(value, 'IDR'), 'Amount']} 
-                  />
-                  <Legend layout="vertical" verticalAlign="bottom" align="center" />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {isLoading ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : pieData.length === 0 ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <p>No expense data available for this period</p>
+              </div>
+            ) : (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      innerRadius={45}
+                      dataKey="value"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: number) => [formatCurrency(value, 'IDR'), 'Amount']} 
+                    />
+                    <Legend layout="vertical" verticalAlign="bottom" align="center" />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -230,27 +419,49 @@ const AnalyticsPage = () => {
             {/* Top Spending Categories */}
             <div>
               <h3 className="text-sm font-medium mb-2">Top Spending Categories</h3>
-              <div className="space-y-3">
-                {topSpendingCategories.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{item.icon}</span>
-                      <span>{item.category}</span>
+              {topSpendingCategories.length > 0 ? (
+                <div className="space-y-3">
+                  {topSpendingCategories.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{item.icon}</span>
+                        <span>{item.category}</span>
+                      </div>
+                      <span className="font-medium">{formatCurrency(item.amount, 'IDR')}</span>
                     </div>
-                    <span className="font-medium">{formatCurrency(item.amount, 'IDR')}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 bg-muted rounded-md text-center">
+                  <p>No data available</p>
+                </div>
+              )}
             </div>
             
             {/* Highest Spending Day */}
             <div>
               <h3 className="text-sm font-medium mb-2">Highest Spending Day</h3>
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-sm">Wednesday, 12 May</p>
-                <p className="font-medium text-lg mt-1">{formatCurrency(1250000, 'IDR')}</p>
-                <p className="text-xs text-muted-foreground mt-1">3 transactions</p>
-              </div>
+              {highestSpendingDay ? (
+                <div className="p-3 bg-muted rounded-md">
+                  <p className="text-sm">
+                    {highestSpendingDay.date.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'short'
+                    })}
+                  </p>
+                  <p className="font-medium text-lg mt-1">
+                    {formatCurrency(highestSpendingDay.amount, 'IDR')}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {highestSpendingDay.count} transactions
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-muted rounded-md text-center">
+                  <p>No data available</p>
+                </div>
+              )}
             </div>
             
             {/* Transaction Stats */}
@@ -259,11 +470,13 @@ const AnalyticsPage = () => {
               <div className="grid grid-cols-2 gap-2">
                 <div className="p-3 bg-muted rounded-md">
                   <p className="text-xs text-muted-foreground">Transactions</p>
-                  <p className="font-medium text-lg">24</p>
+                  <p className="font-medium text-lg">{transactions.length}</p>
                 </div>
                 <div className="p-3 bg-muted rounded-md">
                   <p className="text-xs text-muted-foreground">Avg Per Day</p>
-                  <p className="font-medium text-lg">{formatCurrency(250000, 'IDR')}</p>
+                  <p className="font-medium text-lg">
+                    {formatCurrency(averageDailyExpense, 'IDR')}
+                  </p>
                 </div>
               </div>
             </div>

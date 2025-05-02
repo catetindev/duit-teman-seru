@@ -12,6 +12,14 @@ export interface DashboardStats {
   currency: 'IDR' | 'USD';
 }
 
+export interface Budget {
+  id: string;
+  category: string;
+  amount: number;
+  spent: number;
+  currency: 'IDR' | 'USD';
+}
+
 // Export formatCurrency function so it can be imported elsewhere
 export const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string => {
   if (currency === 'IDR') {
@@ -23,6 +31,7 @@ export const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string 
 export const useDashboardData = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     balance: 0,
     income: 0,
@@ -32,7 +41,8 @@ export const useDashboardData = () => {
   const [loading, setLoading] = useState({
     transactions: true,
     goals: true,
-    stats: true
+    stats: true,
+    budgets: true
   });
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -112,6 +122,58 @@ export const useDashboardData = () => {
     }
   };
 
+  const fetchBudgets = async () => {
+    try {
+      setLoading(prev => ({ ...prev, budgets: true }));
+      
+      // First get all budgets
+      const { data: budgetData, error: budgetError } = await supabase
+        .from('budgets')
+        .select('*')
+        .order('category', { ascending: true });
+      
+      if (budgetError) throw budgetError;
+      
+      // Get current month's first and last day
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      
+      // Get sum of expenses per category for current month
+      const { data: expenseData, error: expenseError } = await supabase
+        .from('transactions')
+        .select('category, sum(amount)')
+        .eq('type', 'expense')
+        .gte('date', firstDay.toISOString().split('T')[0])
+        .lte('date', lastDay.toISOString().split('T')[0])
+        .group('category');
+      
+      if (expenseError) throw expenseError;
+      
+      // Map expenses to an object for easy lookup
+      const expensesByCategory: Record<string, number> = {};
+      expenseData?.forEach(item => {
+        expensesByCategory[item.category] = Number(item.sum || 0);
+      });
+      
+      // Combine budget data with spent amounts
+      const formattedBudgets: Budget[] = (budgetData || []).map(budget => ({
+        id: budget.id,
+        category: budget.category,
+        amount: Number(budget.amount),
+        spent: expensesByCategory[budget.category] || 0,
+        currency: budget.currency as 'IDR' | 'USD',
+      }));
+      
+      setBudgets(formattedBudgets);
+    } catch (error: any) {
+      console.error('Error fetching budgets:', error);
+      setError(error.message);
+    } finally {
+      setLoading(prev => ({ ...prev, budgets: false }));
+    }
+  };
+
   const calculateStats = async () => {
     try {
       setLoading(prev => ({ ...prev, stats: true }));
@@ -161,6 +223,7 @@ export const useDashboardData = () => {
     if (user) {
       fetchTransactions();
       fetchGoals();
+      fetchBudgets();
       calculateStats();
     }
   }, [user]);
@@ -168,16 +231,120 @@ export const useDashboardData = () => {
   const refreshData = () => {
     fetchTransactions();
     fetchGoals();
+    fetchBudgets();
     calculateStats();
+  };
+  
+  const deleteGoal = async (goalId: string) => {
+    try {
+      const { error } = await supabase
+        .from('savings_goals')
+        .delete()
+        .eq('id', goalId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Goal deleted",
+        description: "Savings goal has been deleted successfully",
+      });
+      
+      fetchGoals(); // Refresh goals after deletion
+    } catch (error: any) {
+      console.error('Error deleting goal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete goal: " + error.message,
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const addUpdateBudget = async (budget: Omit<Budget, 'id' | 'spent'> & { id?: string }) => {
+    try {
+      if (budget.id) {
+        // Update existing budget
+        const { error } = await supabase
+          .from('budgets')
+          .update({
+            category: budget.category,
+            amount: budget.amount,
+            currency: budget.currency
+          })
+          .eq('id', budget.id);
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Budget updated",
+          description: "Budget has been updated successfully",
+        });
+      } else {
+        // Add new budget
+        const { error } = await supabase
+          .from('budgets')
+          .insert({
+            category: budget.category,
+            amount: budget.amount,
+            currency: budget.currency,
+            user_id: user?.id
+          });
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Budget added",
+          description: "New budget has been added successfully",
+        });
+      }
+      
+      fetchBudgets(); // Refresh budgets after adding/updating
+    } catch (error: any) {
+      console.error('Error saving budget:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save budget: " + error.message,
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const deleteBudget = async (budgetId: string) => {
+    try {
+      const { error } = await supabase
+        .from('budgets')
+        .delete()
+        .eq('id', budgetId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Budget deleted",
+        description: "Budget has been deleted successfully",
+      });
+      
+      fetchBudgets(); // Refresh budgets after deletion
+    } catch (error: any) {
+      console.error('Error deleting budget:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete budget: " + error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   return {
     transactions,
     goals,
+    budgets,
     stats,
     loading,
     error,
     refreshData,
+    deleteGoal,
+    addUpdateBudget,
+    deleteBudget,
     formatCurrency
   };
 };

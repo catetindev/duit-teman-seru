@@ -1,124 +1,110 @@
 
-import React, { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import Header from './Header';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/hooks/useLanguage';
-import { cn } from '@/lib/utils';
-import { Home, PiggyBank, BarChart, CreditCard, Target, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-interface NavItemProps {
-  icon: React.ReactNode;
-  label: string;
-  href: string;
-  active: boolean;
-}
-
-const NavItem = ({ icon, label, href, active }: NavItemProps) => (
-  <Link 
-    to={href} 
-    className={cn(
-      "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-      active 
-        ? "bg-primary/10 text-primary font-medium" 
-        : "hover:bg-muted/80 text-muted-foreground"
-    )}
-  >
-    {icon}
-    <span>{label}</span>
-  </Link>
-);
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
+import {
+  BarChart2,
+  LayoutDashboard,
+  PieChart,
+  ArrowDownUp,
+  Target,
+  Settings,
+  Bell
+} from 'lucide-react';
 
 interface DashboardLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
   isPremium?: boolean;
-  isAdmin?: boolean;
 }
 
-const DashboardLayout = ({ 
-  children, 
-  isPremium = false, 
-  isAdmin = false 
-}: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, isPremium }: DashboardLayoutProps) => {
   const { t } = useLanguage();
-  const location = useLocation();
-  const currentPath = location.pathname;
-  
-  const navItems = [
-    {
-      icon: <Home size={20} />,
-      label: t('nav.dashboard'),
-      href: isAdmin ? '/admin' : '/dashboard',
-    },
-    {
-      icon: <CreditCard size={20} />,
-      label: t('nav.transactions'),
-      href: '/transactions',
-    },
-    {
-      icon: <Target size={20} />,
-      label: t('nav.goals'),
-      href: '/goals',
-    },
-    {
-      icon: <BarChart size={20} />,
-      label: t('nav.budget'),
-      href: '/budget',
-    }
-  ];
-  
-  // Add analytics for premium users only
-  if (isPremium) {
-    navItems.push({
-      icon: <PiggyBank size={20} />,
-      label: t('nav.analytics'),
-      href: '/analytics',
-    });
-  }
-  
-  // Add settings at the end
-  navItems.push({
-    icon: <Settings size={20} />,
-    label: t('nav.settings'),
-    href: '/settings',
-  });
-  
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <Header isPremium={isPremium} isAdmin={isAdmin} />
-      
-      <div className="flex flex-1 container px-4 mx-auto pt-6">
-        <aside className="w-60 hidden md:block pr-6">
-          <nav className="space-y-1">
-            {navItems.map((item) => (
-              <NavItem
-                key={item.href}
-                icon={item.icon}
-                label={item.label}
-                href={item.href}
-                active={currentPath === item.href}
-              />
-            ))}
-          </nav>
-          
-          {!isPremium && !isAdmin && (
-            <div className="mt-8 p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg text-white">
-              <h3 className="font-bold mb-2">✨ {t('action.upgrade')}</h3>
-              <p className="text-sm mb-3 opacity-90">
-                {t('app.tagline')}
-              </p>
-              <Button variant="secondary" size="sm" className="w-full">
-                {t('action.upgrade')}
-              </Button>
-            </div>
-          )}
-        </aside>
-        
-        <main className="flex-1">
-          {children}
-        </main>
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-    </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <h2 className="text-2xl font-bold mb-4">You need to log in</h2>
+        <p className="mb-6 text-center">Please log in to access the dashboard</p>
+        <div className="flex gap-4">
+          <Link
+            to="/login"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+          >
+            Login
+          </Link>
+          <Link
+            to="/signup"
+            className="bg-muted text-muted-foreground px-4 py-2 rounded-md hover:bg-muted/90"
+          >
+            Sign Up
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <Sidebar>
+          <SidebarHeader />
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Main</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
+                  {t('nav.dashboard')}
+                </SidebarNavLink>
+                <SidebarNavLink to="/transactions" icon={<ArrowDownUp className="h-5 w-5" />}>
+                  {t('nav.transactions')}
+                </SidebarNavLink>
+                <SidebarNavLink to="/goals" icon={<Target className="h-5 w-5" />}>
+                  {t('nav.goals')}
+                </SidebarNavLink>
+                <SidebarNavLink to="/budget" icon={<BarChart2 className="h-5 w-5" />}>
+                  {t('nav.budget')}
+                </SidebarNavLink>
+                {isPremium && (
+                  <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
+                    {t('nav.analytics')}
+                  </SidebarNavLink>
+                )}
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            <SidebarGroup>
+              <SidebarGroupLabel>User</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
+                  Notifications
+                </SidebarNavLink>
+                <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
+                  {t('nav.settings')}
+                </SidebarNavLink>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+          <SidebarFooter />
+        </Sidebar>
+
+        <div className="flex-1 ml-16 md:ml-64">
+          <main className="h-full p-6 md:px-8 overflow-y-auto bg-background">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 

@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { formatCurrency } from '@/hooks/useDashboardData';
 
 interface Transaction {
   id: string;
@@ -26,13 +27,6 @@ interface TransactionChartProps {
 }
 
 const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8DD1E1', '#EA80FC', '#607D8B'];
-
-const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string => {
-  if (currency === 'IDR') {
-    return `Rp${amount.toLocaleString('id-ID')}`;
-  }
-  return `$${amount.toLocaleString('en-US')}`;
-};
 
 const TransactionChart: React.FC<TransactionChartProps> = ({ transactions }) => {
   const { t } = useLanguage();

@@ -16,6 +16,8 @@ import Transactions from "./pages/Transactions";
 import Goals from "./pages/Goals";
 import Budget from "./pages/Budget";
 import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -62,6 +64,16 @@ const App = () => (
               <Route path="/analytics" element={
                 <ProtectedRoute requiredRole="premium">
                   <Analytics />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } />
+              <Route path="/notifications" element={
+                <ProtectedRoute>
+                  <Notifications />
                 </ProtectedRoute>
               } />
               <Route path="/admin" element={
