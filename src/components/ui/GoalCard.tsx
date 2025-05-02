@@ -1,4 +1,3 @@
-
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -62,7 +61,7 @@ const GoalCard = ({
       const newAmount = current + Number(amount);
       
       const { error } = await supabase
-        .from('savings_goals')
+        .from('savings_goals' as any)
         .update({ saved_amount: newAmount })
         .eq('id', id);
       

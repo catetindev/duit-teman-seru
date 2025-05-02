@@ -44,14 +44,16 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
         return;
       }
       
-      const { data, error } = await supabase.from('savings_goals').insert({
-        user_id: user.id,
-        title: newGoal.title,
-        target_amount: parseFloat(newGoal.target_amount),
-        saved_amount: 0,
-        currency: 'IDR',
-        emoji: newGoal.emoji
-      });
+      const { data, error } = await supabase
+        .from('savings_goals' as any)
+        .insert({
+          user_id: user.id,
+          title: newGoal.title,
+          target_amount: parseFloat(newGoal.target_amount),
+          saved_amount: 0,
+          currency: 'IDR',
+          emoji: newGoal.emoji
+        });
       
       if (error) {
         if (error.message.includes('free users can only create')) {

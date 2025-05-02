@@ -43,7 +43,7 @@ export const useDashboardData = () => {
       setLoading(prev => ({ ...prev, transactions: true }));
       
       const { data, error } = await supabase
-        .from('transactions')
+        .from('transactions' as any)
         .select('*')
         .order('date', { ascending: false })
         .limit(10);
@@ -81,7 +81,7 @@ export const useDashboardData = () => {
       setLoading(prev => ({ ...prev, goals: true }));
       
       const { data, error } = await supabase
-        .from('savings_goals')
+        .from('savings_goals' as any)
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -122,7 +122,7 @@ export const useDashboardData = () => {
       startOfMonth.setHours(0, 0, 0, 0);
       
       const { data, error } = await supabase
-        .from('transactions')
+        .from('transactions' as any)
         .select('*')
         .gte('date', startOfMonth.toISOString());
       
