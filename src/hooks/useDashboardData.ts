@@ -51,7 +51,7 @@ export const useDashboardData = () => {
       if (error) throw error;
       
       // Transform data to match our interface
-      const formattedTransactions = data.map(item => ({
+      const formattedTransactions = (data as any[]).map(item => ({
         id: item.id,
         type: item.type as 'income' | 'expense',
         amount: Number(item.amount),
@@ -83,12 +83,12 @@ export const useDashboardData = () => {
       const { data, error } = await supabase
         .from('savings_goals' as any)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('id', { ascending: false });
       
       if (error) throw error;
       
       // Transform data to match our interface
-      const formattedGoals = data.map(item => ({
+      const formattedGoals = (data as any[]).map(item => ({
         id: item.id,
         title: item.title,
         target_amount: Number(item.target_amount),
@@ -131,7 +131,7 @@ export const useDashboardData = () => {
       let totalIncome = 0;
       let totalExpense = 0;
       
-      data.forEach(transaction => {
+      (data as any[]).forEach(transaction => {
         const amount = Number(transaction.amount);
         if (transaction.type === 'income') {
           totalIncome += amount;

@@ -1,4 +1,6 @@
 
+import { formatCurrency } from '@/hooks/useDashboardData';
+
 // Mock data for dashboard components
 
 export interface Transaction {
@@ -146,13 +148,8 @@ export const mockBadges = [
   }
 ];
 
-// Financial utility functions
-export const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string => {
-  if (currency === 'IDR') {
-    return `Rp${amount.toLocaleString('id-ID')}`;
-  }
-  return `$${amount.toLocaleString('en-US')}`;
-};
+// Export the formatCurrency for use in components
+export { formatCurrency };
 
 export const categoryIcons: Record<string, string> = {
   'food': '🍔',
