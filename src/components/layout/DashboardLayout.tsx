@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -5,6 +6,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
 import LogoutButton from '@/components/ui/LogoutButton';
+import MobileNavbar from '@/components/layout/MobileNavbar';
 import {
   BarChart2,
   LayoutDashboard,
@@ -54,7 +56,7 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
         <img 
           src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png"
           alt="Catatuy Logo" 
-          className="h-16 mb-8" 
+          className="h-20 mb-8" 
         />
         <h2 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">You need to log in</h2>
         <p className="mb-6 text-center text-gray-600 dark:text-gray-300">Please log in to access the dashboard</p>
@@ -79,84 +81,76 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full relative">
-        {isMobile && (
-          <Button 
-            variant="outline" 
-            size="icon"
-            className="fixed top-4 left-4 z-50 rounded-full bg-white shadow-md"
-            onClick={toggleSidebar}
-          >
-            {isCollapsed ? <Menu size={18} /> : <X size={18} />}
-          </Button>
-        )}
+        {/* Display Mobile Navbar when on mobile */}
+        {isMobile && <MobileNavbar isPremium={isPremium} isAdmin={isAdmin} />}
         
-        <Sidebar
-          className={`${isMobile ? 'fixed z-40' : ''} ${isCollapsed && isMobile ? 'transform -translate-x-full' : ''} transition-transform duration-300`}
-        >
-          <SidebarHeader>
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <img 
-                  src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
-                  alt="Catatuy Logo" 
-                  className="h-8" 
-                />
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <Sidebar>
+            <SidebarHeader>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+                    alt="Catatuy Logo" 
+                    className="h-10" 
+                  />
+                </div>
               </div>
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Main</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
-                  {t('nav.dashboard')}
-                </SidebarNavLink>
-                <SidebarNavLink to="/transactions" icon={<ArrowDownUp className="h-5 w-5" />}>
-                  {t('nav.transactions')}
-                </SidebarNavLink>
-                <SidebarNavLink to="/goals" icon={<Target className="h-5 w-5" />}>
-                  {t('nav.goals')}
-                </SidebarNavLink>
-                <SidebarNavLink to="/budget" icon={<BarChart2 className="h-5 w-5" />}>
-                  {t('nav.budget')}
-                </SidebarNavLink>
-                {isPremium && (
-                  <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
-                    {t('nav.analytics')}
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Main</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
+                    {t('nav.dashboard')}
                   </SidebarNavLink>
-                )}
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            <SidebarGroup>
-              <SidebarGroupLabel>User</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
-                  Notifications
-                </SidebarNavLink>
-                <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
-                  {t('nav.settings')}
-                </SidebarNavLink>
-                {isAdmin && (
-                  <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
-                    Admin
+                  <SidebarNavLink to="/transactions" icon={<ArrowDownUp className="h-5 w-5" />}>
+                    {t('nav.transactions')}
                   </SidebarNavLink>
-                )}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            <div className="px-3 py-2">
-              <LogoutButton variant="outline" className="w-full rounded-full" />
-            </div>
-          </SidebarFooter>
-        </Sidebar>
+                  <SidebarNavLink to="/goals" icon={<Target className="h-5 w-5" />}>
+                    {t('nav.goals')}
+                  </SidebarNavLink>
+                  <SidebarNavLink to="/budget" icon={<BarChart2 className="h-5 w-5" />}>
+                    {t('nav.budget')}
+                  </SidebarNavLink>
+                  {isPremium && (
+                    <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
+                      {t('nav.analytics')}
+                    </SidebarNavLink>
+                  )}
+                </SidebarGroupContent>
+              </SidebarGroup>
+              
+              <SidebarGroup>
+                <SidebarGroupLabel>User</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
+                    Notifications
+                  </SidebarNavLink>
+                  <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
+                    {t('nav.settings')}
+                  </SidebarNavLink>
+                  {isAdmin && (
+                    <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
+                      Admin
+                    </SidebarNavLink>
+                  )}
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+            <SidebarFooter>
+              <div className="px-3 py-2">
+                <LogoutButton variant="outline" className="w-full rounded-full" />
+              </div>
+            </SidebarFooter>
+          </Sidebar>
+        )}
 
-        <div className={`flex-1 ml-16 md:ml-64 transition-all duration-300 ${isMobile && !isCollapsed ? 'ml-64' : ''}`}>
-          {isCollapsed && isMobile && (
-            <div className="h-16"></div> /* Space for the toggle button */
-          )}
+        <div className={`flex-1 ${isMobile ? '' : 'ml-64'} transition-all duration-300`}>
           <main className="h-full p-4 md:p-6 lg:p-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10">
+            {/* Mobile top spacing for the navbar */}
+            {isMobile && <div className="h-16"></div>}
             {children}
           </main>
         </div>

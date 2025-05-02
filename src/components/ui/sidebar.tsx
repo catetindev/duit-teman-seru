@@ -71,10 +71,10 @@ export const SidebarHeader = ({
   return <header className={cn("h-16 flex items-center px-4 border-b", className)} {...props}>
       <div className="flex items-center justify-between w-full">
         {!collapsed && <div className="flex items-center">
-            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-5 object-fill" />
+            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-10 object-contain" />
           </div>}
         {collapsed && <div className="flex items-center justify-center w-full">
-            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-6" />
+            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-8 object-contain" />
           </div>}
       </div>
     </header>;

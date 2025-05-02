@@ -17,7 +17,7 @@ const Header = ({ isPremium = false, isAdmin = false }) => {
             <img 
               src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
               alt="Catatuy Logo" 
-              className="h-8" 
+              className="h-10 object-contain" 
             />
           </Link>
           {isPremium && (
