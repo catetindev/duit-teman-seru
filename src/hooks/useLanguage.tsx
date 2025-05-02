@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type Language = 'id' | 'en';
@@ -474,9 +473,11 @@ const translations = {
   }
 };
 
+// Create a context with a default undefined value
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+// Define the LanguageProvider as a proper React functional component
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('en');
   
   const t = (key: string): string => {
