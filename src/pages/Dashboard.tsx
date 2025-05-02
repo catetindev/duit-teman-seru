@@ -7,7 +7,7 @@ import StatCard from '@/components/ui/StatCard';
 import GoalCard from '@/components/ui/GoalCard';
 import TransactionList from '@/components/ui/TransactionList';
 import ExpenseCard from '@/components/ui/ExpenseCard';
-import { Badge } from '@/components/ui/badge';
+import BadgeCard from '@/components/ui/BadgeCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusCircle, CreditCard, PiggyBank, Target, ChevronRight } from 'lucide-react';
 
@@ -266,7 +266,7 @@ const Dashboard = () => {
               <h2 className="text-xl font-bold mb-4">Your Badges</h2>
               <div className="grid grid-cols-2 gap-3">
                 {mockBadges.map((badge, index) => (
-                  <Badge
+                  <BadgeCard
                     key={index}
                     name={badge.name}
                     description={badge.description}
