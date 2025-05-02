@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       budgets: {
         Row: {
           amount: number
@@ -194,8 +221,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_user: {
+        Args: {
+          _email: string
+          _password: string
+          _full_name: string
+          _role?: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: string
+      }
+      admin_delete_user: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      admin_send_notification: {
+        Args: {
+          _title: string
+          _message: string
+          _type?: string
+          _user_id?: string
+        }
+        Returns: number
+      }
+      admin_update_user: {
+        Args: {
+          _user_id: string
+          _full_name?: string
+          _role?: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
       check_user_role: {
         Args: { required_role: Database["public"]["Enums"]["user_role"] }
+        Returns: boolean
+      }
+      create_activity_log: {
+        Args: {
+          _user_id: string
+          _action: string
+          _entity_type?: string
+          _entity_id?: string
+        }
+        Returns: string
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }

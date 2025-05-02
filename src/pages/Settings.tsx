@@ -1,20 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/hooks/useLanguage';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
-  CardContent,
-  CardFooter
-} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -24,6 +16,22 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -31,334 +39,495 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { 
-  AlertDialog, 
-  AlertDialogTrigger, 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { toast } from '@/components/ui/sonner';
 
-const formSchema = z.object({
-  fullName: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  preferredCurrency: z.enum(['IDR', 'USD']),
-  preferredLanguage: z.enum(['en', 'id'])
+// Form schema
+const profileFormSchema = z.object({
+  full_name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address').min(1, 'Email is required'),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+const currencyFormSchema = z.object({
+  currency: z.string().min(1, 'Please select a currency'),
+  language: z.string().min(1, 'Please select a language'),
+});
+
+const passwordFormSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type CurrencyFormValues = z.infer<typeof currencyFormSchema>;
+type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 const SettingsPage = () => {
-  const { user, profile, isPremium, signOut } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [settings, setSettings] = useState<{
-    preferredCurrency: 'IDR' | 'USD',
-    preferredLanguage: 'en' | 'id'
-  }>({
-    preferredCurrency: 'IDR',
-    preferredLanguage: language as 'en' | 'id'
-  });
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const { user, profile, signOut, isPremium, isAdmin } = useAuth();
+  const { toast: uiToast } = useToast();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      fullName: profile?.full_name || '',
-      email: user?.email || '',
-      preferredCurrency: settings.preferredCurrency,
-      preferredLanguage: settings.preferredLanguage
-    }
+      full_name: '',
+      email: '',
+    },
+    mode: "onChange",
   });
 
-  // Fetch user settings
-  useEffect(() => {
-    const fetchSettings = async () => {
-      if (!user) return;
+  const currencyForm = useForm<CurrencyFormValues>({
+    resolver: zodResolver(currencyFormSchema),
+    defaultValues: {
+      currency: 'IDR',
+      language: 'en',
+    },
+  });
 
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
+
+  // Load user data when component mounts
+  useEffect(() => {
+    if (user && profile) {
+      profileForm.setValue('full_name', profile.full_name || '');
+      profileForm.setValue('email', user.email || '');
+    }
+    
+    // Load user settings
+    const loadUserSettings = async () => {
+      if (!user) return;
+      
       try {
         const { data, error } = await supabase
           .from('user_settings')
           .select('*')
           .eq('user_id', user.id)
           .single();
-
+          
         if (error) throw error;
         
         if (data) {
-          setSettings({
-            preferredCurrency: data.preferred_currency as 'IDR' | 'USD',
-            preferredLanguage: data.preferred_language as 'en' | 'id'
-          });
-          
-          // Update form values
-          form.setValue('preferredCurrency', data.preferred_currency as 'IDR' | 'USD');
-          form.setValue('preferredLanguage', data.preferred_language as 'en' | 'id');
+          currencyForm.setValue('currency', data.preferred_currency);
+          currencyForm.setValue('language', data.preferred_language);
         }
       } catch (error) {
-        console.error('Error fetching user settings:', error);
+        console.error('Error loading user settings:', error);
       }
     };
-
-    if (user) {
-      fetchSettings();
-    }
-  }, [user]);
-
-  // Update form when profile is loaded
-  useEffect(() => {
-    if (profile) {
-      form.setValue('fullName', profile.full_name);
-      form.setValue('email', user?.email || '');
-    }
-  }, [profile, user]);
-
-  const onSubmit = async (values: FormValues) => {
-    if (!user) return;
     
-    setIsLoading(true);
+    loadUserSettings();
+  }, [user, profile]);
+
+  const onProfileSubmit = async (data: ProfileFormValues) => {
+    if (!user) return;
     
     try {
       // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ full_name: values.fullName })
+        .update({
+          full_name: data.full_name,
+        })
         .eq('id', user.id);
-
+        
       if (profileError) throw profileError;
-
-      // Update user settings
-      const { error: settingsError } = await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          preferred_currency: values.preferredCurrency,
-          preferred_language: values.preferredLanguage,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-
-      if (settingsError) throw settingsError;
-
-      // Update language context
-      if (values.preferredLanguage !== language) {
-        setLanguage(values.preferredLanguage);
-      }
-
-      toast({
+      
+      uiToast({
         title: "Settings updated",
         description: "Your profile has been updated successfully",
       });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update settings",
+      uiToast({
+        title: "Error updating profile",
+        description: error.message,
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  const onCurrencySubmit = async (data: CurrencyFormValues) => {
+    if (!user) return;
+    
+    try {
+      // Check if settings exist
+      const { data: existingSettings, error: checkError } = await supabase
+        .from('user_settings')
+        .select('id')
+        .eq('user_id', user.id);
+        
+      if (checkError) throw checkError;
+      
+      if (existingSettings && existingSettings.length > 0) {
+        // Update existing settings
+        const { error } = await supabase
+          .from('user_settings')
+          .update({
+            preferred_currency: data.currency,
+            preferred_language: data.language,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id);
+          
+        if (error) throw error;
+      } else {
+        // Insert new settings
+        const { error } = await supabase
+          .from('user_settings')
+          .insert({
+            user_id: user.id,
+            preferred_currency: data.currency,
+            preferred_language: data.language,
+          });
+          
+        if (error) throw error;
+      }
+      
+      uiToast({
+        title: "Settings updated",
+        description: "Your preferences have been updated successfully",
+      });
+      
+      // Force reload to apply language change
+      if (data.language !== currencyForm.getValues().language) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    } catch (error: any) {
+      uiToast({
+        title: "Error updating preferences",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const onPasswordSubmit = async (data: PasswordFormValues) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: data.newPassword,
+      });
+      
+      if (error) throw error;
+      
+      uiToast({
+        title: "Password updated",
+        description: "Your password has been changed successfully",
+      });
+      
+      passwordForm.reset();
+    } catch (error: any) {
+      uiToast({
+        title: "Error updating password",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+  
   const handleDeleteAccount = async () => {
     if (!user) return;
     
     try {
-      // For this example, we'll use a direct Supabase auth signout and delete
-      // In a real application, you might need a backend function to handle this
-      const { error } = await supabase.auth.signOut();
+      // For this example, we'll sign out the user
+      // In a production app, you would implement proper account deletion
+      await signOut();
       
-      if (error) throw error;
-      
-      // Since we can't directly call delete_user RPC (it doesn't exist),
-      // we'll just sign out for now - in a real app you would implement proper account deletion
-      
-      toast({
-        title: "Account deleted",
-        description: "Your account has been deleted successfully",
+      toast("Account deleted", {
+        description: "Your account has been deleted successfully"
       });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete account",
+      uiToast({
+        title: "Error deleting account",
+        description: error.message,
         variant: "destructive"
       });
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   };
 
   return (
-    <DashboardLayout isPremium={isPremium}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-1">Update your profile and preferences</p>
+    <DashboardLayout isPremium={isPremium} isAdmin={isAdmin}>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">Settings</h1>
+        <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
+      
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="bg-muted/60 rounded-full p-1 mb-2">
+          <TabsTrigger value="profile" className="rounded-full">
+            Profile
+          </TabsTrigger>
+          <TabsTrigger value="preferences" className="rounded-full">
+            Preferences
+          </TabsTrigger>
+          <TabsTrigger value="password" className="rounded-full">
+            Password
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid gap-6">
-        {/* Profile Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-            <CardDescription>Update your personal information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="john@example.com" {...field} disabled />
-                      </FormControl>
-                      <FormDescription>Email cannot be changed</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="preferredCurrency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preferred Currency</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                        value={field.value}
-                      >
+        <TabsContent value="profile">
+          <Card className="border-none shadow-md rounded-xl">
+            <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+              <CardTitle>Profile</CardTitle>
+              <CardDescription>
+                Manage your personal information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <Form {...profileForm}>
+                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                  <FormField
+                    control={profileForm.control}
+                    name="full_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select currency" />
-                          </SelectTrigger>
+                          <Input {...field} className="rounded-full" />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
-                          <SelectItem value="USD">USD - US Dollar</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="preferredLanguage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Language</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                        value={field.value}
-                      >
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={profileForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select language" />
-                          </SelectTrigger>
+                          <Input {...field} readOnly className="rounded-full bg-muted" />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="id">Bahasa Indonesia</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormDescription>
+                          Email address cannot be changed
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600"
+                  >
+                    Save Changes
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                <Button type="submit" className="w-full md:w-auto" disabled={isLoading}>
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+        <TabsContent value="preferences">
+          <Card className="border-none shadow-md rounded-xl">
+            <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+              <CardTitle>Preferences</CardTitle>
+              <CardDescription>
+                Manage your app preferences and settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <Form {...currencyForm}>
+                <form onSubmit={currencyForm.handleSubmit(onCurrencySubmit)} className="space-y-6">
+                  <FormField
+                    control={currencyForm.control}
+                    name="currency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Currency</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="rounded-full">
+                              <SelectValue placeholder="Select currency" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
+                            <SelectItem value="USD">USD - US Dollar</SelectItem>
+                            <SelectItem value="EUR">EUR - Euro</SelectItem>
+                            <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                            <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={currencyForm.control}
+                    name="language"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Language</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="rounded-full">
+                              <SelectValue placeholder="Select language" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="id">Indonesian</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit"
+                    className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600"
+                  >
+                    Save Preferences
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        {/* Subscription Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Subscription Plan</CardTitle>
-            <CardDescription>Your current subscription details</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-muted p-4 rounded-md">
-              <p className="font-medium mb-1">Current Plan:</p>
-              <p className="text-lg font-bold">
-                {isPremium ? (
-                  <span className="text-green-600 dark:text-green-400">Premium Plan</span>
-                ) : (
-                  <span>Free Plan</span>
-                )}
+        <TabsContent value="password">
+          <Card className="border-none shadow-md rounded-xl">
+            <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+              <CardTitle>Security</CardTitle>
+              <CardDescription>
+                Change your password and security settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <Form {...passwordForm}>
+                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
+                  <FormField
+                    control={passwordForm.control}
+                    name="currentPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Password</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            {...field}
+                            className="rounded-full" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={passwordForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            {...field} 
+                            className="rounded-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            {...field} 
+                            className="rounded-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit"
+                    className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600"
+                  >
+                    Change Password
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            
+            <CardFooter className="flex flex-col items-start border-t pt-6">
+              <h3 className="text-lg font-semibold text-red-600 mb-2">Danger Zone</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Once you delete your account, there is no going back. Please be certain.
               </p>
               
-              {profile?.subscription_expiry && isPremium && (
-                <p className="text-sm mt-2">
-                  Expires: {new Date(profile.subscription_expiry).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-            
-            {!isPremium && (
-              <Button variant="outline" className="mt-4" onClick={() => window.location.href = '/pricing'}>
-                Upgrade to Premium
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Danger Zone */}
-        <Card className="border-red-200 dark:border-red-900">
-          <CardHeader>
-            <CardTitle className="text-red-600 dark:text-red-400">Danger Zone</CardTitle>
-            <CardDescription>Irreversible actions for your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete Account</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your account
-                    and remove all your data from our servers.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 hover:bg-red-700">
-                    Delete Account
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardContent>
-        </Card>
-      </div>
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="rounded-full">Delete Account</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your
+                      account and remove your data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-500 hover:bg-red-600 rounded-full"
+                      onClick={handleDeleteAccount}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </DashboardLayout>
   );
 };

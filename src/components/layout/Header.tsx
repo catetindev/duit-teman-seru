@@ -16,17 +16,17 @@ const Header = ({ isPremium = false, isAdmin = false }) => {
           <Link to="/" className="flex items-center">
             <img 
               src="/lovable-uploads/9dfb4bc1-064f-4b55-b196-360715fddf7f.png" 
-              alt="Catatype Logo" 
+              alt="DuitTemanseru Logo" 
               className="h-8 mr-2" 
             />
           </Link>
           {isPremium && (
-            <span className="bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs px-2 py-1 rounded-full">
+            <span className="bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-xs px-2 py-1 rounded-full">
               Premium
             </span>
           )}
           {isAdmin && (
-            <span className="bg-gradient-to-r from-purple-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full">
+            <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">
               Admin
             </span>
           )}
@@ -34,7 +34,7 @@ const Header = ({ isPremium = false, isAdmin = false }) => {
         
         <div className="flex items-center gap-3">
           <LanguageToggle />
-          <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative rounded-full">
             <Bell size={20} />
             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
           </Button>

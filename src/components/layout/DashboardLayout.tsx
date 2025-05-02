@@ -36,19 +36,24 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <h2 className="text-2xl font-bold mb-4">You need to log in</h2>
-        <p className="mb-6 text-center">Please log in to access the dashboard</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <img 
+          src="/lovable-uploads/9dfb4bc1-064f-4b55-b196-360715fddf7f.png"
+          alt="DuitTemanseru Logo" 
+          className="h-16 mb-8" 
+        />
+        <h2 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">You need to log in</h2>
+        <p className="mb-6 text-center text-gray-600 dark:text-gray-300">Please log in to access the dashboard</p>
         <div className="flex gap-4">
           <Link
             to="/login"
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+            className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-2.5 rounded-full hover:opacity-90 transition-all shadow-md"
           >
             Login
           </Link>
           <Link
             to="/signup"
-            className="bg-muted text-muted-foreground px-4 py-2 rounded-md hover:bg-muted/90"
+            className="bg-white text-gray-700 border border-gray-200 px-6 py-2.5 rounded-full hover:bg-gray-50 transition-all shadow-sm"
           >
             Sign Up
           </Link>
@@ -61,7 +66,17 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <Sidebar>
-          <SidebarHeader />
+          <SidebarHeader>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <img 
+                  src="/lovable-uploads/9dfb4bc1-064f-4b55-b196-360715fddf7f.png" 
+                  alt="Logo" 
+                  className="h-8" 
+                />
+              </div>
+            </div>
+          </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel>Main</SidebarGroupLabel>
@@ -105,13 +120,13 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
           </SidebarContent>
           <SidebarFooter>
             <div className="px-3 py-2">
-              <LogoutButton variant="outline" className="w-full" />
+              <LogoutButton variant="outline" className="w-full rounded-full" />
             </div>
           </SidebarFooter>
         </Sidebar>
 
         <div className="flex-1 ml-16 md:ml-64">
-          <main className="h-full p-6 md:px-8 overflow-y-auto bg-background">
+          <main className="h-full p-6 md:px-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10">
             {children}
           </main>
         </div>
