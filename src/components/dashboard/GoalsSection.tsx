@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import GoalCard from '@/components/ui/GoalCard';
 import { PlusCircle } from 'lucide-react';
@@ -118,12 +116,14 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
           goals.map((goal) => (
             <GoalCard
               key={goal.id}
+              id={goal.id}
               name={goal.title}
               target={goal.target_amount}
               current={goal.saved_amount}
               currency={goal.currency}
               deadline={goal.target_date}
               emoji={goal.emoji}
+              onUpdate={onGoalAdded}
             />
           ))
         ) : (

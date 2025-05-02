@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Transaction, Goal, formatCurrency, categoryIcons } from '@/components/dashboard/DashboardData';
+import { Transaction, Goal, categoryIcons } from '@/components/dashboard/DashboardData';
 
 export interface DashboardStats {
   balance: number;
@@ -11,6 +11,14 @@ export interface DashboardStats {
   expenses: number;
   currency: 'IDR' | 'USD';
 }
+
+// Export formatCurrency function so it can be imported elsewhere
+export const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string => {
+  if (currency === 'IDR') {
+    return `Rp${amount.toLocaleString('id-ID')}`;
+  }
+  return `$${amount.toLocaleString('en-US')}`;
+};
 
 export const useDashboardData = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -45,7 +53,7 @@ export const useDashboardData = () => {
       // Transform data to match our interface
       const formattedTransactions = data.map(item => ({
         id: item.id,
-        type: item.type,
+        type: item.type as 'income' | 'expense',
         amount: Number(item.amount),
         currency: item.currency as 'IDR' | 'USD',
         category: item.category,

@@ -36,6 +36,72 @@ export type Database = {
         }
         Relationships: []
       }
+      savings_goals: {
+        Row: {
+          currency: string
+          emoji: string | null
+          id: string
+          saved_amount: number
+          target_amount: number
+          target_date: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          currency?: string
+          emoji?: string | null
+          id?: string
+          saved_amount?: number
+          target_amount: number
+          target_date?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          currency?: string
+          emoji?: string | null
+          id?: string
+          saved_amount?: number
+          target_amount?: number
+          target_date?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          category: string
+          currency: string
+          date: string
+          description: string | null
+          id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          currency?: string
+          date?: string
+          description?: string | null
+          id?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          currency?: string
+          date?: string
+          description?: string | null
+          id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

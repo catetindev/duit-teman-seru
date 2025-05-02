@@ -3,7 +3,8 @@ import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import StatCard from '@/components/ui/StatCard';
 import { PiggyBank, CreditCard } from 'lucide-react';
-import { DashboardStats, formatCurrency } from '@/hooks/useDashboardData';
+import { DashboardStats } from '@/hooks/useDashboardData';
+import { formatCurrency } from '@/components/dashboard/DashboardData';
 
 interface StatCardsSectionProps {
   stats: DashboardStats;
