@@ -120,4 +120,58 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600;
   }
+  
+  /* Mobile optimizations */
+  .mobile-container {
+    @apply px-4 md:px-6 lg:px-8;
+  }
+  
+  .mobile-text {
+    @apply text-sm md:text-base;
+  }
+  
+  .mobile-heading {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+  
+  .mobile-card {
+    @apply p-3 md:p-5;
+  }
+  
+  .mobile-grid {
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .mobile-stack {
+    @apply flex-col md:flex-row;
+  }
+  
+  /* Improved tap targets for mobile */
+  .mobile-tap-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  
+  .mobile-full-width {
+    width: 100%;
+  }
+  
+  .mobile-text-center {
+    text-align: center;
+  }
+  
+  .mobile-p-4 {
+    padding: 1rem;
+  }
+  
+  .mobile-my-2 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
 }

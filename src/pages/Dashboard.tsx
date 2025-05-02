@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -11,7 +11,7 @@ import BudgetsSection from '@/components/dashboard/BudgetsSection';
 import GoalsSection from '@/components/dashboard/GoalsSection';
 import BadgesSection from '@/components/dashboard/BadgesSection';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { mockBudgets, mockBadges } from '@/components/dashboard/DashboardData';
+import { mockBadges } from '@/components/dashboard/DashboardData';
 
 const Dashboard = () => {
   const { type } = useParams();
@@ -42,7 +42,7 @@ const Dashboard = () => {
             loading={loading.transactions} 
           />
           
-          {isPremium && <BudgetsSection budgets={mockBudgets} isPremium={isPremium} />}
+          {isPremium && <BudgetsSection isPremium={isPremium} />}
         </div>
         
         <div className="space-y-8">

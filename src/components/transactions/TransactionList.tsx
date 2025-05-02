@@ -4,6 +4,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { formatCurrency } from '@/hooks/useDashboardData';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import TransactionActions from './TransactionActions';
 
 interface Transaction {
   id: string;
@@ -19,9 +20,10 @@ interface Transaction {
 interface TransactionListProps {
   transactions: Transaction[];
   isLoading?: boolean;
+  onUpdate?: () => void;
 }
 
-const TransactionList = ({ transactions, isLoading = false }: TransactionListProps) => {
+const TransactionList = ({ transactions, isLoading = false, onUpdate = () => {} }: TransactionListProps) => {
   const { t } = useLanguage();
   
   if (isLoading) {
@@ -60,11 +62,14 @@ const TransactionList = ({ transactions, isLoading = false }: TransactionListPro
                 <p className="text-xs text-muted-foreground">{transaction.category} • {transaction.date}</p>
               </div>
             </div>
-            <div className={cn(
-              "font-semibold",
-              transaction.type === 'income' ? 'text-green-500' : 'text-red-500'
-            )}>
-              {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "font-semibold",
+                transaction.type === 'income' ? 'text-green-500' : 'text-red-500'
+              )}>
+                {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
+              </div>
+              <TransactionActions transaction={transaction} onUpdate={onUpdate} />
             </div>
           </div>
         </Card>

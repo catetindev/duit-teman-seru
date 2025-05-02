@@ -1,8 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
 import LogoutButton from '@/components/ui/LogoutButton';
 import {
@@ -13,8 +14,11 @@ import {
   Target,
   Settings,
   Bell,
-  ShieldAlert
+  ShieldAlert,
+  Menu,
+  X
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -25,6 +29,17 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps) => {
   const { t } = useLanguage();
   const { user, isLoading } = useAuth();
+  const isMobile = useIsMobile();
+  const [isCollapsed, setIsCollapsed] = useState(isMobile);
+
+  // Update collapsed state when screen size changes
+  useEffect(() => {
+    setIsCollapsed(isMobile);
+  }, [isMobile]);
+
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   if (isLoading) {
     return (
@@ -38,8 +53,8 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
         <img 
-          src="/lovable-uploads/9dfb4bc1-064f-4b55-b196-360715fddf7f.png"
-          alt="DuitTemanseru Logo" 
+          src="/lovable-uploads/7d98b3c3-94ea-43a9-b93b-7329c3bb262d.png"
+          alt="Catatuy Logo" 
           className="h-16 mb-8" 
         />
         <h2 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">You need to log in</h2>
@@ -64,13 +79,26 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <Sidebar>
+      <div className="min-h-screen flex w-full relative">
+        {isMobile && (
+          <Button 
+            variant="outline" 
+            size="icon"
+            className="fixed top-4 left-4 z-50 rounded-full bg-white shadow-md"
+            onClick={toggleSidebar}
+          >
+            {isCollapsed ? <Menu size={18} /> : <X size={18} />}
+          </Button>
+        )}
+        
+        <Sidebar
+          className={`${isMobile ? 'fixed z-40' : ''} ${isCollapsed && isMobile ? 'transform -translate-x-full' : ''} transition-transform duration-300`}
+        >
           <SidebarHeader>
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <img 
-                  src="/lovable-uploads/9dfb4bc1-064f-4b55-b196-360715fddf7f.png" 
+                  src="/lovable-uploads/7d98b3c3-94ea-43a9-b93b-7329c3bb262d.png" 
                   alt="Logo" 
                   className="h-8" 
                 />
@@ -125,8 +153,11 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
           </SidebarFooter>
         </Sidebar>
 
-        <div className="flex-1 ml-16 md:ml-64">
-          <main className="h-full p-6 md:px-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10">
+        <div className={`flex-1 ml-16 md:ml-64 transition-all duration-300 ${isMobile && !isCollapsed ? 'ml-64' : ''}`}>
+          {isCollapsed && isMobile && (
+            <div className="h-16"></div> /* Space for the toggle button */
+          )}
+          <main className="h-full p-4 md:p-6 lg:p-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10">
             {children}
           </main>
         </div>

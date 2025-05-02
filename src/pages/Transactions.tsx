@@ -36,69 +36,71 @@ export default function Transactions() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
-  // Fetch transactions from Supabase
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      if (!user) return;
+  const fetchTransactions = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      // Build query based on filters
+      let query = supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
       
-      setIsLoading(true);
-      try {
-        // Build query based on filters
-        let query = supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('date', { ascending: false });
+      // Apply time filter if premium user
+      if (isPremium && timeFilter !== 'all') {
+        const now = new Date();
+        let startDate = new Date();
         
-        // Apply time filter if premium user
-        if (isPremium && timeFilter !== 'all') {
-          const now = new Date();
-          let startDate = new Date();
-          
-          if (timeFilter === 'today') {
-            startDate.setHours(0, 0, 0, 0);
-          } else if (timeFilter === 'week') {
-            startDate.setDate(now.getDate() - 7);
-          } else if (timeFilter === 'month') {
-            startDate.setMonth(now.getMonth() - 1);
-          }
-          
-          query = query.gte('date', startDate.toISOString());
+        if (timeFilter === 'today') {
+          startDate.setHours(0, 0, 0, 0);
+        } else if (timeFilter === 'week') {
+          startDate.setDate(now.getDate() - 7);
+        } else if (timeFilter === 'month') {
+          startDate.setMonth(now.getMonth() - 1);
         }
         
-        // Apply category filter
-        if (categoryFilter !== 'all') {
-          query = query.eq('category', categoryFilter);
-        }
-        
-        const { data, error } = await query;
-        
-        if (error) throw error;
-        
-        // Format transactions
-        const formattedTransactions = (data || []).map(item => ({
-          id: item.id,
-          type: item.type as 'income' | 'expense',
-          amount: Number(item.amount),
-          currency: item.currency as 'IDR' | 'USD',
-          category: item.category,
-          description: item.description || '',
-          date: new Date(item.date).toISOString().split('T')[0],
-          icon: getCategoryIcon(item.category)
-        }));
-        
-        setTransactions(formattedTransactions);
-      } catch (error: any) {
-        console.error('Error fetching transactions:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch transactions",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
+        query = query.gte('date', startDate.toISOString());
       }
-    };
+      
+      // Apply category filter
+      if (categoryFilter !== 'all') {
+        query = query.eq('category', categoryFilter);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      // Format transactions
+      const formattedTransactions = (data || []).map(item => ({
+        id: item.id,
+        type: item.type as 'income' | 'expense',
+        amount: Number(item.amount),
+        currency: item.currency as 'IDR' | 'USD',
+        category: item.category,
+        description: item.description || '',
+        date: new Date(item.date).toISOString().split('T')[0],
+        icon: getCategoryIcon(item.category)
+      }));
+      
+      setTransactions(formattedTransactions);
+    } catch (error: any) {
+      console.error('Error fetching transactions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch transactions",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Fetch transactions initially and set up real-time subscription
+  useEffect(() => {
+    if (!user) return;
     
     fetchTransactions();
     
@@ -122,7 +124,7 @@ export default function Transactions() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, timeFilter, categoryFilter, toast]);
+  }, [user, timeFilter, categoryFilter]);
 
   // Filter transactions based on search query
   const filteredTransactions = transactions.filter(transaction => 
@@ -147,14 +149,9 @@ export default function Transactions() {
     return categoryIcons[category.toLowerCase()] || '💸';
   };
 
-  const handleTransactionAdded = () => {
-    // No need to do anything here as the real-time subscription will update the transactions
-    setIsAddDialogOpen(false);
-  };
-
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="p-6 space-y-6">
+      <div className="p-4 md:p-6 space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">{t('nav.transactions')}</h1>
           
@@ -200,7 +197,8 @@ export default function Transactions() {
                 <TabsContent value="all">
                   <TransactionList 
                     transactions={filteredTransactions}
-                    isLoading={isLoading} 
+                    isLoading={isLoading}
+                    onUpdate={fetchTransactions}
                   />
                 </TabsContent>
                 
@@ -208,6 +206,7 @@ export default function Transactions() {
                   <TransactionList 
                     transactions={filteredTransactions.filter(t => t.type === 'income')}
                     isLoading={isLoading}
+                    onUpdate={fetchTransactions}
                   />
                 </TabsContent>
                 
@@ -215,6 +214,7 @@ export default function Transactions() {
                   <TransactionList 
                     transactions={filteredTransactions.filter(t => t.type === 'expense')}
                     isLoading={isLoading}
+                    onUpdate={fetchTransactions}
                   />
                 </TabsContent>
               </Tabs>
@@ -230,7 +230,7 @@ export default function Transactions() {
       <AddTransactionDialog 
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={handleTransactionAdded}
+        onTransactionAdded={fetchTransactions}
       />
     </DashboardLayout>
   );
