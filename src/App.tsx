@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Pricing from "./pages/Pricing";
 import Dashboard from "./pages/Dashboard";
+import Transactions from "./pages/Transactions";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,11 @@ const App = () => (
               <Route path="/dashboard/:type" element={
                 <ProtectedRoute requiredRole="premium">
                   <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/transactions" element={
+                <ProtectedRoute>
+                  <Transactions />
                 </ProtectedRoute>
               } />
               <Route path="/admin" element={
