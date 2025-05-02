@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,7 +52,7 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
         <img 
-          src="/lovable-uploads/7d98b3c3-94ea-43a9-b93b-7329c3bb262d.png"
+          src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png"
           alt="Catatuy Logo" 
           className="h-16 mb-8" 
         />
@@ -98,8 +97,8 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <img 
-                  src="/lovable-uploads/7d98b3c3-94ea-43a9-b93b-7329c3bb262d.png" 
-                  alt="Logo" 
+                  src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+                  alt="Catatuy Logo" 
                   className="h-8" 
                 />
               </div>

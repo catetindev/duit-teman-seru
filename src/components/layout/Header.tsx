@@ -15,9 +15,9 @@ const Header = ({ isPremium = false, isAdmin = false }) => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <img 
-              src="/lovable-uploads/7d98b3c3-94ea-43a9-b93b-7329c3bb262d.png" 
+              src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
               alt="Catatuy Logo" 
-              className="h-8 mr-2" 
+              className="h-8" 
             />
           </Link>
           {isPremium && (

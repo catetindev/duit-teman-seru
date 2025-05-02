@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils"
@@ -95,9 +94,23 @@ export const SidebarHeader = ({
     >
       <div className="flex items-center justify-between w-full">
         {!collapsed && (
-          <div className="font-bold text-xl">DuitTemanseru</div>
+          <div className="flex items-center">
+            <img 
+              src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+              alt="Catatuy Logo" 
+              className="h-7"
+            />
+          </div>
         )}
-        {collapsed && <div className="font-bold text-xl">DT</div>}
+        {collapsed && (
+          <div className="flex items-center justify-center w-full">
+            <img 
+              src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+              alt="Catatuy Logo" 
+              className="h-6"
+            />
+          </div>
+        )}
       </div>
     </header>
   );
