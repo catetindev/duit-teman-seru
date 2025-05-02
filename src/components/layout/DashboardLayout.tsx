@@ -1,10 +1,10 @@
-
 import React, { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Header from './Header';
 import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
 import { Home, PiggyBank, BarChart, CreditCard, Target, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface NavItemProps {
   icon: React.ReactNode;

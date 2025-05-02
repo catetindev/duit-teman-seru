@@ -71,8 +71,7 @@ const ExpenseCard = ({
       
       <Progress 
         value={Math.min(percentage, 100)} 
-        className="h-2" 
-        indicatorClassName={getProgressColor()}
+        className={cn("h-2", getProgressColor())}
       />
       
       <div className="mt-2 text-sm">

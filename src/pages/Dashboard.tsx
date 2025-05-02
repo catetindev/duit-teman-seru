@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -8,7 +7,7 @@ import StatCard from '@/components/ui/StatCard';
 import GoalCard from '@/components/ui/GoalCard';
 import TransactionList from '@/components/ui/TransactionList';
 import ExpenseCard from '@/components/ui/ExpenseCard';
-import Badge from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusCircle, CreditCard, PiggyBank, Target, ChevronRight } from 'lucide-react';
 
@@ -21,9 +20,9 @@ const Dashboard = () => {
   const mockTransactions = [
     {
       id: '1',
-      type: 'expense',
+      type: 'expense' as const,
       amount: 125000,
-      currency: 'IDR',
+      currency: 'IDR' as const,
       category: 'food',
       description: 'Lunch at Warung Pak Made',
       date: '2025-05-01',
@@ -31,9 +30,9 @@ const Dashboard = () => {
     },
     {
       id: '2',
-      type: 'expense',
+      type: 'expense' as const,
       amount: 55000,
-      currency: 'IDR',
+      currency: 'IDR' as const,
       category: 'transport',
       description: 'Gojek ride',
       date: '2025-05-01',
@@ -41,9 +40,9 @@ const Dashboard = () => {
     },
     {
       id: '3',
-      type: 'income',
+      type: 'income' as const,
       amount: 5000000,
-      currency: 'IDR',
+      currency: 'IDR' as const,
       category: 'salary',
       description: 'Monthly Salary',
       date: '2025-05-01',
@@ -56,7 +55,7 @@ const Dashboard = () => {
       name: 'New Laptop',
       target: 15000000,
       current: 7500000,
-      currency: 'IDR',
+      currency: 'IDR' as const,
       deadline: 'Sep 2025',
       emoji: '💻'
     }
@@ -69,7 +68,7 @@ const Dashboard = () => {
       name: 'Bali Trip',
       target: 8000000,
       current: 3200000,
-      currency: 'IDR',
+      currency: 'IDR' as const,
       deadline: 'Dec 2025',
       emoji: '🏝️'
     },
@@ -77,7 +76,7 @@ const Dashboard = () => {
       name: 'Emergency Fund',
       target: 25000000,
       current: 10000000,
-      currency: 'IDR',
+      currency: 'IDR' as const,
       deadline: 'Ongoing',
       emoji: '🚨'
     }
@@ -88,19 +87,19 @@ const Dashboard = () => {
       category: 'Food',
       spent: 1250000,
       budget: 2000000,
-      currency: 'IDR'
+      currency: 'IDR' as const
     },
     {
       category: 'Transport',
       spent: 450000,
       budget: 500000,
-      currency: 'IDR'
+      currency: 'IDR' as const
     },
     {
       category: 'Entertainment',
       spent: 800000,
       budget: 600000,
-      currency: 'IDR'
+      currency: 'IDR' as const
     }
   ];
 
