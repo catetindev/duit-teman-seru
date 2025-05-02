@@ -74,7 +74,7 @@ export const mockGoals = [
     name: 'New Laptop',
     target: 15000000,
     current: 7500000,
-    currency: 'IDR',
+    currency: 'IDR' as const,
     deadline: 'Sep 2025',
     emoji: '💻'
   }
@@ -86,7 +86,7 @@ export const premiumGoals = [
     name: 'Bali Trip',
     target: 8000000,
     current: 3200000,
-    currency: 'IDR',
+    currency: 'IDR' as const,
     deadline: 'Dec 2025',
     emoji: '🏝️'
   },
@@ -94,7 +94,7 @@ export const premiumGoals = [
     name: 'Emergency Fund',
     target: 25000000,
     current: 10000000,
-    currency: 'IDR',
+    currency: 'IDR' as const,
     deadline: 'Ongoing',
     emoji: '🚨'
   }
@@ -105,19 +105,19 @@ export const mockBudgets = [
     category: 'Food',
     spent: 1250000,
     budget: 2000000,
-    currency: 'IDR'
+    currency: 'IDR' as const
   },
   {
     category: 'Transport',
     spent: 450000,
     budget: 500000,
-    currency: 'IDR'
+    currency: 'IDR' as const
   },
   {
     category: 'Entertainment',
     spent: 800000,
     budget: 600000,
-    currency: 'IDR'
+    currency: 'IDR' as const
   }
 ];
 
