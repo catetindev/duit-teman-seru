@@ -9,7 +9,7 @@ import { toast as sonnerToast } from '@/components/ui/sonner';
 import StatCard from '@/components/ui/StatCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronRight, Users, UserCheck, Award, Bell, Trash2, Edit, AlertTriangle } from 'lucide-react';
+import { ChevronRight, Users, UserCheck, Award, Bell, Trash2, Edit, AlertTriangle, Activity } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -86,7 +86,7 @@ interface ActivityLog {
   user?: {
     full_name: string;
     email: string;
-  };
+  } | null;
 }
 
 const AdminDashboard = () => {
@@ -168,10 +168,10 @@ const AdminDashboard = () => {
         email: user.email,
         full_name: user.full_name,
         role: user.role,
-        status: 'active', // For simplicity assuming all are active
+        status: 'active' as 'active', // Explicitly cast to the correct type
         joined: new Date(user.created_at).toISOString().split('T')[0],
         lastActive: new Date(user.created_at).toISOString().split('T')[0], // We don't have last_active in DB yet
-      }));
+      })) as User[]; // Cast to User array
     }
   });
   
@@ -183,17 +183,39 @@ const AdminDashboard = () => {
   } = useQuery({
     queryKey: ['admin-activity-logs'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get the activity logs
+      const { data: logsData, error: logsError } = await supabase
         .from('activity_logs')
-        .select(`
-          *,
-          user:profiles(full_name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
         
-      if (error) throw error;
-      return data as ActivityLog[];
+      if (logsError) throw logsError;
+      
+      // Then, for each log, get the user details
+      const logsWithUsers: ActivityLog[] = await Promise.all(
+        logsData.map(async (log) => {
+          if (!log.user_id) {
+            return {
+              ...log,
+              user: null
+            } as ActivityLog;
+          }
+          
+          const { data: userData, error: userError } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', log.user_id)
+            .single();
+            
+          return {
+            ...log,
+            user: userError ? null : userData
+          } as ActivityLog;
+        })
+      );
+      
+      return logsWithUsers;
     }
   });
 
