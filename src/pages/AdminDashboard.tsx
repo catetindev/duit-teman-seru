@@ -61,7 +61,7 @@ const AdminDashboard = () => {
   ];
   
   return (
-    <DashboardLayout isAdmin>
+    <DashboardLayout isAdmin={true}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
         <p className="text-muted-foreground">

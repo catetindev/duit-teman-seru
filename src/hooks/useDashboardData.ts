@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -140,20 +139,25 @@ export const useDashboardData = () => {
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       
       // Get sum of expenses per category for current month
+      // Using aggregate function instead of group which isn't available
       const { data: expenseData, error: expenseError } = await supabase
         .from('transactions')
-        .select('category, sum(amount)')
+        .select('category, amount')
         .eq('type', 'expense')
         .gte('date', firstDay.toISOString().split('T')[0])
-        .lte('date', lastDay.toISOString().split('T')[0])
-        .group('category');
+        .lte('date', lastDay.toISOString().split('T')[0]);
       
       if (expenseError) throw expenseError;
       
-      // Map expenses to an object for easy lookup
+      // Map expenses to an object for easy lookup - calculate sums manually
       const expensesByCategory: Record<string, number> = {};
       expenseData?.forEach(item => {
-        expensesByCategory[item.category] = Number(item.sum || 0);
+        const category = item.category;
+        const amount = Number(item.amount || 0);
+        if (!expensesByCategory[category]) {
+          expensesByCategory[category] = 0;
+        }
+        expensesByCategory[category] += amount;
       });
       
       // Combine budget data with spent amounts

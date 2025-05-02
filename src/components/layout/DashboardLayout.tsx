@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/hooks/useLanguage';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
+import LogoutButton from '@/components/ui/LogoutButton';
 import {
   BarChart2,
   LayoutDashboard,
@@ -11,15 +12,17 @@ import {
   ArrowDownUp,
   Target,
   Settings,
-  Bell
+  Bell,
+  ShieldAlert
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   isPremium?: boolean;
+  isAdmin?: boolean;
 }
 
-const DashboardLayout = ({ children, isPremium }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps) => {
   const { t } = useLanguage();
   const { user, isLoading } = useAuth();
 
@@ -92,10 +95,19 @@ const DashboardLayout = ({ children, isPremium }: DashboardLayoutProps) => {
                 <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
                   {t('nav.settings')}
                 </SidebarNavLink>
+                {isAdmin && (
+                  <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
+                    Admin
+                  </SidebarNavLink>
+                )}
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarFooter />
+          <SidebarFooter>
+            <div className="px-3 py-2">
+              <LogoutButton variant="outline" className="w-full" />
+            </div>
+          </SidebarFooter>
         </Sidebar>
 
         <div className="flex-1 ml-16 md:ml-64">
