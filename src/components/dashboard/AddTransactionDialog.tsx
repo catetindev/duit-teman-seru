@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -60,7 +59,7 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded }: AddTransa
       }
       
       const { data, error } = await supabase
-        .from('transactions' as any)
+        .from('transactions')
         .insert({
           user_id: user.id,
           type: transaction.type,

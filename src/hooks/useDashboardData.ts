@@ -43,15 +43,15 @@ export const useDashboardData = () => {
       setLoading(prev => ({ ...prev, transactions: true }));
       
       const { data, error } = await supabase
-        .from('transactions' as any)
+        .from('transactions')
         .select('*')
         .order('date', { ascending: false })
         .limit(10);
       
       if (error) throw error;
       
-      // Transform data to match our interface
-      const formattedTransactions = (data as any[]).map(item => ({
+      // Transform data to match our interface and fix the type with explicit casting
+      const formattedTransactions = (data || []).map(item => ({
         id: item.id,
         type: item.type as 'income' | 'expense',
         amount: Number(item.amount),
@@ -81,14 +81,14 @@ export const useDashboardData = () => {
       setLoading(prev => ({ ...prev, goals: true }));
       
       const { data, error } = await supabase
-        .from('savings_goals' as any)
+        .from('savings_goals')
         .select('*')
         .order('id', { ascending: false });
       
       if (error) throw error;
       
-      // Transform data to match our interface
-      const formattedGoals = (data as any[]).map(item => ({
+      // Transform data to match our interface with explicit casting
+      const formattedGoals = (data || []).map(item => ({
         id: item.id,
         title: item.title,
         target_amount: Number(item.target_amount),
@@ -122,7 +122,7 @@ export const useDashboardData = () => {
       startOfMonth.setHours(0, 0, 0, 0);
       
       const { data, error } = await supabase
-        .from('transactions' as any)
+        .from('transactions')
         .select('*')
         .gte('date', startOfMonth.toISOString());
       
@@ -131,7 +131,8 @@ export const useDashboardData = () => {
       let totalIncome = 0;
       let totalExpense = 0;
       
-      (data as any[]).forEach(transaction => {
+      // Fix the type with explicit casting and null check
+      (data || []).forEach(transaction => {
         const amount = Number(transaction.amount);
         if (transaction.type === 'income') {
           totalIncome += amount;

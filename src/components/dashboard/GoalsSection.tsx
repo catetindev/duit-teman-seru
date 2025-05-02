@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,7 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
       }
       
       const { data, error } = await supabase
-        .from('savings_goals' as any)
+        .from('savings_goals')
         .insert({
           user_id: user.id,
           title: newGoal.title,
