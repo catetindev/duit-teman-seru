@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import LanguageToggle from '@/components/ui/LanguageToggle';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Signup = () => {
   const { t } = useLanguage();
@@ -18,15 +20,45 @@ const Signup = () => {
   const [plan, setPlan] = useState('free');
   const [isLoading, setIsLoading] = useState(false);
   
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Mock signup - replace with actual auth
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Create the user with Supabase auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // If signup successful, show success message
+      toast.success(t('auth.signupSuccess'));
+      
+      // If premium plan selected, we'll need to handle that separately
+      // For now, let's just redirect to dashboard (the profile trigger will create the base profile)
+      if (plan === 'premium') {
+        // In a real app, this would redirect to payment processing
+        // For demo purposes, just add a message
+        toast.info(t('auth.premiumRedirect'));
+      }
+      
+      // Redirect to dashboard (or a verification page in production)
       navigate('/dashboard');
-    }, 1500);
+    } catch (error: any) {
+      toast.error(error.message || t('auth.signupFailed'));
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (

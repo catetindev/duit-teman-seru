@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,19 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // User is already logged in, redirect to dashboard
+        navigate('/dashboard');
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,13 +48,47 @@ const Login = () => {
         id: 'login-success',
       });
       
-      navigate('/dashboard');
+      // Check user role to determine where to redirect
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user?.id)
+        .single();
+        
+      if (!profileError && profileData) {
+        if (profileData.role === 'admin') {
+          navigate('/admin');
+        } else if (profileData.role === 'premium') {
+          navigate('/dashboard/premium');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        // Default fallback if we can't get the role
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast.error(error.message || t('auth.loginFailed'), {
         id: 'login-error',
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'apple' | 'facebook') => {
+    try {
+      // You would need to configure these providers in Supabase dashboard
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || t('auth.socialLoginFailed'));
     }
   };
 
@@ -202,6 +249,7 @@ const Login = () => {
                   whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.97 }}
                   type="button"
+                  onClick={() => handleSocialLogin('google')}
                   className="flex justify-center items-center h-12 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -216,6 +264,7 @@ const Login = () => {
                   whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.97 }}
                   type="button"
+                  onClick={() => handleSocialLogin('apple')}
                   className="flex justify-center items-center h-12 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -227,6 +276,7 @@ const Login = () => {
                   whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.97 }}
                   type="button"
+                  onClick={() => handleSocialLogin('facebook')}
                   className="flex justify-center items-center h-12 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
