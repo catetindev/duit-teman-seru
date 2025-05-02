@@ -67,7 +67,7 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
           View all transactions
           <ChevronRight size={16} className="ml-1" />
         </Button>
-      </div>
+      </Tabs>
 
       <AddTransactionDialog 
         isOpen={isAddDialogOpen}
