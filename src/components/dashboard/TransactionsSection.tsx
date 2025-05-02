@@ -29,7 +29,7 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
           onClick={() => setIsAddDialogOpen(true)}
         >
           <PlusCircle size={16} />
-          <span>{t('transactions.add')}</span>
+          <span>Add Transaction</span>
         </Button>
       </div>
       

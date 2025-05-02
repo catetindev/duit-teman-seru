@@ -16,11 +16,11 @@ const AddTransactionButton = ({ onSuccess }: AddTransactionButtonProps) => {
   return (
     <>
       <Button 
-        className="fixed bottom-6 right-6 rounded-full shadow-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 w-14 h-14 p-0"
+        className="gap-2"
         onClick={() => setIsDialogOpen(true)}
       >
-        <PlusCircle className="h-6 w-6" />
-        <span className="sr-only">{t('transactions.add')}</span>
+        <PlusCircle className="h-4 w-4" />
+        Add Transaction
       </Button>
       
       <AddTransactionDialog 

@@ -61,7 +61,7 @@ const TransactionChart = ({ transactions }: TransactionChartProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('transactions.spendingBreakdown')}</CardTitle>
+          <CardTitle>Grafik transaksi kamu</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-10">
           <div className="text-4xl mb-3">📊</div>
@@ -76,7 +76,7 @@ const TransactionChart = ({ transactions }: TransactionChartProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('transactions.spendingBreakdown')}</CardTitle>
+        <CardTitle>Grafik transaksi kamu</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64">

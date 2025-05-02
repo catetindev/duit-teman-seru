@@ -8,9 +8,10 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import TransactionList from '@/components/transactions/TransactionList';
 import TransactionFilters from '@/components/transactions/TransactionFilters';
 import TransactionChart from '@/components/transactions/TransactionChart';
-import AddTransactionButton from '@/components/transactions/AddTransactionButton';
 import { PlusCircle, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
 
 interface TransactionData {
   id: string;
@@ -32,6 +33,7 @@ export default function Transactions() {
   const [searchQuery, setSearchQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState('month');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
   // Fetch transactions from Supabase
   useEffect(() => {
@@ -144,22 +146,35 @@ export default function Transactions() {
     return categoryIcons[category.toLowerCase()] || '💸';
   };
 
+  const handleTransactionAdded = () => {
+    // No need to do anything here as the real-time subscription will update the transactions
+    setIsAddDialogOpen(false);
+  };
+
   return (
     <DashboardLayout isPremium={isPremium}>
       <div className="p-6 space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">{t('nav.transactions')}</h1>
           
-          <div className="w-full md:w-auto">
+          <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
             <div className="relative w-full md:w-60">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input 
-                placeholder={t('transactions.search')}
+                placeholder="Search Transactions"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4"
               />
             </div>
+            
+            <Button 
+              onClick={() => setIsAddDialogOpen(true)}
+              className="gap-2"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Add Transaction
+            </Button>
           </div>
         </div>
 
@@ -185,7 +200,11 @@ export default function Transactions() {
         </div>
       </div>
       
-      <AddTransactionButton onSuccess={() => {}} />
+      <AddTransactionDialog 
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onTransactionAdded={handleTransactionAdded}
+      />
     </DashboardLayout>
   );
 }
