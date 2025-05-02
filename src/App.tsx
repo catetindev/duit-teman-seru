@@ -13,6 +13,9 @@ import Signup from "./pages/Signup";
 import Pricing from "./pages/Pricing";
 import Dashboard from "./pages/Dashboard";
 import Transactions from "./pages/Transactions";
+import Goals from "./pages/Goals";
+import Budget from "./pages/Budget";
+import Analytics from "./pages/Analytics";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +47,21 @@ const App = () => (
               <Route path="/transactions" element={
                 <ProtectedRoute>
                   <Transactions />
+                </ProtectedRoute>
+              } />
+              <Route path="/goals" element={
+                <ProtectedRoute>
+                  <Goals />
+                </ProtectedRoute>
+              } />
+              <Route path="/budget" element={
+                <ProtectedRoute>
+                  <Budget />
+                </ProtectedRoute>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute requiredRole="premium">
+                  <Analytics />
                 </ProtectedRoute>
               } />
               <Route path="/admin" element={

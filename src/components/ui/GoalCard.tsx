@@ -1,8 +1,9 @@
+
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +11,7 @@ import { formatCurrency } from "@/components/dashboard/DashboardData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface GoalCardProps {
   id: string;
@@ -21,6 +23,7 @@ interface GoalCardProps {
   emoji?: string;
   className?: string;
   onUpdate?: () => void;
+  onDelete?: () => void;
 }
 
 const GoalCard = ({
@@ -32,11 +35,13 @@ const GoalCard = ({
   deadline,
   emoji = '🎯',
   className,
-  onUpdate
+  onUpdate,
+  onDelete
 }: GoalCardProps) => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -89,9 +94,16 @@ const GoalCard = ({
     }
   };
   
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete();
+      setIsDeleteDialogOpen(false);
+    }
+  };
+  
   return (
     <div className={cn(
-      "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 card-hover",
+      "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 card-hover relative",
       className
     )}>
       <div className="flex justify-between items-start">
@@ -117,15 +129,25 @@ const GoalCard = ({
         )} />
         <div className="mt-2 flex justify-between items-center">
           <span className="text-sm font-medium">{percentage}%</span>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 gap-1"
-            onClick={() => setIsDialogOpen(true)}
-          >
-            <PlusCircle size={16} />
-            <span>{t('action.add')}</span>
-          </Button>
+          <div className="flex gap-1">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 gap-1"
+              onClick={() => setIsDialogOpen(true)}
+            >
+              <PlusCircle size={16} />
+              <span>{t('action.add')}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-muted-foreground hover:text-red-500"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              <Trash2 size={16} />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -170,6 +192,24 @@ const GoalCard = ({
           </form>
         </DialogContent>
       </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your "{name}" savings goal and all its progress.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
