@@ -1,34 +1,33 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import TransactionList from '@/components/ui/TransactionList';
 import { PlusCircle, ChevronRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-interface Transaction {
-  id: string;
-  type: 'income' | 'expense';
-  amount: number;
-  currency: 'IDR' | 'USD';
-  category: string;
-  description: string;
-  date: string;
-  icon?: string;
-}
+import AddTransactionDialog from './AddTransactionDialog';
+import { Transaction } from '@/components/dashboard/DashboardData';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
+  onTransactionAdded: () => void;
+  loading?: boolean;
 }
 
-const TransactionsSection = ({ transactions }: TransactionsSectionProps) => {
+const TransactionsSection = ({ transactions, onTransactionAdded, loading = false }: TransactionsSectionProps) => {
   const { t } = useLanguage();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{t('transactions.title')}</h2>
-        <Button variant="outline" size="sm" className="gap-1">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="gap-1"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
           <PlusCircle size={16} />
           <span>{t('transactions.add')}</span>
         </Button>
@@ -41,25 +40,40 @@ const TransactionsSection = ({ transactions }: TransactionsSectionProps) => {
           <TabsTrigger value="expense">{t('transactions.expense')}</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="all">
-          <TransactionList transactions={transactions} />
-        </TabsContent>
-        <TabsContent value="income">
-          <TransactionList 
-            transactions={transactions.filter(t => t.type === 'income')} 
-          />
-        </TabsContent>
-        <TabsContent value="expense">
-          <TransactionList 
-            transactions={transactions.filter(t => t.type === 'expense')} 
-          />
-        </TabsContent>
-      </Tabs>
-      
-      <Button variant="ghost" size="sm" className="w-full mt-4">
-        View all transactions
-        <ChevronRight size={16} className="ml-1" />
-      </Button>
+        {loading ? (
+          <div className="py-10 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-sm text-muted-foreground">Loading your transactions...</p>
+          </div>
+        ) : (
+          <>
+            <TabsContent value="all">
+              <TransactionList transactions={transactions} />
+            </TabsContent>
+            <TabsContent value="income">
+              <TransactionList 
+                transactions={transactions.filter(t => t.type === 'income')} 
+              />
+            </TabsContent>
+            <TabsContent value="expense">
+              <TransactionList 
+                transactions={transactions.filter(t => t.type === 'expense')} 
+              />
+            </TabsContent>
+          </>
+        )}
+        
+        <Button variant="ghost" size="sm" className="w-full mt-4">
+          View all transactions
+          <ChevronRight size={16} className="ml-1" />
+        </Button>
+      </div>
+
+      <AddTransactionDialog 
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onTransactionAdded={onTransactionAdded}
+      />
     </div>
   );
 };

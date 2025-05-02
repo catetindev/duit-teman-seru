@@ -20,22 +20,16 @@ export interface Budget {
 }
 
 export interface Goal {
-  name: string;
-  target: number;
-  current: number;
+  id: string;
+  title: string;
+  target_amount: number;
+  saved_amount: number;
   currency: 'IDR' | 'USD';
-  deadline?: string;
+  target_date?: string;
   emoji?: string;
 }
 
-export interface Badge {
-  name: string;
-  description: string;
-  icon: string;
-  isLocked?: boolean;
-  isNew?: boolean;
-}
-
+// Mock data - will be replaced with real data from Supabase
 export const mockTransactions: Transaction[] = [
   {
     id: '1',
@@ -71,11 +65,12 @@ export const mockTransactions: Transaction[] = [
 
 export const mockGoals = [
   {
-    name: 'New Laptop',
-    target: 15000000,
-    current: 7500000,
+    id: '1',
+    title: 'New Laptop',
+    target_amount: 15000000,
+    saved_amount: 7500000,
     currency: 'IDR' as const,
-    deadline: 'Sep 2025',
+    target_date: 'Sep 2025',
     emoji: '💻'
   }
 ];
@@ -83,19 +78,21 @@ export const mockGoals = [
 export const premiumGoals = [
   ...mockGoals,
   {
-    name: 'Bali Trip',
-    target: 8000000,
-    current: 3200000,
+    id: '2',
+    title: 'Bali Trip',
+    target_amount: 8000000,
+    saved_amount: 3200000,
     currency: 'IDR' as const,
-    deadline: 'Dec 2025',
+    target_date: 'Dec 2025',
     emoji: '🏝️'
   },
   {
-    name: 'Emergency Fund',
-    target: 25000000,
-    current: 10000000,
+    id: '3',
+    title: 'Emergency Fund',
+    target_amount: 25000000,
+    saved_amount: 10000000,
     currency: 'IDR' as const,
-    deadline: 'Ongoing',
+    target_date: 'Ongoing',
     emoji: '🚨'
   }
 ];
@@ -148,3 +145,22 @@ export const mockBadges = [
     isLocked: true
   }
 ];
+
+// Financial utility functions
+export const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string => {
+  if (currency === 'IDR') {
+    return `Rp${amount.toLocaleString('id-ID')}`;
+  }
+  return `$${amount.toLocaleString('en-US')}`;
+};
+
+export const categoryIcons: Record<string, string> = {
+  'food': '🍔',
+  'transport': '🚗',
+  'entertainment': '🎬',
+  'shopping': '🛍️',
+  'bills': '📄',
+  'salary': '💰',
+  'gift': '🎁',
+  'other': '📦'
+};
