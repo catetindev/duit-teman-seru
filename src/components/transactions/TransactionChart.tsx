@@ -1,8 +1,8 @@
 
 import React, { useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 interface Transaction {
   id: string;
@@ -15,58 +15,69 @@ interface Transaction {
   icon?: string;
 }
 
+interface ChartData {
+  name: string;
+  value: number;
+  color: string;
+}
+
 interface TransactionChartProps {
   transactions: Transaction[];
 }
 
-const TransactionChart = ({ transactions }: TransactionChartProps) => {
+const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8DD1E1', '#EA80FC', '#607D8B'];
+
+const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string => {
+  if (currency === 'IDR') {
+    return `Rp${amount.toLocaleString('id-ID')}`;
+  }
+  return `$${amount.toLocaleString('en-US')}`;
+};
+
+const TransactionChart: React.FC<TransactionChartProps> = ({ transactions }) => {
   const { t } = useLanguage();
   
-  const categoryColors: Record<string, string> = {
-    'food': '#FF9F7A',
-    'shopping': '#7AD0FF',
-    'entertainment': '#C07AFF',
-    'bills': '#FFE07A',
-    'salary': '#7AFF9F',
-    'transport': '#FF7AC0',
-    'health': '#7AFFFF',
-    'education': '#D0FF7A',
-    'other': '#A0A0A0'
-  };
-  
   const chartData = useMemo(() => {
-    // Only process expense transactions
-    const expenseTransactions = transactions.filter(t => t.type === 'expense');
+    // Filter only expenses
+    const expenses = transactions.filter(t => t.type === 'expense');
+    
+    if (expenses.length === 0) return [];
     
     // Group by category
-    const categories = expenseTransactions.reduce((acc: Record<string, number>, transaction) => {
-      const { category, amount } = transaction;
-      if (!acc[category]) {
-        acc[category] = 0;
-      }
-      acc[category] += Number(amount);
-      return acc;
-    }, {});
+    const categoryMap = new Map<string, number>();
     
-    // Convert to format expected by Recharts
-    return Object.entries(categories).map(([name, value]) => ({
-      name,
-      value,
-      color: categoryColors[name.toLowerCase()] || '#A0A0A0'
-    }));
+    expenses.forEach(transaction => {
+      const { category, amount } = transaction;
+      const currentAmount = categoryMap.get(category) || 0;
+      categoryMap.set(category, currentAmount + Number(amount));
+    });
+    
+    // Convert to chart data
+    const data: ChartData[] = [];
+    let colorIndex = 0;
+    
+    categoryMap.forEach((value, name) => {
+      data.push({
+        name,
+        value,
+        color: COLORS[colorIndex % COLORS.length]
+      });
+      colorIndex++;
+    });
+    
+    return data;
   }, [transactions]);
   
-  // For the empty state
-  if (chartData.length === 0) {
+  if (transactions.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Grafik transaksi kamu</CardTitle>
+          <CardTitle>Grafik Transaksi Kamu</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-10">
           <div className="text-4xl mb-3">📊</div>
           <p className="text-muted-foreground text-center">
-            No expense data to show yet
+            {t('transactions.noData')}
           </p>
         </CardContent>
       </Card>
@@ -76,7 +87,7 @@ const TransactionChart = ({ transactions }: TransactionChartProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Grafik transaksi kamu</CardTitle>
+        <CardTitle>Grafik Transaksi Kamu</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64">
@@ -86,30 +97,21 @@ const TransactionChart = ({ transactions }: TransactionChartProps) => {
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
+                labelLine={false}
                 outerRadius={80}
-                paddingAngle={5}
+                fill="#8884d8"
                 dataKey="value"
-                label={({ name }) => name}
+                nameKey="name"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => [`${value}`, 'Amount']} />
+              <Tooltip formatter={(value: number) => formatCurrency(value, 'IDR')} />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {chartData.map((entry, index) => (
-            <div key={`legend-${index}`} className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-xs truncate">{entry.name}</span>
-            </div>
-          ))}
         </div>
       </CardContent>
     </Card>

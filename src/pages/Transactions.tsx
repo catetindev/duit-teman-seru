@@ -12,6 +12,7 @@ import { PlusCircle, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface TransactionData {
   id: string;
@@ -188,10 +189,36 @@ export default function Transactions() {
               setCategoryFilter={setCategoryFilter}
             />
             
-            <TransactionList 
-              transactions={filteredTransactions} 
-              isLoading={isLoading} 
-            />
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList className="w-full md:w-auto mb-4 grid grid-cols-3">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="income">{t('transactions.income')}</TabsTrigger>
+                  <TabsTrigger value="expense">{t('transactions.expense')}</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="all">
+                  <TransactionList 
+                    transactions={filteredTransactions}
+                    isLoading={isLoading} 
+                  />
+                </TabsContent>
+                
+                <TabsContent value="income">
+                  <TransactionList 
+                    transactions={filteredTransactions.filter(t => t.type === 'income')}
+                    isLoading={isLoading}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="expense">
+                  <TransactionList 
+                    transactions={filteredTransactions.filter(t => t.type === 'expense')}
+                    isLoading={isLoading}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
           
           <div>

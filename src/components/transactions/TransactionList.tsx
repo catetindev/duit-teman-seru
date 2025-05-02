@@ -3,6 +3,7 @@ import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { formatCurrency } from '@/hooks/useDashboardData';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface Transaction {
   id: string;
@@ -48,9 +49,10 @@ const TransactionList = ({ transactions, isLoading = false }: TransactionListPro
         <Card key={transaction.id} className="p-4 hover:shadow-md transition-shadow card-hover">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl ${
+              <div className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center text-xl",
                 transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-              }`}>
+              )}>
                 {transaction.icon || '💸'}
               </div>
               <div>
@@ -58,9 +60,10 @@ const TransactionList = ({ transactions, isLoading = false }: TransactionListPro
                 <p className="text-xs text-muted-foreground">{transaction.category} • {transaction.date}</p>
               </div>
             </div>
-            <div className={`font-semibold ${
+            <div className={cn(
+              "font-semibold",
               transaction.type === 'income' ? 'text-green-500' : 'text-red-500'
-            }`}>
+            )}>
               {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
             </div>
           </div>
