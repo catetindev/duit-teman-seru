@@ -14,12 +14,11 @@ const Header = ({ isPremium = false, isAdmin = false }) => {
       <div className="container px-4 mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
-            <div className="bg-gradient-to-r from-teal-500 to-purple-500 rounded-lg w-8 h-8 flex items-center justify-center text-white font-bold mr-2">
-              D
-            </div>
-            <span className="text-xl font-outfit font-bold bg-gradient-to-r from-teal-500 to-purple-500 bg-clip-text text-transparent">
-              {t('app.name')}
-            </span>
+            <img 
+              src="/lovable-uploads/9dfb4bc1-064f-4b55-b196-360715fddf7f.png" 
+              alt="Catatype Logo" 
+              className="h-8 mr-2" 
+            />
           </Link>
           {isPremium && (
             <span className="bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs px-2 py-1 rounded-full">
