@@ -5,7 +5,6 @@ import { useLanguage } from '@/hooks/useLanguage';
 import ExpenseCard from '@/components/ui/ExpenseCard';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Plus } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface BudgetsSectionProps {
@@ -48,7 +47,7 @@ const BudgetsSection = React.memo(({ isPremium }: BudgetsSectionProps) => {
             <ExpenseCard 
               key={budget.id}
               category={budget.category}
-              spent={budget.spent}
+              spent={budget.spent ?? 0}
               budget={budget.amount}
               currency={budget.currency}
             />

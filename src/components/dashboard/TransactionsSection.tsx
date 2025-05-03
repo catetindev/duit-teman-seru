@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import TransactionList from '@/components/ui/TransactionList';
@@ -19,12 +19,12 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
   // Memoize filtered transactions to prevent unnecessary rerenders
-  const incomeTransactions = React.useMemo(() => 
+  const incomeTransactions = useMemo(() => 
     transactions.filter(t => t.type === 'income'),
     [transactions]
   );
   
-  const expenseTransactions = React.useMemo(() => 
+  const expenseTransactions = useMemo(() => 
     transactions.filter(t => t.type === 'expense'),
     [transactions]
   );
@@ -70,9 +70,16 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
           </>
         )}
         
-        <Button variant="ghost" size="sm" className="w-full mt-4">
-          View all transactions
-          <ChevronRight size={16} className="ml-1" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="w-full mt-4"
+          asChild
+        >
+          <a href="/transactions">
+            View all transactions
+            <ChevronRight size={16} className="ml-1" />
+          </a>
         </Button>
       </Tabs>
 

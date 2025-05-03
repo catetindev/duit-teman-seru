@@ -53,11 +53,12 @@ export function useDashboardData() {
     budgets: true
   });
 
-  // Fetch transactions - wrapped in useCallback to prevent recreating functions
+  // Fetch transactions
   const fetchTransactions = useCallback(async () => {
-    if (!user) return;
-    
-    setLoading(prev => ({ ...prev, transactions: true }));
+    if (!user) {
+      setLoading(prev => ({ ...prev, transactions: false }));
+      return;
+    }
     
     try {
       const { data, error } = await supabase
@@ -109,21 +110,22 @@ export function useDashboardData() {
         description: error.message,
         variant: "destructive",
       });
-      setLoading(prev => ({ ...prev, transactions: false }));
+      setLoading(prev => ({ ...prev, transactions: false, stats: false }));
     }
   }, [user, toast]);
 
   // Fetch goals
   const fetchGoals = useCallback(async () => {
-    if (!user) return;
-    
-    setLoading(prev => ({ ...prev, goals: true }));
+    if (!user) {
+      setLoading(prev => ({ ...prev, goals: false }));
+      return;
+    }
     
     try {
       const { data, error } = await supabase
         .from('savings_goals')
         .select('*')
-        .eq('user_id', user.id);  // Fixed: Changed from .or() to .eq()
+        .eq('user_id', user.id);
         
       if (error) throw error;
       
@@ -148,9 +150,10 @@ export function useDashboardData() {
 
   // Fetch budgets
   const fetchBudgets = useCallback(async () => {
-    if (!user) return;
-    
-    setLoading(prev => ({ ...prev, budgets: true }));
+    if (!user) {
+      setLoading(prev => ({ ...prev, budgets: false }));
+      return;
+    }
     
     try {
       const { data, error } = await supabase
@@ -220,8 +223,6 @@ export function useDashboardData() {
           period: updatedBudget.period as 'daily' | 'weekly' | 'monthly' | 'yearly'
         } : b));
         
-        fetchBudgets(); // Refresh to get accurate data
-        
         return updatedBudget;
       } else {
         // Insert new budget
@@ -243,8 +244,6 @@ export function useDashboardData() {
         
         setBudgets(prev => [...prev, typedBudget]);
         
-        fetchBudgets(); // Refresh to get accurate data
-        
         return newBudget;
       }
     } catch (error: any) {
@@ -256,7 +255,7 @@ export function useDashboardData() {
       });
       return null;
     }
-  }, [user, toast, fetchBudgets]);
+  }, [user, toast]);
 
   // Delete budget
   const deleteBudget = useCallback(async (id: string) => {
@@ -286,10 +285,20 @@ export function useDashboardData() {
   // Fetch all data
   const refreshData = useCallback(async () => {
     if (!user) return;
+    
+    // Reset loading states
+    setLoading({
+      transactions: true,
+      goals: true,
+      stats: true,
+      budgets: true
+    });
+    
     await fetchTransactions();
     await fetchGoals();
-    await fetchBudgets();
-  }, [user, fetchTransactions, fetchGoals, fetchBudgets]);
+    // After transactions have been fetched, then fetch budgets
+    // as they depend on transaction data for calculating spent amounts
+  }, [user, fetchTransactions, fetchGoals]);
 
   // Initial data fetch - use useEffect with proper dependencies
   useEffect(() => {
@@ -298,10 +307,14 @@ export function useDashboardData() {
     }
   }, [user, refreshData]);
 
-  // Removed the realtime subscription to prevent rerenders
-  // We'll only fetch data when explicitly called via refreshData or component mount
+  // After transactions are loaded, fetch budgets
+  useEffect(() => {
+    if (user && !loading.transactions) {
+      fetchBudgets();
+    }
+  }, [user, loading.transactions, fetchBudgets]);
 
-  // Re-export utility functions for convenience
+  // Export utility functions for convenience
   return {
     transactions,
     goals,
