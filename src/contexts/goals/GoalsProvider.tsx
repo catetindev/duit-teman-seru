@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 import { Goal, Collaborator } from '@/hooks/goals/types';
-import { useGoals } from '@/hooks/useGoals';
+import { useGoals } from '@/hooks/goals/useGoals'; // Fixed import path
 import { useAuth } from '@/contexts/AuthContext';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { useToast } from '@/hooks/use-toast';
@@ -76,6 +76,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsSubmitting
   );
 
+  // Handle adding a goal
   const handleAddGoal = async (goalData: GoalFormData) => {
     setIsSubmitting(true);
     

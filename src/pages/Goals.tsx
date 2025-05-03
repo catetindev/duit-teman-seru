@@ -13,7 +13,7 @@ import GoalsFilters from '@/components/goals/GoalsFilters';
 import GoalsHeader from '@/components/goals/GoalsHeader';
 import GoalsLoading from '@/components/goals/GoalsLoading';
 
-// Import context provider - updated import path
+// Import context provider
 import { GoalsProvider, useGoalsContext } from '@/contexts/goals';
 
 // Main component that wraps everything with the context provider

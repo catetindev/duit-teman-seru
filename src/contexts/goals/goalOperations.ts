@@ -142,8 +142,8 @@ export const useGoalOperations = (
           description: "Collaborator has been removed",
         });
         
-        // Use the functional update pattern with the correct React.SetStateAction type
-        setGoalCollaborators(prev => prev.filter(c => c.user_id !== userId));
+        // Use functional update to filter out the removed collaborator
+        setGoalCollaborators((prev) => prev.filter(c => c.user_id !== userId));
       }
     } catch (error: any) {
       console.error('Error removing collaborator:', error);
