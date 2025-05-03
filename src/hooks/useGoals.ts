@@ -19,6 +19,11 @@ interface Collaborator {
   full_name: string;
 }
 
+// Helper function to validate currency
+const validateCurrency = (currency: string): 'IDR' | 'USD' => {
+  return currency === 'USD' ? 'USD' : 'IDR'; // Default to IDR if not USD
+};
+
 export function useGoals(userId: string) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,12 +74,22 @@ export function useGoals(userId: string) {
         
         if (fetchError) throw fetchError;
         
-        if (collabGoals) sharedGoals = collabGoals;
+        if (collabGoals) {
+          // Convert database records to Goal objects with proper currency type
+          sharedGoals = collabGoals.map(goal => ({
+            ...goal,
+            currency: validateCurrency(goal.currency)
+          }));
+        }
       }
       
-      // Combine both sets of goals
-      const allGoals = [...(ownGoals || []), ...sharedGoals];
-      setGoals(allGoals);
+      // Combine both sets of goals, ensuring proper currency type
+      const typedOwnGoals = ownGoals ? ownGoals.map(goal => ({
+        ...goal,
+        currency: validateCurrency(goal.currency)
+      })) : [];
+      
+      setGoals([...typedOwnGoals, ...sharedGoals]);
       
     } catch (error: any) {
       console.error('Error fetching goals:', error);
