@@ -10,7 +10,7 @@ interface GoalInvitationNotificationProps {
   notification: {
     id: string;
     created_at: string;
-    action_data: string;
+    action_data?: string;
     is_read: boolean;
   };
   onProcessed: () => void;

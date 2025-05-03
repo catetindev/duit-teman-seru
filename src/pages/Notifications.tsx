@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,7 +24,7 @@ interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
-  action_data?: string;
+  action_data?: string; // Make action_data optional to match the database
 }
 
 const NotificationsPage = () => {

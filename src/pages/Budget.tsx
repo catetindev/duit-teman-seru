@@ -18,7 +18,7 @@ interface FormValues {
   currency: ValidCurrency;
 }
 
-// Define Budget interface for this page that's compatible with both types
+// Define a compatible Budget interface for this page
 interface PageBudget {
   id: string;
   category: string;
