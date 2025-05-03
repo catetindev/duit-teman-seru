@@ -4,9 +4,10 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 // Import refactored components
 import GoalsList from '@/components/goals/GoalsList';
@@ -201,19 +202,27 @@ const GoalsPage = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('goals.title')}</h1>
           <p className="text-muted-foreground mt-1">Track progress towards your financial goals</p>
         </div>
-        <Button 
-          className="flex items-center gap-2"
-          onClick={() => setIsAddDialogOpen(true)}
-          disabled={!isPremium && goals.length >= 1}
-        >
-          <Plus size={16} />
-          <span>Add Goal</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            className="flex items-center gap-2"
+            onClick={() => setIsAddDialogOpen(true)}
+            disabled={!isPremium && goals.length >= 1}
+          >
+            <Plus size={16} />
+            <span>Add Goal</span>
+          </Button>
+          <Link to="/goals/collaboration-docs">
+            <Button variant="outline" className="flex items-center gap-2">
+              <BookOpen size={16} />
+              <span>Documentation</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Goals List Component */}

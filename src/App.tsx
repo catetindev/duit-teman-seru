@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import GoalsCollaborationDocs from "./pages/GoalsCollaborationDocs";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,11 @@ const App = () => (
               <Route path="/goals" element={
                 <ProtectedRoute>
                   <Goals />
+                </ProtectedRoute>
+              } />
+              <Route path="/goals/collaboration-docs" element={
+                <ProtectedRoute>
+                  <GoalsCollaborationDocs />
                 </ProtectedRoute>
               } />
               <Route path="/budget" element={
