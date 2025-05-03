@@ -1,101 +1,100 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Collaborator } from './types';
+import { useToast } from '@/hooks/use-toast';
 
 export function useCollaboratorApi() {
+  const { toast } = useToast();
+
   const fetchCollaborators = async (goalId: string): Promise<Collaborator[]> => {
     try {
-      const { data, error } = await supabase
-        .from('goal_collaborators')
-        .select(`
-          user_id,
-          profiles(
-            id,
-            email,
-            full_name
-          )
-        `)
-        .eq('goal_id', goalId);
+      // Use the edge function instead of direct database access
+      const { data: response, error } = await supabase.functions.invoke('goal_collaborators', {
+        body: {
+          action: 'list',
+          goalId
+        }
+      });
       
       if (error) throw error;
       
-      if (!data || data.length === 0) return [];
-      
-      // Process the data to match the Collaborator interface
-      return data.map(item => {
-        // Check if profiles exists and handle possible null values
-        const profiles = item.profiles as any;
-        return {
-          user_id: item.user_id,
-          email: profiles?.email || 'Unknown Email',
-          full_name: profiles?.full_name || 'Unknown User'
-        };
-      });
-    } catch (error) {
+      return response?.collaborators || [];
+    } catch (error: any) {
       console.error('Error fetching collaborators:', error);
-      throw error;
+      toast({
+        title: "Error",
+        description: "Failed to load collaborators: " + (error.message || "Unknown error"),
+        variant: "destructive"
+      });
+      return [];
     }
   };
 
   const addCollaborator = async (goalId: string, email: string): Promise<boolean> => {
     try {
-      // First, find the user by email
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .eq('email', email)
-        .single();
+      // First, find the user by email using the edge function
+      const { data: userData, error: userError } = await supabase.functions.invoke('goal_collaborators', {
+        body: {
+          action: 'find_user',
+          email
+        }
+      });
       
       if (userError) throw userError;
       
-      if (!userData) {
+      if (!userData?.user) {
         throw new Error('User not found with that email');
       }
       
-      // Check if the user is already a collaborator
-      const { data: existingCollab, error: collabError } = await supabase
-        .from('goal_collaborators')
-        .select()
-        .eq('goal_id', goalId)
-        .eq('user_id', userData.id);
+      // Add the collaborator using the edge function
+      const { data: addResult, error: addError } = await supabase.functions.invoke('goal_collaborators', {
+        body: {
+          action: 'add',
+          goalId,
+          userId: userData.user.id
+        }
+      });
       
-      if (collabError) throw collabError;
+      if (addError) throw addError;
       
-      if (existingCollab && existingCollab.length > 0) {
+      if (addResult?.status === 'exists') {
         throw new Error('This user is already a collaborator');
       }
       
-      // Add the user as a collaborator
-      const { error: insertError } = await supabase
-        .from('goal_collaborators')
-        .insert({
-          goal_id: goalId,
-          user_id: userData.id
-        });
-      
-      if (insertError) throw insertError;
-      
       // Return true to indicate success
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding collaborator:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add collaborator: " + (error.message || "Unknown error"),
+        variant: "destructive"
+      });
       throw error;
     }
   };
 
   const removeCollaborator = async (goalId: string, userId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('goal_collaborators')
-        .delete()
-        .eq('goal_id', goalId)
-        .eq('user_id', userId);
+      // Use the edge function to remove the collaborator
+      const { data, error } = await supabase.functions.invoke('goal_collaborators', {
+        body: {
+          action: 'remove',
+          goalId,
+          userId
+        }
+      });
       
       if (error) throw error;
       
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing collaborator:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove collaborator: " + (error.message || "Unknown error"),
+        variant: "destructive"
+      });
       throw error;
     }
   };
