@@ -48,7 +48,7 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
         description: "Goal has been deleted successfully",
       });
       
-      // Explicitly fetch goals to refresh the UI
+      // Immediately fetch goals to refresh the UI
       await fetchGoals();
     } catch (error: any) {
       console.error('Error deleting goal:', error);
@@ -111,7 +111,7 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       
       setIsEditDialogOpen(false);
       
-      // Explicitly fetch goals to refresh the UI
+      // Immediately fetch goals to refresh the UI
       await fetchGoals();
     } catch (error: any) {
       console.error('Error updating goal:', error);

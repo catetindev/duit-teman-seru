@@ -1,3 +1,4 @@
+
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -79,8 +80,8 @@ const GoalCard = ({
       setIsDialogOpen(false);
       setAmount('');
       
-      // Ensure UI is updated
-      if (onUpdate) setTimeout(() => onUpdate(), 300);
+      // Call update function immediately, don't rely on setTimeout
+      if (onUpdate) onUpdate();
       
     } catch (error: any) {
       console.error('Error updating goal:', error);
@@ -116,9 +117,9 @@ const GoalCard = ({
       
       setIsDeleteDialogOpen(false);
       
-      // Ensure UI is updated
-      if (onDelete) setTimeout(() => onDelete(), 300);
-      else if (onUpdate) setTimeout(() => onUpdate(), 300); // Fall back to onUpdate if onDelete isn't provided
+      // Call update functions immediately, don't rely on setTimeout
+      if (onDelete) onDelete();
+      else if (onUpdate) onUpdate(); // Fall back to onUpdate if onDelete isn't provided
       
     } catch (error: any) {
       console.error('Error deleting goal:', error);

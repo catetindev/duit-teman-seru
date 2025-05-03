@@ -26,8 +26,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     };
   }, []);
 
-  // Wrapper for fetchGoals that updates state
-  const fetchGoals = async () => {
+  // Fetch goals function with comprehensive error handling
+  const fetchGoals = useCallback(async () => {
     if (!userId) {
       console.warn('No userId provided to useGoals.fetchGoals');
       if (isMounted.current) {
@@ -64,10 +64,10 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
         setLoading(false);
       }
     }
-  };
+  }, [userId, toast, goalApi]);
 
-  // Add a new goal and update state if successful
-  const addGoal = async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
+  // Add a new goal 
+  const addGoal = useCallback(async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
     console.log('Adding goal in useGoals:', goal);
     // Make sure user_id is set
     if (!goal.user_id) {
@@ -85,9 +85,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       const newGoal = await goalApi.addGoal(goal);
       console.log('New goal created:', newGoal);
       if (newGoal && isMounted.current) {
-        // Instead of manually updating the state, fetch all goals to ensure consistency
+        // Fetch all goals to ensure consistency rather than manual state updates
         await fetchGoals();
-        // Clear any previous errors
         setError(null);
       }
       return newGoal;
@@ -103,17 +102,16 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       }
       return null;
     }
-  };
+  }, [goalApi, fetchGoals, toast]);
 
-  // Wrapper for deleteGoal that updates state if successful
-  const deleteGoal = async (goalId: string): Promise<void> => {
+  // Delete a goal
+  const deleteGoal = useCallback(async (goalId: string): Promise<void> => {
     try {
       console.log('Deleting goal:', goalId);
       const success = await goalApi.deleteGoal(goalId);
       if (success && isMounted.current) {
-        // Instead of manually updating the state, fetch all goals to ensure consistency
+        // Fetch all goals to ensure consistency rather than manual state updates
         await fetchGoals();
-        // Clear any previous errors
         setError(null);
         
         toast({
@@ -133,12 +131,14 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       }
       throw error; // Re-throw to allow handling in calling components
     }
-  };
+  }, [goalApi, fetchGoals, toast]);
 
   // Set up real-time subscription for goals
   useEffect(() => {
     if (!userId) return;
 
+    console.log('Setting up real-time subscription for goals');
+    
     const channel = supabase
       .channel('public:savings_goals')
       .on(
@@ -168,19 +168,21 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       )
       .subscribe();
 
+    // Cleanup subscription on unmount
     return () => {
+      console.log('Cleaning up goals subscription');
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, fetchGoals]);
 
-  // Use useEffect to fetch goals when component mounts
+  // Initial fetch when component mounts
   useEffect(() => {
     if (shouldFetch && userId) {
       fetchGoals();
     } else if (!userId) {
       setLoading(false);
     }
-  }, [shouldFetch, userId]);
+  }, [shouldFetch, userId, fetchGoals]);
 
   return {
     goals,
@@ -192,7 +194,7 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     formatCurrency,
     calculateProgress,
     fetchCollaborators: collaboratorApi.fetchCollaborators,
-    addCollaborator: collaboratorApi.inviteCollaborator, // Changed to use inviteCollaborator
+    addCollaborator: collaboratorApi.inviteCollaborator,
     removeCollaborator: collaboratorApi.removeCollaborator
   };
 }

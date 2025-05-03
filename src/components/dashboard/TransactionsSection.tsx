@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import TransactionList from '@/components/ui/TransactionList';
@@ -28,6 +28,12 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
     transactions.filter(t => t.type === 'expense'),
     [transactions]
   );
+
+  // Create stable callback for updates
+  const handleUpdate = useCallback(() => {
+    console.log('TransactionsSection: triggering data refresh');
+    onTransactionAdded();
+  }, [onTransactionAdded]);
   
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
@@ -59,13 +65,13 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
         ) : (
           <>
             <TabsContent value="all">
-              <TransactionList transactions={transactions} onUpdate={onTransactionAdded} />
+              <TransactionList transactions={transactions} onUpdate={handleUpdate} />
             </TabsContent>
             <TabsContent value="income">
-              <TransactionList transactions={incomeTransactions} onUpdate={onTransactionAdded} />
+              <TransactionList transactions={incomeTransactions} onUpdate={handleUpdate} />
             </TabsContent>
             <TabsContent value="expense">
-              <TransactionList transactions={expenseTransactions} onUpdate={onTransactionAdded} />
+              <TransactionList transactions={expenseTransactions} onUpdate={handleUpdate} />
             </TabsContent>
           </>
         )}
@@ -86,7 +92,7 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
       <AddTransactionDialog 
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={onTransactionAdded}
+        onTransactionAdded={handleUpdate}
       />
     </div>
   );
