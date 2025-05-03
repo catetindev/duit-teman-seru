@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
-import { Goal } from './types';
+import { useState } from 'react';
+import { Goal, Collaborator } from './types';
 import { useGoalApi } from './goalApi';
 import { useCollaboratorApi } from './collaboratorApi';
-import { formatCurrency, calculateProgress } from './utils';
+import { formatCurrency, calculateProgress } from '@/utils/formatUtils';
 import { useToast } from '@/hooks/use-toast';
 
 export function useGoals(userId: string | undefined, shouldFetch: boolean = true) {
@@ -101,18 +101,10 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     }
   };
 
-  useEffect(() => {
-    // Only fetch goals if shouldFetch is true and we have a userId
-    if (shouldFetch && userId) {
-      fetchGoals();
-    } else if (shouldFetch && !userId) {
-      setLoading(false);
-      setError('User ID is required to fetch goals');
-    } else {
-      // If we shouldn't fetch, just set loading to false
-      setLoading(false);
-    }
-  }, [userId, shouldFetch]);
+  // If shouldFetch is true, fetch goals in the component that uses this hook
+  if (shouldFetch && userId && loading) {
+    fetchGoals();
+  }
 
   return {
     goals,

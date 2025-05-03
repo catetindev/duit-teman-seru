@@ -280,6 +280,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_goal_access: {
+        Args: { goal_id: string }
+        Returns: boolean
+      }
       check_user_role: {
         Args: { required_role: Database["public"]["Enums"]["user_role"] }
         Returns: boolean

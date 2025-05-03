@@ -2,36 +2,60 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Transaction, Goal } from '@/components/dashboard/DashboardData';
-import { formatCurrency } from '@/utils/formatUtils';
+import { useToast } from '@/hooks/use-toast';
+import { formatCurrency, calculateProgress } from '@/utils/formatUtils';
 
-// Define the DashboardStats interface
-export interface DashboardStats {
-  balance: number;
-  income: number;
-  expenses: number;
+// Types
+export interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  amount: number;
   currency: 'IDR' | 'USD';
-  change?: number;
+  category: string;
+  description: string;
+  date: string;
+  icon?: string;
 }
 
-// Define the Budget interface
+export interface Goal {
+  id: string;
+  title: string;
+  target_amount: number;
+  saved_amount: number;
+  currency: 'IDR' | 'USD';
+  target_date?: string;
+  emoji?: string;
+}
+
 export interface Budget {
   id: string;
   category: string;
   amount: number;
-  spent: number;
+  spent?: number;
   currency: 'IDR' | 'USD';
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }
 
-export const useDashboardData = () => {
+export interface DashboardStats {
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  recentTransactionDate?: string;
+}
+
+// Main hook
+export function useDashboardData() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
+  // States
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
-    balance: 0,
-    income: 0,
-    expenses: 0,
-    currency: 'IDR'
+    totalIncome: 0,
+    totalExpense: 0,
+    balance: 0
   });
   
   // Loading states
@@ -39,288 +63,238 @@ export const useDashboardData = () => {
     transactions: true,
     goals: true,
     stats: true,
-    budgets: true,
+    budgets: true
   });
-  
-  const { user } = useAuth();
-  
-  // Function to fetch transaction data
+
+  // Fetch transactions
   const fetchTransactions = async () => {
     if (!user) return;
     
+    setLoading(prev => ({ ...prev, transactions: true }));
+    
     try {
-      setLoading(prev => ({ ...prev, transactions: true }));
-      
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user.id)
-        .order('date', { ascending: false })
-        .limit(5);
+        .order('date', { ascending: false });
       
       if (error) throw error;
       
-      // Type assertion to make TypeScript happy
-      setTransactions(data as Transaction[] || []);
-    } catch (error) {
+      const formattedData: Transaction[] = data || [];
+      setTransactions(formattedData);
+      
+      // Calculate stats
+      let totalIncome = 0;
+      let totalExpense = 0;
+      
+      formattedData.forEach(transaction => {
+        if (transaction.type === 'income') {
+          totalIncome += Number(transaction.amount);
+        } else {
+          totalExpense += Number(transaction.amount);
+        }
+      });
+      
+      setStats({
+        totalIncome,
+        totalExpense,
+        balance: totalIncome - totalExpense,
+        recentTransactionDate: formattedData[0]?.date
+      });
+      
+      setLoading(prev => ({ ...prev, transactions: false, stats: false }));
+    } catch (error: any) {
       console.error('Error fetching transactions:', error);
-    } finally {
+      toast({
+        title: "Error loading transactions",
+        description: error.message,
+        variant: "destructive",
+      });
       setLoading(prev => ({ ...prev, transactions: false }));
     }
   };
-  
-  // Function to fetch goals data
+
+  // Fetch goals
   const fetchGoals = async () => {
     if (!user) return;
     
+    setLoading(prev => ({ ...prev, goals: true }));
+    
     try {
-      setLoading(prev => ({ ...prev, goals: true }));
-      
       const { data, error } = await supabase
         .from('savings_goals')
         .select('*')
-        .eq('user_id', user.id)
-        .limit(3)
-        .order('created_at', { ascending: false });
+        .or(`user_id.eq.${user.id},id.in.(${
+          supabase.from('goal_collaborators')
+            .select('goal_id')
+            .eq('user_id', user.id)
+            .then(({ data }) => data?.map(row => row.goal_id) || [])
+        })`);
         
-      if (error) {
-        // Check if it's the recursion error or something that shouldn't interrupt the dashboard
-        if (!error.message.includes('infinite recursion detected')) {
-          throw error;
-        }
-        console.warn('Ignoring goals recursion error on dashboard:', error.message);
-        // Don't fail the whole dashboard for this error, just show empty goals
-        setGoals([]);
-      } else {
-        // Type assertion to make TypeScript happy
-        setGoals(data as Goal[] || []);
-      }
-    } catch (error) {
-      console.error('Error fetching goals for dashboard:', error);
-      // Continue with empty goals rather than breaking the dashboard
-      setGoals([]);
+      if (error) throw error;
+      
+      setGoals(data || []);
+    } catch (error: any) {
+      console.error('Error fetching goals:', error);
+      toast({
+        title: "Error loading goals",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(prev => ({ ...prev, goals: false }));
     }
   };
-  
-  // Function to calculate and prepare stats
-  const calculateStats = async () => {
-    if (!user) return;
-    
-    try {
-      setLoading(prev => ({ ...prev, stats: true }));
-      
-      // Create the current month date range
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      
-      // Format dates for Supabase
-      const startDate = firstDay.toISOString().split('T')[0];
-      const endDate = lastDay.toISOString().split('T')[0];
-      
-      // Fetch income and expense transactions for the current month
-      const { data: incomeData, error: incomeError } = await supabase
-        .from('transactions')
-        .select('amount, currency')
-        .eq('user_id', user.id)
-        .eq('type', 'income')
-        .gte('date', startDate)
-        .lte('date', endDate);
-      
-      if (incomeError) throw incomeError;
-      
-      const { data: expenseData, error: expenseError } = await supabase
-        .from('transactions')
-        .select('amount, currency')
-        .eq('user_id', user.id)
-        .eq('type', 'expense')
-        .gte('date', startDate)
-        .lte('date', endDate);
-      
-      if (expenseError) throw expenseError;
-      
-      // Calculate total income and expenses
-      const totalIncome = incomeData?.reduce((sum, transaction) => sum + Number(transaction.amount), 0) || 0;
-      const totalExpenses = expenseData?.reduce((sum, transaction) => sum + Number(transaction.amount), 0) || 0;
-      
-      // Prepare stats data
-      const statsData: DashboardStats = {
-        income: totalIncome,
-        expenses: totalExpenses,
-        balance: totalIncome - totalExpenses,
-        currency: 'IDR',
-      };
-      
-      setStats(statsData);
-    } catch (error) {
-      console.error('Error calculating stats:', error);
-    } finally {
-      setLoading(prev => ({ ...prev, stats: false }));
-    }
-  };
 
-  // Function to fetch budgets data
+  // Fetch budgets
   const fetchBudgets = async () => {
     if (!user) return;
     
+    setLoading(prev => ({ ...prev, budgets: true }));
+    
     try {
-      setLoading(prev => ({ ...prev, budgets: true }));
-      
-      // Get current month's first and last day
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      
-      // Format dates for Supabase
-      const startDate = firstDay.toISOString().split('T')[0];
-      const endDate = lastDay.toISOString().split('T')[0];
-      
-      // First get all budgets
-      const { data: budgetData, error: budgetError } = await supabase
+      const { data, error } = await supabase
         .from('budgets')
         .select('*')
         .eq('user_id', user.id);
       
-      if (budgetError) throw budgetError;
+      if (error) throw error;
       
-      // Get expenses per category for current month
-      const { data: expenseData, error: expenseError } = await supabase
-        .from('transactions')
-        .select('category, amount')
-        .eq('type', 'expense')
-        .eq('user_id', user.id)
-        .gte('date', startDate)
-        .lte('date', endDate);
-      
-      if (expenseError) throw expenseError;
-      
-      // Map expenses to an object for easy lookup
-      const expensesByCategory: Record<string, number> = {};
-      expenseData?.forEach(item => {
-        const category = item.category.toLowerCase();
-        const amount = Number(item.amount || 0);
-        if (!expensesByCategory[category]) {
-          expensesByCategory[category] = 0;
-        }
-        expensesByCategory[category] += amount;
+      // Calculate spent amount for each budget based on transactions
+      const budgetsWithSpent = (data || []).map(budget => {
+        const spent = transactions
+          .filter(t => 
+            t.type === 'expense' && 
+            t.category.toLowerCase() === budget.category.toLowerCase()
+          )
+          .reduce((sum, t) => sum + Number(t.amount), 0);
+        
+        return {
+          ...budget,
+          spent
+        };
       });
       
-      // Combine budget data with spent amounts
-      const formattedBudgets: Budget[] = (budgetData || []).map(budget => ({
-        id: budget.id,
-        category: budget.category,
-        amount: Number(budget.amount),
-        spent: expensesByCategory[budget.category.toLowerCase()] || 0,
-        currency: budget.currency as 'IDR' | 'USD',
-      }));
-      
-      setBudgets(formattedBudgets);
-    } catch (error) {
+      setBudgets(budgetsWithSpent);
+    } catch (error: any) {
       console.error('Error fetching budgets:', error);
-      setBudgets([]);
+      toast({
+        title: "Error loading budgets",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(prev => ({ ...prev, budgets: false }));
     }
   };
 
-  // Function to add or update a budget
-  const addUpdateBudget = async (budget: { 
-    id?: string; 
-    category: string; 
-    amount: number; 
-    currency: 'IDR' | 'USD' 
-  }) => {
-    if (!user) return;
-
+  // Add or update budget
+  const addUpdateBudget = async (budgetData: Omit<Budget, 'id'> & { id?: string }) => {
+    if (!user) return null;
+    
     try {
-      const budgetData = {
-        ...budget,
+      const { id, ...rest } = budgetData;
+      const data = {
+        ...rest,
         user_id: user.id
       };
-
-      if (budget.id) {
+      
+      if (id) {
         // Update existing budget
-        const { error } = await supabase
+        const { data: updatedBudget, error } = await supabase
           .from('budgets')
-          .update({
-            category: budget.category,
-            amount: budget.amount,
-            currency: budget.currency
-          })
-          .eq('id', budget.id)
-          .eq('user_id', user.id);
-
+          .update(data)
+          .eq('id', id)
+          .select()
+          .single();
+        
         if (error) throw error;
+        
+        // Update local state
+        setBudgets(prev => prev.map(b => b.id === id ? { ...updatedBudget, spent: b.spent } : b));
+        fetchBudgets(); // Refresh to get accurate data
+        
+        return updatedBudget;
       } else {
         // Insert new budget
-        const { error } = await supabase
+        const { data: newBudget, error } = await supabase
           .from('budgets')
-          .insert({
-            category: budget.category,
-            amount: budget.amount,
-            currency: budget.currency,
-            user_id: user.id
-          });
-
+          .insert(data)
+          .select()
+          .single();
+        
         if (error) throw error;
+        
+        // Update local state
+        setBudgets(prev => [...prev, { ...newBudget, spent: 0 }]);
+        fetchBudgets(); // Refresh to get accurate data
+        
+        return newBudget;
       }
-
-      // Refresh budgets
-      await fetchBudgets();
-      return true;
-    } catch (error) {
-      console.error('Error saving budget:', error);
-      return false;
+    } catch (error: any) {
+      console.error('Error adding/updating budget:', error);
+      toast({
+        title: "Error saving budget",
+        description: error.message,
+        variant: "destructive",
+      });
+      return null;
     }
   };
 
-  // Function to delete a budget
-  const deleteBudget = async (budgetId: string) => {
-    if (!user) return;
-
+  // Delete budget
+  const deleteBudget = async (id: string) => {
     try {
       const { error } = await supabase
         .from('budgets')
         .delete()
-        .eq('id', budgetId)
-        .eq('user_id', user.id);
-
+        .eq('id', id);
+      
       if (error) throw error;
       
-      // Refresh budgets
-      await fetchBudgets();
+      // Update local state
+      setBudgets(prev => prev.filter(b => b.id !== id));
+      
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting budget:', error);
+      toast({
+        title: "Error deleting budget",
+        description: error.message,
+        variant: "destructive",
+      });
       return false;
     }
   };
-  
-  // Refresh all dashboard data
-  const refreshData = () => {
-    fetchTransactions();
-    fetchGoals();
-    calculateStats();
-    fetchBudgets();
+
+  // Fetch all data
+  const refreshData = async () => {
+    if (!user) return;
+    await fetchTransactions();
+    await fetchGoals();
+    await fetchBudgets();
   };
-  
-  // Load data when component mounts or user changes
+
+  // Initial data fetch
   useEffect(() => {
     if (user) {
       refreshData();
     }
   }, [user]);
-  
+
+  // Re-export utility functions for convenience
   return {
     transactions,
     goals,
-    stats,
     budgets,
+    stats,
     loading,
     refreshData,
     addUpdateBudget,
-    deleteBudget
+    deleteBudget,
   };
-};
+}
+
+// Export utility functions
+export { formatCurrency, calculateProgress };
