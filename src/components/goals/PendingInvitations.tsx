@@ -22,7 +22,7 @@ const PendingInvitations: React.FC = () => {
     
     setLoading(true);
     try {
-      // We need to use the correct foreign key references
+      // We need to join with profiles table to get inviter's full_name
       const { data, error } = await supabase
         .from('goal_invitations')
         .select(`
@@ -33,8 +33,8 @@ const PendingInvitations: React.FC = () => {
           created_at,
           expires_at,
           status,
-          goals:goal_id(title, emoji),
-          inviter:inviter_id(full_name)
+          goals:savings_goals!goal_id(title, emoji),
+          profiles!goal_invitations_inviter_id_fkey(full_name)
         `)
         .eq('invitee_id', user.id)
         .eq('status', 'pending');
@@ -55,7 +55,7 @@ const PendingInvitations: React.FC = () => {
           emoji: item.goals?.emoji || '🎯'
         },
         inviter: {
-          full_name: item.inviter?.full_name || 'Unknown User'
+          full_name: item.profiles?.full_name || 'Unknown User'
         }
       })) || [];
       
