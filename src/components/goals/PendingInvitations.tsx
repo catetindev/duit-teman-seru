@@ -22,8 +22,8 @@ const PendingInvitations: React.FC = () => {
     
     setLoading(true);
     try {
-      // Specify the correct foreign key relationship in the join
-      const { data, error } = await supabase
+      // First get all the invitations
+      const { data: invitationsData, error: invitationsError } = await supabase
         .from('goal_invitations')
         .select(`
           id, 
@@ -33,16 +33,38 @@ const PendingInvitations: React.FC = () => {
           created_at,
           expires_at,
           status,
-          goals:savings_goals(title, emoji),
-          inviter:profiles!inviter_id(full_name)
+          goals:savings_goals(title, emoji)
         `)
         .eq('invitee_id', user.id)
         .eq('status', 'pending');
       
-      if (error) throw error;
+      if (invitationsError) throw invitationsError;
+      
+      if (!invitationsData || invitationsData.length === 0) {
+        setInvitations([]);
+        setLoading(false);
+        return;
+      }
+      
+      // Get all unique inviter IDs to fetch their profiles
+      const inviterIds = [...new Set(invitationsData.map(invitation => invitation.inviter_id))];
+      
+      // Get the profiles for all inviters in a separate query
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', inviterIds);
+      
+      if (profilesError) throw profilesError;
+      
+      // Create a map of profiles by ID for easy lookup
+      const profilesMap = (profilesData || []).reduce((map, profile) => {
+        map[profile.id] = profile;
+        return map;
+      }, {} as Record<string, { id: string, full_name: string }>);
       
       // Transform the data to match our expected structure
-      const formattedInvitations = data?.map(item => ({
+      const formattedInvitations = invitationsData.map(item => ({
         id: item.id,
         goal_id: item.goal_id,
         inviter_id: item.inviter_id,
@@ -55,9 +77,9 @@ const PendingInvitations: React.FC = () => {
           emoji: item.goals?.emoji || '🎯'
         },
         inviter: {
-          full_name: item.inviter?.full_name || 'Unknown User'
+          full_name: profilesMap[item.inviter_id]?.full_name || 'Unknown User'
         }
-      })) || [];
+      }));
       
       setInvitations(formattedInvitations);
     } catch (error) {
