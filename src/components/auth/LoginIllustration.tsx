@@ -10,12 +10,11 @@ const LoginIllustration = () => {
       <div className="absolute w-full h-full">
         <div className="absolute top-8 left-8">
           <Link to="/" className="flex items-center gap-2">
-            <div className="bg-gradient-to-r from-teal-500 to-purple-500 rounded-lg w-8 h-8 flex items-center justify-center text-white font-bold">
-              D
-            </div>
-            <span className="text-xl font-outfit font-bold bg-gradient-to-r from-teal-500 to-purple-500 text-transparent bg-clip-text">
-              DuitTemanseru
-            </span>
+            <img 
+              src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+              alt="Catatuy Logo" 
+              className="h-12 object-contain" 
+            />
           </Link>
         </div>
       </div>
@@ -27,7 +26,7 @@ const LoginIllustration = () => {
       <div className="absolute bottom-12 left-12 right-12">
         <h1 className="text-4xl font-outfit font-bold mb-4">
           {language === 'en' ? 'Sign In to' : 'Masuk ke'}
-          <span className="block">{t('app.name')}</span>
+          <span className="block">Catatuy</span>
         </h1>
         <p className="text-gray-700 dark:text-gray-300">
           {language === 'en' ? 'If you don\'t have an account' : 'Jika belum punya akun'}{' '}

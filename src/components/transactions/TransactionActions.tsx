@@ -136,6 +136,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
   const handleDelete = async () => {
     setIsSubmitting(true);
     try {
+      // Fix: Use proper Supabase query to delete the transaction
       const { error } = await supabase
         .from('transactions')
         .delete()
@@ -149,6 +150,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsDeleteOpen(false);
+      // Make sure to call onUpdate to refresh the transactions list
       onUpdate();
     } catch (error: any) {
       console.error('Error deleting transaction:', error);

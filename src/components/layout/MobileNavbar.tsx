@@ -96,7 +96,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <img 
               src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
               alt="Catatuy Logo" 
-              className="h-9 object-contain" 
+              className="h-10 object-contain" 
             />
           </div>
           
