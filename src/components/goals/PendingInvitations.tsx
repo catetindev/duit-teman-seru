@@ -21,7 +21,7 @@ const PendingInvitations: React.FC = () => {
     
     setLoading(true);
     try {
-      // We need to join with profiles table to get inviter's full_name
+      // Use a clearer syntax for the join that specifies the foreign key relationship
       const { data, error } = await supabase
         .from('goal_invitations')
         .select(`
@@ -33,7 +33,7 @@ const PendingInvitations: React.FC = () => {
           expires_at,
           status,
           goals:savings_goals(title, emoji),
-          inviter:profiles!inviter_id(full_name)
+          inviter:profiles(full_name)
         `)
         .eq('invitee_id', user.id)
         .eq('status', 'pending');
