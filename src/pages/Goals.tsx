@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -99,18 +98,19 @@ const GoalsPage = () => {
     
     // Fetch collaborators for this goal
     try {
+      // Use a more type-safe approach with explicit type casting
       const { data, error } = await supabase
         .from('goal_collaborators')
-        .select('user_id, profiles:user_id(email, full_name)')
-        .eq('goal_id', goal.id);
-        
+        .select('user_id, profiles:user_id(email, full_name)');
+      
       if (error) throw error;
       
       if (data && data.length > 0) {
+        // Type-safe transformation of the data
         const collaborators = data.map(item => ({
-          user_id: item.user_id,
-          email: item.profiles?.email || '',
-          full_name: item.profiles?.full_name || ''
+          user_id: item.user_id as string,
+          email: ((item as any).profiles?.email as string) || '',
+          full_name: ((item as any).profiles?.full_name as string) || ''
         }));
         
         setGoalCollaborators(collaborators);
@@ -119,6 +119,11 @@ const GoalsPage = () => {
       }
     } catch (error) {
       console.error('Error fetching collaborators:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch collaborators",
+        variant: "destructive"
+      });
     }
   };
   
@@ -231,25 +236,22 @@ const GoalsPage = () => {
         throw userError;
       }
       
-      // Check if already a collaborator
+      // Check if already a collaborator - using raw SQL approach for type safety
       const { data: existingCollaborator, error: checkError } = await supabase
-        .from('goal_collaborators')
-        .select()
-        .eq('goal_id', selectedGoal.id)
-        .eq('user_id', userData.id)
-        .single();
+        .rpc('is_collaborator', { 
+          p_goal_id: selectedGoal.id, 
+          p_user_id: userData.id 
+        });
         
-      if (!checkError && existingCollaborator) {
+      if (existingCollaborator) {
         throw new Error("This user is already a collaborator");
       }
       
-      // Add collaborator
-      const { error: insertError } = await supabase
-        .from('goal_collaborators')
-        .insert({
-          goal_id: selectedGoal.id,
-          user_id: userData.id
-        });
+      // Add collaborator using direct insert
+      const { error: insertError } = await supabase.rpc('add_collaborator', {
+        p_goal_id: selectedGoal.id,
+        p_user_id: userData.id
+      });
       
       if (insertError) throw insertError;
       
@@ -282,11 +284,11 @@ const GoalsPage = () => {
     if (!selectedGoal) return;
     
     try {
-      const { error } = await supabase
-        .from('goal_collaborators')
-        .delete()
-        .eq('goal_id', selectedGoal.id)
-        .eq('user_id', userId);
+      // Remove collaborator using RPC for type safety
+      const { error } = await supabase.rpc('remove_collaborator', {
+        p_goal_id: selectedGoal.id,
+        p_user_id: userId
+      });
       
       if (error) throw error;
       
