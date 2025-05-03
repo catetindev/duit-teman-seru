@@ -2,12 +2,27 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Transaction, Goal, StatCard } from '@/components/dashboard/DashboardData';
+import { Transaction, Goal } from '@/components/dashboard/DashboardData';
+import { formatCurrency } from '@/utils/formatUtils';
+
+// Define the DashboardStats interface
+export interface DashboardStats {
+  balance: number;
+  income: number;
+  expenses: number;
+  currency: 'IDR' | 'USD';
+  change?: number;
+}
 
 export const useDashboardData = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [stats, setStats] = useState<StatCard[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    balance: 0,
+    income: 0,
+    expenses: 0,
+    currency: 'IDR'
+  });
   
   // Loading states
   const [loading, setLoading] = useState({
@@ -34,7 +49,8 @@ export const useDashboardData = () => {
       
       if (error) throw error;
       
-      setTransactions(data || []);
+      // Type assertion to make TypeScript happy
+      setTransactions(data as Transaction[] || []);
     } catch (error) {
       console.error('Error fetching transactions:', error);
     } finally {
@@ -65,7 +81,8 @@ export const useDashboardData = () => {
         // Don't fail the whole dashboard for this error, just show empty goals
         setGoals([]);
       } else {
-        setGoals(data || []);
+        // Type assertion to make TypeScript happy
+        setGoals(data as Goal[] || []);
       }
     } catch (error) {
       console.error('Error fetching goals for dashboard:', error);
@@ -118,29 +135,12 @@ export const useDashboardData = () => {
       const totalExpenses = expenseData?.reduce((sum, transaction) => sum + Number(transaction.amount), 0) || 0;
       
       // Prepare stats data
-      const statsData: StatCard[] = [
-        {
-          title: 'Monthly Income',
-          value: totalIncome,
-          currency: 'IDR',
-          change: 0, // Replace with actual calculation if previous month data is available
-          type: 'positive'
-        },
-        {
-          title: 'Monthly Expenses',
-          value: totalExpenses,
-          currency: 'IDR',
-          change: 0, // Replace with actual calculation if previous month data is available
-          type: 'negative'
-        },
-        {
-          title: 'Monthly Balance',
-          value: totalIncome - totalExpenses,
-          currency: 'IDR',
-          change: 0, // Replace with actual calculation if previous month data is available
-          type: totalIncome - totalExpenses >= 0 ? 'positive' : 'negative'
-        }
-      ];
+      const statsData: DashboardStats = {
+        income: totalIncome,
+        expenses: totalExpenses,
+        balance: totalIncome - totalExpenses,
+        currency: 'IDR',
+      };
       
       setStats(statsData);
     } catch (error) {
@@ -172,3 +172,6 @@ export const useDashboardData = () => {
     refreshData
   };
 };
+
+// Re-export formatCurrency to maintain compatibility with existing imports
+export { formatCurrency };

@@ -1,9 +1,8 @@
-
 import React, { useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { formatCurrency } from '@/hooks/useDashboardData';
+import { formatCurrency } from '@/utils/formatUtils';
 
 interface Transaction {
   id: string;

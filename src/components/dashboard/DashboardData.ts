@@ -1,8 +1,6 @@
+import { formatCurrency } from '@/utils/formatUtils';
 
-import { formatCurrency } from '@/hooks/useDashboardData';
-
-// Mock data for dashboard components
-
+// Define interfaces
 export interface Transaction {
   id: string;
   type: 'income' | 'expense';
@@ -29,6 +27,14 @@ export interface Goal {
   currency: 'IDR' | 'USD';
   target_date?: string;
   emoji?: string;
+}
+
+export interface StatCard {
+  title: string;
+  value: number;
+  currency: 'IDR' | 'USD';
+  change: number;
+  type: 'positive' | 'negative';
 }
 
 // Mock data - will be replaced with real data from Supabase
@@ -148,7 +154,7 @@ export const mockBadges = [
   }
 ];
 
-// Export the formatCurrency for use in components
+// Re-export formatCurrency
 export { formatCurrency };
 
 export const categoryIcons: Record<string, string> = {

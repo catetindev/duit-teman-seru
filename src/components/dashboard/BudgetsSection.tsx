@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatCurrency } from '@/hooks/useDashboardData';
+import { formatCurrency } from '@/utils/formatUtils';
 import { useToast } from '@/hooks/use-toast';
 
 interface Budget {

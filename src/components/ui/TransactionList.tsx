@@ -1,6 +1,6 @@
-
 import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatUtils";
 
 interface Transaction {
   id: string;
@@ -18,13 +18,6 @@ interface TransactionListProps {
   className?: string;
   showEmpty?: boolean;
 }
-
-const formatCurrency = (amount: number, currency: 'IDR' | 'USD'): string => {
-  if (currency === 'IDR') {
-    return `Rp${amount.toLocaleString('id-ID')}`;
-  }
-  return `$${amount.toLocaleString('en-US')}`;
-};
 
 const categoryIcons: Record<string, string> = {
   'food': '🍔',

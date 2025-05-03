@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { formatCurrency } from '@/hooks/useDashboardData';
+import { formatCurrency } from '@/utils/formatUtils';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import TransactionActions from './TransactionActions';
