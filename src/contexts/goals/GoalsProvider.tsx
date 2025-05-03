@@ -84,12 +84,15 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         throw new Error("You must be logged in to add a goal");
       }
       
+      console.log('Adding new goal with data:', goalData);
+      
+      // Ensure all values are properly converted to their expected types
       const goalToAdd = {
         title: goalData.title,
         target_amount: parseFloat(goalData.target_amount),
-        saved_amount: parseFloat(goalData.saved_amount || '0'),
+        saved_amount: goalData.saved_amount ? parseFloat(goalData.saved_amount) : 0,
         target_date: goalData.target_date || null,
-        emoji: goalData.emoji,
+        emoji: goalData.emoji || '🎯',
         user_id: user.id,
         currency: 'IDR' as const
       };
@@ -104,7 +107,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         
         setIsAddDialogOpen(false);
         // Refresh goals list
-        fetchGoals();
+        await fetchGoals();
       }
       
     } catch (error: any) {

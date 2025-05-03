@@ -15,6 +15,8 @@ export const useGoalApi = () => {
         return [];
       }
       
+      console.log('Fetching goals for user ID:', userId);
+      
       // First get user's own goals
       const { data: ownGoals, error: ownError } = await supabase
         .from('savings_goals')
@@ -67,6 +69,7 @@ export const useGoalApi = () => {
         currency: validateCurrency(goal.currency)
       })) : [];
       
+      console.log('Fetched goals count:', (typedOwnGoals.length + sharedGoals.length));
       return [...typedOwnGoals, ...sharedGoals];
       
     } catch (error: any) {
@@ -76,31 +79,36 @@ export const useGoalApi = () => {
         description: "Failed to load goals: " + (error.message || "Unknown error"),
         variant: "destructive"
       });
-      return [];
+      throw error; // Re-throw to allow handling at the hook level
     }
   };
 
   // Add a new goal
   const addGoal = async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
     try {
-      console.log('Adding goal:', goal);
+      console.log('Adding goal in goalApi:', goal);
       
       // Ensure user_id is present in the goal object before inserting
       if (!goal.user_id) {
         throw new Error("User ID is required to add a goal");
       }
       
+      // Make sure all required fields are present and properly formatted
+      const goalData = {
+        title: goal.title,
+        target_amount: goal.target_amount,
+        saved_amount: goal.saved_amount || 0,
+        target_date: goal.target_date || null,
+        emoji: goal.emoji || '🎯',
+        user_id: goal.user_id,
+        currency: goal.currency || 'IDR'
+      };
+      
+      console.log('Inserting goal data:', goalData);
+      
       const { data, error } = await supabase
         .from('savings_goals')
-        .insert({
-          title: goal.title,
-          target_amount: goal.target_amount,
-          saved_amount: goal.saved_amount || 0,
-          target_date: goal.target_date || null,
-          emoji: goal.emoji || '🎯',
-          user_id: goal.user_id,
-          currency: goal.currency || 'IDR'
-        })
+        .insert(goalData)
         .select('*')
         .single();
       
@@ -111,10 +119,7 @@ export const useGoalApi = () => {
       
       if (!data) throw new Error("No data returned from insert");
       
-      toast({
-        title: "Success",
-        description: "Goal has been added",
-      });
+      console.log('Successfully added goal:', data);
       
       return {
         ...data,
@@ -123,18 +128,15 @@ export const useGoalApi = () => {
       
     } catch (error: any) {
       console.error('Error adding goal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add goal",
-        variant: "destructive",
-      });
-      return null;
+      throw error; // Re-throw to allow handling at the hook level
     }
   };
 
   // Delete a goal
   const deleteGoal = async (goalId: string): Promise<boolean> => {
     try {
+      console.log('Deleting goal with ID:', goalId);
+      
       const { error } = await supabase
         .from('savings_goals')
         .delete()
@@ -142,20 +144,11 @@ export const useGoalApi = () => {
       
       if (error) throw error;
       
-      toast({
-        title: "Success",
-        description: "Goal has been deleted",
-      });
-      
+      console.log('Successfully deleted goal with ID:', goalId);
       return true;
     } catch (error: any) {
       console.error('Error deleting goal:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete goal: " + (error.message || "Unknown error"),
-        variant: "destructive",
-      });
-      return false;
+      throw error; // Re-throw to allow handling at the hook level
     }
   };
 
