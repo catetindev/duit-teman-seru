@@ -1,7 +1,7 @@
 
-import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import { Goal, Collaborator } from '@/hooks/goals/types';
-import { useGoals } from '@/hooks/goals/useGoals'; // Fixed import path
+import { useGoals } from '@/hooks/goals/useGoals';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { useToast } from '@/hooks/use-toast';
@@ -51,12 +51,12 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     calculateProgress
   } = useGoals(user?.id, shouldFetchGoals);
 
-  // Fix: Use stable dependencies in useMemo to prevent infinite re-renders
+  // Fix: Properly memoize the filtered goals to prevent render loops
   const filteredAndSortedGoals = useMemo(() => {
     return filterAndSortGoals(goals || [], filterBy, sortBy, sortDirection, calculateProgress);
   }, [goals, filterBy, sortBy, sortDirection, calculateProgress]);
   
-  // Pass the correct dependencies to useGoalOperations
+  // Fix: Wrap goal operation functions with useCallback to prevent recreation on every render
   const {
     handleEditGoal,
     handleDeleteGoal,
@@ -81,15 +81,20 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsSubmitting
   );
 
-  // Fix: Properly memoize handleAddGoal to prevent it from causing re-renders
+  // Fix: Properly memoize handleAddGoal with stable dependencies
   const handleAddGoal = useCallback(async (goalData: GoalFormData) => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add a goal",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
-    try {
-      if (!user?.id) {
-        throw new Error("You must be logged in to add a goal");
-      }
-      
+    try {      
       console.log('Adding new goal with data:', goalData);
       
       // Ensure all values are properly converted to their expected types
@@ -112,8 +117,6 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         });
         
         setIsAddDialogOpen(false);
-        // Refresh goals list
-        await fetchGoals();
       }
       
     } catch (error: any) {
@@ -126,7 +129,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, addGoal, toast, fetchGoals]);
+  }, [user, addGoal, toast, setIsAddDialogOpen]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({

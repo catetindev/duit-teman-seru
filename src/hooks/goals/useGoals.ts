@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Goal, Collaborator } from './types';
 import { useGoalApi } from './goalApi';
 import { useCollaboratorApi } from './collaboratorApi';
@@ -101,10 +101,12 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     }
   };
 
-  // If shouldFetch is true, fetch goals in the component that uses this hook
-  if (shouldFetch && userId && loading) {
-    fetchGoals();
-  }
+  // Use useEffect to fetch goals when component mounts
+  useEffect(() => {
+    if (shouldFetch && userId && loading) {
+      fetchGoals();
+    }
+  }, [shouldFetch, userId]); // Remove 'loading' from dependency array to avoid loops
 
   return {
     goals,

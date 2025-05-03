@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -64,6 +64,27 @@ const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
     fetchGoals,
   } = useGoalsContext();
 
+  // Use stable callback to prevent re-renders
+  const handleAddDialogOpen = useCallback(() => {
+    setIsAddDialogOpen(true);
+  }, [setIsAddDialogOpen]);
+
+  const handleAddDialogClose = useCallback(() => {
+    setIsAddDialogOpen(false);
+  }, [setIsAddDialogOpen]);
+
+  const handleEditDialogClose = useCallback(() => {
+    setIsEditDialogOpen(false);
+  }, [setIsEditDialogOpen]);
+
+  const handleCollaborateDialogClose = useCallback(() => {
+    setIsCollaborateDialogOpen(false);
+  }, [setIsCollaborateDialogOpen]);
+
+  const handleDeleteDialogClose = useCallback(() => {
+    setIsDeleteDialogOpen(false);
+  }, [setIsDeleteDialogOpen]);
+
   if (loading) {
     return <GoalsLoading isPremium={isPremium} />;
   }
@@ -75,7 +96,7 @@ const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
   return (
     <DashboardLayout isPremium={isPremium}>
       <GoalsHeader 
-        onAddGoal={() => setIsAddDialogOpen(true)}
+        onAddGoal={handleAddDialogOpen}
         isPremium={isPremium}
         goalsCount={goals?.length || 0}
       />
@@ -106,14 +127,14 @@ const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
       {/* Dialogs */}
       <AddGoalDialog
         isOpen={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
+        onClose={handleAddDialogClose}
         onSubmit={handleAddGoal}
         isSubmitting={isSubmitting}
       />
       
       <EditGoalDialog
         isOpen={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
+        onClose={handleEditDialogClose}
         onSubmit={updateGoalHandler}
         selectedGoal={selectedGoal}
         isSubmitting={isSubmitting}
@@ -121,7 +142,7 @@ const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
       
       <CollaboratorsDialog
         isOpen={isCollaborateDialogOpen}
-        onClose={() => setIsCollaborateDialogOpen(false)}
+        onClose={handleCollaborateDialogClose}
         selectedGoal={selectedGoal}
         collaborators={goalCollaborators}
         onInviteCollaborator={handleInviteCollaborator}
@@ -131,7 +152,7 @@ const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
       
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
+        onClose={handleDeleteDialogClose}
         onConfirm={confirmDeleteGoal}
       />
     </DashboardLayout>

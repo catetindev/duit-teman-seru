@@ -1,4 +1,5 @@
 
+import { useCallback } from 'react';
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,26 +22,26 @@ export const useGoalOperations = (
 ) => {
   const { toast } = useToast();
 
-  const handleEditGoal = (goal: Goal) => {
+  const handleEditGoal = useCallback((goal: Goal) => {
     setSelectedGoal(goal);
     setIsEditDialogOpen(true);
-  };
+  }, [setSelectedGoal, setIsEditDialogOpen]);
   
-  const handleDeleteGoal = (id: string) => {
+  const handleDeleteGoal = useCallback((id: string) => {
     setGoalToDelete(id);
     setIsDeleteDialogOpen(true);
-  };
+  }, [setGoalToDelete, setIsDeleteDialogOpen]);
 
-  const confirmDeleteGoal = async () => {
+  const confirmDeleteGoal = useCallback(async () => {
     const goalToDeleteId = selectedGoal?.id || null;
     if (goalToDeleteId) {
       await deleteGoal(goalToDeleteId);
       setGoalToDelete(null);
       setIsDeleteDialogOpen(false);
     }
-  };
+  }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen]);
 
-  const openCollaborationDialog = async (goal: Goal) => {
+  const openCollaborationDialog = useCallback(async (goal: Goal) => {
     setSelectedGoal(goal);
     setIsCollaborateDialogOpen(true);
     
@@ -55,9 +56,9 @@ export const useGoalOperations = (
         variant: "destructive"
       });
     }
-  };
+  }, [setSelectedGoal, setIsCollaborateDialogOpen, fetchCollaborators, setGoalCollaborators, toast]);
 
-  const updateGoalHandler = async (goalData: GoalFormData) => {
+  const updateGoalHandler = useCallback(async (goalData: GoalFormData) => {
     if (!selectedGoal) return;
     setIsSubmitting(true);
     
@@ -98,9 +99,9 @@ export const useGoalOperations = (
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [selectedGoal, setIsSubmitting, toast, setIsEditDialogOpen, fetchGoals]);
 
-  const handleInviteCollaborator = async (email: string) => {
+  const handleInviteCollaborator = useCallback(async (email: string) => {
     if (!selectedGoal) return;
     setIsSubmitting(true);
     
@@ -127,9 +128,9 @@ export const useGoalOperations = (
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [selectedGoal, setIsSubmitting, addCollaborator, toast, fetchCollaborators, setGoalCollaborators]);
 
-  const handleRemoveCollaborator = async (userId: string) => {
+  const handleRemoveCollaborator = useCallback(async (userId: string) => {
     if (!selectedGoal) return;
     setIsSubmitting(true);
     
@@ -155,7 +156,7 @@ export const useGoalOperations = (
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [selectedGoal, setIsSubmitting, removeCollaborator, toast, setGoalCollaborators]);
 
   return {
     handleEditGoal,
