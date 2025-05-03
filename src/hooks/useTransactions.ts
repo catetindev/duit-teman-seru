@@ -26,7 +26,7 @@ export const useTransactions = () => {
   
   const fetchTransactions = async () => {
     if (!user) {
-      setIsLoading(false); // Fixed: Changed setLoading to setIsLoading
+      setIsLoading(false);
       return;
     }
     

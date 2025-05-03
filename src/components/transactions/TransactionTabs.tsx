@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
-import TransactionList from '@/components/transactions/TransactionList';
+import TransactionList from '@/components/ui/TransactionList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface TransactionData {

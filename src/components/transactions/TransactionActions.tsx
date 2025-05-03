@@ -48,6 +48,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsEditOpen(false);
+      // Make sure to call onUpdate to refresh the transactions list
       onUpdate();
     } catch (error: any) {
       console.error('Error updating transaction:', error);

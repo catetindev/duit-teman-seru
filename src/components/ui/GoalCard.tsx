@@ -94,10 +94,40 @@ const GoalCard = ({
     }
   };
   
-  const handleDelete = () => {
-    if (onDelete) {
-      onDelete();
+  const handleDelete = async () => {
+    setIsSubmitting(true);
+    try {
+      console.log('Deleting goal with ID:', id);
+      
+      const { error } = await supabase
+        .from('savings_goals')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "Goal deleted successfully",
+      });
+      
       setIsDeleteDialogOpen(false);
+      
+      if (onDelete) onDelete();
+      else if (onUpdate) onUpdate(); // Fall back to onUpdate if onDelete isn't provided
+      
+    } catch (error: any) {
+      console.error('Error deleting goal:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete goal",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
