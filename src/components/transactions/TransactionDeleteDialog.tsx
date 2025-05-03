@@ -18,6 +18,9 @@ interface TransactionDeleteDialogProps {
   isSubmitting: boolean;
 }
 
+/**
+ * Dialog for confirming transaction deletion
+ */
 const TransactionDeleteDialog = ({
   isOpen,
   onClose,
