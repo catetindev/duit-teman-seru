@@ -137,8 +137,8 @@ export const useGoalOperations = (
           description: "Collaborator has been removed",
         });
         
-        // Update the collaborators list
-        setGoalCollaborators(prev => prev.filter(c => c.user_id !== userId));
+        // Fix the type error by using a type-safe approach
+        setGoalCollaborators((prev: Collaborator[]) => prev.filter(c => c.user_id !== userId));
       }
     } catch (error: any) {
       console.error('Error removing collaborator:', error);
