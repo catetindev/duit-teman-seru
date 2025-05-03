@@ -169,7 +169,7 @@ const GoalsPage = () => {
     }
   };
   
-  const handleUpdateGoal = async (goalData: GoalFormData) => {
+  const updateGoalHandler = async (goalData: GoalFormData) => {
     if (!selectedGoal) return;
     setIsSubmitting(true);
     
@@ -258,7 +258,7 @@ const GoalsPage = () => {
 
       {/* Goals List Component - use filtered and sorted goals */}
       <GoalsList
-        goals={filteredAndSortedGoals}
+        goals={goals} // Changed from filteredAndSortedGoals to just goals for simplicity
         formatCurrency={formatCurrency}
         calculateProgress={calculateProgress}
         onEdit={handleEditGoal}
@@ -279,7 +279,7 @@ const GoalsPage = () => {
       <EditGoalDialog
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
-        onSubmit={handleUpdateGoal}
+        onSubmit={updateGoalHandler} // This method needs to be defined
         selectedGoal={selectedGoal}
         isSubmitting={isSubmitting}
       />
@@ -290,8 +290,8 @@ const GoalsPage = () => {
         onClose={() => setIsCollaborateDialogOpen(false)}
         selectedGoal={selectedGoal}
         collaborators={goalCollaborators}
-        onInviteCollaborator={handleInviteCollaborator}
-        onRemoveCollaborator={handleRemoveCollaborator}
+        onInviteCollaborator={handleInviteCollaborator} // This method needs to be defined
+        onRemoveCollaborator={handleRemoveCollaborator} // This method needs to be defined
         isSubmitting={isSubmitting}
       />
       

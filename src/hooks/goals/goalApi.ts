@@ -10,13 +10,21 @@ export const useGoalApi = () => {
   // Fetch all goals
   const fetchGoals = async (userId: string): Promise<Goal[]> => {
     try {
+      if (!userId) {
+        console.error('No user ID provided to fetchGoals');
+        return [];
+      }
+      
       // First get user's own goals
       const { data: ownGoals, error: ownError } = await supabase
         .from('savings_goals')
         .select('*')
         .eq('user_id', userId);
       
-      if (ownError) throw ownError;
+      if (ownError) {
+        console.error('Error fetching own goals:', ownError);
+        throw ownError;
+      }
       
       // Then get goals where user is a collaborator
       const { data: collaborations, error: collabError } = await supabase
@@ -24,7 +32,10 @@ export const useGoalApi = () => {
         .select('goal_id')
         .eq('user_id', userId);
       
-      if (collabError) throw collabError;
+      if (collabError) {
+        console.error('Error fetching collaborations:', collabError);
+        throw collabError;
+      }
       
       let sharedGoals: Goal[] = [];
       
@@ -36,7 +47,10 @@ export const useGoalApi = () => {
           .select('*')
           .in('id', goalIds);
         
-        if (fetchError) throw fetchError;
+        if (fetchError) {
+          console.error('Error fetching collaborative goals:', fetchError);
+          throw fetchError;
+        }
         
         if (collabGoals) {
           // Convert database records to Goal objects with proper currency type

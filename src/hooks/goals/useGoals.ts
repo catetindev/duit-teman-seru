@@ -14,14 +14,31 @@ export function useGoals(userId: string) {
 
   // Wrapper for fetchGoals that updates state
   const fetchGoals = async () => {
+    if (!userId) {
+      console.warn('No userId provided to useGoals.fetchGoals');
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
-    const fetchedGoals = await goalApi.fetchGoals(userId);
-    setGoals(fetchedGoals);
-    setLoading(false);
+    try {
+      const fetchedGoals = await goalApi.fetchGoals(userId);
+      setGoals(fetchedGoals);
+    } catch (error) {
+      console.error('Error in useGoals.fetchGoals:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Add a new goal and update state if successful
   const addGoal = async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
+    // Make sure user_id is set
+    if (!goal.user_id) {
+      console.error('No user_id provided to useGoals.addGoal');
+      return null;
+    }
+    
     const newGoal = await goalApi.addGoal(goal);
     if (newGoal) {
       setGoals(prev => [...prev, newGoal]);
@@ -40,6 +57,8 @@ export function useGoals(userId: string) {
   useEffect(() => {
     if (userId) {
       fetchGoals();
+    } else {
+      setLoading(false);
     }
   }, [userId]);
 
