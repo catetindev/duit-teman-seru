@@ -4,10 +4,12 @@ import { Goal } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { GoalOperationsDependencies, GoalOperations } from './types/operationTypes';
+import { useToast } from '@/hooks/use-toast';
 
 export const useGoalOperations = (dependencies: GoalOperationsDependencies): GoalOperations => {
+  // Extract dependencies with default values for safety
   const {
-    selectedGoal,
+    selectedGoal = null,
     setIsEditDialogOpen,
     setIsDeleteDialogOpen,
     setSelectedGoal,
@@ -20,8 +22,8 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
     addCollaborator,
     removeCollaborator,
     setIsSubmitting,
-    toast
-  } = dependencies;
+    toast = useToast().toast // Use the hook directly as fallback if not provided
+  } = dependencies || {};
 
   const handleEditGoal = useCallback((goal: Goal) => {
     setSelectedGoal(goal);
