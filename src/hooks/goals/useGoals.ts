@@ -89,6 +89,11 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
         setGoals(prev => prev.filter(goal => goal.id !== goalId));
         // Clear any previous errors
         setError(null);
+        
+        toast({
+          title: "Success",
+          description: "Goal deleted successfully",
+        });
       }
     } catch (error: any) {
       console.error('Error in useGoals.deleteGoal:', error);
@@ -98,13 +103,16 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
         description: error.message || 'Failed to delete goal',
         variant: "destructive"
       });
+      throw error; // Re-throw to allow handling in calling components
     }
   };
 
   // Use useEffect to fetch goals when component mounts
   useEffect(() => {
-    if (shouldFetch && userId && loading) {
+    if (shouldFetch && userId) {
       fetchGoals();
+    } else if (!userId) {
+      setLoading(false);
     }
   }, [shouldFetch, userId]); // Remove 'loading' from dependency array to avoid loops
 

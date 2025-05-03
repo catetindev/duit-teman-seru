@@ -35,11 +35,28 @@ export const useGoalOperations = (
   const confirmDeleteGoal = useCallback(async () => {
     const goalToDeleteId = selectedGoal?.id || null;
     if (goalToDeleteId) {
-      await deleteGoal(goalToDeleteId);
-      setGoalToDelete(null);
-      setIsDeleteDialogOpen(false);
+      setIsSubmitting(true);
+      try {
+        console.log('Deleting goal with ID:', goalToDeleteId);
+        await deleteGoal(goalToDeleteId);
+        toast({
+          title: "Success",
+          description: "Goal has been deleted successfully",
+        });
+      } catch (error: any) {
+        console.error('Error deleting goal:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to delete goal",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+        setGoalToDelete(null);
+        setIsDeleteDialogOpen(false);
+      }
     }
-  }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen]);
+  }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen, setIsSubmitting, toast]);
 
   const openCollaborationDialog = useCallback(async (goal: Goal) => {
     setSelectedGoal(goal);

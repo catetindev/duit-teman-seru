@@ -8,6 +8,8 @@ export function useCollaboratorApi() {
 
   const fetchCollaborators = async (goalId: string): Promise<Collaborator[]> => {
     try {
+      console.log('Fetching collaborators for goal:', goalId);
+      
       // Use the edge function instead of direct database access
       const { data: response, error } = await supabase.functions.invoke('goal_collaborators', {
         body: {
@@ -16,8 +18,12 @@ export function useCollaboratorApi() {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
       
+      console.log('Collaborators response:', response);
       return response?.collaborators || [];
     } catch (error: any) {
       console.error('Error fetching collaborators:', error);
@@ -26,7 +32,7 @@ export function useCollaboratorApi() {
         description: "Failed to load collaborators: " + (error.message || "Unknown error"),
         variant: "destructive"
       });
-      return [];
+      throw error;
     }
   };
 
@@ -40,7 +46,10 @@ export function useCollaboratorApi() {
         }
       });
       
-      if (userError) throw userError;
+      if (userError) {
+        console.error('Edge function error (find_user):', userError);
+        throw userError;
+      }
       
       if (!userData?.user) {
         throw new Error('User not found with that email');
@@ -55,7 +64,10 @@ export function useCollaboratorApi() {
         }
       });
       
-      if (addError) throw addError;
+      if (addError) {
+        console.error('Edge function error (add):', addError);
+        throw addError;
+      }
       
       if (addResult?.status === 'exists') {
         throw new Error('This user is already a collaborator');
@@ -85,7 +97,10 @@ export function useCollaboratorApi() {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error (remove):', error);
+        throw error;
+      }
       
       return true;
     } catch (error: any) {

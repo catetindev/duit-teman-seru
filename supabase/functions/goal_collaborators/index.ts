@@ -117,21 +117,37 @@ serve(async (req) => {
           throw new Error('Missing goal ID');
         }
         
-        const { data, error } = await supabase
+        // FIX: Use a direct join query rather than relying on foreign key relationships
+        const { data: collaborators, error } = await supabase
           .from('goal_collaborators')
-          .select('user_id, profiles:user_id(email, full_name)')
+          .select('user_id')
           .eq('goal_id', goalId);
           
         if (error) throw error;
         
-        // Transform the data to a more usable format
-        const collaborators = data.map(item => ({
-          user_id: item.user_id,
-          email: (item.profiles as any)?.email || '',
-          full_name: (item.profiles as any)?.full_name || ''
+        // Now get the profile information for each collaborator
+        const userIds = collaborators.map(col => col.user_id);
+        
+        if (userIds.length === 0) {
+          result = { collaborators: [] };
+          break;
+        }
+        
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', userIds);
+          
+        if (profilesError) throw profilesError;
+        
+        // Map the profiles to the expected format
+        const formattedCollaborators = profiles.map(profile => ({
+          user_id: profile.id,
+          email: profile.email,
+          full_name: profile.full_name
         }));
         
-        result = { collaborators };
+        result = { collaborators: formattedCollaborators };
         break;
       }
       

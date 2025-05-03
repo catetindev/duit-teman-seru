@@ -136,13 +136,17 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
   const handleDelete = async () => {
     setIsSubmitting(true);
     try {
-      // Fix: Use proper Supabase query to delete the transaction
+      console.log('Deleting transaction with ID:', transaction.id);
+      
       const { error } = await supabase
         .from('transactions')
         .delete()
         .eq('id', transaction.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
       
       toast({
         title: "Success",
