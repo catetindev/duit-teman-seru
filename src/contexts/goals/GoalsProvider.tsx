@@ -51,12 +51,12 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     calculateProgress
   } = useGoals(user?.id, shouldFetchGoals);
 
-  // Apply sorting and filtering to goals - fix the dependency array to prevent infinite loops
+  // Fix: Use stable dependencies in useMemo to prevent infinite re-renders
   const filteredAndSortedGoals = useMemo(() => {
-    return filterAndSortGoals(goals, filterBy, sortBy, sortDirection, calculateProgress);
-  }, [goals, filterBy, sortBy, sortDirection]);
+    return filterAndSortGoals(goals || [], filterBy, sortBy, sortDirection, calculateProgress);
+  }, [goals, filterBy, sortBy, sortDirection, calculateProgress]);
   
-  // Goal operations - Use useCallback to prevent unnecessary re-renders
+  // Pass the correct dependencies to useGoalOperations
   const {
     handleEditGoal,
     handleDeleteGoal,
@@ -81,7 +81,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsSubmitting
   );
 
-  // Handle adding a goal - Use useCallback to prevent unnecessary re-renders
+  // Fix: Properly memoize handleAddGoal to prevent it from causing re-renders
   const handleAddGoal = useCallback(async (goalData: GoalFormData) => {
     setIsSubmitting(true);
     
@@ -126,9 +126,10 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, addGoal, toast, fetchGoals, setIsAddDialogOpen]);
+  }, [user, addGoal, toast, fetchGoals]);
 
-  const value = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
     goals,
     loading,
     error,
@@ -164,9 +165,36 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     handleRemoveCollaborator,
     formatCurrency,
     calculateProgress
-  };
+  }), [
+    goals,
+    loading,
+    error,
+    selectedGoal,
+    goalToDelete,
+    isSubmitting,
+    sortBy,
+    sortDirection,
+    filterBy,
+    goalCollaborators,
+    filteredAndSortedGoals,
+    isAddDialogOpen, 
+    isEditDialogOpen,
+    isCollaborateDialogOpen,
+    isDeleteDialogOpen,
+    fetchGoals,
+    handleAddGoal,
+    handleEditGoal,
+    handleDeleteGoal,
+    confirmDeleteGoal,
+    updateGoalHandler,
+    openCollaborationDialog,
+    handleInviteCollaborator,
+    handleRemoveCollaborator,
+    formatCurrency,
+    calculateProgress
+  ]);
   
-  return <GoalsContext.Provider value={value}>{children}</GoalsContext.Provider>;
+  return <GoalsContext.Provider value={contextValue}>{children}</GoalsContext.Provider>;
 };
 
 export const useGoalsContext = (): GoalsContextType => {

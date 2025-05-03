@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Goal, ValidCurrency } from './types';
 
@@ -9,11 +8,11 @@ export function useGoalApi() {
         throw new Error('User ID is required to fetch goals');
       }
       
-      // Fetch both owned goals and collaborated goals
+      // Fix: Use a simple equality check instead of a complex OR condition that might be causing recursion
       const { data, error } = await supabase
         .from('savings_goals')
         .select('*')
-        .or(`user_id.eq.${userId}`);
+        .eq('user_id', userId);
       
       if (error) throw error;
       

@@ -28,7 +28,7 @@ const GoalsPage = () => {
 };
 
 // Inner component that consumes the context
-const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
+const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
   const { 
     loading, 
     error,
@@ -77,11 +77,11 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
       <GoalsHeader 
         onAddGoal={() => setIsAddDialogOpen(true)}
         isPremium={isPremium}
-        goalsCount={goals.length}
+        goalsCount={goals?.length || 0}
       />
 
       {/* Add GoalsFilters component */}
-      {goals.length > 0 && (
+      {goals && goals.length > 0 && (
         <GoalsFilters
           sortBy={sortBy}
           setSortBy={setSortBy}
@@ -136,6 +136,6 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
       />
     </DashboardLayout>
   );
-};
+});
 
 export default GoalsPage;
