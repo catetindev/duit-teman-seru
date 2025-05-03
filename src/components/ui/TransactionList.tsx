@@ -1,6 +1,8 @@
+
 import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatUtils";
+import TransactionActions from "@/components/transactions/TransactionActions";
 
 interface Transaction {
   id: string;
@@ -17,6 +19,7 @@ interface TransactionListProps {
   transactions: Transaction[];
   className?: string;
   showEmpty?: boolean;
+  onUpdate?: () => void;
 }
 
 const categoryIcons: Record<string, string> = {
@@ -30,7 +33,7 @@ const categoryIcons: Record<string, string> = {
   'other': '📦'
 };
 
-const TransactionList = ({ transactions, className, showEmpty = true }: TransactionListProps) => {
+const TransactionList = ({ transactions, className, showEmpty = true, onUpdate = () => {} }: TransactionListProps) => {
   const { t } = useLanguage();
 
   if (transactions.length === 0 && showEmpty) {
@@ -61,11 +64,14 @@ const TransactionList = ({ transactions, className, showEmpty = true }: Transact
               <p className="text-xs text-muted-foreground">{transaction.category} • {transaction.date}</p>
             </div>
           </div>
-          <div className={cn(
-            "font-semibold",
-            transaction.type === 'income' ? 'text-green-500' : 'text-red-500'
-          )}>
-            {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
+          <div className="flex items-center gap-2">
+            <div className={cn(
+              "font-semibold",
+              transaction.type === 'income' ? 'text-green-500' : 'text-red-500'
+            )}>
+              {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
+            </div>
+            <TransactionActions transaction={transaction} onUpdate={onUpdate} />
           </div>
         </div>
       ))}
