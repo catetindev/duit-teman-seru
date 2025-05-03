@@ -1,25 +1,26 @@
 
 import { useCallback } from 'react';
-import { Goal, Collaborator } from '@/hooks/goals/types';
+import { Goal } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { GoalOperationsDependencies, GoalOperations } from './types/operationTypes';
 
-export const useGoalOperations = (
-  selectedGoal: Goal | null, 
-  setIsEditDialogOpen: (isOpen: boolean) => void,
-  setIsDeleteDialogOpen: (isOpen: boolean) => void,
-  setSelectedGoal: (goal: Goal | null) => void,
-  setGoalToDelete: (goalId: string | null) => void,
-  setIsCollaborateDialogOpen: (isOpen: boolean) => void,
-  setGoalCollaborators: React.Dispatch<React.SetStateAction<Collaborator[]>>,
-  fetchGoals: () => Promise<void>,
-  deleteGoal: (goalId: string) => Promise<void>,
-  fetchCollaborators: (goalId: string) => Promise<Collaborator[]>,
-  addCollaborator: (goalId: string, email: string) => Promise<boolean>,
-  removeCollaborator: (goalId: string, userId: string) => Promise<boolean>,
-  setIsSubmitting: (isSubmitting: boolean) => void
-) => {
+export const useGoalOperations = ({
+  selectedGoal,
+  setIsEditDialogOpen,
+  setIsDeleteDialogOpen,
+  setSelectedGoal,
+  setGoalToDelete,
+  setIsCollaborateDialogOpen,
+  setGoalCollaborators,
+  fetchGoals,
+  deleteGoal,
+  fetchCollaborators,
+  addCollaborator,
+  removeCollaborator,
+  setIsSubmitting
+}: GoalOperationsDependencies): GoalOperations => {
   const { toast } = useToast();
 
   const handleEditGoal = useCallback((goal: Goal) => {
@@ -34,27 +35,27 @@ export const useGoalOperations = (
 
   const confirmDeleteGoal = useCallback(async () => {
     const goalToDeleteId = selectedGoal?.id || null;
-    if (goalToDeleteId) {
-      setIsSubmitting(true);
-      try {
-        console.log('Deleting goal with ID:', goalToDeleteId);
-        await deleteGoal(goalToDeleteId);
-        toast({
-          title: "Success",
-          description: "Goal has been deleted successfully",
-        });
-      } catch (error: any) {
-        console.error('Error deleting goal:', error);
-        toast({
-          title: "Error",
-          description: error.message || "Failed to delete goal",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSubmitting(false);
-        setGoalToDelete(null);
-        setIsDeleteDialogOpen(false);
-      }
+    if (!goalToDeleteId) return;
+    
+    setIsSubmitting(true);
+    try {
+      console.log('Deleting goal with ID:', goalToDeleteId);
+      await deleteGoal(goalToDeleteId);
+      toast({
+        title: "Success",
+        description: "Goal has been deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting goal:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete goal",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+      setGoalToDelete(null);
+      setIsDeleteDialogOpen(false);
     }
   }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen, setIsSubmitting, toast]);
 
