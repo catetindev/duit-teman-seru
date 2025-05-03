@@ -8,7 +8,7 @@ import { toast as sonnerToast } from '@/components/ui/sonner';
 import StatCard from '@/components/ui/StatCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronRight, Users, UserCheck, Award, Bell, Trash2, Edit, AlertTriangle, Activity } from 'lucide-react';
+import { ChevronRight, Users, UserCheck, Award, Bell, Trash2, Edit, AlertTriangle, Activity as ActivityIcon } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+
 interface User {
   id: string;
   email: string;
@@ -700,7 +701,7 @@ const AdminDashboard = () => {
           <Card className="border-none shadow-md rounded-xl overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
               <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" /> Recent Activity
+                <ActivityIcon className="h-5 w-5" /> Recent Activity
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">

@@ -297,6 +297,10 @@ export type Database = {
         }
         Returns: string
       }
+      get_goals_as_collaborator: {
+        Args: { user_uid: string }
+        Returns: string[]
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
