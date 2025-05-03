@@ -115,6 +115,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     deleteGoal,
     formatCurrency,
     calculateProgress,
-    ...collaboratorApi
+    fetchCollaborators: collaboratorApi.fetchCollaborators,
+    addCollaborator: collaboratorApi.addCollaborator,
+    removeCollaborator: collaboratorApi.removeCollaborator
   };
 }

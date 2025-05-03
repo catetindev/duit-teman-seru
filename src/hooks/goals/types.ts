@@ -29,3 +29,15 @@ export interface DashboardStats {
   currency: ValidCurrency;
   recentTransactionDate?: string;
 }
+
+// Define the Budget interface
+export interface Budget {
+  id: string;
+  category: string;
+  amount: number;
+  currency: ValidCurrency;
+  period: string;
+  spent?: number;
+  created_at?: string;
+  user_id?: string;
+}

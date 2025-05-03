@@ -76,7 +76,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     fetchGoals,
     deleteGoal,
     fetchCollaborators,
-    addCollaborator,
+    addCollaborator, // This now returns boolean as expected
     removeCollaborator,
     setIsSubmitting
   );

@@ -9,7 +9,8 @@ export function useCollaboratorApi() {
         .from('goal_collaborators')
         .select(`
           user_id,
-          profiles:user_id (
+          profiles(
+            id,
             email,
             full_name
           )
@@ -36,12 +37,12 @@ export function useCollaboratorApi() {
     }
   };
 
-  const addCollaborator = async (goalId: string, email: string): Promise<Collaborator | null> => {
+  const addCollaborator = async (goalId: string, email: string): Promise<boolean> => {
     try {
       // First, find the user by email
       const { data: userData, error: userError } = await supabase
         .from('profiles')
-        .select('user_id, email, full_name')
+        .select('id, email, full_name')
         .eq('email', email)
         .single();
       
@@ -56,7 +57,7 @@ export function useCollaboratorApi() {
         .from('goal_collaborators')
         .select()
         .eq('goal_id', goalId)
-        .eq('user_id', userData.user_id);
+        .eq('user_id', userData.id);
       
       if (collabError) throw collabError;
       
@@ -69,16 +70,13 @@ export function useCollaboratorApi() {
         .from('goal_collaborators')
         .insert({
           goal_id: goalId,
-          user_id: userData.user_id
+          user_id: userData.id
         });
       
       if (insertError) throw insertError;
       
-      return {
-        user_id: userData.user_id,
-        email: userData.email,
-        full_name: userData.full_name
-      };
+      // Return true to indicate success
+      return true;
     } catch (error) {
       console.error('Error adding collaborator:', error);
       throw error;
