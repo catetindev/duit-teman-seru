@@ -26,7 +26,7 @@ export const useTransactions = () => {
   
   const fetchTransactions = async () => {
     if (!user) {
-      setLoading(prev => ({ ...prev, transactions: false }));
+      setIsLoading(false); // Fixed: Changed setLoading to setIsLoading
       return;
     }
     
