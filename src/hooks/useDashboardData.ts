@@ -24,6 +24,7 @@ export interface Budget {
   spent?: number;
   currency: ValidCurrency;
   period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  user_id: string; // Add this property to match the Budget interface in goals/types.ts
 }
 
 // Main hook
