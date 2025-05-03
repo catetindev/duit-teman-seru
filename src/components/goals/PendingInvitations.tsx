@@ -32,8 +32,7 @@ const PendingInvitations: React.FC = () => {
           invitee_id,
           created_at,
           expires_at,
-          status,
-          goals:savings_goals(title, emoji)
+          status
         `)
         .eq('invitee_id', user.id)
         .eq('status', 'pending');
@@ -45,6 +44,21 @@ const PendingInvitations: React.FC = () => {
         setLoading(false);
         return;
       }
+      
+      // Get goal details for each invitation
+      const goalIds = [...new Set(invitationsData.map(invitation => invitation.goal_id))];
+      const { data: goalsData, error: goalsError } = await supabase
+        .from('savings_goals')
+        .select('id, title, emoji')
+        .in('id', goalIds);
+        
+      if (goalsError) throw goalsError;
+      
+      // Create a map of goals by ID for easy lookup
+      const goalsMap = (goalsData || []).reduce((map, goal) => {
+        map[goal.id] = goal;
+        return map;
+      }, {} as Record<string, { id: string, title: string, emoji: string }>);
       
       // Get all unique inviter IDs to fetch their profiles
       const inviterIds = [...new Set(invitationsData.map(invitation => invitation.inviter_id))];
@@ -73,8 +87,8 @@ const PendingInvitations: React.FC = () => {
         created_at: item.created_at,
         expires_at: item.expires_at,
         goal: {
-          title: item.goals?.title || 'Unknown Goal',
-          emoji: item.goals?.emoji || '🎯'
+          title: goalsMap[item.goal_id]?.title || 'Unknown Goal',
+          emoji: goalsMap[item.goal_id]?.emoji || '🎯'
         },
         inviter: {
           full_name: profilesMap[item.inviter_id]?.full_name || 'Unknown User'
@@ -121,15 +135,15 @@ const PendingInvitations: React.FC = () => {
   }
   
   return (
-    <div className="mt-6 space-y-4">
+    <div className="mt-6 mb-10 space-y-4">
       <h3 className="text-lg font-medium">Pending Invitations</h3>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {invitations.map(invitation => (
           <Card key={invitation.id} className="border-l-4 border-l-primary">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-primary/10 p-2">
-                  <span className="text-xl">{invitation.goal.emoji || '🎯'}</span>
+                  <span className="text-xl">{invitation.goal.emoji}</span>
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
@@ -138,24 +152,24 @@ const PendingInvitations: React.FC = () => {
                       {formatDistance(new Date(invitation.created_at), new Date(), { addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1 mb-3">
-                    {invitation.inviter.full_name} has invited you to collaborate on this goal
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">
+                    <strong>{invitation.inviter.full_name}</strong> has invited you to collaborate on this goal
                   </p>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-3">
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleResponse(invitation.id, false)}
-                      className="h-8 text-xs flex items-center gap-1"
+                      className="h-8 text-xs px-3 flex items-center gap-1"
                     >
-                      <XCircle className="h-3 w-3" /> Decline
+                      <XCircle className="h-3.5 w-3.5" /> Decline
                     </Button>
                     <Button 
                       size="sm"
                       onClick={() => handleResponse(invitation.id, true)}
-                      className="h-8 text-xs flex items-center gap-1"
+                      className="h-8 text-xs px-3 flex items-center gap-1"
                     >
-                      <CheckCircle className="h-3 w-3" /> Accept
+                      <CheckCircle className="h-3.5 w-3.5" /> Accept
                     </Button>
                   </div>
                 </div>

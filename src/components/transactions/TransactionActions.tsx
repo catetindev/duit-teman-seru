@@ -23,6 +23,8 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
   const handleSubmit = async (values: z.infer<typeof TransactionFormSchema>) => {
     setIsSubmitting(true);
     try {
+      console.log('Updating transaction with ID:', transaction.id, 'New values:', values);
+      
       const { error } = await supabase
         .from('transactions')
         .update({
@@ -35,7 +37,10 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
         })
         .eq('id', transaction.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
       
       toast({
         title: "Success",
