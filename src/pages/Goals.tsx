@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Plus, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
 
 // Import refactored components
 import GoalsList from '@/components/goals/GoalsList';
@@ -15,27 +12,15 @@ import EditGoalDialog from '@/components/goals/EditGoalDialog';
 import CollaboratorsDialog from '@/components/goals/CollaboratorsDialog';
 import DeleteConfirmationDialog from '@/components/goals/DeleteConfirmationDialog';
 import GoalsFilters, { SortOption, SortDirection, FilterOption } from '@/components/goals/GoalsFilters';
+import GoalsHeader from '@/components/goals/GoalsHeader';
+import GoalsLoading from '@/components/goals/GoalsLoading';
+
+// Import hooks
 import { useGoals } from '@/hooks/useGoals';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
-
-interface Goal {
-  id: string;
-  title: string;
-  target_amount: number;
-  saved_amount: number;
-  currency: 'IDR' | 'USD';
-  target_date?: string;
-  emoji?: string;
-}
-
-interface Collaborator {
-  user_id: string;
-  email: string;
-  full_name: string;
-}
+import { Goal, Collaborator } from '@/hooks/goals/types';
 
 const GoalsPage = () => {
-  const { t } = useLanguage();
   const { isPremium, user } = useAuth();
   const { toast } = useToast();
   
@@ -50,7 +35,7 @@ const GoalsPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   
-  // New states for sorting and filtering
+  // States for sorting and filtering
   const [sortBy, setSortBy] = useState<SortOption>('progress');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
@@ -59,6 +44,7 @@ const GoalsPage = () => {
     goals, 
     loading, 
     fetchGoals,
+    addGoal,
     deleteGoal, 
     fetchCollaborators, 
     addCollaborator,
@@ -147,28 +133,26 @@ const GoalsPage = () => {
     setIsSubmitting(true);
     
     try {
-      const { data, error } = await supabase
-        .from('savings_goals')
-        .insert({
-          title: goalData.title,
-          target_amount: parseFloat(goalData.target_amount),
-          saved_amount: parseFloat(goalData.saved_amount || '0'),
-          target_date: goalData.target_date || null,
-          emoji: goalData.emoji,
-          user_id: user?.id,
-          currency: 'IDR'  // Default currency
-        })
-        .select();
+      const goalToAdd = {
+        title: goalData.title,
+        target_amount: parseFloat(goalData.target_amount),
+        saved_amount: parseFloat(goalData.saved_amount || '0'),
+        target_date: goalData.target_date || null,
+        emoji: goalData.emoji,
+        user_id: user?.id,
+        currency: 'IDR' as const  // Use 'as const' to ensure it's the correct type
+      };
       
-      if (error) throw error;
+      const newGoal = await addGoal(goalToAdd);
       
-      toast({
-        title: "Success!",
-        description: "Savings goal has been added.",
-      });
-      
-      setIsAddDialogOpen(false);
-      fetchGoals();
+      if (newGoal) {
+        toast({
+          title: "Success!",
+          description: "Savings goal has been added.",
+        });
+        
+        setIsAddDialogOpen(false);
+      }
       
     } catch (error: any) {
       console.error('Error adding goal:', error);
@@ -246,39 +230,16 @@ const GoalsPage = () => {
   };
 
   if (loading) {
-    return (
-      <DashboardLayout isPremium={isPremium}>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </DashboardLayout>
-    );
+    return <GoalsLoading isPremium={isPremium} />;
   }
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">{t('goals.title')}</h1>
-          <p className="text-muted-foreground mt-1">Track progress towards your financial goals</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            className="flex items-center gap-2"
-            onClick={() => setIsAddDialogOpen(true)}
-            disabled={!isPremium && goals.length >= 1}
-          >
-            <Plus size={16} />
-            <span>Add Goal</span>
-          </Button>
-          <Link to="/goals/collaboration-docs">
-            <Button variant="outline" className="flex items-center gap-2">
-              <BookOpen size={16} />
-              <span>Documentation</span>
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <GoalsHeader 
+        onAddGoal={() => setIsAddDialogOpen(true)}
+        isPremium={isPremium}
+        goalsCount={goals.length}
+      />
 
       {/* Add GoalsFilters component */}
       {goals.length > 0 && (

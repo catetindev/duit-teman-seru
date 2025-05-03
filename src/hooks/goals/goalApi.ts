@@ -66,6 +66,45 @@ export const useGoalApi = () => {
     }
   };
 
+  // Add a new goal
+  const addGoal = async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
+    try {
+      console.log('Adding goal:', goal);
+      
+      const { data, error } = await supabase
+        .from('savings_goals')
+        .insert([goal])
+        .select('*')
+        .single();
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      if (!data) throw new Error("No data returned from insert");
+      
+      toast({
+        title: "Success",
+        description: "Goal has been added",
+      });
+      
+      return {
+        ...data,
+        currency: validateCurrency(data.currency)
+      };
+      
+    } catch (error: any) {
+      console.error('Error adding goal:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add goal",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
   // Delete a goal
   const deleteGoal = async (goalId: string): Promise<boolean> => {
     try {
@@ -95,6 +134,7 @@ export const useGoalApi = () => {
 
   return {
     fetchGoals,
+    addGoal,
     deleteGoal
   };
 };

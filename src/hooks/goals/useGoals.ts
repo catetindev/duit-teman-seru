@@ -20,6 +20,15 @@ export function useGoals(userId: string) {
     setLoading(false);
   };
 
+  // Add a new goal and update state if successful
+  const addGoal = async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
+    const newGoal = await goalApi.addGoal(goal);
+    if (newGoal) {
+      setGoals(prev => [...prev, newGoal]);
+    }
+    return newGoal;
+  };
+
   // Wrapper for deleteGoal that updates state if successful
   const deleteGoal = async (goalId: string): Promise<void> => {
     const success = await goalApi.deleteGoal(goalId);
@@ -38,6 +47,7 @@ export function useGoals(userId: string) {
     goals,
     loading,
     fetchGoals,
+    addGoal,
     deleteGoal,
     formatCurrency,
     calculateProgress,
