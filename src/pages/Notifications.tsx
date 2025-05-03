@@ -16,6 +16,7 @@ import {
   Target,
   AlertTriangle
 } from 'lucide-react';
+import GoalInvitationNotification from '@/components/notifications/GoalInvitationNotification';
 
 interface Notification {
   id: string;
@@ -24,6 +25,7 @@ interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
+  action_data?: string;
 }
 
 const NotificationsPage = () => {
@@ -52,6 +54,32 @@ const NotificationsPage = () => {
     },
     enabled: !!user?.id,
   });
+
+  // Set up real-time subscription
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Notification change detected:', payload);
+          refetch();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, refetch]);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -177,6 +205,17 @@ const NotificationsPage = () => {
     }
   };
 
+  // Check if a notification is a goal invitation
+  const isGoalInvitation = (notification: Notification): boolean => {
+    if (!notification.action_data) return false;
+    try {
+      const actionData = JSON.parse(notification.action_data);
+      return actionData.type === 'goal_invitation';
+    } catch (e) {
+      return false;
+    }
+  };
+
   const hasUnread = notifications.some(n => !n.is_read);
 
   return (
@@ -268,53 +307,64 @@ const NotificationsPage = () => {
       ) : (
         <div className="space-y-4">
           {notifications.map((notification) => (
-            <Card 
-              key={notification.id}
-              className={`transition-all ${!notification.is_read ? 'border-l-4 border-l-blue-500' : 'bg-muted/30'}`}
-            >
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <h3 className="text-base font-medium truncate">
-                        <span className="mr-2">{getNotificationEmoji(notification.type)}</span>
-                        {notification.title}
-                      </h3>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatDate(notification.created_at)}
-                      </span>
+            isGoalInvitation(notification) ? (
+              <GoalInvitationNotification 
+                key={notification.id} 
+                notification={notification} 
+                onProcessed={() => {
+                  markAsRead(notification.id);
+                  refetch();
+                }} 
+              />
+            ) : (
+              <Card 
+                key={notification.id}
+                className={`transition-all ${!notification.is_read ? 'border-l-4 border-l-blue-500' : 'bg-muted/30'}`}
+              >
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      {getNotificationIcon(notification.type)}
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {notification.message}
-                    </p>
-                    
-                    <div className="flex justify-end mt-2 gap-2">
-                      {!notification.is_read && (
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h3 className="text-base font-medium truncate">
+                          <span className="mr-2">{getNotificationEmoji(notification.type)}</span>
+                          {notification.title}
+                        </h3>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {formatDate(notification.created_at)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {notification.message}
+                      </p>
+                      
+                      <div className="flex justify-end mt-2 gap-2">
+                        {!notification.is_read && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => markAsRead(notification.id)}
+                            className="h-8 text-xs"
+                          >
+                            Mark as read
+                          </Button>
+                        )}
                         <Button 
                           variant="ghost" 
-                          size="sm"
-                          onClick={() => markAsRead(notification.id)}
-                          className="h-8 text-xs"
+                          size="sm" 
+                          onClick={() => deleteNotification(notification.id)}
+                          className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
                         >
-                          Mark as read
+                          Delete
                         </Button>
-                      )}
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => deleteNotification(notification.id)}
-                        className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                      >
-                        Delete
-                      </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )
           ))}
         </div>
       )}

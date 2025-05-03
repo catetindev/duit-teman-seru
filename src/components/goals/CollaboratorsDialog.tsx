@@ -61,7 +61,7 @@ const CollaboratorsDialog: React.FC<CollaboratorsDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Goal Collaborators</DialogTitle>
           <DialogDescription>
-            Invite others to collaborate on this goal.
+            Invite others to collaborate on this goal. They will receive a notification to accept or decline.
           </DialogDescription>
         </DialogHeader>
         

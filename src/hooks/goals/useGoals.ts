@@ -5,6 +5,7 @@ import { useGoalApi } from './goalApi';
 import { useCollaboratorApi } from './collaboratorApi';
 import { formatCurrency, calculateProgress } from '@/utils/formatUtils';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useGoals(userId: string | undefined, shouldFetch: boolean = true) {
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -132,6 +133,44 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     }
   };
 
+  // Set up real-time subscription for goals
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel('public:savings_goals')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'savings_goals',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log('Goals change detected:', payload);
+          fetchGoals();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'goal_collaborators',
+        },
+        (payload) => {
+          console.log('Collaborators change detected:', payload);
+          fetchGoals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
   // Use useEffect to fetch goals when component mounts
   useEffect(() => {
     if (shouldFetch && userId) {
@@ -154,7 +193,7 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     formatCurrency,
     calculateProgress,
     fetchCollaborators: collaboratorApi.fetchCollaborators,
-    addCollaborator: collaboratorApi.addCollaborator,
+    addCollaborator: collaboratorApi.inviteCollaborator, // Changed to use inviteCollaborator
     removeCollaborator: collaboratorApi.removeCollaborator
   };
 }

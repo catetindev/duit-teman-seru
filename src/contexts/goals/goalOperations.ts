@@ -126,6 +126,7 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
     setIsSubmitting(true);
     
     try {
+      // Changed to use inviteCollaborator instead of addCollaborator
       const success = await addCollaborator(selectedGoal.id, email);
       
       if (success) {

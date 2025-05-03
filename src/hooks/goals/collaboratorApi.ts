@@ -69,8 +69,32 @@ export function useCollaboratorApi() {
     }
   };
 
-  const addCollaborator = async (goalId: string, email: string): Promise<boolean> => {
+  const inviteCollaborator = async (goalId: string, email: string): Promise<boolean> => {
     try {
+      // Find the goal details (needed for notification)
+      const { data: goalData, error: goalError } = await supabase
+        .from('savings_goals')
+        .select('title, user_id')
+        .eq('id', goalId)
+        .single();
+      
+      if (goalError) {
+        console.error('Error finding goal:', goalError);
+        throw new Error('Goal not found');
+      }
+      
+      // Find the inviter's profile
+      const { data: inviterProfile, error: inviterError } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', goalData.user_id)
+        .single();
+        
+      if (inviterError) {
+        console.error('Error finding inviter profile:', inviterError);
+        throw inviterError;
+      }
+      
       // Find the user by email
       const { data: userData, error: userError } = await supabase
         .from('profiles')
@@ -104,28 +128,213 @@ export function useCollaboratorApi() {
         throw new Error('This user is already a collaborator');
       }
       
-      // Add the collaborator
-      const { error: insertError } = await supabase
-        .from('goal_collaborators')
+      // Check if there's already a pending invitation
+      const { data: existingInvite, error: inviteExistsError } = await supabase
+        .from('goal_invitations')
+        .select('id, status')
+        .eq('goal_id', goalId)
+        .eq('invitee_id', userData.id)
+        .maybeSingle();
+        
+      if (inviteExistsError) {
+        console.error('Error checking existing invitation:', inviteExistsError);
+        throw inviteExistsError;
+      }
+      
+      // If invitation exists but was declined, allow resending
+      let inviteId;
+      if (existingInvite) {
+        if (existingInvite.status === 'pending') {
+          throw new Error('This user already has a pending invitation');
+        }
+        
+        // Update the existing invitation
+        const { data, error: updateError } = await supabase
+          .from('goal_invitations')
+          .update({ 
+            status: 'pending', 
+            expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() 
+          })
+          .eq('id', existingInvite.id)
+          .select('id')
+          .single();
+          
+        if (updateError) {
+          console.error('Error updating invitation:', updateError);
+          throw updateError;
+        }
+        
+        inviteId = data.id;
+      } else {
+        // Create a new invitation with expiration date (3 days from now)
+        const { data, error: inviteError } = await supabase
+          .from('goal_invitations')
+          .insert({
+            goal_id: goalId,
+            inviter_id: goalData.user_id,
+            invitee_id: userData.id,
+            status: 'pending',
+            expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+          })
+          .select('id')
+          .single();
+          
+        if (inviteError) {
+          console.error('Error creating invitation:', inviteError);
+          throw inviteError;
+        }
+        
+        inviteId = data.id;
+      }
+      
+      // Create notification for the user
+      const { error: notificationError } = await supabase
+        .from('notifications')
         .insert({
-          goal_id: goalId,
-          user_id: userData.id
+          user_id: userData.id,
+          title: 'Goal Collaboration Invitation',
+          message: `${inviterProfile.full_name} has invited you to collaborate on the savings goal "${goalData.title}"`,
+          type: 'goal',
+          action_data: JSON.stringify({
+            type: 'goal_invitation',
+            invitation_id: inviteId,
+            goal_id: goalId,
+            goal_title: goalData.title
+          })
         });
         
-      if (insertError) {
-        console.error('Error adding collaborator:', insertError);
-        throw insertError;
+      if (notificationError) {
+        console.error('Error creating notification:', notificationError);
+        // Don't throw here, we've successfully created the invitation
+      }
+      
+      toast({
+        title: "Invitation Sent",
+        description: `An invitation has been sent to ${email}`,
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error inviting collaborator:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send invitation: " + (error.message || "Unknown error"),
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const respondToInvitation = async (invitationId: string, accept: boolean): Promise<boolean> => {
+    try {
+      // Get invitation details
+      const { data: invitation, error: inviteError } = await supabase
+        .from('goal_invitations')
+        .select('goal_id, invitee_id, status')
+        .eq('id', invitationId)
+        .single();
+        
+      if (inviteError) {
+        console.error('Error finding invitation:', inviteError);
+        throw inviteError;
+      }
+      
+      if (invitation.status !== 'pending') {
+        throw new Error(`Invitation has already been ${invitation.status}`);
+      }
+
+      if (accept) {
+        // Add the collaborator
+        const { error: collaboratorError } = await supabase
+          .from('goal_collaborators')
+          .insert({
+            goal_id: invitation.goal_id,
+            user_id: invitation.invitee_id
+          });
+          
+        if (collaboratorError) {
+          console.error('Error adding collaborator:', collaboratorError);
+          throw collaboratorError;
+        }
+        
+        // Update invitation status
+        const { error: updateError } = await supabase
+          .from('goal_invitations')
+          .update({ status: 'accepted' })
+          .eq('id', invitationId);
+          
+        if (updateError) {
+          console.error('Error updating invitation:', updateError);
+          throw updateError;
+        }
+        
+        toast({
+          title: "Invitation Accepted",
+          description: "You are now a collaborator on this goal",
+        });
+      } else {
+        // Update invitation status to declined
+        const { error: updateError } = await supabase
+          .from('goal_invitations')
+          .update({ status: 'declined' })
+          .eq('id', invitationId);
+          
+        if (updateError) {
+          console.error('Error updating invitation:', updateError);
+          throw updateError;
+        }
+        
+        toast({
+          title: "Invitation Declined",
+          description: "You have declined the collaboration invitation",
+        });
       }
       
       return true;
     } catch (error: any) {
-      console.error('Error adding collaborator:', error);
+      console.error('Error responding to invitation:', error);
       toast({
         title: "Error",
-        description: "Failed to add collaborator: " + (error.message || "Unknown error"),
+        description: "Failed to process invitation response: " + (error.message || "Unknown error"),
         variant: "destructive"
       });
       throw error;
+    }
+  };
+
+  const fetchPendingInvitations = async (): Promise<any[]> => {
+    try {
+      // Get user's pending invitations
+      const { data: invitations, error } = await supabase
+        .from('goal_invitations')
+        .select(`
+          id,
+          goal_id,
+          inviter_id,
+          status,
+          created_at,
+          expires_at,
+          savings_goals:goal_id (title, emoji),
+          profiles:inviter_id (full_name)
+        `)
+        .eq('invitee_id', supabase.auth.user()?.id)
+        .eq('status', 'pending')
+        .lt('expires_at', new Date().toISOString());
+        
+      if (error) {
+        console.error('Error fetching invitations:', error);
+        throw error;
+      }
+      
+      return invitations || [];
+    } catch (error: any) {
+      console.error('Error fetching invitations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load invitations: " + (error.message || "Unknown error"),
+        variant: "destructive"
+      });
+      return [];
     }
   };
 
@@ -157,7 +366,9 @@ export function useCollaboratorApi() {
 
   return {
     fetchCollaborators,
-    addCollaborator,
-    removeCollaborator
+    inviteCollaborator,
+    removeCollaborator,
+    respondToInvitation,
+    fetchPendingInvitations
   };
 }
