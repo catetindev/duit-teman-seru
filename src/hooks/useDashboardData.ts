@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -53,8 +53,8 @@ export function useDashboardData() {
     budgets: true
   });
 
-  // Fetch transactions
-  const fetchTransactions = async () => {
+  // Fetch transactions - wrapped in useCallback to prevent recreating functions
+  const fetchTransactions = useCallback(async () => {
     if (!user) return;
     
     setLoading(prev => ({ ...prev, transactions: true }));
@@ -111,10 +111,10 @@ export function useDashboardData() {
       });
       setLoading(prev => ({ ...prev, transactions: false }));
     }
-  };
+  }, [user, toast]);
 
   // Fetch goals
-  const fetchGoals = async () => {
+  const fetchGoals = useCallback(async () => {
     if (!user) return;
     
     setLoading(prev => ({ ...prev, goals: true }));
@@ -144,10 +144,10 @@ export function useDashboardData() {
     } finally {
       setLoading(prev => ({ ...prev, goals: false }));
     }
-  };
+  }, [user, toast]);
 
   // Fetch budgets
-  const fetchBudgets = async () => {
+  const fetchBudgets = useCallback(async () => {
     if (!user) return;
     
     setLoading(prev => ({ ...prev, budgets: true }));
@@ -188,10 +188,10 @@ export function useDashboardData() {
     } finally {
       setLoading(prev => ({ ...prev, budgets: false }));
     }
-  };
+  }, [user, toast, transactions]);
 
   // Add or update budget
-  const addUpdateBudget = async (budgetData: Omit<Budget, 'id'> & { id?: string }) => {
+  const addUpdateBudget = useCallback(async (budgetData: Omit<Budget, 'id'> & { id?: string }) => {
     if (!user) return null;
     
     try {
@@ -256,10 +256,10 @@ export function useDashboardData() {
       });
       return null;
     }
-  };
+  }, [user, toast, fetchBudgets]);
 
   // Delete budget
-  const deleteBudget = async (id: string) => {
+  const deleteBudget = useCallback(async (id: string) => {
     try {
       const { error } = await supabase
         .from('budgets')
@@ -281,22 +281,22 @@ export function useDashboardData() {
       });
       return false;
     }
-  };
+  }, [toast]);
 
   // Fetch all data
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     if (!user) return;
     await fetchTransactions();
     await fetchGoals();
     await fetchBudgets();
-  };
+  }, [user, fetchTransactions, fetchGoals, fetchBudgets]);
 
-  // Initial data fetch
+  // Initial data fetch - use useEffect with proper dependencies
   useEffect(() => {
     if (user) {
       refreshData();
     }
-  }, [user]);
+  }, [user, refreshData]);
 
   // Re-export utility functions for convenience
   return {

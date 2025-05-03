@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -32,7 +32,7 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
 
-  const handleAddGoal = async (e: React.FormEvent) => {
+  const handleAddGoal = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     
@@ -87,11 +87,11 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, newGoal, toast, onGoalAdded]);
 
-  const handleEmojiSelect = (emoji: string) => {
+  const handleEmojiSelect = useCallback((emoji: string) => {
     setNewGoal(prev => ({ ...prev, emoji }));
-  };
+  }, []);
 
   const commonEmojis = ['🎯', '💰', '🏠', '🚗', '✈️', '💻', '📱', '👕', '🏝️', '🎓', '💍', '🚨'];
   

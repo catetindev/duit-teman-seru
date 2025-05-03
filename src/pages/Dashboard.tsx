@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -46,15 +46,13 @@ const Dashboard = () => {
         </div>
         
         <div className="space-y-8">
-          {/* Only render GoalsSection when goals are available */}
-          {goals.length >= 0 && (
-            <GoalsSection 
-              goals={goals}
-              isPremium={isPremium}
-              onGoalAdded={refreshData}
-              loading={loading.goals}
-            />
-          )}
+          {/* Only render GoalsSection when goals are available or loading */}
+          <GoalsSection 
+            goals={goals}
+            isPremium={isPremium}
+            onGoalAdded={refreshData}
+            loading={loading.goals}
+          />
           
           {isPremium && <BadgesSection badges={mockBadges} />}
         </div>
