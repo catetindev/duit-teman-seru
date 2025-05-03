@@ -7,6 +7,7 @@ export interface Goal {
   currency: 'IDR' | 'USD';
   target_date?: string;
   emoji?: string;
+  user_id: string; // Adding user_id as a required property
 }
 
 export interface Collaborator {

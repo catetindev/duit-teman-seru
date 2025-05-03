@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -133,14 +132,18 @@ const GoalsPage = () => {
     setIsSubmitting(true);
     
     try {
+      if (!user?.id) {
+        throw new Error("You must be logged in to add a goal");
+      }
+      
       const goalToAdd = {
         title: goalData.title,
         target_amount: parseFloat(goalData.target_amount),
         saved_amount: parseFloat(goalData.saved_amount || '0'),
         target_date: goalData.target_date || null,
         emoji: goalData.emoji,
-        user_id: user?.id,
-        currency: 'IDR' as const  // Use 'as const' to ensure it's the correct type
+        user_id: user.id,
+        currency: 'IDR' as const
       };
       
       const newGoal = await addGoal(goalToAdd);

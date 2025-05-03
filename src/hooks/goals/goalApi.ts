@@ -71,7 +71,11 @@ export const useGoalApi = () => {
     try {
       console.log('Adding goal:', goal);
       
-      // Fix: Pass the goal object directly, not as an array
+      // Ensure user_id is present in the goal object before inserting
+      if (!goal.user_id) {
+        throw new Error("User ID is required to add a goal");
+      }
+      
       const { data, error } = await supabase
         .from('savings_goals')
         .insert(goal)
