@@ -18,6 +18,17 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
   const { t } = useLanguage();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
+  // Memoize filtered transactions to prevent unnecessary rerenders
+  const incomeTransactions = React.useMemo(() => 
+    transactions.filter(t => t.type === 'income'),
+    [transactions]
+  );
+  
+  const expenseTransactions = React.useMemo(() => 
+    transactions.filter(t => t.type === 'expense'),
+    [transactions]
+  );
+  
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
       <div className="flex justify-between items-center mb-4">
@@ -51,14 +62,10 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
               <TransactionList transactions={transactions} />
             </TabsContent>
             <TabsContent value="income">
-              <TransactionList 
-                transactions={transactions.filter(t => t.type === 'income')} 
-              />
+              <TransactionList transactions={incomeTransactions} />
             </TabsContent>
             <TabsContent value="expense">
-              <TransactionList 
-                transactions={transactions.filter(t => t.type === 'expense')} 
-              />
+              <TransactionList transactions={expenseTransactions} />
             </TabsContent>
           </>
         )}
@@ -78,4 +85,4 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
   );
 };
 
-export default TransactionsSection;
+export default React.memo(TransactionsSection);

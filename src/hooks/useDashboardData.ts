@@ -123,7 +123,7 @@ export function useDashboardData() {
       const { data, error } = await supabase
         .from('savings_goals')
         .select('*')
-        .or(`user_id.eq.${user.id}`);
+        .eq('user_id', user.id);  // Fixed: Changed from .or() to .eq()
         
       if (error) throw error;
       
@@ -297,6 +297,9 @@ export function useDashboardData() {
       refreshData();
     }
   }, [user, refreshData]);
+
+  // Removed the realtime subscription to prevent rerenders
+  // We'll only fetch data when explicitly called via refreshData or component mount
 
   // Re-export utility functions for convenience
   return {

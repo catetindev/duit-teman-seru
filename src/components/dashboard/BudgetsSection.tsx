@@ -1,24 +1,19 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import ExpenseCard from '@/components/ui/ExpenseCard';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Plus } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatCurrency } from '@/utils/formatUtils';
-import { useToast } from '@/hooks/use-toast';
-import { useDashboardData, Budget } from '@/hooks/useDashboardData';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface BudgetsSectionProps {
   isPremium: boolean;
 }
 
-const BudgetsSection = ({ isPremium }: BudgetsSectionProps) => {
+const BudgetsSection = React.memo(({ isPremium }: BudgetsSectionProps) => {
   const { t } = useLanguage();
-  const { user } = useAuth();
-  const { toast } = useToast();
   const { budgets, loading } = useDashboardData();
   
   if (!isPremium) return null;
@@ -29,7 +24,7 @@ const BudgetsSection = ({ isPremium }: BudgetsSectionProps) => {
         <h2 className="text-xl font-bold">{t('budget.title')}</h2>
         <Link to="/budget">
           <Button variant="ghost" size="sm" className="text-sm">
-            {t('common.viewAll')} <ChevronRight className="ml-1 h-4 w-4" />
+            {t('common.viewAll', 'View All')} <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </Link>
       </div>
@@ -62,6 +57,6 @@ const BudgetsSection = ({ isPremium }: BudgetsSectionProps) => {
       )}
     </div>
   );
-};
+});
 
 export default BudgetsSection;
