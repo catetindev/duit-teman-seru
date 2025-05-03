@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Goal, Collaborator } from './types';
 import { useGoalApi } from './goalApi';
 import { useCollaboratorApi } from './collaboratorApi';
@@ -85,7 +85,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       const newGoal = await goalApi.addGoal(goal);
       console.log('New goal created:', newGoal);
       if (newGoal && isMounted.current) {
-        setGoals(prev => [...prev, newGoal]);
+        // Instead of manually updating the state, fetch all goals to ensure consistency
+        await fetchGoals();
         // Clear any previous errors
         setError(null);
       }
@@ -110,7 +111,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       console.log('Deleting goal:', goalId);
       const success = await goalApi.deleteGoal(goalId);
       if (success && isMounted.current) {
-        setGoals(prev => prev.filter(goal => goal.id !== goalId));
+        // Instead of manually updating the state, fetch all goals to ensure consistency
+        await fetchGoals();
         // Clear any previous errors
         setError(null);
         
@@ -178,9 +180,6 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     } else if (!userId) {
       setLoading(false);
     }
-    
-    // No need to include fetchGoals in dependency array as it would cause refetching
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldFetch, userId]);
 
   return {

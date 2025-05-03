@@ -106,7 +106,7 @@ export const useTransactions = () => {
     return categoryIcons[category.toLowerCase()] || '💸';
   };
   
-  // Fetch transactions initially and set up real-time subscription
+  // Initial fetch and subscription setup
   useEffect(() => {
     if (!user) return;
     

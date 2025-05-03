@@ -48,8 +48,9 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsEditOpen(false);
+      
       // Make sure to call onUpdate to refresh the transactions list
-      onUpdate();
+      setTimeout(() => onUpdate(), 300);
     } catch (error: any) {
       console.error('Error updating transaction:', error);
       toast({
@@ -83,8 +84,9 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsDeleteOpen(false);
+      
       // Immediately call onUpdate to refresh the transactions list
-      onUpdate();
+      setTimeout(() => onUpdate(), 300);
     } catch (error: any) {
       console.error('Error deleting transaction:', error);
       toast({
