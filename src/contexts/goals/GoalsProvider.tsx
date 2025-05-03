@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { useGoals } from '@/hooks/goals/useGoals'; // Fixed import path
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,12 +51,12 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     calculateProgress
   } = useGoals(user?.id, shouldFetchGoals);
 
-  // Apply sorting and filtering to goals
+  // Apply sorting and filtering to goals - fix the dependency array to prevent infinite loops
   const filteredAndSortedGoals = useMemo(() => {
     return filterAndSortGoals(goals, filterBy, sortBy, sortDirection, calculateProgress);
-  }, [goals, filterBy, sortBy, sortDirection, calculateProgress]);
+  }, [goals, filterBy, sortBy, sortDirection]);
   
-  // Goal operations
+  // Goal operations - Use useCallback to prevent unnecessary re-renders
   const {
     handleEditGoal,
     handleDeleteGoal,
@@ -76,13 +76,13 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     fetchGoals,
     deleteGoal,
     fetchCollaborators,
-    addCollaborator, // This now returns boolean as expected
+    addCollaborator,
     removeCollaborator,
     setIsSubmitting
   );
 
-  // Handle adding a goal
-  const handleAddGoal = async (goalData: GoalFormData) => {
+  // Handle adding a goal - Use useCallback to prevent unnecessary re-renders
+  const handleAddGoal = useCallback(async (goalData: GoalFormData) => {
     setIsSubmitting(true);
     
     try {
@@ -126,7 +126,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, addGoal, toast, fetchGoals, setIsAddDialogOpen]);
 
   const value = {
     goals,
