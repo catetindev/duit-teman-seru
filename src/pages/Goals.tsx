@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -98,22 +99,18 @@ const GoalsPage = () => {
     
     // Fetch collaborators for this goal
     try {
-      // Use a more type-safe approach with explicit type casting
-      const { data, error } = await supabase
-        .from('goal_collaborators')
-        .select('user_id, profiles:user_id(email, full_name)');
+      // Use the goal_helpers edge function
+      const { data, error } = await supabase.functions.invoke('goal_helpers', {
+        body: {
+          method: 'get_goal_collaborators',
+          params: { goalId: goal.id }
+        }
+      });
       
       if (error) throw error;
       
       if (data && data.length > 0) {
-        // Type-safe transformation of the data
-        const collaborators = data.map(item => ({
-          user_id: item.user_id as string,
-          email: ((item as any).profiles?.email as string) || '',
-          full_name: ((item as any).profiles?.full_name as string) || ''
-        }));
-        
-        setGoalCollaborators(collaborators);
+        setGoalCollaborators(data);
       } else {
         setGoalCollaborators([]);
       }
@@ -227,30 +224,34 @@ const GoalsPage = () => {
         .from('profiles')
         .select('id, email, full_name')
         .eq('email', inviteEmail.trim())
-        .single();
+        .maybeSingle();
       
-      if (userError) {
-        if (userError.code === 'PGRST116') {
-          throw new Error("User not found with this email");
-        }
-        throw userError;
+      if (userError) throw userError;
+      
+      if (!userData) {
+        throw new Error("User not found with this email");
       }
       
-      // Check if already a collaborator - using raw SQL approach for type safety
-      const { data: existingCollaborator, error: checkError } = await supabase
-        .rpc('is_collaborator', { 
-          p_goal_id: selectedGoal.id, 
-          p_user_id: userData.id 
-        });
+      // Check if already a collaborator using edge function
+      const { data: isCollaborator, error: checkError } = await supabase.functions.invoke('goal_helpers', {
+        body: {
+          method: 'is_collaborator',
+          params: { goalId: selectedGoal.id, userId: userData.id }
+        }
+      });
         
-      if (existingCollaborator) {
+      if (checkError) throw checkError;
+      
+      if (isCollaborator) {
         throw new Error("This user is already a collaborator");
       }
       
-      // Add collaborator using direct insert
-      const { error: insertError } = await supabase.rpc('add_collaborator', {
-        p_goal_id: selectedGoal.id,
-        p_user_id: userData.id
+      // Add collaborator using edge function
+      const { data, error: insertError } = await supabase.functions.invoke('goal_helpers', {
+        body: {
+          method: 'add_collaborator',
+          params: { goalId: selectedGoal.id, userId: userData.id }
+        }
       });
       
       if (insertError) throw insertError;
@@ -284,10 +285,12 @@ const GoalsPage = () => {
     if (!selectedGoal) return;
     
     try {
-      // Remove collaborator using RPC for type safety
-      const { error } = await supabase.rpc('remove_collaborator', {
-        p_goal_id: selectedGoal.id,
-        p_user_id: userId
+      // Remove collaborator using edge function
+      const { error } = await supabase.functions.invoke('goal_helpers', {
+        body: {
+          method: 'remove_collaborator',
+          params: { goalId: selectedGoal.id, userId }
+        }
       });
       
       if (error) throw error;
