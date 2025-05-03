@@ -36,10 +36,10 @@ const BudgetPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<PageBudget | null>(null);
 
-  // Convert budgets to the correct type
+  // Convert budgets to the correct type with explicit user_id
   const typedBudgets: PageBudget[] = budgets.map(budget => ({
     ...budget,
-    user_id: budget.user_id || '',
+    user_id: budget.user_id || '', // Add explicit user_id property
     currency: budget.currency as ValidCurrency,
     period: budget.period || 'monthly'
   }));
