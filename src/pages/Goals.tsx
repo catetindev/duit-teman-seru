@@ -13,8 +13,8 @@ import GoalsFilters from '@/components/goals/GoalsFilters';
 import GoalsHeader from '@/components/goals/GoalsHeader';
 import GoalsLoading from '@/components/goals/GoalsLoading';
 
-// Import context provider
-import { GoalsProvider, useGoalsContext } from '@/contexts/GoalsContext';
+// Import context provider - updated import path
+import { GoalsProvider, useGoalsContext } from '@/contexts/goals';
 
 // Main component that wraps everything with the context provider
 const GoalsPage = () => {
@@ -61,7 +61,7 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
     setIsEditDialogOpen,
     setIsCollaborateDialogOpen,
     setIsDeleteDialogOpen,
-    fetchGoals, // Added for retry functionality
+    fetchGoals,
   } = useGoalsContext();
 
   if (loading) {
