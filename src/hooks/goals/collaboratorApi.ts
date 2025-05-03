@@ -22,21 +22,42 @@ export function useCollaboratorApi() {
         throw new Error('Goal not found');
       }
       
-      // Use the edge function instead of direct database access
-      const { data: response, error } = await supabase.functions.invoke('goal_collaborators', {
-        body: {
-          action: 'list',
-          goalId
-        }
-      });
-      
+      // Now that we have the goal_collaborators table, we can query it directly
+      const { data: collaborators, error } = await supabase
+        .from('goal_collaborators')
+        .select('user_id')
+        .eq('goal_id', goalId);
+        
       if (error) {
-        console.error('Edge function error:', error);
+        console.error('Error fetching collaborators:', error);
         throw error;
       }
       
-      console.log('Collaborators response:', response);
-      return response?.collaborators || [];
+      if (!collaborators || collaborators.length === 0) {
+        return []; // Return empty array if no collaborators
+      }
+      
+      // Get the profiles data for all collaborators
+      const userIds = collaborators.map(col => col.user_id);
+      
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', userIds);
+        
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+      
+      // Convert to expected format
+      const formattedCollaborators: Collaborator[] = profiles.map(profile => ({
+        user_id: profile.id,
+        email: profile.email,
+        full_name: profile.full_name
+      }));
+      
+      return formattedCollaborators;
     } catch (error: any) {
       console.error('Error fetching collaborators:', error);
       toast({
@@ -50,42 +71,52 @@ export function useCollaboratorApi() {
 
   const addCollaborator = async (goalId: string, email: string): Promise<boolean> => {
     try {
-      // First, find the user by email using the edge function
-      const { data: userData, error: userError } = await supabase.functions.invoke('goal_collaborators', {
-        body: {
-          action: 'find_user',
-          email
-        }
-      });
+      // Find the user by email
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .eq('email', email)
+        .maybeSingle();
       
       if (userError) {
-        console.error('Edge function error (find_user):', userError);
+        console.error('Error finding user:', userError);
         throw userError;
       }
       
-      if (!userData?.user) {
+      if (!userData) {
         throw new Error('User not found with that email');
       }
       
-      // Add the collaborator using the edge function
-      const { data: addResult, error: addError } = await supabase.functions.invoke('goal_collaborators', {
-        body: {
-          action: 'add',
-          goalId,
-          userId: userData.user.id
-        }
-      });
-      
-      if (addError) {
-        console.error('Edge function error (add):', addError);
-        throw addError;
+      // Check if this user is already a collaborator
+      const { data: existingCollaborator, error: existingError } = await supabase
+        .from('goal_collaborators')
+        .select('id')
+        .eq('goal_id', goalId)
+        .eq('user_id', userData.id)
+        .maybeSingle();
+        
+      if (existingError) {
+        console.error('Error checking existing collaborator:', existingError);
+        throw existingError;
       }
       
-      if (addResult?.status === 'exists') {
+      if (existingCollaborator) {
         throw new Error('This user is already a collaborator');
       }
       
-      // Return true to indicate success
+      // Add the collaborator
+      const { error: insertError } = await supabase
+        .from('goal_collaborators')
+        .insert({
+          goal_id: goalId,
+          user_id: userData.id
+        });
+        
+      if (insertError) {
+        console.error('Error adding collaborator:', insertError);
+        throw insertError;
+      }
+      
       return true;
     } catch (error: any) {
       console.error('Error adding collaborator:', error);
@@ -100,17 +131,15 @@ export function useCollaboratorApi() {
 
   const removeCollaborator = async (goalId: string, userId: string): Promise<boolean> => {
     try {
-      // Use the edge function to remove the collaborator
-      const { data, error } = await supabase.functions.invoke('goal_collaborators', {
-        body: {
-          action: 'remove',
-          goalId,
-          userId
-        }
-      });
-      
+      // Remove the collaborator
+      const { error } = await supabase
+        .from('goal_collaborators')
+        .delete()
+        .eq('goal_id', goalId)
+        .eq('user_id', userId);
+        
       if (error) {
-        console.error('Edge function error (remove):', error);
+        console.error('Error removing collaborator:', error);
         throw error;
       }
       

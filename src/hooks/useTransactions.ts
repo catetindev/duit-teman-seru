@@ -25,7 +25,10 @@ export const useTransactions = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   
   const fetchTransactions = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(prev => ({ ...prev, transactions: false }));
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -121,6 +124,7 @@ export const useTransactions = () => {
           filter: `user_id=eq.${user?.id}`,
         },
         (payload) => {
+          console.log('Transaction change detected:', payload);
           fetchTransactions(); // Refresh data on any change
         }
       )
