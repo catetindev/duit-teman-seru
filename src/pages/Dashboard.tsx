@@ -46,12 +46,15 @@ const Dashboard = () => {
         </div>
         
         <div className="space-y-8">
-          <GoalsSection 
-            goals={goals}
-            isPremium={isPremium}
-            onGoalAdded={refreshData}
-            loading={loading.goals}
-          />
+          {/* Only render GoalsSection when goals are available */}
+          {goals.length >= 0 && (
+            <GoalsSection 
+              goals={goals}
+              isPremium={isPremium}
+              onGoalAdded={refreshData}
+              loading={loading.goals}
+            />
+          )}
           
           {isPremium && <BadgesSection badges={mockBadges} />}
         </div>

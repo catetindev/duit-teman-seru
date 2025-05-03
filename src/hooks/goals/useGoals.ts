@@ -6,7 +6,7 @@ import { useCollaboratorApi } from './collaboratorApi';
 import { formatCurrency, calculateProgress } from './utils';
 import { useToast } from '@/hooks/use-toast';
 
-export function useGoals(userId: string) {
+export function useGoals(userId: string | undefined, shouldFetch: boolean = true) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,13 +102,17 @@ export function useGoals(userId: string) {
   };
 
   useEffect(() => {
-    if (userId) {
+    // Only fetch goals if shouldFetch is true and we have a userId
+    if (shouldFetch && userId) {
       fetchGoals();
-    } else {
+    } else if (shouldFetch && !userId) {
       setLoading(false);
       setError('User ID is required to fetch goals');
+    } else {
+      // If we shouldn't fetch, just set loading to false
+      setLoading(false);
     }
-  }, [userId]);
+  }, [userId, shouldFetch]);
 
   return {
     goals,

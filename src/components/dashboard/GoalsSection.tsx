@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -53,7 +54,9 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
           saved_amount: 0,
           currency: 'IDR',
           emoji: newGoal.emoji
-        });
+        })
+        .select()
+        .single();
       
       if (error) {
         if (error.message.includes('free users can only create')) {

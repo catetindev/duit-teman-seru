@@ -8,12 +8,17 @@ import { useToast } from '@/hooks/use-toast';
 import { GoalsContextType, FilterOption, SortDirection, SortOption } from './types';
 import { filterAndSortGoals } from './goalsUtils';
 import { useGoalOperations } from './goalOperations';
+import { useLocation } from 'react-router-dom';
 
 const GoalsContext = createContext<GoalsContextType | undefined>(undefined);
 
 export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { isPremium, user } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
+  
+  // Only fetch goals if we're on the goals page
+  const shouldFetchGoals = location.pathname === '/goals';
   
   // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -44,7 +49,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     removeCollaborator,
     formatCurrency,
     calculateProgress
-  } = useGoals(user?.id || '');
+  } = useGoals(user?.id, shouldFetchGoals);
 
   // Apply sorting and filtering to goals
   const filteredAndSortedGoals = useMemo(() => {
