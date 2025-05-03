@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Goal, Collaborator } from './types';
 import { useGoalApi } from './goalApi';
 import { useCollaboratorApi } from './collaboratorApi';
@@ -11,36 +11,57 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Add ref to track mounted state
+  const isMounted = useRef(true);
+  
   const { toast } = useToast();
   const goalApi = useGoalApi();
   const collaboratorApi = useCollaboratorApi();
+
+  // Cleanup function to prevent state updates after unmounting
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Wrapper for fetchGoals that updates state
   const fetchGoals = async () => {
     if (!userId) {
       console.warn('No userId provided to useGoals.fetchGoals');
-      setLoading(false);
-      setError('User ID is required to fetch goals');
+      if (isMounted.current) {
+        setLoading(false);
+        setError('User ID is required to fetch goals');
+      }
       return;
     }
     
     console.log('Fetching goals for user:', userId);
-    setLoading(true);
-    setError(null);
+    if (isMounted.current) {
+      setLoading(true);
+      setError(null);
+    }
+    
     try {
       const fetchedGoals = await goalApi.fetchGoals(userId);
       console.log('Fetched goals:', fetchedGoals);
-      setGoals(fetchedGoals);
+      if (isMounted.current) {
+        setGoals(fetchedGoals);
+      }
     } catch (error: any) {
       console.error('Error in useGoals.fetchGoals:', error);
-      setError(error.message || 'Failed to load goals');
-      toast({
-        title: "Error",
-        description: error.message || 'Failed to load goals',
-        variant: "destructive"
-      });
+      if (isMounted.current) {
+        setError(error.message || 'Failed to load goals');
+        toast({
+          title: "Error",
+          description: error.message || 'Failed to load goals',
+          variant: "destructive"
+        });
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -62,7 +83,7 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     try {
       const newGoal = await goalApi.addGoal(goal);
       console.log('New goal created:', newGoal);
-      if (newGoal) {
+      if (newGoal && isMounted.current) {
         setGoals(prev => [...prev, newGoal]);
         // Clear any previous errors
         setError(null);
@@ -70,12 +91,14 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       return newGoal;
     } catch (error: any) {
       console.error('Error in useGoals.addGoal:', error);
-      setError(error.message || 'Failed to add goal');
-      toast({
-        title: "Error",
-        description: error.message || 'Failed to add goal',
-        variant: "destructive"
-      });
+      if (isMounted.current) {
+        setError(error.message || 'Failed to add goal');
+        toast({
+          title: "Error",
+          description: error.message || 'Failed to add goal',
+          variant: "destructive"
+        });
+      }
       return null;
     }
   };
@@ -85,7 +108,7 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     try {
       console.log('Deleting goal:', goalId);
       const success = await goalApi.deleteGoal(goalId);
-      if (success) {
+      if (success && isMounted.current) {
         setGoals(prev => prev.filter(goal => goal.id !== goalId));
         // Clear any previous errors
         setError(null);
@@ -97,12 +120,14 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       }
     } catch (error: any) {
       console.error('Error in useGoals.deleteGoal:', error);
-      setError(error.message || 'Failed to delete goal');
-      toast({
-        title: "Error",
-        description: error.message || 'Failed to delete goal',
-        variant: "destructive"
-      });
+      if (isMounted.current) {
+        setError(error.message || 'Failed to delete goal');
+        toast({
+          title: "Error",
+          description: error.message || 'Failed to delete goal',
+          variant: "destructive"
+        });
+      }
       throw error; // Re-throw to allow handling in calling components
     }
   };
@@ -114,7 +139,10 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     } else if (!userId) {
       setLoading(false);
     }
-  }, [shouldFetch, userId]); // Remove 'loading' from dependency array to avoid loops
+    
+    // No need to include fetchGoals in dependency array as it would cause refetching
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldFetch, userId]);
 
   return {
     goals,

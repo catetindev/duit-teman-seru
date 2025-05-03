@@ -28,7 +28,7 @@ const GoalsPage = () => {
 };
 
 // Inner component that consumes the context
-const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
+const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
   const { 
     loading, 
     error,
@@ -157,6 +157,6 @@ const GoalsContent = React.memo(({ isPremium }: { isPremium: boolean }) => {
       />
     </DashboardLayout>
   );
-});
+};
 
 export default GoalsPage;

@@ -10,6 +10,18 @@ export function useCollaboratorApi() {
     try {
       console.log('Fetching collaborators for goal:', goalId);
       
+      // First check if goal exists
+      const { data: goalData, error: goalError } = await supabase
+        .from('savings_goals')
+        .select('id')
+        .eq('id', goalId)
+        .single();
+        
+      if (goalError) {
+        console.error('Error finding goal:', goalError);
+        throw new Error('Goal not found');
+      }
+      
       // Use the edge function instead of direct database access
       const { data: response, error } = await supabase.functions.invoke('goal_collaborators', {
         body: {
@@ -32,7 +44,7 @@ export function useCollaboratorApi() {
         description: "Failed to load collaborators: " + (error.message || "Unknown error"),
         variant: "destructive"
       });
-      throw error;
+      return []; // Return empty array instead of throwing to prevent cascading errors
     }
   };
 
