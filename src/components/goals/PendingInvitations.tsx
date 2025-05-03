@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ const PendingInvitations: React.FC = () => {
     
     setLoading(true);
     try {
-      // Use a clearer syntax for the join that specifies the foreign key relationship
+      // Specify the correct foreign key relationship in the join
       const { data, error } = await supabase
         .from('goal_invitations')
         .select(`
@@ -33,7 +34,7 @@ const PendingInvitations: React.FC = () => {
           expires_at,
           status,
           goals:savings_goals(title, emoji),
-          inviter:profiles(full_name)
+          inviter:profiles!inviter_id(full_name)
         `)
         .eq('invitee_id', user.id)
         .eq('status', 'pending');
