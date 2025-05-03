@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Budget, ValidCurrency } from '@/hooks/goals/types';
-import { useLanguage } from '@/hooks/useLanguage';
 
 interface BudgetFormProps {
   open: boolean;
@@ -23,8 +22,6 @@ interface FormValues {
 }
 
 const BudgetForm = ({ open, onOpenChange, onSubmit, selectedBudget }: BudgetFormProps) => {
-  const { t } = useLanguage();
-  
   const form = useForm<FormValues>({
     defaultValues: {
       category: selectedBudget?.category || '',
@@ -43,20 +40,20 @@ const BudgetForm = ({ open, onOpenChange, onSubmit, selectedBudget }: BudgetForm
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{selectedBudget ? t('budget.editTitle') : t('budget.createTitle')}</DialogTitle>
+          <DialogTitle>{selectedBudget ? 'Edit Budget' : 'Create New Budget'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="category">{t('budget.category')}</Label>
+            <Label htmlFor="category">Category</Label>
             <Input 
               id="category" 
               {...form.register("category", { required: true })}
-              placeholder={t('budget.categoryPlaceholder')}
+              placeholder="e.g. Groceries, Rent, Entertainment"
             />
           </div>
           
           <div>
-            <Label htmlFor="amount">{t('budget.amount')}</Label>
+            <Label htmlFor="amount">Amount</Label>
             <Input 
               id="amount" 
               type="number" 
@@ -70,13 +67,13 @@ const BudgetForm = ({ open, onOpenChange, onSubmit, selectedBudget }: BudgetForm
           </div>
           
           <div>
-            <Label htmlFor="currency">{t('budget.currency')}</Label>
+            <Label htmlFor="currency">Currency</Label>
             <Select 
               onValueChange={(value) => form.setValue("currency", value as ValidCurrency)}
               defaultValue={form.getValues("currency")}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t('budget.selectCurrency')} />
+                <SelectValue placeholder="Select Currency" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
@@ -87,10 +84,10 @@ const BudgetForm = ({ open, onOpenChange, onSubmit, selectedBudget }: BudgetForm
           
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              {t('common.cancel')}
+              Cancel
             </Button>
             <Button type="submit">
-              {selectedBudget ? t('common.update') : t('common.create')}
+              {selectedBudget ? 'Update' : 'Create'}
             </Button>
           </div>
         </form>

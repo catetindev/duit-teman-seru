@@ -12,6 +12,7 @@ import DeleteConfirmationDialog from '@/components/goals/DeleteConfirmationDialo
 import GoalsFilters from '@/components/goals/GoalsFilters';
 import GoalsHeader from '@/components/goals/GoalsHeader';
 import GoalsLoading from '@/components/goals/GoalsLoading';
+import PendingInvitations from '@/components/goals/PendingInvitations';
 
 // Import context provider
 import { GoalsProvider, useGoalsContext } from '@/contexts/goals';
@@ -100,6 +101,9 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
         isPremium={isPremium}
         goalsCount={goals?.length || 0}
       />
+
+      {/* Display pending invitations */}
+      <PendingInvitations />
 
       {/* Add GoalsFilters component */}
       {goals && goals.length > 0 && (

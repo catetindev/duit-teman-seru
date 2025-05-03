@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ValidCurrency } from '@/hooks/goals/types';
 import { useLanguage } from '@/hooks/useLanguage';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import BudgetForm from '@/components/budget/BudgetForm';
 import BudgetList from '@/components/budget/BudgetList';
 import DeleteBudgetDialog from '@/components/budget/DeleteBudgetDialog';
@@ -31,6 +32,7 @@ interface PageBudget {
 const BudgetPage = () => {
   const { t } = useLanguage();
   const { budgets, loading, addUpdateBudget, deleteBudget } = useDashboardData();
+  const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<PageBudget | null>(null);
@@ -58,8 +60,8 @@ const BudgetPage = () => {
       const success = await deleteBudget(selectedBudget.id);
       if (success) {
         toast({
-          title: t('budget.deleted'),
-          description: t('budget.deleteSuccess'),
+          title: "Budget Deleted",
+          description: "Your budget has been successfully deleted",
         });
       }
     }
@@ -70,7 +72,7 @@ const BudgetPage = () => {
     setDialogOpen(true);
   };
 
-  // Form submission handler - Updated to include user_id
+  // Form submission handler - includes user_id
   const onSubmit = async (values: FormValues) => {
     await addUpdateBudget({
       id: selectedBudget?.id,
@@ -82,8 +84,8 @@ const BudgetPage = () => {
     });
     
     toast({
-      title: selectedBudget ? t('budget.updated') : t('budget.created'),
-      description: t('budget.saveSuccess'),
+      title: selectedBudget ? "Budget Updated" : "Budget Created",
+      description: "Your budget has been saved successfully",
     });
   };
 
@@ -91,9 +93,9 @@ const BudgetPage = () => {
     <DashboardLayout>
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{t('budget.title')}</h1>
+          <h1 className="text-2xl font-bold">Budget Management</h1>
           <Button onClick={openNewBudgetDialog}>
-            <Plus className="mr-2 h-4 w-4" /> {t('budget.create')}
+            <Plus className="mr-2 h-4 w-4" /> Create Budget
           </Button>
         </div>
 

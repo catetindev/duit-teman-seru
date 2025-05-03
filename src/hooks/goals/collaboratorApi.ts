@@ -95,11 +95,11 @@ export function useCollaboratorApi() {
         throw inviterError;
       }
       
-      // Find the user by email
+      // Find the user by email - FIX: use case-insensitive search with ilike
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('id, email')
-        .eq('email', email)
+        .ilike('email', email)
         .maybeSingle();
       
       if (userError) {

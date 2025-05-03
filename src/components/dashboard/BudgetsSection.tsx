@@ -20,10 +20,10 @@ const BudgetsSection = React.memo(({ isPremium }: BudgetsSectionProps) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">{t('budget.title')}</h2>
+        <h2 className="text-xl font-bold">Budget</h2>
         <Link to="/budget">
           <Button variant="ghost" size="sm" className="text-sm">
-            {t('common.viewAll')} <ChevronRight className="ml-1 h-4 w-4" />
+            View All <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </Link>
       </div>
@@ -34,10 +34,10 @@ const BudgetsSection = React.memo(({ isPremium }: BudgetsSectionProps) => {
         </div>
       ) : budgets.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground mb-4">{t('budget.empty')}</p>
+          <p className="text-muted-foreground mb-4">No budgets created yet</p>
           <Link to="/budget">
             <Button variant="outline" size="sm" className="gap-1">
-              <Plus className="h-4 w-4" /> {t('budget.createBudget')}
+              <Plus className="h-4 w-4" /> Create Budget
             </Button>
           </Link>
         </div>
