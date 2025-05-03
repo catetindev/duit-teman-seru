@@ -5,27 +5,13 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { CheckCircle, XCircle, Target } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { formatDistance } from 'date-fns';
 import { useCollaboratorApi } from '@/hooks/goals/collaboratorApi';
-
-interface Invitation {
-  id: string;
-  goal_id: string;
-  created_at: string;
-  expires_at: string;
-  status: string;
-  savings_goals: {
-    title: string;
-    emoji: string;
-  };
-  profiles: {
-    full_name: string;
-  };
-}
+import { InvitationWithDetails } from '@/hooks/goals/types';
 
 const PendingInvitations: React.FC = () => {
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [invitations, setInvitations] = useState<InvitationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -36,22 +22,42 @@ const PendingInvitations: React.FC = () => {
     
     setLoading(true);
     try {
+      // We need to change the query to handle the relationship properly
       const { data, error } = await supabase
         .from('goal_invitations')
         .select(`
           id, 
           goal_id,
+          inviter_id,
           created_at,
           expires_at,
           status,
-          savings_goals (title, emoji),
-          profiles:inviter_id (full_name)
+          goal:goal_id (title, emoji),
+          inviter:inviter_id (full_name)
         `)
         .eq('invitee_id', user.id)
         .eq('status', 'pending');
       
       if (error) throw error;
-      setInvitations(data || []);
+      
+      // Transform the data to match our expected structure
+      const formattedInvitations = data?.map(item => ({
+        id: item.id,
+        goal_id: item.goal_id,
+        inviter_id: item.inviter_id,
+        status: item.status,
+        created_at: item.created_at,
+        expires_at: item.expires_at,
+        goal: {
+          title: item.goal?.title || 'Unknown Goal',
+          emoji: item.goal?.emoji || '🎯'
+        },
+        inviter: {
+          full_name: item.inviter?.full_name || 'Unknown User'
+        }
+      })) || [];
+      
+      setInvitations(formattedInvitations);
     } catch (error) {
       console.error('Error fetching invitations:', error);
       toast({
@@ -99,17 +105,17 @@ const PendingInvitations: React.FC = () => {
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-primary/10 p-2">
-                  <span className="text-xl">{invitation.savings_goals.emoji || '🎯'}</span>
+                  <span className="text-xl">{invitation.goal.emoji || '🎯'}</span>
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
-                    <h4 className="font-medium">{invitation.savings_goals.title}</h4>
+                    <h4 className="font-medium">{invitation.goal.title}</h4>
                     <span className="text-xs text-muted-foreground">
                       {formatDistance(new Date(invitation.created_at), new Date(), { addSuffix: true })}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1 mb-3">
-                    {invitation.profiles.full_name} has invited you to collaborate on this goal
+                    {invitation.inviter.full_name} has invited you to collaborate on this goal
                   </p>
                   <div className="flex justify-end gap-2">
                     <Button 
