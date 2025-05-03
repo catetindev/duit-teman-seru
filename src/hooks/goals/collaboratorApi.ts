@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Collaborator, GoalInvitation } from './types';
 import { useToast } from '@/hooks/use-toast';
@@ -254,16 +255,17 @@ export function useCollaboratorApi() {
           throw updateError;
         }
         
-        // Add the collaborator - using RPC function to bypass RLS
-        const { data: goalData, error: goalError } = await supabase
-          .rpc('add_collaborator', { 
-            p_goal_id: invitation.goal_id, 
-            p_user_id: invitation.invitee_id 
+        // Add the collaborator - using a direct insert instead of RPC
+        const { error: collaboratorError } = await supabase
+          .from('goal_collaborators')
+          .insert({ 
+            goal_id: invitation.goal_id, 
+            user_id: invitation.invitee_id 
           });
           
-        if (goalError) {
-          console.error('Error adding collaborator:', goalError);
-          throw goalError;
+        if (collaboratorError) {
+          console.error('Error adding collaborator:', collaboratorError);
+          throw collaboratorError;
         }
         
         toast({
