@@ -59,13 +59,13 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
         ) : (
           <>
             <TabsContent value="all">
-              <TransactionList transactions={transactions} />
+              <TransactionList transactions={transactions} onUpdate={onTransactionAdded} />
             </TabsContent>
             <TabsContent value="income">
-              <TransactionList transactions={incomeTransactions} />
+              <TransactionList transactions={incomeTransactions} onUpdate={onTransactionAdded} />
             </TabsContent>
             <TabsContent value="expense">
-              <TransactionList transactions={expenseTransactions} />
+              <TransactionList transactions={expenseTransactions} onUpdate={onTransactionAdded} />
             </TabsContent>
           </>
         )}
