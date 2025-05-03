@@ -24,7 +24,7 @@ const BudgetsSection = React.memo(({ isPremium }: BudgetsSectionProps) => {
         <h2 className="text-xl font-bold">{t('budget.title')}</h2>
         <Link to="/budget">
           <Button variant="ghost" size="sm" className="text-sm">
-            {t('common.viewAll', 'View All')} <ChevronRight className="ml-1 h-4 w-4" />
+            {t('common.viewAll')} <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </Link>
       </div>
