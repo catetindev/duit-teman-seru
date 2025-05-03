@@ -304,6 +304,14 @@ export function useCollaboratorApi() {
 
   const fetchPendingInvitations = async (): Promise<any[]> => {
     try {
+      // Get the current user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('No authenticated user found');
+        return [];
+      }
+      
       // Get user's pending invitations
       const { data: invitations, error } = await supabase
         .from('goal_invitations')
@@ -317,7 +325,7 @@ export function useCollaboratorApi() {
           savings_goals:goal_id (title, emoji),
           profiles:inviter_id (full_name)
         `)
-        .eq('invitee_id', supabase.auth.user()?.id)
+        .eq('invitee_id', user.id)
         .eq('status', 'pending')
         .lt('expires_at', new Date().toISOString());
         

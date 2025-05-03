@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Target } from 'lucide-react';
 import { formatDistance } from 'date-fns';
 import { useCollaboratorApi } from '@/hooks/goals/collaboratorApi';
-import { useQuery } from '@tanstack/react-query';
 
 interface GoalInvitationNotificationProps {
   notification: {
@@ -27,7 +26,7 @@ const GoalInvitationNotification: React.FC<GoalInvitationNotificationProps> = ({
   // Parse the action data
   const actionData = React.useMemo(() => {
     try {
-      return JSON.parse(notification.action_data);
+      return JSON.parse(notification.action_data || '{}');
     } catch (e) {
       console.error('Failed to parse action data:', e);
       return { type: 'unknown' };

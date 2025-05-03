@@ -4,7 +4,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Budget, ValidCurrency } from '@/hooks/goals/types';
+import { ValidCurrency } from '@/hooks/goals/types';
 import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from '@/hooks/use-toast';
 import BudgetForm from '@/components/budget/BudgetForm';
@@ -18,19 +18,38 @@ interface FormValues {
   currency: ValidCurrency;
 }
 
+// Define Budget interface for this page that's compatible with both types
+interface PageBudget {
+  id: string;
+  category: string;
+  amount: number;
+  spent?: number;
+  currency: ValidCurrency;
+  period: string;
+  user_id: string;
+}
+
 const BudgetPage = () => {
   const { t } = useLanguage();
   const { budgets, loading, addUpdateBudget, deleteBudget } = useDashboardData();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [selectedBudget, setSelectedBudget] = useState<PageBudget | null>(null);
 
-  const handleEditBudget = (budget: Budget) => {
+  // Convert budgets to the correct type
+  const typedBudgets: PageBudget[] = budgets.map(budget => ({
+    ...budget,
+    user_id: budget.user_id || '',
+    currency: budget.currency as ValidCurrency,
+    period: budget.period || 'monthly'
+  }));
+
+  const handleEditBudget = (budget: PageBudget) => {
     setSelectedBudget(budget);
     setDialogOpen(true);
   };
 
-  const handleDeleteBudget = (budget: Budget) => {
+  const handleDeleteBudget = (budget: PageBudget) => {
     setSelectedBudget(budget);
     setDeleteDialogOpen(true);
   };
@@ -79,7 +98,7 @@ const BudgetPage = () => {
         </div>
 
         <BudgetList 
-          budgets={budgets}
+          budgets={typedBudgets}
           loading={loading.budgets}
           onAddNew={openNewBudgetDialog}
           onEdit={handleEditBudget}

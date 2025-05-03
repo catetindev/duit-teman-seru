@@ -1,4 +1,5 @@
 
+
 export interface Goal {
   id: string;
   user_id: string;
@@ -53,4 +54,10 @@ export interface DashboardStats {
   totalExpenses: number;
   savingsRate: number;
   goalProgress: number;
+  balance: number;
+  income: number;
+  expenses: number;
+  currency: ValidCurrency;
+  recentTransactionDate?: string;
 }
+

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,7 +37,9 @@ export function useDashboardData() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalIncome: 0,
-    totalExpense: 0,
+    totalExpenses: 0,
+    savingsRate: 0,
+    goalProgress: 0,
     balance: 0,
     income: 0,
     expenses: 0,
@@ -80,13 +81,13 @@ export function useDashboardData() {
       
       // Calculate stats
       let totalIncome = 0;
-      let totalExpense = 0;
+      let totalExpenses = 0;
       
       formattedData.forEach(transaction => {
         if (transaction.type === 'income') {
           totalIncome += Number(transaction.amount);
         } else {
-          totalExpense += Number(transaction.amount);
+          totalExpenses += Number(transaction.amount);
         }
       });
       
@@ -94,11 +95,13 @@ export function useDashboardData() {
       
       setStats({
         totalIncome,
-        totalExpense,
-        balance: totalIncome - totalExpense,
+        totalExpenses,
+        balance: totalIncome - totalExpenses,
         income: totalIncome,
-        expenses: totalExpense,
+        expenses: totalExpenses,
         currency: defaultCurrency,
+        savingsRate: totalIncome > 0 ? Math.round((totalIncome - totalExpenses) / totalIncome * 100) : 0,
+        goalProgress: 0, // This will be calculated elsewhere
         recentTransactionDate: formattedData[0]?.date
       });
       
