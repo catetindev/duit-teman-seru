@@ -15,11 +15,8 @@ import {
   Target,
   Settings,
   Bell,
-  ShieldAlert,
-  Menu,
-  X
+  ShieldAlert
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -31,16 +28,6 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
   const { t } = useLanguage();
   const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
-  const [isCollapsed, setIsCollapsed] = useState(isMobile);
-
-  // Update collapsed state when screen size changes
-  useEffect(() => {
-    setIsCollapsed(isMobile);
-  }, [isMobile]);
-
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
 
   if (isLoading) {
     return (
@@ -149,8 +136,13 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
 
         <div className={`flex-1 ${isMobile ? '' : 'ml-64'} transition-all duration-300`}>
           <main className="h-full p-4 md:p-6 lg:p-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10">
-            {/* Mobile top spacing for the navbar */}
-            {isMobile && <div className="h-16"></div>}
+            {/* Mobile top and bottom spacing for the navbar */}
+            {isMobile && (
+              <>
+                <div className="h-16"></div> {/* Top spacing */}
+                <div className="pb-20"></div> {/* Bottom spacing to avoid content being hidden by bottom navbar */}
+              </>
+            )}
             {children}
           </main>
         </div>
