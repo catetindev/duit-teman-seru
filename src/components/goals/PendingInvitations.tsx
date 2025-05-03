@@ -33,11 +33,10 @@ const PendingInvitations: React.FC = () => {
           expires_at,
           status,
           goals:savings_goals(title, emoji),
-          profiles(full_name)
+          inviter:profiles!inviter_id(full_name)
         `)
         .eq('invitee_id', user.id)
-        .eq('status', 'pending')
-        .eq('profiles.id', 'goal_invitations.inviter_id');
+        .eq('status', 'pending');
       
       if (error) throw error;
       
@@ -55,7 +54,7 @@ const PendingInvitations: React.FC = () => {
           emoji: item.goals?.emoji || '🎯'
         },
         inviter: {
-          full_name: item.profiles?.[0]?.full_name || 'Unknown User'
+          full_name: item.inviter?.full_name || 'Unknown User'
         }
       })) || [];
       
