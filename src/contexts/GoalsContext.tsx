@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { useGoals } from '@/hooks/useGoals';
@@ -31,6 +30,7 @@ interface GoalsContextType {
   isDeleteDialogOpen: boolean;
   
   // Methods
+  fetchGoals: () => Promise<void>; // Added fetchGoals to the interface
   setSelectedGoal: (goal: Goal | null) => void;
   setIsAddDialogOpen: (isOpen: boolean) => void;
   setIsEditDialogOpen: (isOpen: boolean) => void;
@@ -331,6 +331,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     isEditDialogOpen,
     isCollaborateDialogOpen,
     isDeleteDialogOpen,
+    fetchGoals, // Add fetchGoals to the context value
     setSelectedGoal,
     setIsAddDialogOpen,
     setIsEditDialogOpen,
