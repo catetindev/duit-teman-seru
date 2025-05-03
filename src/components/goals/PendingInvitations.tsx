@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,11 +32,12 @@ const PendingInvitations: React.FC = () => {
           created_at,
           expires_at,
           status,
-          goals:savings_goals!goal_id(title, emoji),
-          profiles!goal_invitations_inviter_id_fkey(full_name)
+          goals:savings_goals(title, emoji),
+          profiles(full_name)
         `)
         .eq('invitee_id', user.id)
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .eq('profiles.id', 'goal_invitations.inviter_id');
       
       if (error) throw error;
       
@@ -55,7 +55,7 @@ const PendingInvitations: React.FC = () => {
           emoji: item.goals?.emoji || '🎯'
         },
         inviter: {
-          full_name: item.profiles?.full_name || 'Unknown User'
+          full_name: item.profiles?.[0]?.full_name || 'Unknown User'
         }
       })) || [];
       
