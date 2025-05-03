@@ -297,6 +297,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_goal_owner_or_collaborator: {
+        Args: { goal_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_role: "free" | "premium" | "admin"
