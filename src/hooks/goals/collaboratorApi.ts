@@ -9,70 +9,78 @@ export function useCollaboratorApi() {
         .from('goal_collaborators')
         .select(`
           user_id,
-          profiles:profiles(email, full_name)
+          profiles:user_id (
+            email,
+            full_name
+          )
         `)
         .eq('goal_id', goalId);
       
       if (error) throw error;
       
-      // Transform to a more user-friendly format
-      const collaborators: Collaborator[] = (data || [])
-        .filter(item => item.profiles) // Make sure profiles exists
-        .map(item => ({
-          user_id: item.user_id,
-          email: item.profiles?.email || '',
-          full_name: item.profiles?.full_name || ''
-        }));
+      if (!data || data.length === 0) return [];
       
-      return collaborators;
+      // Process the data to match the Collaborator interface
+      return data.map(item => {
+        // Check if profiles exists and handle possible null values
+        const profiles = item.profiles as any;
+        return {
+          user_id: item.user_id,
+          email: profiles?.email || 'Unknown Email',
+          full_name: profiles?.full_name || 'Unknown User'
+        };
+      });
     } catch (error) {
-      console.error('Error in fetchCollaborators:', error);
+      console.error('Error fetching collaborators:', error);
       throw error;
     }
   };
 
-  const addCollaborator = async (goalId: string, email: string): Promise<boolean> => {
+  const addCollaborator = async (goalId: string, email: string): Promise<Collaborator | null> => {
     try {
       // First, find the user by email
       const { data: userData, error: userError } = await supabase
         .from('profiles')
-        .select('id, email, full_name')
+        .select('user_id, email, full_name')
         .eq('email', email)
-        .maybeSingle();
+        .single();
       
       if (userError) throw userError;
       
       if (!userData) {
-        throw new Error(`User with email ${email} not found`);
+        throw new Error('User not found with that email');
       }
       
-      // Check if collaboration already exists
-      const { data: existingData, error: checkError } = await supabase
+      // Check if the user is already a collaborator
+      const { data: existingCollab, error: collabError } = await supabase
         .from('goal_collaborators')
-        .select('*')
+        .select()
         .eq('goal_id', goalId)
-        .eq('user_id', userData.id)
-        .maybeSingle();
-        
-      if (checkError) throw checkError;
+        .eq('user_id', userData.user_id);
       
-      if (existingData) {
-        return true; // Already a collaborator
+      if (collabError) throw collabError;
+      
+      if (existingCollab && existingCollab.length > 0) {
+        throw new Error('This user is already a collaborator');
       }
       
-      // Add collaborator
-      const { error } = await supabase
+      // Add the user as a collaborator
+      const { error: insertError } = await supabase
         .from('goal_collaborators')
         .insert({
           goal_id: goalId,
-          user_id: userData.id
+          user_id: userData.user_id
         });
       
-      if (error) throw error;
+      if (insertError) throw insertError;
       
-      return true;
+      return {
+        user_id: userData.user_id,
+        email: userData.email,
+        full_name: userData.full_name
+      };
     } catch (error) {
-      console.error('Error in addCollaborator:', error);
+      console.error('Error adding collaborator:', error);
       throw error;
     }
   };
@@ -89,7 +97,7 @@ export function useCollaboratorApi() {
       
       return true;
     } catch (error) {
-      console.error('Error in removeCollaborator:', error);
+      console.error('Error removing collaborator:', error);
       throw error;
     }
   };
