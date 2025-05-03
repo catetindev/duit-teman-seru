@@ -73,7 +73,7 @@ export const useGoalApi = () => {
       console.error('Error fetching goals:', error);
       toast({
         title: "Error",
-        description: "Failed to load goals",
+        description: "Failed to load goals: " + (error.message || "Unknown error"),
         variant: "destructive"
       });
       return [];
@@ -92,7 +92,15 @@ export const useGoalApi = () => {
       
       const { data, error } = await supabase
         .from('savings_goals')
-        .insert(goal)
+        .insert({
+          title: goal.title,
+          target_amount: goal.target_amount,
+          saved_amount: goal.saved_amount || 0,
+          target_date: goal.target_date || null,
+          emoji: goal.emoji || '🎯',
+          user_id: goal.user_id,
+          currency: goal.currency || 'IDR'
+        })
         .select('*')
         .single();
       
@@ -144,7 +152,7 @@ export const useGoalApi = () => {
       console.error('Error deleting goal:', error);
       toast({
         title: "Error",
-        description: "Failed to delete goal",
+        description: "Failed to delete goal: " + (error.message || "Unknown error"),
         variant: "destructive",
       });
       return false;

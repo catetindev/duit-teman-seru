@@ -14,6 +14,7 @@ export type FilterOption = 'all' | 'completed' | 'incomplete' | 'noDate';
 interface GoalsContextType {
   goals: Goal[];
   loading: boolean;
+  error: string | null;  // Added error state
   selectedGoal: Goal | null;
   goalToDelete: string | null;
   isSubmitting: boolean;
@@ -80,6 +81,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const { 
     goals, 
     loading, 
+    error,  // Added error handling
     fetchGoals,
     addGoal,
     deleteGoal, 
@@ -162,8 +164,17 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setSelectedGoal(goal);
     setIsCollaborateDialogOpen(true);
     
-    const collaborators = await fetchCollaborators(goal.id);
-    setGoalCollaborators(collaborators);
+    try {
+      const collaborators = await fetchCollaborators(goal.id);
+      setGoalCollaborators(collaborators);
+    } catch (error) {
+      console.error("Failed to fetch collaborators:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load collaborators",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAddGoal = async (goalData: GoalFormData) => {
@@ -193,6 +204,8 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         });
         
         setIsAddDialogOpen(false);
+        // Refresh goals list
+        fetchGoals();
       }
       
     } catch (error: any) {
@@ -217,7 +230,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         .update({
           title: goalData.title,
           target_amount: parseFloat(goalData.target_amount),
-          saved_amount: parseFloat(goalData.saved_amount),
+          saved_amount: parseFloat(goalData.saved_amount || '0'),
           target_date: goalData.target_date || null,
           emoji: goalData.emoji
         })
@@ -249,30 +262,63 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (!selectedGoal) return;
     setIsSubmitting(true);
     
-    const success = await addCollaborator(selectedGoal.id, email);
-    
-    if (success) {
-      // Refresh collaborators list
-      const collaborators = await fetchCollaborators(selectedGoal.id);
-      setGoalCollaborators(collaborators);
+    try {
+      const success = await addCollaborator(selectedGoal.id, email);
+      
+      if (success) {
+        toast({
+          title: "Success!",
+          description: `Invitation sent to ${email}`,
+        });
+        
+        // Refresh collaborators list
+        const collaborators = await fetchCollaborators(selectedGoal.id);
+        setGoalCollaborators(collaborators);
+      }
+    } catch (error: any) {
+      console.error('Error inviting collaborator:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to invite collaborator",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   const handleRemoveCollaborator = async (userId: string) => {
     if (!selectedGoal) return;
+    setIsSubmitting(true);
     
-    const success = await removeCollaborator(selectedGoal.id, userId);
-    
-    if (success) {
-      setGoalCollaborators(prev => prev.filter(c => c.user_id !== userId));
+    try {
+      const success = await removeCollaborator(selectedGoal.id, userId);
+      
+      if (success) {
+        toast({
+          title: "Success!",
+          description: "Collaborator has been removed",
+        });
+        
+        // Update the collaborators list
+        setGoalCollaborators(prev => prev.filter(c => c.user_id !== userId));
+      }
+    } catch (error: any) {
+      console.error('Error removing collaborator:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove collaborator",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const value = {
     goals,
     loading,
+    error,  // Added error state
     selectedGoal,
     goalToDelete,
     isSubmitting,

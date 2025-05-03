@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 interface AddGoalProps {
   isOpen: boolean;
@@ -27,23 +28,73 @@ export interface GoalFormData {
   emoji: string;
 }
 
+const initialFormState: GoalFormData = {
+  title: '',
+  target_amount: '',
+  saved_amount: '',
+  target_date: '',
+  emoji: '🎯'
+};
+
 const AddGoalDialog: React.FC<AddGoalProps> = ({
   isOpen,
   onClose,
   onSubmit,
   isSubmitting
 }) => {
-  const [goalData, setGoalData] = useState<GoalFormData>({
-    title: '',
-    target_amount: '',
-    saved_amount: '',
-    target_date: '',
-    emoji: '🎯'
-  });
+  const [goalData, setGoalData] = useState<GoalFormData>(initialFormState);
+  const [validationErrors, setValidationErrors] = useState<Partial<Record<keyof GoalFormData, string>>>({});
+  const { toast } = useToast();
+
+  // Reset form when dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setGoalData(initialFormState);
+      setValidationErrors({});
+    }
+  }, [isOpen]);
+
+  const validateForm = (): boolean => {
+    const errors: Partial<Record<keyof GoalFormData, string>> = {};
+    
+    if (!goalData.title.trim()) {
+      errors.title = 'Title is required';
+    }
+    
+    if (!goalData.target_amount) {
+      errors.target_amount = 'Target amount is required';
+    } else if (isNaN(Number(goalData.target_amount)) || Number(goalData.target_amount) <= 0) {
+      errors.target_amount = 'Target amount must be a positive number';
+    }
+    
+    if (goalData.saved_amount && (isNaN(Number(goalData.saved_amount)) || Number(goalData.saved_amount) < 0)) {
+      errors.saved_amount = 'Saved amount must be a non-negative number';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(goalData);
+    
+    // Validate before submitting
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the form errors before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      await onSubmit(goalData);
+      // Form will be reset by the useEffect when isOpen changes
+    } catch (error) {
+      console.error("Error submitting goal:", error);
+      // Error handling is done in the parent component
+    }
   };
 
   const commonEmojis = ['🎯', '💰', '🏠', '🚗', '✈️', '💻', '📱', '👕', '🏝️', '🎓', '💍', '🚨'];
@@ -76,18 +127,26 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="goal-name">Goal Name *</Label>
+            <Label htmlFor="goal-name" className={validationErrors.title ? "text-destructive" : ""}>
+              Goal Name *
+            </Label>
             <Input 
               id="goal-name" 
               value={goalData.title}
               onChange={(e) => setGoalData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="e.g., New Laptop, Emergency Fund"
               required
+              className={validationErrors.title ? "border-destructive" : ""}
             />
+            {validationErrors.title && (
+              <p className="text-sm text-destructive">{validationErrors.title}</p>
+            )}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="goal-amount">Target Amount (IDR) *</Label>
+            <Label htmlFor="goal-amount" className={validationErrors.target_amount ? "text-destructive" : ""}>
+              Target Amount (IDR) *
+            </Label>
             <Input 
               id="goal-amount" 
               value={goalData.target_amount}
@@ -97,8 +156,11 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
               }}
               placeholder="1000000"
               required
+              className={validationErrors.target_amount ? "border-destructive" : ""}
             />
-            {goalData.target_amount && (
+            {validationErrors.target_amount ? (
+              <p className="text-sm text-destructive">{validationErrors.target_amount}</p>
+            ) : goalData.target_amount && (
               <p className="text-sm text-muted-foreground">
                 Rp {parseInt(goalData.target_amount).toLocaleString('id-ID')}
               </p>
@@ -106,7 +168,9 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="goal-saved">Current Savings (IDR)</Label>
+            <Label htmlFor="goal-saved" className={validationErrors.saved_amount ? "text-destructive" : ""}>
+              Current Savings (IDR)
+            </Label>
             <Input 
               id="goal-saved" 
               value={goalData.saved_amount}
@@ -115,8 +179,11 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
                 setGoalData(prev => ({ ...prev, saved_amount: value }));
               }}
               placeholder="0"
+              className={validationErrors.saved_amount ? "border-destructive" : ""}
             />
-            {goalData.saved_amount && (
+            {validationErrors.saved_amount ? (
+              <p className="text-sm text-destructive">{validationErrors.saved_amount}</p>
+            ) : goalData.saved_amount && (
               <p className="text-sm text-muted-foreground">
                 Rp {parseInt(goalData.saved_amount).toLocaleString('id-ID')}
               </p>

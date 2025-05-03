@@ -31,6 +31,7 @@ const GoalsPage = () => {
 const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
   const { 
     loading, 
+    error,
     goals,
     filteredAndSortedGoals,
     isAddDialogOpen,
@@ -60,10 +61,15 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
     setIsEditDialogOpen,
     setIsCollaborateDialogOpen,
     setIsDeleteDialogOpen,
+    fetchGoals, // Added for retry functionality
   } = useGoalsContext();
 
   if (loading) {
     return <GoalsLoading isPremium={isPremium} />;
+  }
+
+  if (error) {
+    return <GoalsLoading isPremium={isPremium} error={error} onRetry={fetchGoals} />;
   }
 
   return (
