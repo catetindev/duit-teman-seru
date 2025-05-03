@@ -62,32 +62,19 @@ export function useGoals(userId: string) {
       if (collaborations && collaborations.length > 0) {
         const goalIds = collaborations.map(c => c.goal_id);
         
-        const { data: collabGoalsData, error: fetchError } = await supabase
+        const { data: collabGoals, error: fetchError } = await supabase
           .from('savings_goals')
           .select('*')
           .in('id', goalIds);
         
         if (fetchError) throw fetchError;
         
-        if (collabGoalsData) {
-          // Ensure the data conforms to the Goal interface by explicitly casting currency
-          sharedGoals = collabGoalsData.map(goal => ({
-            ...goal,
-            currency: goal.currency as 'IDR' | 'USD'
-          }));
-        }
+        if (collabGoals) sharedGoals = collabGoals;
       }
       
-      // Combine both sets of goals and ensure all currencies are properly typed
-      const allGoalsTyped = [
-        ...(ownGoals || []).map(goal => ({
-          ...goal,
-          currency: goal.currency as 'IDR' | 'USD'
-        })),
-        ...sharedGoals
-      ];
-      
-      setGoals(allGoalsTyped);
+      // Combine both sets of goals
+      const allGoals = [...(ownGoals || []), ...sharedGoals];
+      setGoals(allGoals);
       
     } catch (error: any) {
       console.error('Error fetching goals:', error);
