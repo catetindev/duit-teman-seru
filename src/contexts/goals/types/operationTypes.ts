@@ -16,6 +16,7 @@ export interface GoalOperationsDependencies {
   addCollaborator: (goalId: string, email: string) => Promise<boolean>;
   removeCollaborator: (goalId: string, userId: string) => Promise<boolean>;
   setIsSubmitting: (isSubmitting: boolean) => void;
+  toast: any; // Adding toast to dependencies to avoid importing it in each operation
 }
 
 export interface GoalOperations {

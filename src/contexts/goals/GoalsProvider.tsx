@@ -52,21 +52,22 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     updateGoalHandler,
     handleInviteCollaborator,
     handleRemoveCollaborator
-  } = useGoalOperations(
-    state.selectedGoal,
-    state.setIsEditDialogOpen,
-    state.setIsDeleteDialogOpen,
-    state.setSelectedGoal,
-    state.setGoalToDelete,
-    state.setIsCollaborateDialogOpen,
-    state.setGoalCollaborators,
+  } = useGoalOperations({
+    selectedGoal: state.selectedGoal,
+    setIsEditDialogOpen: state.setIsEditDialogOpen,
+    setIsDeleteDialogOpen: state.setIsDeleteDialogOpen,
+    setSelectedGoal: state.setSelectedGoal,
+    setGoalToDelete: state.setGoalToDelete,
+    setIsCollaborateDialogOpen: state.setIsCollaborateDialogOpen,
+    setGoalCollaborators: state.setGoalCollaborators,
     fetchGoals,
     deleteGoal,
     fetchCollaborators,
     addCollaborator,
     removeCollaborator,
-    state.setIsSubmitting
-  );
+    setIsSubmitting: state.setIsSubmitting,
+    toast
+  });
 
   // Handle adding a goal
   const handleAddGoal = useCallback(async (goalData: GoalFormData) => {

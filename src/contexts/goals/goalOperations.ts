@@ -3,25 +3,25 @@ import { useCallback } from 'react';
 import { Goal } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { GoalOperationsDependencies, GoalOperations } from './types/operationTypes';
 
-export const useGoalOperations = ({
-  selectedGoal,
-  setIsEditDialogOpen,
-  setIsDeleteDialogOpen,
-  setSelectedGoal,
-  setGoalToDelete,
-  setIsCollaborateDialogOpen,
-  setGoalCollaborators,
-  fetchGoals,
-  deleteGoal,
-  fetchCollaborators,
-  addCollaborator,
-  removeCollaborator,
-  setIsSubmitting
-}: GoalOperationsDependencies): GoalOperations => {
-  const { toast } = useToast();
+export const useGoalOperations = (dependencies: GoalOperationsDependencies): GoalOperations => {
+  const {
+    selectedGoal,
+    setIsEditDialogOpen,
+    setIsDeleteDialogOpen,
+    setSelectedGoal,
+    setGoalToDelete,
+    setIsCollaborateDialogOpen,
+    setGoalCollaborators,
+    fetchGoals,
+    deleteGoal,
+    fetchCollaborators,
+    addCollaborator,
+    removeCollaborator,
+    setIsSubmitting,
+    toast
+  } = dependencies;
 
   const handleEditGoal = useCallback((goal: Goal) => {
     setSelectedGoal(goal);
