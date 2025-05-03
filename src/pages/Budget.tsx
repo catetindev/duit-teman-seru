@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -71,14 +70,15 @@ const BudgetPage = () => {
     setDialogOpen(true);
   };
 
-  // Form submission handler
+  // Form submission handler - Updated to include user_id
   const onSubmit = async (values: FormValues) => {
     await addUpdateBudget({
       id: selectedBudget?.id,
       category: values.category,
       amount: values.amount,
       currency: values.currency,
-      period: 'monthly' // Default period value
+      period: 'monthly', // Default period value
+      user_id: selectedBudget?.user_id || '' // Include user_id from selected budget or empty string
     });
     
     toast({
