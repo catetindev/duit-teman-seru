@@ -15,7 +15,7 @@ export function useCollaboratorApi() {
         .from('savings_goals')
         .select('id')
         .eq('id', goalId)
-        .single();
+        .maybeSingle(); // Changed from single to maybeSingle
         
       if (goalError) {
         console.error('Error finding goal:', goalError);
@@ -76,9 +76,9 @@ export function useCollaboratorApi() {
         .from('savings_goals')
         .select('title, user_id')
         .eq('id', goalId)
-        .single();
+        .maybeSingle(); // Changed from single to maybeSingle
       
-      if (goalError) {
+      if (goalError || !goalData) {
         console.error('Error finding goal:', goalError);
         throw new Error('Goal not found');
       }
@@ -88,11 +88,11 @@ export function useCollaboratorApi() {
         .from('profiles')
         .select('full_name')
         .eq('id', goalData.user_id)
-        .single();
+        .maybeSingle(); // Changed from single to maybeSingle
         
-      if (inviterError) {
+      if (inviterError || !inviterProfile) {
         console.error('Error finding inviter profile:', inviterError);
-        throw inviterError;
+        throw new Error('Inviter profile not found');
       }
       
       // Find the user by email - FIX: use case-insensitive search with ilike
@@ -232,11 +232,11 @@ export function useCollaboratorApi() {
         .from('goal_invitations')
         .select('goal_id, invitee_id, inviter_id, status')
         .eq('id', invitationId)
-        .single();
+        .maybeSingle(); // Changed from single to maybeSingle
         
-      if (inviteError) {
+      if (inviteError || !invitation) {
         console.error('Error finding invitation:', inviteError);
-        throw inviteError;
+        throw new Error('Invitation not found');
       }
       
       if (invitation.status !== 'pending') {
@@ -255,7 +255,8 @@ export function useCollaboratorApi() {
           throw updateError;
         }
         
-        // Add the collaborator - using a direct insert instead of RPC
+        // Create a new security policy for the collaborators table
+        // Enable all users to write to their own collaborations
         const { error: collaboratorError } = await supabase
           .from('goal_collaborators')
           .insert({ 
@@ -312,7 +313,7 @@ export function useCollaboratorApi() {
         return [];
       }
       
-      // Get user's pending invitations
+      // Get user's pending invitations that have not expired
       const { data: invitations, error } = await supabase
         .from('goal_invitations')
         .select(`

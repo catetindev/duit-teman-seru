@@ -82,7 +82,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsDeleteOpen(false);
-      // Make sure to call onUpdate to refresh the transactions list
+      // Immediately call onUpdate to refresh the transactions list
       onUpdate();
     } catch (error: any) {
       console.error('Error deleting transaction:', error);

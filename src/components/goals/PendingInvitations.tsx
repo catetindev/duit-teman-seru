@@ -35,7 +35,8 @@ const PendingInvitations: React.FC = () => {
           status
         `)
         .eq('invitee_id', user.id)
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .gte('expires_at', new Date().toISOString()); // Fixed the date comparison - should be greater than now
       
       if (invitationsError) throw invitationsError;
       
