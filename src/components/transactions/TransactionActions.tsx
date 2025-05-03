@@ -4,10 +4,10 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
-import { z } from 'zod';
 import TransactionEditDialog from './TransactionEditDialog';
 import TransactionDeleteDialog from './TransactionDeleteDialog';
-import { Transaction, TransactionFormSchema } from './transaction-types';
+import { Transaction } from './transaction-types';
+import { TransactionFormValues } from './transaction-form-schema';
 
 interface TransactionActionsProps {
   transaction: Transaction;
@@ -20,7 +20,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleSubmit = async (values: z.infer<typeof TransactionFormSchema>) => {
+  const handleSubmit = async (values: TransactionFormValues) => {
     setIsSubmitting(true);
     try {
       console.log('Updating transaction with ID:', transaction.id, 'New values:', values);
