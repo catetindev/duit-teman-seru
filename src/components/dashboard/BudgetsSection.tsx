@@ -9,14 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency } from '@/utils/formatUtils';
 import { useToast } from '@/hooks/use-toast';
-
-interface Budget {
-  id: string;
-  category: string;
-  spent: number;
-  budget: number;
-  currency: 'IDR' | 'USD';
-}
+import { useDashboardData, Budget } from '@/hooks/useDashboardData';
 
 interface BudgetsSectionProps {
   isPremium: boolean;
@@ -26,90 +19,7 @@ const BudgetsSection = ({ isPremium }: BudgetsSectionProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    if (!user) return;
-    
-    const fetchBudgets = async () => {
-      setLoading(true);
-      try {
-        // First get all budgets
-        const { data: budgetData, error: budgetError } = await supabase
-          .from('budgets')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('category', { ascending: true });
-        
-        if (budgetError) throw budgetError;
-        
-        // Get current month's first and last day
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        
-        // Get sum of expenses per category for current month
-        const { data: expenseData, error: expenseError } = await supabase
-          .from('transactions')
-          .select('category, amount')
-          .eq('type', 'expense')
-          .eq('user_id', user.id)
-          .gte('date', firstDay.toISOString().split('T')[0])
-          .lte('date', lastDay.toISOString().split('T')[0]);
-        
-        if (expenseError) throw expenseError;
-        
-        // Map expenses to an object for easy lookup
-        const expensesByCategory: Record<string, number> = {};
-        expenseData?.forEach(item => {
-          const category = item.category;
-          const amount = Number(item.amount || 0);
-          if (!expensesByCategory[category]) {
-            expensesByCategory[category] = 0;
-          }
-          expensesByCategory[category] += amount;
-        });
-        
-        // Combine budget data with spent amounts
-        const formattedBudgets: Budget[] = (budgetData || []).map(budget => ({
-          id: budget.id,
-          category: budget.category,
-          budget: Number(budget.amount),
-          spent: expensesByCategory[budget.category.toLowerCase()] || 0,
-          currency: budget.currency as 'IDR' | 'USD',
-        }));
-        
-        setBudgets(formattedBudgets);
-      } catch (error: any) {
-        console.error('Error fetching budgets:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load budget data",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchBudgets();
-    
-    // Set up realtime subscription
-    const channel = supabase
-      .channel('budgets-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'budgets', filter: `user_id=eq.${user.id}` },
-        () => {
-          fetchBudgets();
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, toast]);
+  const { budgets, loading } = useDashboardData();
   
   if (!isPremium) return null;
   
@@ -124,7 +34,7 @@ const BudgetsSection = ({ isPremium }: BudgetsSectionProps) => {
         </Link>
       </div>
       
-      {loading ? (
+      {loading.budgets ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
@@ -144,7 +54,7 @@ const BudgetsSection = ({ isPremium }: BudgetsSectionProps) => {
               key={budget.id}
               category={budget.category}
               spent={budget.spent}
-              budget={budget.budget}
+              budget={budget.amount}
               currency={budget.currency}
             />
           ))}

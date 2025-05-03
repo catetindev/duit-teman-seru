@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDashboardData, formatCurrency, Budget } from '@/hooks/useDashboardData';
+import { useDashboardData, Budget } from '@/hooks/useDashboardData';
+import { formatCurrency } from '@/utils/formatUtils';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
