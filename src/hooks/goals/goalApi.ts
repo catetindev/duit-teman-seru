@@ -71,9 +71,10 @@ export const useGoalApi = () => {
     try {
       console.log('Adding goal:', goal);
       
+      // Fix: Pass the goal object directly, not as an array
       const { data, error } = await supabase
         .from('savings_goals')
-        .insert([goal])
+        .insert(goal)
         .select('*')
         .single();
       
