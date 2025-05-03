@@ -11,7 +11,7 @@ export const useGoalOperations = (
   setSelectedGoal: (goal: Goal | null) => void,
   setGoalToDelete: (goalId: string | null) => void,
   setIsCollaborateDialogOpen: (isOpen: boolean) => void,
-  setGoalCollaborators: (collaborators: Collaborator[]) => void,
+  setGoalCollaborators: React.Dispatch<React.SetStateAction<Collaborator[]>>,
   fetchGoals: () => Promise<void>,
   deleteGoal: (goalId: string) => Promise<void>,
   fetchCollaborators: (goalId: string) => Promise<Collaborator[]>,
@@ -137,8 +137,8 @@ export const useGoalOperations = (
           description: "Collaborator has been removed",
         });
         
-        // Fix the type error by using a type-safe approach
-        setGoalCollaborators((prev: Collaborator[]) => prev.filter(c => c.user_id !== userId));
+        // Use the functional update pattern with the correct React.SetStateAction type
+        setGoalCollaborators(prev => prev.filter(c => c.user_id !== userId));
       }
     } catch (error: any) {
       console.error('Error removing collaborator:', error);
