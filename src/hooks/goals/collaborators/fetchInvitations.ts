@@ -23,6 +23,7 @@ export function useFetchInvitations() {
           id,
           goal_id,
           inviter_id,
+          invitee_id,
           status,
           created_at,
           expires_at,
@@ -38,7 +39,25 @@ export function useFetchInvitations() {
         throw error;
       }
       
-      return invitations || [];
+      // Transform the data to match our expected structure
+      const formattedInvitations = invitations?.map(invitation => ({
+        id: invitation.id,
+        goal_id: invitation.goal_id,
+        inviter_id: invitation.inviter_id,
+        invitee_id: invitation.invitee_id,
+        status: invitation.status,
+        created_at: invitation.created_at,
+        expires_at: invitation.expires_at,
+        goal: {
+          title: invitation.savings_goals?.title || 'Unknown Goal',
+          emoji: invitation.savings_goals?.emoji || '🎯'
+        },
+        inviter: {
+          full_name: invitation.profiles?.full_name || 'Unknown User'
+        }
+      })) || [];
+      
+      return formattedInvitations;
     } catch (error: any) {
       console.error('Error fetching invitations:', error);
       toast({
