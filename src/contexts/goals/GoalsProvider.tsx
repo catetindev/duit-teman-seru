@@ -1,14 +1,15 @@
 
-import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
-import { Goal, Collaborator } from '@/hooks/goals/types';
+import React, { createContext, useContext, ReactNode, useMemo, useCallback, useEffect } from 'react';
+import { Goal } from '@/hooks/goals/types';
 import { useGoals } from '@/hooks/goals/useGoals';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { useToast } from '@/hooks/use-toast';
-import { GoalsContextType, FilterOption, SortDirection, SortOption } from './types';
+import { GoalsContextType } from './types';
 import { filterAndSortGoals } from './goalsUtils';
 import { useGoalOperations } from './goalOperations';
 import { useLocation } from 'react-router-dom';
+import { useGoalsState } from './useGoalsState';
 
 const GoalsContext = createContext<GoalsContextType | undefined>(undefined);
 
@@ -20,22 +21,8 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Only fetch goals if we're on the goals page
   const shouldFetchGoals = location.pathname === '/goals';
   
-  // Dialog states
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCollaborateDialogOpen, setIsCollaborateDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
-  // Goal states
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [goalCollaborators, setGoalCollaborators] = useState<Collaborator[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
-  
-  // Sort and filter states
-  const [sortBy, setSortBy] = useState<SortOption>('progress');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [filterBy, setFilterBy] = useState<FilterOption>('all');
+  // Get all state from the hook
+  const state = useGoalsState();
   
   const { 
     goals, 
@@ -51,12 +38,12 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     calculateProgress
   } = useGoals(user?.id, shouldFetchGoals);
 
-  // Fix: Properly memoize the filtered goals to prevent render loops
+  // Memoize the filtered goals to prevent render loops
   const filteredAndSortedGoals = useMemo(() => {
-    return filterAndSortGoals(goals || [], filterBy, sortBy, sortDirection, calculateProgress);
-  }, [goals, filterBy, sortBy, sortDirection, calculateProgress]);
+    return filterAndSortGoals(goals || [], state.filterBy, state.sortBy, state.sortDirection, calculateProgress);
+  }, [goals, state.filterBy, state.sortBy, state.sortDirection, calculateProgress]);
   
-  // Fix: Wrap goal operation functions with useCallback to prevent recreation on every render
+  // Get goal operations
   const {
     handleEditGoal,
     handleDeleteGoal,
@@ -66,22 +53,22 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     handleInviteCollaborator,
     handleRemoveCollaborator
   } = useGoalOperations(
-    selectedGoal,
-    setIsEditDialogOpen,
-    setIsDeleteDialogOpen,
-    setSelectedGoal,
-    setGoalToDelete,
-    setIsCollaborateDialogOpen,
-    setGoalCollaborators,
+    state.selectedGoal,
+    state.setIsEditDialogOpen,
+    state.setIsDeleteDialogOpen,
+    state.setSelectedGoal,
+    state.setGoalToDelete,
+    state.setIsCollaborateDialogOpen,
+    state.setGoalCollaborators,
     fetchGoals,
     deleteGoal,
     fetchCollaborators,
     addCollaborator,
     removeCollaborator,
-    setIsSubmitting
+    state.setIsSubmitting
   );
 
-  // Fix: Properly memoize handleAddGoal with stable dependencies
+  // Handle adding a goal
   const handleAddGoal = useCallback(async (goalData: GoalFormData) => {
     if (!user?.id) {
       toast({
@@ -92,7 +79,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return;
     }
 
-    setIsSubmitting(true);
+    state.setIsSubmitting(true);
     
     try {      
       console.log('Adding new goal with data:', goalData);
@@ -116,7 +103,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           description: "Savings goal has been added.",
         });
         
-        setIsAddDialogOpen(false);
+        state.setIsAddDialogOpen(false);
       }
       
     } catch (error: any) {
@@ -127,37 +114,37 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      state.setIsSubmitting(false);
     }
-  }, [user, addGoal, toast, setIsAddDialogOpen]);
+  }, [user, addGoal, toast, state]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     goals,
     loading,
     error,
-    selectedGoal,
-    goalToDelete,
-    isSubmitting,
-    sortBy,
-    sortDirection,
-    filterBy,
-    goalCollaborators,
+    selectedGoal: state.selectedGoal,
+    goalToDelete: state.goalToDelete,
+    isSubmitting: state.isSubmitting,
+    sortBy: state.sortBy,
+    sortDirection: state.sortDirection,
+    filterBy: state.filterBy,
+    goalCollaborators: state.goalCollaborators,
     filteredAndSortedGoals,
-    isAddDialogOpen,
-    isEditDialogOpen,
-    isCollaborateDialogOpen,
-    isDeleteDialogOpen,
+    isAddDialogOpen: state.isAddDialogOpen,
+    isEditDialogOpen: state.isEditDialogOpen,
+    isCollaborateDialogOpen: state.isCollaborateDialogOpen,
+    isDeleteDialogOpen: state.isDeleteDialogOpen,
     fetchGoals,
-    setSelectedGoal,
-    setIsAddDialogOpen,
-    setIsEditDialogOpen,
-    setIsCollaborateDialogOpen,
-    setIsDeleteDialogOpen,
-    setGoalToDelete,
-    setSortBy,
-    setSortDirection,
-    setFilterBy,
+    setSelectedGoal: state.setSelectedGoal,
+    setIsAddDialogOpen: state.setIsAddDialogOpen,
+    setIsEditDialogOpen: state.setIsEditDialogOpen,
+    setIsCollaborateDialogOpen: state.setIsCollaborateDialogOpen,
+    setIsDeleteDialogOpen: state.setIsDeleteDialogOpen,
+    setGoalToDelete: state.setGoalToDelete,
+    setSortBy: state.setSortBy,
+    setSortDirection: state.setSortDirection,
+    setFilterBy: state.setFilterBy,
     handleAddGoal,
     handleEditGoal,
     handleDeleteGoal,
@@ -172,18 +159,8 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     goals,
     loading,
     error,
-    selectedGoal,
-    goalToDelete,
-    isSubmitting,
-    sortBy,
-    sortDirection,
-    filterBy,
-    goalCollaborators,
+    state,
     filteredAndSortedGoals,
-    isAddDialogOpen, 
-    isEditDialogOpen,
-    isCollaborateDialogOpen,
-    isDeleteDialogOpen,
     fetchGoals,
     handleAddGoal,
     handleEditGoal,
