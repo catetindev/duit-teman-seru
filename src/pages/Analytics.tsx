@@ -7,7 +7,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { formatCurrency } from '@/hooks/useDashboardData';
+import { formatCurrency } from '@/utils/formatUtils';
 import { 
   BarChart,
   ResponsiveContainer, 
