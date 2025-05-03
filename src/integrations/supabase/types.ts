@@ -95,8 +95,47 @@ export type Database = {
           },
         ]
       }
+      goal_invitations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          goal_id: string
+          id: string
+          invitee_id: string
+          inviter_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          goal_id: string
+          id?: string
+          invitee_id: string
+          inviter_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          goal_id?: string
+          id?: string
+          invitee_id?: string
+          inviter_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_invitations_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
+          action_data: string | null
           created_at: string
           id: string
           is_read: boolean
@@ -106,6 +145,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          action_data?: string | null
           created_at?: string
           id?: string
           is_read?: boolean
@@ -115,6 +155,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          action_data?: string | null
           created_at?: string
           id?: string
           is_read?: boolean

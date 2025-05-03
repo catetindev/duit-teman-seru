@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Collaborator } from './types';
+import { Collaborator, GoalInvitation } from './types';
 import { useToast } from '@/hooks/use-toast';
 
 export function useCollaboratorApi() {

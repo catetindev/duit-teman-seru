@@ -35,3 +35,22 @@ export interface InvitationWithDetails extends GoalInvitation {
     full_name: string;
   };
 }
+
+export type ValidCurrency = 'IDR' | 'USD';
+
+export interface Budget {
+  id: string;
+  category: string;
+  amount: number;
+  spent?: number;
+  currency: ValidCurrency;
+  period: string;
+  user_id: string;
+}
+
+export interface DashboardStats {
+  totalIncome: number;
+  totalExpenses: number;
+  savingsRate: number;
+  goalProgress: number;
+}
