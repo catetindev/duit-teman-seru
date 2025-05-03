@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +14,7 @@ import AddGoalDialog from '@/components/goals/AddGoalDialog';
 import EditGoalDialog from '@/components/goals/EditGoalDialog';
 import CollaboratorsDialog from '@/components/goals/CollaboratorsDialog';
 import DeleteConfirmationDialog from '@/components/goals/DeleteConfirmationDialog';
+import GoalsFilters, { SortOption, SortDirection, FilterOption } from '@/components/goals/GoalsFilters';
 import { useGoals } from '@/hooks/useGoals';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 
@@ -50,6 +50,11 @@ const GoalsPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   
+  // New states for sorting and filtering
+  const [sortBy, setSortBy] = useState<SortOption>('progress');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [filterBy, setFilterBy] = useState<FilterOption>('all');
+  
   const { 
     goals, 
     loading, 
@@ -61,6 +66,56 @@ const GoalsPage = () => {
     formatCurrency,
     calculateProgress
   } = useGoals(user?.id || '');
+
+  // Apply sorting and filtering to goals
+  const filteredAndSortedGoals = useMemo(() => {
+    let result = [...goals];
+    
+    // Apply filters
+    switch(filterBy) {
+      case 'completed':
+        result = result.filter(goal => calculateProgress(goal.saved_amount, goal.target_amount) >= 100);
+        break;
+      case 'incomplete':
+        result = result.filter(goal => calculateProgress(goal.saved_amount, goal.target_amount) < 100);
+        break;
+      case 'noDate':
+        result = result.filter(goal => !goal.target_date);
+        break;
+      // 'all' case returns all goals, no filtering needed
+    }
+    
+    // Apply sorting
+    result.sort((a, b) => {
+      let comparison = 0;
+      
+      switch(sortBy) {
+        case 'progress':
+          const progressA = calculateProgress(a.saved_amount, a.target_amount);
+          const progressB = calculateProgress(b.saved_amount, b.target_amount);
+          comparison = progressA - progressB;
+          break;
+        case 'amount':
+          comparison = a.target_amount - b.target_amount;
+          break;
+        case 'date':
+          // Handle cases where one or both goals don't have a target date
+          if (!a.target_date && !b.target_date) comparison = 0;
+          else if (!a.target_date) comparison = 1;  // Goals without dates go last
+          else if (!b.target_date) comparison = -1; // Goals without dates go last
+          else comparison = new Date(a.target_date).getTime() - new Date(b.target_date).getTime();
+          break;
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+      }
+      
+      // Apply sort direction
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    
+    return result;
+  }, [goals, sortBy, sortDirection, filterBy, calculateProgress]);
 
   const handleEditGoal = (goal: Goal) => {
     setSelectedGoal(goal);
@@ -225,9 +280,21 @@ const GoalsPage = () => {
         </div>
       </div>
 
-      {/* Goals List Component */}
+      {/* Add GoalsFilters component */}
+      {goals.length > 0 && (
+        <GoalsFilters
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortDirection={sortDirection}
+          setSortDirection={setSortDirection}
+          filterBy={filterBy}
+          setFilterBy={setFilterBy}
+        />
+      )}
+
+      {/* Goals List Component - use filtered and sorted goals */}
       <GoalsList
-        goals={goals}
+        goals={filteredAndSortedGoals}
         formatCurrency={formatCurrency}
         calculateProgress={calculateProgress}
         onEdit={handleEditGoal}
