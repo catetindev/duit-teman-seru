@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Goal } from './types';
+import { Goal, ValidCurrency } from './types';
 
 export function useGoalApi() {
   const fetchGoals = async (userId: string): Promise<Goal[]> => {
@@ -17,7 +17,11 @@ export function useGoalApi() {
       
       if (error) throw error;
       
-      return data as Goal[];
+      // Cast the currency to the valid type
+      return data.map(goal => ({
+        ...goal,
+        currency: (goal.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency
+      })) as Goal[];
     } catch (error) {
       console.error('Error in fetchGoals:', error);
       throw error;
@@ -34,7 +38,11 @@ export function useGoalApi() {
       
       if (error) throw error;
       
-      return data;
+      // Cast the currency to the valid type
+      return {
+        ...data,
+        currency: (data.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency
+      } as Goal;
     } catch (error) {
       console.error('Error in addGoal:', error);
       throw error;
@@ -52,7 +60,11 @@ export function useGoalApi() {
       
       if (error) throw error;
       
-      return data;
+      // Cast the currency to the valid type
+      return {
+        ...data,
+        currency: (data.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency
+      } as Goal;
     } catch (error) {
       console.error('Error in updateGoal:', error);
       throw error;

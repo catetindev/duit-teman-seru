@@ -9,21 +9,20 @@ export function useCollaboratorApi() {
         .from('goal_collaborators')
         .select(`
           user_id,
-          profiles(
-            email,
-            full_name
-          )
+          profiles:profiles(email, full_name)
         `)
         .eq('goal_id', goalId);
       
       if (error) throw error;
       
       // Transform to a more user-friendly format
-      const collaborators: Collaborator[] = (data || []).map(item => ({
-        user_id: item.user_id,
-        email: item.profiles?.email || '',
-        full_name: item.profiles?.full_name || ''
-      }));
+      const collaborators: Collaborator[] = (data || [])
+        .filter(item => item.profiles) // Make sure profiles exists
+        .map(item => ({
+          user_id: item.user_id,
+          email: item.profiles?.email || '',
+          full_name: item.profiles?.full_name || ''
+        }));
       
       return collaborators;
     } catch (error) {

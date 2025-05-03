@@ -4,27 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency, calculateProgress } from '@/utils/formatUtils';
+import { Goal, ValidCurrency, DashboardStats } from '@/hooks/goals/types';
 
 // Types
 export interface Transaction {
   id: string;
   type: 'income' | 'expense';
   amount: number;
-  currency: 'IDR' | 'USD';
+  currency: ValidCurrency;
   category: string;
   description: string;
   date: string;
   icon?: string;
-}
-
-export interface Goal {
-  id: string;
-  title: string;
-  target_amount: number;
-  saved_amount: number;
-  currency: 'IDR' | 'USD';
-  target_date?: string;
-  emoji?: string;
 }
 
 export interface Budget {
@@ -32,15 +23,8 @@ export interface Budget {
   category: string;
   amount: number;
   spent?: number;
-  currency: 'IDR' | 'USD';
+  currency: ValidCurrency;
   period: 'daily' | 'weekly' | 'monthly' | 'yearly';
-}
-
-export interface DashboardStats {
-  totalIncome: number;
-  totalExpense: number;
-  balance: number;
-  recentTransactionDate?: string;
 }
 
 // Main hook
@@ -55,7 +39,10 @@ export function useDashboardData() {
   const [stats, setStats] = useState<DashboardStats>({
     totalIncome: 0,
     totalExpense: 0,
-    balance: 0
+    balance: 0,
+    income: 0,
+    expenses: 0,
+    currency: 'IDR'
   });
   
   // Loading states
@@ -81,7 +68,13 @@ export function useDashboardData() {
       
       if (error) throw error;
       
-      const formattedData: Transaction[] = data || [];
+      // Make sure to properly type the transaction data
+      const formattedData: Transaction[] = (data || []).map(tx => ({
+        ...tx,
+        type: tx.type === 'income' ? 'income' : 'expense',
+        currency: (tx.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency
+      }));
+      
       setTransactions(formattedData);
       
       // Calculate stats
@@ -96,10 +89,15 @@ export function useDashboardData() {
         }
       });
       
+      const defaultCurrency = formattedData.length > 0 ? formattedData[0].currency : 'IDR';
+      
       setStats({
         totalIncome,
         totalExpense,
         balance: totalIncome - totalExpense,
+        income: totalIncome,
+        expenses: totalExpense,
+        currency: defaultCurrency,
         recentTransactionDate: formattedData[0]?.date
       });
       
@@ -125,16 +123,17 @@ export function useDashboardData() {
       const { data, error } = await supabase
         .from('savings_goals')
         .select('*')
-        .or(`user_id.eq.${user.id},id.in.(${
-          supabase.from('goal_collaborators')
-            .select('goal_id')
-            .eq('user_id', user.id)
-            .then(({ data }) => data?.map(row => row.goal_id) || [])
-        })`);
+        .or(`user_id.eq.${user.id}`);
         
       if (error) throw error;
       
-      setGoals(data || []);
+      // Type conversion to ensure Goal[] type compatibility
+      const typedGoals: Goal[] = (data || []).map(goal => ({
+        ...goal,
+        currency: (goal.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency
+      }));
+      
+      setGoals(typedGoals);
     } catch (error: any) {
       console.error('Error fetching goals:', error);
       toast({
@@ -162,7 +161,7 @@ export function useDashboardData() {
       if (error) throw error;
       
       // Calculate spent amount for each budget based on transactions
-      const budgetsWithSpent = (data || []).map(budget => {
+      const budgetsWithSpent: Budget[] = (data || []).map(budget => {
         const spent = transactions
           .filter(t => 
             t.type === 'expense' && 
@@ -172,7 +171,9 @@ export function useDashboardData() {
         
         return {
           ...budget,
-          spent
+          spent,
+          currency: (budget.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency,
+          period: budget.period as 'daily' | 'weekly' | 'monthly' | 'yearly'
         };
       });
       
@@ -211,8 +212,14 @@ export function useDashboardData() {
         
         if (error) throw error;
         
-        // Update local state
-        setBudgets(prev => prev.map(b => b.id === id ? { ...updatedBudget, spent: b.spent } : b));
+        // Update local state with proper type casting
+        setBudgets(prev => prev.map(b => b.id === id ? {
+          ...updatedBudget,
+          spent: b.spent,
+          currency: (updatedBudget.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency,
+          period: updatedBudget.period as 'daily' | 'weekly' | 'monthly' | 'yearly'
+        } : b));
+        
         fetchBudgets(); // Refresh to get accurate data
         
         return updatedBudget;
@@ -226,8 +233,16 @@ export function useDashboardData() {
         
         if (error) throw error;
         
-        // Update local state
-        setBudgets(prev => [...prev, { ...newBudget, spent: 0 }]);
+        // Update local state with proper type casting
+        const typedBudget: Budget = {
+          ...newBudget,
+          spent: 0,
+          currency: (newBudget.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency,
+          period: newBudget.period as 'daily' | 'weekly' | 'monthly' | 'yearly'
+        };
+        
+        setBudgets(prev => [...prev, typedBudget]);
+        
         fetchBudgets(); // Refresh to get accurate data
         
         return newBudget;

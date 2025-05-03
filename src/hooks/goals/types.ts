@@ -15,3 +15,17 @@ export interface Collaborator {
   email: string;
   full_name: string;
 }
+
+// Add this type alias for database currency conversion
+export type ValidCurrency = 'IDR' | 'USD';
+
+// Define the DashboardStats interface
+export interface DashboardStats {
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  income: number;
+  expenses: number;
+  currency: ValidCurrency;
+  recentTransactionDate?: string;
+}
