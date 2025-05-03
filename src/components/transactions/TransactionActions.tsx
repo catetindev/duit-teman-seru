@@ -48,7 +48,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsEditOpen(false);
-      // Make sure to call onUpdate to refresh the transactions list
+      // Immediately call onUpdate to refresh the transactions list
       onUpdate();
     } catch (error: any) {
       console.error('Error updating transaction:', error);
@@ -89,7 +89,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       console.error('Error deleting transaction:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete transaction",
+        description: error.message || "Failed to delete transaction. Make sure you have permission to delete this transaction.",
         variant: "destructive",
       });
     } finally {

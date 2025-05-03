@@ -3,6 +3,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatUtils";
 import TransactionActions from "@/components/transactions/TransactionActions";
+import { useCallback } from "react";
 
 interface Transaction {
   id: string;
@@ -20,6 +21,7 @@ interface TransactionListProps {
   className?: string;
   showEmpty?: boolean;
   onUpdate?: () => void;
+  isLoading?: boolean;
 }
 
 const categoryIcons: Record<string, string> = {
@@ -33,8 +35,28 @@ const categoryIcons: Record<string, string> = {
   'other': '📦'
 };
 
-const TransactionList = ({ transactions, className, showEmpty = true, onUpdate = () => {} }: TransactionListProps) => {
+const TransactionList = ({ 
+  transactions, 
+  className, 
+  showEmpty = true, 
+  onUpdate = () => {}, 
+  isLoading = false 
+}: TransactionListProps) => {
   const { t } = useLanguage();
+
+  const handleUpdate = useCallback(() => {
+    console.log('Transaction update requested from list');
+    onUpdate();
+  }, [onUpdate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+        <p className="text-sm text-muted-foreground">{t('transactions.loading')}</p>
+      </div>
+    );
+  }
 
   if (transactions.length === 0 && showEmpty) {
     return (
@@ -46,11 +68,12 @@ const TransactionList = ({ transactions, className, showEmpty = true, onUpdate =
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-3", className)} data-testid="transaction-list">
       {transactions.map((transaction) => (
         <div 
           key={transaction.id}
           className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm flex items-center justify-between"
+          data-testid={`transaction-item-${transaction.id}`}
         >
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -71,7 +94,7 @@ const TransactionList = ({ transactions, className, showEmpty = true, onUpdate =
             )}>
               {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
             </div>
-            <TransactionActions transaction={transaction} onUpdate={onUpdate} />
+            <TransactionActions transaction={transaction} onUpdate={handleUpdate} />
           </div>
         </div>
       ))}

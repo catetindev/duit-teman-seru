@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import TransactionList from '@/components/ui/TransactionList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,6 +23,12 @@ interface TransactionTabsProps {
 
 const TransactionTabs = ({ transactions, isLoading, onUpdate }: TransactionTabsProps) => {
   const { t } = useLanguage();
+  
+  // Create a memoized update handler to prevent unnecessary re-renders
+  const handleUpdate = useCallback(() => {
+    console.log('Transaction update triggered from tabs');
+    onUpdate();
+  }, [onUpdate]);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
@@ -37,7 +43,7 @@ const TransactionTabs = ({ transactions, isLoading, onUpdate }: TransactionTabsP
           <TransactionList 
             transactions={transactions}
             isLoading={isLoading}
-            onUpdate={onUpdate}
+            onUpdate={handleUpdate}
           />
         </TabsContent>
         
@@ -45,7 +51,7 @@ const TransactionTabs = ({ transactions, isLoading, onUpdate }: TransactionTabsP
           <TransactionList 
             transactions={transactions.filter(t => t.type === 'income')}
             isLoading={isLoading}
-            onUpdate={onUpdate}
+            onUpdate={handleUpdate}
           />
         </TabsContent>
         
@@ -53,7 +59,7 @@ const TransactionTabs = ({ transactions, isLoading, onUpdate }: TransactionTabsP
           <TransactionList 
             transactions={transactions.filter(t => t.type === 'expense')}
             isLoading={isLoading}
-            onUpdate={onUpdate}
+            onUpdate={handleUpdate}
           />
         </TabsContent>
       </Tabs>

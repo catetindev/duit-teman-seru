@@ -18,14 +18,28 @@ interface TransactionDeleteDialogProps {
   isSubmitting: boolean;
 }
 
+/**
+ * Dialog component for confirming transaction deletion
+ * 
+ * @param isOpen - Controls the visibility of the dialog
+ * @param onClose - Function to call when the dialog should close
+ * @param onConfirm - Async function to handle the delete confirmation
+ * @param isSubmitting - Boolean indicating if the delete operation is in progress
+ */
 const TransactionDeleteDialog = ({
   isOpen,
   onClose,
   onConfirm,
   isSubmitting
 }: TransactionDeleteDialogProps) => {
+  const handleClose = () => {
+    if (!isSubmitting) {
+      onClose();
+    }
+  };
+
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
+    <AlertDialog open={isOpen} onOpenChange={handleClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Transaction</AlertDialogTitle>

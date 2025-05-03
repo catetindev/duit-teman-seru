@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,7 @@ export const useTransactions = () => {
   const [timeFilter, setTimeFilter] = useState('month');
   const [categoryFilter, setCategoryFilter] = useState('all');
   
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
       return;
@@ -32,6 +32,8 @@ export const useTransactions = () => {
     
     setIsLoading(true);
     try {
+      console.log('Fetching transactions for user:', user.id);
+      
       // Build query based on filters
       let query = supabase
         .from('transactions')
@@ -62,7 +64,11 @@ export const useTransactions = () => {
       
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+      
+      console.log('Fetched transactions:', data);
       
       // Format transactions
       const formattedTransactions = (data || []).map(item => ({
@@ -81,13 +87,13 @@ export const useTransactions = () => {
       console.error('Error fetching transactions:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch transactions",
+        description: "Failed to fetch transactions: " + (error.message || "Unknown error"),
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, timeFilter, categoryFilter, isPremium, toast]);
 
   // Get category icon
   const getCategoryIcon = (category: string): string => {
@@ -106,7 +112,7 @@ export const useTransactions = () => {
     return categoryIcons[category.toLowerCase()] || '💸';
   };
   
-  // Fetch transactions initially and set up real-time subscription
+  // Fetch transactions initially
   useEffect(() => {
     if (!user) return;
     
@@ -133,7 +139,7 @@ export const useTransactions = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, timeFilter, categoryFilter]);
+  }, [user, fetchTransactions]);
 
   // Filter transactions based on search query
   const filteredTransactions = transactions.filter(transaction => 
