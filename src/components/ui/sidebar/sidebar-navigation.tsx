@@ -1,109 +1,10 @@
+
 import * as React from "react";
-import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Settings, Bell, BarChart2, PieChart, Plus, Minus } from "lucide-react";
-import LogoutButton from "./LogoutButton";
-interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
-  className?: string;
-  children?: React.ReactNode;
-}
-const useSidebar = () => {
-  // Simple sidebar state management. Adjust as needed.
-  const [collapsed, setCollapsed] = React.useState(false);
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
-  return {
-    collapsed,
-    toggleSidebar
-  };
-};
-export const SidebarProvider = ({
-  children
-}: {
-  children: React.ReactNode;
-}) => {
-  const {
-    collapsed,
-    toggleSidebar
-  } = useSidebar();
-  return <div className="min-h-screen flex w-full">
-      <SidebarContext.Provider value={{
-      collapsed,
-      toggleSidebar
-    }}>
-        {children}
-      </SidebarContext.Provider>
-    </div>;
-};
-type SidebarContextType = {
-  collapsed: boolean;
-  toggleSidebar: () => void;
-};
-const SidebarContext = React.createContext<SidebarContextType | undefined>(undefined);
-export const useSidebarContext = () => {
-  const context = React.useContext(SidebarContext);
-  if (!context) {
-    throw new Error("useSidebarContext must be used within a SidebarProvider");
-  }
-  return context;
-};
-export const Sidebar = ({
-  className,
-  children,
-  ...props
-}: SidebarProps) => {
-  const {
-    collapsed
-  } = useSidebarContext();
-  return <aside className={cn("flex flex-col h-screen border-r fixed inset-y-0 left-0 transition-all bg-background", collapsed ? "w-16" : "w-64", className)} {...props}>
-      {children}
-    </aside>;
-};
-interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
-export const SidebarHeader = ({
-  className,
-  ...props
-}: SidebarHeaderProps) => {
-  const {
-    collapsed
-  } = useSidebarContext();
-  return <header className={cn("h-16 flex items-center px-4 border-b", className)} {...props}>
-      <div className="flex items-center justify-between w-full">
-        {!collapsed && <div className="flex items-center">
-            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-10 object-contain" />
-          </div>}
-        {collapsed && <div className="flex items-center justify-center w-full">
-            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-8 object-contain" />
-          </div>}
-      </div>
-    </header>;
-};
-interface SidebarContentProps extends React.HTMLAttributes<HTMLDivElement> {}
-export const SidebarContent = ({
-  className,
-  children,
-  ...props
-}: SidebarContentProps) => {
-  return <div className={cn("flex-1 overflow-y-auto py-3", className)} {...props}>
-      {children}
-    </div>;
-};
-interface SidebarFooterProps extends React.HTMLAttributes<HTMLElement> {}
-export const SidebarFooter = ({
-  className,
-  ...props
-}: SidebarFooterProps) => {
-  const {
-    collapsed
-  } = useSidebarContext();
-  return <footer className={cn("p-4 border-t mt-auto", className)} {...props}>
-      <div className={cn("flex items-center justify-center", collapsed ? "flex-col" : "justify-between")}>
-        {!collapsed && <LogoutButton variant="ghost" />}
-        {collapsed && <LogoutButton variant="ghost" size="icon" className="h-9 w-9 p-0" />}
-      </div>
-    </footer>;
-};
+import { Link, useLocation } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
+import { useSidebarContext } from "./sidebar-context";
+
 interface SidebarGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
 export const SidebarGroup = ({
   className,
@@ -114,6 +15,7 @@ export const SidebarGroup = ({
       {children}
     </div>;
 };
+
 interface SidebarGroupLabelProps extends React.HTMLAttributes<HTMLParagraphElement> {}
 export const SidebarGroupLabel = ({
   className,
@@ -125,6 +27,7 @@ export const SidebarGroupLabel = ({
   if (collapsed) return null;
   return <p className={cn("ml-4 text-xs font-medium text-muted-foreground pb-1", className)} {...props} />;
 };
+
 interface SidebarGroupContentProps extends React.HTMLAttributes<HTMLDivElement> {}
 export const SidebarGroupContent = ({
   className,
@@ -135,6 +38,7 @@ export const SidebarGroupContent = ({
       {children}
     </div>;
 };
+
 interface SidebarMenuProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultOpen?: boolean;
 }
@@ -144,6 +48,7 @@ export const SidebarMenu = ({
 }: SidebarMenuProps) => {
   return <div className={cn("flex flex-col space-y-0.5", className)} {...props} />;
 };
+
 interface SidebarMenuItemProps extends React.HTMLAttributes<HTMLLIElement> {
   active?: boolean;
   disabled?: boolean;
@@ -159,6 +64,7 @@ export const SidebarMenuItem = ({
       {children}
     </li>;
 };
+
 interface SidebarMenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
   active?: boolean;
@@ -178,19 +84,7 @@ export const SidebarMenuButton = React.forwardRef<HTMLButtonElement, SidebarMenu
     </Comp>;
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
-interface SidebarTriggerProps extends React.HTMLAttributes<HTMLButtonElement> {}
-export const SidebarTrigger = ({
-  className,
-  ...props
-}: SidebarTriggerProps) => {
-  const {
-    collapsed,
-    toggleSidebar
-  } = useSidebarContext();
-  return <button className={cn("fixed top-4 left-4 z-50 h-8 w-8 flex items-center justify-center rounded-md border bg-background md:hidden", className)} onClick={toggleSidebar} {...props}>
-      {collapsed ? <Plus size={16} /> : <Minus size={16} />}
-    </button>;
-};
+
 interface SidebarNavLinkProps {
   to: string;
   icon: React.ReactNode;
@@ -217,6 +111,7 @@ export const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
       </SidebarMenuButton>
     </SidebarMenuItem>;
 };
+
 interface SidebarSubMenuProps extends React.HTMLAttributes<HTMLDivElement> {
   label: string;
   icon: React.ReactNode;
