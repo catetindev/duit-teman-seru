@@ -4,10 +4,10 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
+import { z } from 'zod';
 import TransactionEditDialog from './TransactionEditDialog';
 import TransactionDeleteDialog from './TransactionDeleteDialog';
-import { Transaction } from './transaction-types';
-import { TransactionFormValues } from './transaction-form-schema';
+import { Transaction, TransactionFormSchema } from './transaction-types';
 
 interface TransactionActionsProps {
   transaction: Transaction;
@@ -20,7 +20,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleSubmit = async (values: TransactionFormValues) => {
+  const handleSubmit = async (values: z.infer<typeof TransactionFormSchema>) => {
     setIsSubmitting(true);
     try {
       console.log('Updating transaction with ID:', transaction.id, 'New values:', values);
@@ -48,8 +48,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsEditOpen(false);
-      
-      // Call onUpdate immediately and don't rely on setTimeout
+      // Make sure to call onUpdate to refresh the transactions list
       onUpdate();
     } catch (error: any) {
       console.error('Error updating transaction:', error);
@@ -84,8 +83,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
       });
       
       setIsDeleteOpen(false);
-      
-      // Call onUpdate immediately and don't rely on setTimeout
+      // Immediately call onUpdate to refresh the transactions list
       onUpdate();
     } catch (error: any) {
       console.error('Error deleting transaction:', error);

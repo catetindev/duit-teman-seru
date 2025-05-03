@@ -80,7 +80,6 @@ const GoalCard = ({
       setIsDialogOpen(false);
       setAmount('');
       
-      // Call update function immediately, don't rely on setTimeout
       if (onUpdate) onUpdate();
       
     } catch (error: any) {
@@ -117,7 +116,6 @@ const GoalCard = ({
       
       setIsDeleteDialogOpen(false);
       
-      // Call update functions immediately, don't rely on setTimeout
       if (onDelete) onDelete();
       else if (onUpdate) onUpdate(); // Fall back to onUpdate if onDelete isn't provided
       

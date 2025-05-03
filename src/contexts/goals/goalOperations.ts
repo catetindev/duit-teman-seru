@@ -47,9 +47,6 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
         title: "Success",
         description: "Goal has been deleted successfully",
       });
-      
-      // Immediately fetch goals to refresh the UI
-      await fetchGoals();
     } catch (error: any) {
       console.error('Error deleting goal:', error);
       toast({
@@ -62,7 +59,7 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       setGoalToDelete(null);
       setIsDeleteDialogOpen(false);
     }
-  }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen, setIsSubmitting, toast, fetchGoals]);
+  }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen, setIsSubmitting, toast]);
 
   const openCollaborationDialog = useCallback(async (goal: Goal) => {
     setSelectedGoal(goal);
@@ -110,9 +107,8 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       });
       
       setIsEditDialogOpen(false);
-      
-      // Immediately fetch goals to refresh the UI
       await fetchGoals();
+      
     } catch (error: any) {
       console.error('Error updating goal:', error);
       toast({

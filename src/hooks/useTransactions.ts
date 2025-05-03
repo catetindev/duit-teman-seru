@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,8 +24,7 @@ export const useTransactions = () => {
   const [timeFilter, setTimeFilter] = useState('month');
   const [categoryFilter, setCategoryFilter] = useState('all');
   
-  // Memoize fetchTransactions to avoid recreation on every render
-  const fetchTransactions = useCallback(async () => {
+  const fetchTransactions = async () => {
     if (!user) {
       setIsLoading(false);
       return;
@@ -33,8 +32,6 @@ export const useTransactions = () => {
     
     setIsLoading(true);
     try {
-      console.log('Fetching transactions for user:', user.id);
-      
       // Build query based on filters
       let query = supabase
         .from('transactions')
@@ -79,7 +76,6 @@ export const useTransactions = () => {
         icon: getCategoryIcon(item.category)
       }));
       
-      console.log('Fetched transactions:', formattedTransactions.length);
       setTransactions(formattedTransactions);
     } catch (error: any) {
       console.error('Error fetching transactions:', error);
@@ -91,7 +87,7 @@ export const useTransactions = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, isPremium, timeFilter, categoryFilter, toast]);
+  };
 
   // Get category icon
   const getCategoryIcon = (category: string): string => {
@@ -110,14 +106,11 @@ export const useTransactions = () => {
     return categoryIcons[category.toLowerCase()] || '💸';
   };
   
-  // Set up real-time subscription with manual refresh as backup
+  // Fetch transactions initially and set up real-time subscription
   useEffect(() => {
     if (!user) return;
     
-    // Initial fetch
     fetchTransactions();
-    
-    console.log('Setting up real-time subscription for transactions');
     
     // Set up real-time subscription
     const channel = supabase
@@ -137,12 +130,10 @@ export const useTransactions = () => {
       )
       .subscribe();
     
-    // Cleanup subscription on unmount  
     return () => {
-      console.log('Cleaning up transaction subscription');
       supabase.removeChannel(channel);
     };
-  }, [user, fetchTransactions]);
+  }, [user, timeFilter, categoryFilter]);
 
   // Filter transactions based on search query
   const filteredTransactions = transactions.filter(transaction => 

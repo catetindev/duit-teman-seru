@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Goal, Collaborator } from './types';
 import { useGoalApi } from './goalApi';
 import { useCollaboratorApi } from './collaboratorApi';
@@ -26,8 +26,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     };
   }, []);
 
-  // Fetch goals function with comprehensive error handling
-  const fetchGoals = useCallback(async () => {
+  // Wrapper for fetchGoals that updates state
+  const fetchGoals = async () => {
     if (!userId) {
       console.warn('No userId provided to useGoals.fetchGoals');
       if (isMounted.current) {
@@ -64,10 +64,10 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
         setLoading(false);
       }
     }
-  }, [userId, toast, goalApi]);
+  };
 
-  // Add a new goal 
-  const addGoal = useCallback(async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
+  // Add a new goal and update state if successful
+  const addGoal = async (goal: Omit<Goal, 'id'>): Promise<Goal | null> => {
     console.log('Adding goal in useGoals:', goal);
     // Make sure user_id is set
     if (!goal.user_id) {
@@ -85,8 +85,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       const newGoal = await goalApi.addGoal(goal);
       console.log('New goal created:', newGoal);
       if (newGoal && isMounted.current) {
-        // Fetch all goals to ensure consistency rather than manual state updates
-        await fetchGoals();
+        setGoals(prev => [...prev, newGoal]);
+        // Clear any previous errors
         setError(null);
       }
       return newGoal;
@@ -102,16 +102,16 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       }
       return null;
     }
-  }, [goalApi, fetchGoals, toast]);
+  };
 
-  // Delete a goal
-  const deleteGoal = useCallback(async (goalId: string): Promise<void> => {
+  // Wrapper for deleteGoal that updates state if successful
+  const deleteGoal = async (goalId: string): Promise<void> => {
     try {
       console.log('Deleting goal:', goalId);
       const success = await goalApi.deleteGoal(goalId);
       if (success && isMounted.current) {
-        // Fetch all goals to ensure consistency rather than manual state updates
-        await fetchGoals();
+        setGoals(prev => prev.filter(goal => goal.id !== goalId));
+        // Clear any previous errors
         setError(null);
         
         toast({
@@ -131,14 +131,12 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       }
       throw error; // Re-throw to allow handling in calling components
     }
-  }, [goalApi, fetchGoals, toast]);
+  };
 
   // Set up real-time subscription for goals
   useEffect(() => {
     if (!userId) return;
 
-    console.log('Setting up real-time subscription for goals');
-    
     const channel = supabase
       .channel('public:savings_goals')
       .on(
@@ -168,21 +166,22 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       )
       .subscribe();
 
-    // Cleanup subscription on unmount
     return () => {
-      console.log('Cleaning up goals subscription');
       supabase.removeChannel(channel);
     };
-  }, [userId, fetchGoals]);
+  }, [userId]);
 
-  // Initial fetch when component mounts
+  // Use useEffect to fetch goals when component mounts
   useEffect(() => {
     if (shouldFetch && userId) {
       fetchGoals();
     } else if (!userId) {
       setLoading(false);
     }
-  }, [shouldFetch, userId, fetchGoals]);
+    
+    // No need to include fetchGoals in dependency array as it would cause refetching
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldFetch, userId]);
 
   return {
     goals,
@@ -194,7 +193,7 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
     formatCurrency,
     calculateProgress,
     fetchCollaborators: collaboratorApi.fetchCollaborators,
-    addCollaborator: collaboratorApi.inviteCollaborator,
+    addCollaborator: collaboratorApi.inviteCollaborator, // Changed to use inviteCollaborator
     removeCollaborator: collaboratorApi.removeCollaborator
   };
 }
