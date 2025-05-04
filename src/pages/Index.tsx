@@ -83,7 +83,8 @@ const Index = () => {
             <Button 
               onClick={goToSignup} 
               size="lg"
-              className="bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium text-lg px-8 py-6 h-auto rounded-xl shadow-lg shadow-[#28e57d]/20"
+              variant="outline"
+              className="border-[#28e57d] hover:bg-[#28e57d]/10 text-black dark:text-white font-medium text-lg px-8 py-6 h-auto rounded-xl shadow-lg shadow-[#28e57d]/10"
             >
               Mulai Sekarang
               <ArrowRight className="ml-2" />
@@ -94,12 +95,12 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="mt-16"
+            className="mt-14"
           >
             <img 
               src="/lovable-uploads/cdbfc368-edb8-448f-993c-3230adb08c71.png" 
               alt="App Dashboard Preview" 
-              className="rounded-2xl shadow-xl mx-auto"
+              className="rounded-2xl shadow-xl mx-auto w-full md:w-[90%] lg:w-[95%]"
             />
           </motion.div>
         </div>
@@ -259,7 +260,8 @@ const Index = () => {
                 <Button 
                   onClick={goToAbout}
                   size={isMobile ? "default" : "lg"}
-                  className="bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium px-6"
+                  variant="outline"
+                  className="border-[#28e57d] hover:bg-[#28e57d]/10 text-black dark:text-white font-medium px-6"
                 >
                   Download Sekarang!
                   <Download className="ml-2" />
@@ -299,16 +301,17 @@ const Index = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center p-8 md:p-16 rounded-3xl bg-gradient-to-r from-[#28e57d]/90 to-[#28e57d]/70 shadow-xl shadow-[#28e57d]/20"
+          className="max-w-4xl mx-auto text-center p-8 md:p-16 rounded-3xl bg-gradient-to-r from-gray-900/90 to-gray-800/70 shadow-xl"
         >
-          <h2 className="text-2xl md:text-4xl font-bold mb-4 text-black">Yuk Mulai Catat Keuanganmu Hari Ini!</h2>
-          <p className="text-black/80 text-lg mb-8 md:mb-10 md:text-xl max-w-2xl mx-auto">
+          <h2 className="text-2xl md:text-4xl font-bold mb-4 text-white">Yuk Mulai Catat Keuanganmu Hari Ini!</h2>
+          <p className="text-white/80 text-lg mb-8 md:mb-10 md:text-xl max-w-2xl mx-auto">
             Daftar sekarang dan rasain sendiri serunya atur duit versi kamu.
           </p>
           <Button 
             onClick={goToSignup}
             size="lg"
-            className="bg-black hover:bg-gray-800 text-white font-medium px-8 py-6 h-auto text-lg rounded-xl"
+            variant="outline"
+            className="border-[#28e57d] bg-transparent hover:bg-[#28e57d]/20 text-white font-medium px-8 py-6 h-auto text-lg rounded-xl border-2"
           >
             Coba Gratis Sekarang
             <ChevronRight className="ml-1" />
