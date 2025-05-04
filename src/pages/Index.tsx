@@ -48,7 +48,7 @@ const Index = () => {
         }} transition={{
           duration: 0.5
         }} className="mb-6">
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
+            <h1 className="text-3xl font-bold mb-4 leading-tight my-[17px] md:text-5xl">
               Catat Keuangan Makin Gampang & Menyenangkan!
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 md:text-xl">
