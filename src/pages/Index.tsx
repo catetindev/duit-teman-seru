@@ -67,7 +67,7 @@ const Index = () => {
             className="mb-6"
           >
             <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
-              💸 Catat Keuangan Makin Gampang & Menyenangkan!
+              Catat Keuangan Makin Gampang & Menyenangkan!
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 md:text-xl">
               Nggak perlu ribet, kamu bisa tracking pemasukan & pengeluaran cuma dalam hitungan detik.
@@ -82,10 +82,10 @@ const Index = () => {
           >
             <Button 
               onClick={goToSignup} 
-              size={isMobile ? "lg" : "xl"}
+              size="lg"
               className="bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium text-lg px-8 py-6 h-auto rounded-xl shadow-lg shadow-[#28e57d]/20"
             >
-              🎉 Mulai Sekarang
+              Mulai Sekarang
               <ArrowRight className="ml-2" />
             </Button>
           </motion.div>
@@ -109,7 +109,7 @@ const Index = () => {
       <section className="container mx-auto px-4 py-16 md:py-24 bg-white dark:bg-gray-900 rounded-t-3xl">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">🔍 Cara Kerjanya Simpel Banget</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">Cara Kerjanya Simpel Banget</h2>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -151,29 +151,29 @@ const Index = () => {
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">✨ Kenapa Kamu Bakal Suka:</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">Kenapa Kamu Bakal Suka:</h2>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
             {[
               {
                 icon: <Palette size={40} className="text-pink-500" />,
-                title: "🎨 UI super aesthetic & fun",
+                title: "UI super aesthetic & fun",
                 description: "Desain yang bikin kamu betah dan semangat atur keuangan"
               },
               {
                 icon: <BarChart2 size={40} className="text-purple-500" />,
-                title: "📊 Ringkasan yang mudah dimengerti",
+                title: "Ringkasan yang mudah dimengerti",
                 description: "Data keuanganmu disajikan dengan cara yang simpel dan jelas"
               },
               {
                 icon: <Bell size={40} className="text-yellow-500" />,
-                title: "🔔 Reminder otomatis biar gak lupa",
+                title: "Reminder otomatis biar gak lupa",
                 description: "Notifikasi pintar yang bantu kamu tetap on track"
               },
               {
                 icon: <Lightbulb size={40} className="text-blue-500" />,
-                title: "💡 Tips pintar tiap minggu",
+                title: "Tips pintar tiap minggu",
                 description: "Dapatkan insight dan tips atur keuangan yang sesuai dengan gayamu"
               }
             ].map((feature, i) => (
@@ -202,7 +202,7 @@ const Index = () => {
       <section className="container mx-auto px-4 py-16 md:py-24 bg-gray-50 dark:bg-gray-800 rounded-t-3xl">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">💬 Apa Kata Mereka?</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">Apa Kata Mereka?</h2>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
@@ -210,17 +210,17 @@ const Index = () => {
               {
                 quote: "Desainnya bikin betah. Auto rajin nyatet!",
                 name: "Rani, 21",
-                emoji: "👩‍🎓"
+                emoji: ""
               },
               {
                 quote: "Serasa main game keuangan, seru!",
                 name: "Yoga, 22",
-                emoji: "🧑‍💻"
+                emoji: ""
               },
               {
-                quote: "Jadi ngerti kemana perginya uang jajan 😅",
+                quote: "Jadi ngerti kemana perginya uang jajan",
                 name: "Dinda, 19",
-                emoji: "👩‍🎤"
+                emoji: ""
               }
             ].map((testimonial, i) => (
               <motion.div
@@ -252,7 +252,7 @@ const Index = () => {
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-2xl md:text-4xl font-bold mb-6">📱 Aplikasi yang Bisa Kamu Bawa Kemana Aja!</h2>
+                <h2 className="text-2xl md:text-4xl font-bold mb-6">Aplikasi yang Bisa Kamu Bawa Kemana Aja!</h2>
                 <p className="text-gray-600 dark:text-gray-300 text-lg mb-8">
                   Keuanganmu ada di genggaman tangan. Cek laporan keuangan, atur budget, dan dapatkan tips secara mudah kapan saja, di mana saja.
                 </p>
@@ -261,7 +261,7 @@ const Index = () => {
                   size={isMobile ? "default" : "lg"}
                   className="bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium px-6"
                 >
-                  🚀 Download Sekarang!
+                  Download Sekarang!
                   <Download className="ml-2" />
                 </Button>
               </motion.div>
@@ -301,7 +301,7 @@ const Index = () => {
           viewport={{ once: true }}
           className="max-w-4xl mx-auto text-center p-8 md:p-16 rounded-3xl bg-gradient-to-r from-[#28e57d]/90 to-[#28e57d]/70 shadow-xl shadow-[#28e57d]/20"
         >
-          <h2 className="text-2xl md:text-4xl font-bold mb-4 text-black">🔥 Yuk Mulai Catat Keuanganmu Hari Ini!</h2>
+          <h2 className="text-2xl md:text-4xl font-bold mb-4 text-black">Yuk Mulai Catat Keuanganmu Hari Ini!</h2>
           <p className="text-black/80 text-lg mb-8 md:mb-10 md:text-xl max-w-2xl mx-auto">
             Daftar sekarang dan rasain sendiri serunya atur duit versi kamu.
           </p>
@@ -310,7 +310,7 @@ const Index = () => {
             size="lg"
             className="bg-black hover:bg-gray-800 text-white font-medium px-8 py-6 h-auto text-lg rounded-xl"
           >
-            🚀 Coba Gratis Sekarang
+            Coba Gratis Sekarang
             <ChevronRight className="ml-1" />
           </Button>
         </motion.div>
