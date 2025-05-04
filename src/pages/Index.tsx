@@ -30,7 +30,7 @@ const Index = () => {
   const goToAbout = () => navigate('/about');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-[#f0fff7] dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-white to-[#f8faf9] dark:from-gray-900 dark:to-gray-800">
       {/* Navbar */}
       <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-slate-100 dark:border-slate-800">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -43,13 +43,13 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-3">
             <LanguageToggle />
-            <Button onClick={goToLogin} variant="outline" size={isMobile ? "sm" : "default"} className={isMobile ? "px-2" : ""}>
+            <Button onClick={goToLogin} variant="outline" size={isMobile ? "sm" : "default"} className={`transition-all hover:scale-[1.03] ${isMobile ? "px-2" : ""}`}>
               Masuk
             </Button>
             <Button 
               onClick={goToSignup} 
               size={isMobile ? "sm" : "default"} 
-              className={`bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium ${isMobile ? "px-2" : ""}`}
+              className={`border border-[#28e57d] bg-white text-black dark:bg-transparent dark:text-white hover:bg-[#28e57d]/10 hover:scale-[1.03] transition-all font-medium ${isMobile ? "px-2" : ""}`}
             >
               Daftar
             </Button>
@@ -83,8 +83,7 @@ const Index = () => {
             <Button 
               onClick={goToSignup} 
               size="lg"
-              variant="outline"
-              className="border-[#28e57d] hover:bg-[#28e57d]/10 text-black dark:text-white font-medium text-lg px-8 py-6 h-auto rounded-xl shadow-lg shadow-[#28e57d]/10"
+              className="border-2 border-[#28e57d] bg-white hover:bg-[#28e57d]/5 text-black dark:bg-transparent dark:text-white dark:hover:bg-[#28e57d]/10 font-medium text-lg px-8 py-6 h-auto rounded-xl shadow-md hover:shadow-lg hover:scale-[1.03] transition-all duration-300"
             >
               Mulai Sekarang
               <ArrowRight className="ml-2" />
@@ -100,7 +99,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/cdbfc368-edb8-448f-993c-3230adb08c71.png" 
               alt="App Dashboard Preview" 
-              className="rounded-2xl shadow-xl mx-auto w-full md:w-[90%] lg:w-[95%]"
+              className="rounded-2xl shadow-xl mx-auto w-full md:w-[95%] lg:w-[100%]"
             />
           </motion.div>
         </div>
@@ -137,7 +136,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl text-center hover:shadow-lg transition-all"
+                className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl text-center hover:shadow-lg hover:scale-[1.03] transition-all duration-300"
               >
                 <div className="flex justify-center">{step.icon}</div>
                 <h3 className="text-xl font-bold mb-3">{step.title}</h3>
@@ -184,7 +183,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow hover:shadow-md transition-all flex items-start gap-4"
+                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow hover:shadow-md transition-all duration-300 hover:scale-[1.03] flex items-start gap-4"
               >
                 <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
                   {feature.icon}
@@ -230,7 +229,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-md relative"
+                className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 relative"
               >
                 <div className="text-5xl mb-4">{testimonial.emoji}</div>
                 <p className="italic text-gray-700 dark:text-gray-200 mb-4 text-lg">"{testimonial.quote}"</p>
@@ -260,8 +259,7 @@ const Index = () => {
                 <Button 
                   onClick={goToAbout}
                   size={isMobile ? "default" : "lg"}
-                  variant="outline"
-                  className="border-[#28e57d] hover:bg-[#28e57d]/10 text-black dark:text-white font-medium px-6"
+                  className="border-2 border-[#28e57d] bg-white hover:bg-[#28e57d]/5 text-black dark:bg-transparent dark:text-white dark:hover:bg-[#28e57d]/10 font-medium px-6 hover:shadow-lg hover:scale-[1.03] transition-all duration-300"
                 >
                   Download Sekarang!
                   <Download className="ml-2" />
@@ -287,7 +285,7 @@ const Index = () => {
                   </div>
                   <div className="w-16 h-1 bg-gray-800 rounded-full mx-auto mt-4"></div>
                 </div>
-                <div className="absolute -z-10 inset-0 bg-[#28e57d]/10 rounded-full blur-3xl"></div>
+                <div className="absolute -z-10 inset-0 bg-[#28e57d]/5 rounded-full blur-3xl"></div>
               </motion.div>
             </div>
           </div>
@@ -301,7 +299,7 @@ const Index = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center p-8 md:p-16 rounded-3xl bg-gradient-to-r from-gray-900/90 to-gray-800/70 shadow-xl"
+          className="max-w-4xl mx-auto text-center p-8 md:p-16 rounded-3xl bg-gradient-to-r from-gray-900/90 to-gray-800/80 shadow-lg"
         >
           <h2 className="text-2xl md:text-4xl font-bold mb-4 text-white">Yuk Mulai Catat Keuanganmu Hari Ini!</h2>
           <p className="text-white/80 text-lg mb-8 md:mb-10 md:text-xl max-w-2xl mx-auto">
@@ -310,8 +308,7 @@ const Index = () => {
           <Button 
             onClick={goToSignup}
             size="lg"
-            variant="outline"
-            className="border-[#28e57d] bg-transparent hover:bg-[#28e57d]/20 text-white font-medium px-8 py-6 h-auto text-lg rounded-xl border-2"
+            className="border-2 border-[#28e57d] bg-transparent hover:bg-[#28e57d]/20 text-white font-medium px-8 py-6 h-auto text-lg rounded-xl hover:shadow-[0_0_15px_rgba(40,229,125,0.3)] hover:scale-[1.03] transition-all duration-300"
           >
             Coba Gratis Sekarang
             <ChevronRight className="ml-1" />
