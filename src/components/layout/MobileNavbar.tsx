@@ -94,9 +94,9 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
           {/* Logo centered */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <img 
-              src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+              src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" 
               alt="Catatuy Logo" 
-              className="h-10 object-contain" 
+              className="h-10 w-auto object-contain" 
             />
           </div>
           
