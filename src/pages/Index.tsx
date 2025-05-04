@@ -1,242 +1,363 @@
+
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
-import { ArrowRight, CheckCircle, CreditCard, PiggyBank, User } from 'lucide-react';
+import { 
+  ArrowRight, 
+  CheckCircle, 
+  ChevronRight, 
+  Edit3, 
+  Smartphone, 
+  BarChart2, 
+  Bell, 
+  Download, 
+  Lightbulb, 
+  Palette
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const Index = () => {
-  const {
-    t
-  } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-
+  
   // Navigation functions
   const goToLogin = () => navigate('/login');
   const goToSignup = () => navigate('/signup');
-  const goToPricing = () => navigate('/pricing');
+  const goToAbout = () => navigate('/about');
 
-  // Features data
-  const features = [{
-    icon: <CreditCard className="h-12 w-12 text-teal-500" />,
-    title: t('features.expense.title'),
-    description: t('features.expense.description')
-  }, {
-    icon: <PiggyBank className="h-12 w-12 text-purple-500" />,
-    title: t('features.savings.title'),
-    description: t('features.savings.description')
-  }, {
-    icon: <User className="h-12 w-12 text-orange-500" />,
-    title: t('features.personal.title'),
-    description: t('features.personal.description')
-  }];
-
-  // How it works steps
-  const steps = [{
-    number: '1',
-    title: t('steps.record.title'),
-    description: t('steps.record.description')
-  }, {
-    number: '2',
-    title: t('steps.categorize.title'),
-    description: t('steps.categorize.description')
-  }, {
-    number: '3',
-    title: t('steps.analyze.title'),
-    description: t('steps.analyze.description')
-  }];
-
-  // Testimonials
-  const testimonials = [{
-    name: "Andi, 22",
-    quote: t('testimonials.quote1'),
-    avatar: "😎"
-  }, {
-    name: "Budi, 19",
-    quote: t('testimonials.quote2'),
-    avatar: "👨‍🎓"
-  }, {
-    name: "Cindy, 25",
-    quote: t('testimonials.quote3'),
-    avatar: "👩‍💼"
-  }];
-  return <div className="min-h-screen bg-gradient-to-b from-white to-teal-50 dark:from-gray-900 dark:to-gray-800">
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-[#f0fff7] dark:from-gray-900 dark:to-gray-800">
       {/* Navbar */}
       <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-slate-100 dark:border-slate-800">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center">
-              <img src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" alt="Catatuy Logo" className="h-8 md:h-10 w-auto object-contain" />
-            </Link>
+            <img 
+              src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" 
+              alt="DuitTemanseru Logo" 
+              className="h-8 md:h-10 w-auto object-contain" 
+            />
           </div>
           <div className="flex items-center gap-3">
             <LanguageToggle />
-            <Button onClick={goToLogin} variant="outline" size="sm" className={isMobile ? "px-2" : ""}>{t('auth.login')}</Button>
-            <Button onClick={goToSignup} size="sm" className={`gradient-bg-purple ${isMobile ? "px-2" : ""}`}>{t('auth.signup')}</Button>
+            <Button onClick={goToLogin} variant="outline" size={isMobile ? "sm" : "default"} className={isMobile ? "px-2" : ""}>
+              Masuk
+            </Button>
+            <Button 
+              onClick={goToSignup} 
+              size={isMobile ? "sm" : "default"} 
+              className={`bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium ${isMobile ? "px-2" : ""}`}
+            >
+              Daftar
+            </Button>
           </div>
         </div>
       </header>
       
-      {/* Hero section */}
-      <section className="container mx-auto px-4 py-10 md:py-16 lg:py-24">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.h1 initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.5
-        }} className="text-4xl sm:text-5xl md:text-6xl font-outfit font-bold mb-6">
-            <span className="bg-gradient-to-r from-teal-500 to-purple-500 bg-clip-text text-transparent">
-              {t('landing.hero.title')}
-            </span>
-          </motion.h1>
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-3xl mx-auto md:text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6"
+          >
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
+              💸 Catat Keuangan Makin Gampang & Menyenangkan!
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 md:text-xl">
+              Nggak perlu ribet, kamu bisa tracking pemasukan & pengeluaran cuma dalam hitungan detik.
+              Cocok buat kamu yang pengen atur duit dengan cara yang fun.
+            </p>
+          </motion.div>
           
-          <motion.p initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.5,
-          delay: 0.2
-        }} className="text-lg sm:text-xl mb-8 text-muted-foreground px-4">
-            {t('landing.hero.subtitle')} ✨💰
-          </motion.p>
-          
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.5,
-          delay: 0.4
-        }} className="flex flex-wrap justify-center gap-4">
-            <Button onClick={goToSignup} size={isMobile ? "default" : "lg"} className="gradient-bg-purple">
-              {t('landing.hero.getStarted')}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button onClick={goToPricing} variant="outline" size={isMobile ? "default" : "lg"}>
-              {t('landing.hero.seePricing')}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Button 
+              onClick={goToSignup} 
+              size={isMobile ? "lg" : "xl"}
+              className="bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium text-lg px-8 py-6 h-auto rounded-xl shadow-lg shadow-[#28e57d]/20"
+            >
+              🎉 Mulai Sekarang
+              <ArrowRight className="ml-2" />
             </Button>
           </motion.div>
           
-          <div className="mt-12 md:mt-16">
-            <img alt="App Dashboard Preview" src="/lovable-uploads/cdbfc368-edb8-448f-993c-3230adb08c71.png" className="rounded-xl shadow-lg mx-auto w-full max-w-4xl object-contain" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="mt-16"
+          >
+            <img 
+              src="/lovable-uploads/cdbfc368-edb8-448f-993c-3230adb08c71.png" 
+              alt="App Dashboard Preview" 
+              className="rounded-2xl shadow-xl mx-auto"
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="container mx-auto px-4 py-16 md:py-24 bg-white dark:bg-gray-900 rounded-t-3xl">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">🔍 Cara Kerjanya Simpel Banget</h2>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <Edit3 size={40} className="text-[#28e57d] mb-4" />,
+                title: "Catat transaksi kamu",
+                description: "Catat setiap pemasukan atau pengeluaranmu dengan cepat dan mudah"
+              },
+              {
+                icon: <BarChart2 size={40} className="text-[#28e57d] mb-4" />,
+                title: "Lihat grafik keuangan",
+                description: "Visualisasi otomatis untuk membantu kamu melihat pola keuanganmu"
+              },
+              {
+                icon: <Lightbulb size={40} className="text-[#28e57d] mb-4" />,
+                title: "Dapatkan tips pintar",
+                description: "Tips personalisasi untuk mengatur keuanganmu lebih baik lagi"
+              }
+            ].map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl text-center hover:shadow-lg transition-all"
+              >
+                <div className="flex justify-center">{step.icon}</div>
+                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
       
-      {/* Features section */}
-      <section className="container mx-auto px-4 py-12 md:py-20 bg-white dark:bg-gray-900 rounded-t-3xl">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-outfit font-bold mb-4">{t('landing.features.title')}</h2>
-            <p className="text-muted-foreground">{t('landing.features.subtitle')}</p>
+      {/* Key Features Section */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">✨ Kenapa Kamu Bakal Suka:</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {features.map((feature, index) => <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.5,
-            delay: 0.1 * index
-          }} key={index} className="bg-slate-50 dark:bg-gray-800 p-5 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </motion.div>)}
-          </div>
-        </div>
-      </section>
-      
-      {/* How it works */}
-      <section className="container mx-auto px-4 py-12 md:py-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-outfit font-bold mb-4">{t('landing.howItWorks.title')}</h2>
-            <p className="text-muted-foreground">{t('landing.howItWorks.subtitle')}</p>
-          </div>
-          
-          <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-3 md:gap-8">
-            {steps.map((step, index) => <motion.div initial={{
-            opacity: 0,
-            x: -20
-          }} animate={{
-            opacity: 1,
-            x: 0
-          }} transition={{
-            duration: 0.5,
-            delay: 0.2 * index
-          }} key={index} className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold mb-4">
-                  {step.number}
+          <div className="grid md:grid-cols-2 gap-8">
+            {[
+              {
+                icon: <Palette size={40} className="text-pink-500" />,
+                title: "🎨 UI super aesthetic & fun",
+                description: "Desain yang bikin kamu betah dan semangat atur keuangan"
+              },
+              {
+                icon: <BarChart2 size={40} className="text-purple-500" />,
+                title: "📊 Ringkasan yang mudah dimengerti",
+                description: "Data keuanganmu disajikan dengan cara yang simpel dan jelas"
+              },
+              {
+                icon: <Bell size={40} className="text-yellow-500" />,
+                title: "🔔 Reminder otomatis biar gak lupa",
+                description: "Notifikasi pintar yang bantu kamu tetap on track"
+              },
+              {
+                icon: <Lightbulb size={40} className="text-blue-500" />,
+                title: "💡 Tips pintar tiap minggu",
+                description: "Dapatkan insight dan tips atur keuangan yang sesuai dengan gayamu"
+              }
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow hover:shadow-md transition-all flex items-start gap-4"
+              >
+                <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                  {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-muted-foreground">{step.description}</p>
-              </motion.div>)}
+                <div>
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
       
-      {/* Testimonials */}
-      <section className="container mx-auto px-4 py-12 md:py-20 bg-slate-50 dark:bg-gray-800 rounded-t-3xl">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-outfit font-bold mb-4">{t('landing.testimonials.title')}</h2>
-            <p className="text-muted-foreground">{t('landing.testimonials.subtitle')}</p>
+      {/* Testimonials Section */}
+      <section className="container mx-auto px-4 py-16 md:py-24 bg-gray-50 dark:bg-gray-800 rounded-t-3xl">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">💬 Apa Kata Mereka?</h2>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {testimonials.map((testimonial, index) => <div key={index} className="bg-white dark:bg-gray-900 p-5 md:p-6 rounded-xl shadow-sm">
-                <div className="text-4xl mb-4">{testimonial.avatar}</div>
-                <p className="italic mb-4">"{testimonial.quote}"</p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                quote: "Desainnya bikin betah. Auto rajin nyatet!",
+                name: "Rani, 21",
+                emoji: "👩‍🎓"
+              },
+              {
+                quote: "Serasa main game keuangan, seru!",
+                name: "Yoga, 22",
+                emoji: "🧑‍💻"
+              },
+              {
+                quote: "Jadi ngerti kemana perginya uang jajan 😅",
+                name: "Dinda, 19",
+                emoji: "👩‍🎤"
+              }
+            ].map((testimonial, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-md relative"
+              >
+                <div className="text-5xl mb-4">{testimonial.emoji}</div>
+                <p className="italic text-gray-700 dark:text-gray-200 mb-4 text-lg">"{testimonial.quote}"</p>
                 <p className="font-bold">{testimonial.name}</p>
-              </div>)}
+                <div className="absolute top-4 right-4 text-5xl opacity-10">❝</div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
       
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-12 md:py-20">
-        <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-teal-500 to-purple-500 p-8 md:p-12 rounded-2xl text-white shadow-lg">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-outfit font-bold mb-4">{t('landing.cta.title')}</h2>
-          <p className="text-lg sm:text-xl mb-6 md:mb-8 max-w-lg mx-auto">{t('landing.cta.subtitle')}</p>
-          <Button onClick={goToSignup} variant="secondary" size={isMobile ? "default" : "lg"}>
-            {t('landing.cta.button')}
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+      {/* Mobile-Friendly Design Section */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-5xl mx-auto">
+          <div className="md:flex items-center gap-16">
+            <div className="md:w-1/2 mb-10 md:mb-0">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl md:text-4xl font-bold mb-6">📱 Aplikasi yang Bisa Kamu Bawa Kemana Aja!</h2>
+                <p className="text-gray-600 dark:text-gray-300 text-lg mb-8">
+                  Keuanganmu ada di genggaman tangan. Cek laporan keuangan, atur budget, dan dapatkan tips secara mudah kapan saja, di mana saja.
+                </p>
+                <Button 
+                  onClick={goToAbout}
+                  size={isMobile ? "default" : "lg"}
+                  className="bg-[#28e57d] hover:bg-[#20c96c] text-black font-medium px-6"
+                >
+                  🚀 Download Sekarang!
+                  <Download className="ml-2" />
+                </Button>
+              </motion.div>
+            </div>
+            
+            <div className="md:w-1/2">
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="relative"
+              >
+                <div className="bg-gray-900 rounded-[3rem] p-4 w-[280px] mx-auto shadow-xl">
+                  <div className="rounded-[2.5rem] overflow-hidden border-8 border-gray-900">
+                    <img 
+                      src="/lovable-uploads/7d98b3c3-94ea-43a9-b93b-7329c3bb262d.png" 
+                      alt="Mobile App" 
+                      className="w-full" 
+                    />
+                  </div>
+                  <div className="w-16 h-1 bg-gray-800 rounded-full mx-auto mt-4"></div>
+                </div>
+                <div className="absolute -z-10 inset-0 bg-[#28e57d]/10 rounded-full blur-3xl"></div>
+              </motion.div>
+            </div>
+          </div>
         </div>
+      </section>
+      
+      {/* Final Call To Action */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="max-w-4xl mx-auto text-center p-8 md:p-16 rounded-3xl bg-gradient-to-r from-[#28e57d]/90 to-[#28e57d]/70 shadow-xl shadow-[#28e57d]/20"
+        >
+          <h2 className="text-2xl md:text-4xl font-bold mb-4 text-black">🔥 Yuk Mulai Catat Keuanganmu Hari Ini!</h2>
+          <p className="text-black/80 text-lg mb-8 md:mb-10 md:text-xl max-w-2xl mx-auto">
+            Daftar sekarang dan rasain sendiri serunya atur duit versi kamu.
+          </p>
+          <Button 
+            onClick={goToSignup}
+            size="lg"
+            className="bg-black hover:bg-gray-800 text-white font-medium px-8 py-6 h-auto text-lg rounded-xl"
+          >
+            🚀 Coba Gratis Sekarang
+            <ChevronRight className="ml-1" />
+          </Button>
+        </motion.div>
       </section>
       
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-        <p>&copy; 2025 Catatuy. {t('landing.footer.allRights')}</p>
+      <footer className="container mx-auto px-4 py-12 border-t">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center">
+          <div className="mb-6 md:mb-0">
+            <img 
+              src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" 
+              alt="DuitTemanseru Logo" 
+              className="h-8" 
+            />
+            <p className="text-gray-600 dark:text-gray-400 mt-2">© 2025 DuitTemanseru. All rights reserved.</p>
+          </div>
+          
+          <div className="flex flex-wrap gap-8 justify-center">
+            <div>
+              <h4 className="font-bold mb-4">Product</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Features</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Pricing</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Download</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4">Company</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">About</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Blog</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Careers</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4">Support</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Help Center</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Contact</a></li>
+                <li><a href="#" className="text-gray-600 hover:text-[#28e57d] dark:text-gray-400">Privacy</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
-const Link = ({
-  to,
-  children,
-  className
-}) => {
-  const navigate = useNavigate();
-  const handleClick = e => {
-    e.preventDefault();
-    navigate(to);
-  };
-  return <a href={to} onClick={handleClick} className={className}>
-      {children}
-    </a>;
-};
+
 export default Index;
