@@ -22,10 +22,10 @@ interface AddGoalProps {
 export interface GoalFormData {
   title: string;
   target_amount: string;
-  saved_amount: string;
-  target_date: string;
-  emoji: string;
-  currency?: 'IDR' | 'USD';  // Add currency property with default IDR
+  saved_amount?: string;
+  target_date?: string;
+  currency?: 'IDR' | 'USD';
+  emoji?: string;
 }
 
 const initialFormState: GoalFormData = {
