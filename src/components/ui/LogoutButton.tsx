@@ -17,12 +17,12 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
   size = 'default',
   className = ''
 }) => {
-  const { signOut } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      await logout();
       
       // Navigate to login immediately after successful logout
       navigate('/login');

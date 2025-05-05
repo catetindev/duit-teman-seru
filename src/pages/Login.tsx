@@ -45,7 +45,7 @@ const Login = () => {
     setError(null);
     
     try {
-      const { error } = await login(email, password);
+      const error = await login(email, password);
       
       if (error) {
         throw error;
@@ -121,7 +121,9 @@ const Login = () => {
 
             <LoginForm onLogin={handleLogin} loading={loading} />
             
-            <SocialLoginButtons onSocialLogin={handleSocialLogin} />
+            <div className="mt-6">
+              <SocialLoginButtons onSocialLogin={handleSocialLogin} />
+            </div>
             
             <p className="text-center text-sm text-muted-foreground mt-6">
               Don't have an account?{' '}
@@ -132,7 +134,7 @@ const Login = () => {
           </div>
           
           <div className="hidden md:flex md:w-1/2 items-center justify-center">
-            <LoginIllustration className="max-w-md" />
+            <LoginIllustration />
           </div>
         </div>
       </main>

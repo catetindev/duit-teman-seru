@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -77,7 +76,7 @@ type CurrencyFormValues = z.infer<typeof currencyFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 const SettingsPage = () => {
-  const { user, profile, signOut, isPremium, isAdmin } = useAuth();
+  const { user, profile, logout, isPremium, isAdmin } = useAuth();
   const { toast: uiToast } = useToast();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
@@ -254,7 +253,7 @@ const SettingsPage = () => {
     try {
       // For this example, we'll sign out the user
       // In a production app, you would implement proper account deletion
-      await signOut();
+      await logout();
       
       toast("Account deleted", {
         description: "Your account has been deleted successfully"

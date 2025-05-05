@@ -9,37 +9,30 @@ import { motion } from 'framer-motion';
 import SocialLoginButtons from './SocialLoginButtons';
 
 interface LoginFormProps {
-  email: string;
-  setEmail: (email: string) => void;
-  password: string;
-  setPassword: (password: string) => void;
-  isLoading: boolean;
-  onSubmit: (e: React.FormEvent) => Promise<void>;
-  onSocialLogin: (provider: 'google' | 'apple' | 'facebook') => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<void>;
+  loading: boolean;
 }
 
 const LoginForm = ({
-  email,
-  setEmail,
-  password,
-  setPassword,
-  isLoading,
-  onSubmit,
-  onSocialLogin
+  onLogin,
+  loading
 }: LoginFormProps) => {
   const { t, language } = useLanguage();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleGoogleLogin = () => {
-    onSocialLogin('google');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onLogin(email, password);
   };
-  
+
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
         <div className="relative">
           <Input
@@ -50,7 +43,7 @@ const LoginForm = ({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
         </div>
       </div>
@@ -65,13 +58,13 @@ const LoginForm = ({
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
           <button
             type="button"
             onClick={togglePasswordVisibility}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            disabled={isLoading}
+            disabled={loading}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -91,9 +84,9 @@ const LoginForm = ({
         <Button 
           type="submit" 
           className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all"
-          disabled={isLoading}
+          disabled={loading}
         >
-          {isLoading ? (
+          {loading ? (
             <span className="flex items-center gap-2">
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-r-transparent"></span>
               {t('auth.loggingIn')}
@@ -106,14 +99,6 @@ const LoginForm = ({
           )}
         </Button>
       </motion.div>
-      
-      <SocialLoginButtons onSocialLogin={onSocialLogin} />
-      
-      <div className="mt-10 text-center text-sm text-gray-600 dark:text-gray-400">
-        <Link to="/signup" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 font-medium lg:hidden">
-          {language === 'en' ? "Don't have an account? Register here!" : "Belum punya akun? Daftar disini!"}
-        </Link>
-      </div>
     </form>
   );
 };

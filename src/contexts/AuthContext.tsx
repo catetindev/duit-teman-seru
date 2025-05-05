@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,10 +8,14 @@ interface AuthContextProps {
   user: User | null;
   session: Session | null;
   isPremium: boolean;
+  isAdmin: boolean;
+  userRole: 'free' | 'premium' | 'admin' | null;
   isLoading: boolean;
+  profile: any;
   login: (email: string, password?: string) => Promise<any>;
   signup: (email: string, password?: string) => Promise<any>;
   logout: () => Promise<void>;
+  signOut: () => Promise<void>; // Alias for logout for compatibility
 }
 
 interface AuthProviderProps {
@@ -23,7 +28,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<'free' | 'premium' | 'admin' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -40,6 +48,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }, 0);
         } else {
           setIsPremium(false);
+          setIsAdmin(false);
+          setUserRole(null);
+          setProfile(null);
         }
       }
     );
@@ -77,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('is_premium')
+        .select('*')
         .eq('id', userId)
         .single();
 
@@ -86,7 +97,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      setIsPremium(profile?.is_premium || false);
+      setProfile(profile);
+      setUserRole(profile?.role || 'free');
+      setIsAdmin(profile?.role === 'admin');
+      setIsPremium(profile?.role === 'premium' || profile?.role === 'admin');
     } catch (error) {
       console.error('Error fetching user profile:', error);
     } finally {
@@ -102,20 +116,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('Login error:', error);
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast.error(error.message || "Failed to login");
         return error;
       }
     } catch (error: any) {
       console.error('Login failed', error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "An unexpected error occurred");
+      return error;
     }
   };
 
@@ -128,11 +135,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         console.error('Signup error:', error);
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast.error(error.message || "Failed to sign up");
         return error;
       }
 
@@ -140,15 +143,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await supabase.from('profiles').insert({
           id: data.user.id,
           email: data.user.email,
+          full_name: '',
         });
       }
     } catch (error: any) {
       console.error('Signup failed', error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "An unexpected error occurred");
+      return error;
     }
   };
 
@@ -159,14 +160,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       setSession(null);
       setIsPremium(false);
+      setIsAdmin(false);
+      setUserRole(null);
+      setProfile(null);
       toast("Logged out successfully");
     } catch (error: any) {
       console.error('Logout error:', error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to log out");
     }
   };
 
@@ -174,9 +174,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     session,
     isPremium,
+    isAdmin,
+    userRole,
     isLoading,
+    profile,
     login,
     logout,
+    signOut: logout, // Alias for compatibility
     signup,
   };
 
