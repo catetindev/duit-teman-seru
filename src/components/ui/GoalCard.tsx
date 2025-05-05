@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { formatCurrency } from '@/utils/formatUtils';
 import { Card } from '@/components/ui/card';
@@ -8,7 +7,6 @@ import { Edit, Trash, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 interface GoalCardProps {
   id: string;
   title: string;
@@ -24,7 +22,6 @@ interface GoalCardProps {
   onUpdate?: () => void;
   className?: string;
 }
-
 const GoalCard = ({
   id,
   title,
@@ -38,39 +35,34 @@ const GoalCard = ({
   onDelete,
   onCollaborate,
   onUpdate,
-  className = '',
+  className = ''
 }: GoalCardProps) => {
   const [isDeleting, setIsDeleting] = React.useState(false);
-  
+
   // Calculate progress percentage
-  const progress = Math.min(Math.round((currentAmount / targetAmount) * 100), 100);
-  
+  const progress = Math.min(Math.round(currentAmount / targetAmount * 100), 100);
+
   // Format date
   const formattedDate = targetDate ? new Date(targetDate).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
+    day: 'numeric'
   }) : 'No deadline';
-  
+
   // Handle delete
   const handleDelete = async () => {
     if (isDeleting) return;
-    
     setIsDeleting(true);
     try {
       if (onDelete) {
         onDelete(id);
       } else if (onUpdate) {
         // Direct delete functionality
-        const { error } = await supabase
-          .from('savings_goals')
-          .delete()
-          .eq('id', id);
-        
+        const {
+          error
+        } = await supabase.from('savings_goals').delete().eq('id', id);
         if (error) throw error;
-        
         toast("Goal deleted successfully");
-        
         onUpdate();
       }
     } catch (error: any) {
@@ -80,50 +72,19 @@ const GoalCard = ({
       setIsDeleting(false);
     }
   };
-
-  return (
-    <Card className={cn("p-5 overflow-hidden transition-all duration-300 hover:shadow-md", className)}>
+  return <Card className={cn("p-5 overflow-hidden transition-all duration-300 hover:shadow-md", className)}>
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2">
           {emoji && <span className="text-xl">{emoji}</span>}
           <h3 className="font-semibold text-lg truncate pr-4">{title}</h3>
         </div>
         <div className="flex gap-1">
-          {isPremium && onCollaborate && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-gray-500 hover:text-violet-600" 
-              onClick={onCollaborate}
-              title="Manage collaborators"
-            >
-              <Users className="h-4 w-4" />
-            </Button>
-          )}
-          {onEdit && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-gray-500 hover:text-blue-500" 
-              onClick={onEdit}
-              title="Edit goal"
-            >
+          {isPremium && onCollaborate}
+          {onEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-blue-500" onClick={onEdit} title="Edit goal">
               <Edit className="h-4 w-4" />
-            </Button>
-          )}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 text-gray-500 hover:text-red-500" 
-            onClick={handleDelete}
-            disabled={isDeleting}
-            title="Delete goal"
-          >
-            {isDeleting ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-r-transparent" />
-            ) : (
-              <Trash className="h-4 w-4" />
-            )}
+            </Button>}
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-red-500" onClick={handleDelete} disabled={isDeleting} title="Delete goal">
+            {isDeleting ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-r-transparent" /> : <Trash className="h-4 w-4" />}
           </Button>
         </div>
       </div>
@@ -145,8 +106,6 @@ const GoalCard = ({
           {progress}%
         </div>
       </div>
-    </Card>
-  );
+    </Card>;
 };
-
 export default GoalCard;
