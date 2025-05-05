@@ -19,7 +19,7 @@ const Signup = () => {
           <SignupForm logoUrl={logoUrl} />
         </div>
         
-        {/* Right side - Image */}
+        {/* Right side - Image as background */}
         <AuthIllustration />
       </div>
       
