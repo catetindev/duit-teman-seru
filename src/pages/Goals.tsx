@@ -16,6 +16,7 @@ import PendingInvitations from '@/components/goals/PendingInvitations';
 
 // Import context provider
 import { GoalsProvider, useGoalsContext } from '@/contexts/goals';
+import { SortBy, SortDirection, FilterBy } from '@/contexts/goals/types';
 
 // Main component that wraps everything with the context provider
 const GoalsPage = () => {
@@ -109,11 +110,11 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
       {goals && goals.length > 0 && (
         <GoalsFilters
           sortBy={sortBy}
-          setSortBy={setSortBy}
+          setSortBy={setSortBy as (option: SortBy) => void}
           sortDirection={sortDirection}
           setSortDirection={setSortDirection}
           filterBy={filterBy}
-          setFilterBy={setFilterBy}
+          setFilterBy={setFilterBy as (filter: FilterBy) => void}
         />
       )}
 

@@ -79,7 +79,7 @@ export function useGoalsState() {
   }, [fetchGoals]);
 
   // Function to add a new goal
-  const addGoal = async (values: GoalFormValues & { user_id: string, has_collaborators: boolean }) => {
+  const addGoal = async (values: GoalFormValues & { user_id: string; has_collaborators?: boolean }) => {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
@@ -139,7 +139,7 @@ export function useGoalsState() {
           target_date: values.target_date || null,
           currency: values.currency,
           emoji: values.emoji,
-          has_collaborators: values.has_collaborators
+          has_collaborators: values.has_collaborators || false
         })
         .eq('id', goalId)
         .select();
@@ -259,14 +259,15 @@ export function useGoalsState() {
 
   // Function to handle adding a new goal
   const handleAddGoal = async (values: GoalFormValues & { user_id: string }) => {
-    await addGoal(values);
+    // Adding has_collaborators property with default value false
+    await addGoal({ ...values, has_collaborators: false });
     setIsAddDialogOpen(false);
   };
 
   // Function to handle updating a goal
   const updateGoalHandler = async (values: GoalFormValues) => {
     if (selectedGoal) {
-      await updateGoal(selectedGoal.id, values);
+      await updateGoal(selectedGoal.id, { ...values, has_collaborators: selectedGoal.has_collaborators });
       setIsEditDialogOpen(false);
     }
   };
