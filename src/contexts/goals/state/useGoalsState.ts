@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useReducer, useCallback } from 'react';
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { SortBy, SortDirection, FilterBy } from '../types';
