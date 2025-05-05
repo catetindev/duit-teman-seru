@@ -9,20 +9,43 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { SignupFormHeader } from './signup/SignupFormHeader';
+import { SocialLoginButton } from './signup/SocialLoginButton';
 
-const SignupForm = ({ logoUrl }: { logoUrl: string | null }) => {
+interface SignupFormProps {
+  logoUrl: string | null;
+}
+
+const SignupForm: React.FC<SignupFormProps> = ({ logoUrl }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    agreeTerms: false
+  });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      agreeTerms: checked
+    }));
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!agreeTerms) {
+    if (!formData.agreeTerms) {
       toast.error("Please agree to the terms and privacy policy");
       return;
     }
@@ -32,11 +55,11 @@ const SignupForm = ({ logoUrl }: { logoUrl: string | null }) => {
     try {
       // Create the user with Supabase auth
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
         options: {
           data: {
-            full_name: name,
+            full_name: formData.name,
           },
           emailRedirectTo: `${window.location.origin}/dashboard`
         }
@@ -86,74 +109,52 @@ const SignupForm = ({ logoUrl }: { logoUrl: string | null }) => {
       transition={{ duration: 0.5 }}
       className="w-full max-w-md"
     >
-      <div className="flex md:hidden items-center justify-center mb-8">
-        {logoUrl && (
-          <img 
-            src={logoUrl}
-            alt="App Logo" 
-            className="h-12 object-contain" 
-          />
-        )}
-      </div>
-      
-      <div className="text-center md:text-left mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Get Started Now</h1>
-        <p className="text-gray-500">Create your account and start managing your finances</p>
-      </div>
+      <SignupFormHeader logoUrl={logoUrl} />
       
       <form onSubmit={handleSignup} className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
-          <Input
-            id="name"
-            type="text"
-            placeholder="Your name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="h-12 rounded-lg"
-            disabled={isLoading}
-          />
-        </div>
+        <FormField
+          id="name"
+          label="Full Name"
+          type="text"
+          placeholder="Your name"
+          value={formData.name}
+          onChange={handleChange}
+          disabled={isLoading}
+          required
+        />
         
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="hello@example.com"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-12 rounded-lg"
-            disabled={isLoading}
-          />
-        </div>
+        <FormField
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="hello@example.com"
+          value={formData.email}
+          onChange={handleChange}
+          disabled={isLoading}
+          required
+        />
         
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-12 rounded-lg"
-            disabled={isLoading}
-          />
-        </div>
+        <FormField
+          id="password"
+          label="Password"
+          type="password"
+          placeholder="••••••••"
+          value={formData.password}
+          onChange={handleChange}
+          disabled={isLoading}
+          required
+        />
         
         <div className="flex items-start space-x-2 my-4">
           <Checkbox 
-            id="terms" 
-            checked={agreeTerms} 
-            onCheckedChange={() => setAgreeTerms(!agreeTerms)}
+            id="agreeTerms" 
+            checked={formData.agreeTerms} 
+            onCheckedChange={handleCheckboxChange}
             className="mt-1"
             disabled={isLoading}
           />
           <label
-            htmlFor="terms"
+            htmlFor="agreeTerms"
             className="text-sm text-gray-600 leading-tight cursor-pointer"
           >
             I agree to the <Link to="/terms" className="text-[#28e57d] hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-[#28e57d] hover:underline">Privacy Policy</Link>
@@ -162,7 +163,7 @@ const SignupForm = ({ logoUrl }: { logoUrl: string | null }) => {
         
         <Button 
           type="submit" 
-          disabled={isLoading || !agreeTerms}
+          disabled={isLoading || !formData.agreeTerms}
           className="w-full h-12 bg-[#28e57d] hover:bg-[#28e57d]/90 text-white rounded-lg font-medium transition-all hover:shadow-md"
         >
           {isLoading ? (
@@ -184,21 +185,11 @@ const SignupForm = ({ logoUrl }: { logoUrl: string | null }) => {
           </div>
         </div>
         
-        <Button
-          type="button"
-          variant="outline"
+        <SocialLoginButton 
+          provider="google"
           onClick={handleGoogleLogin}
-          className="w-full h-12 rounded-lg mb-3 border border-gray-200 hover:bg-gray-50 transition-all"
           disabled={isLoading}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
-            <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.255H17.92C17.66 15.63 16.89 16.795 15.72 17.575V20.335H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
-            <path d="M12 23C14.97 23 17.46 22.015 19.28 20.335L15.72 17.575C14.74 18.235 13.48 18.625 12 18.625C9.13504 18.625 6.71004 16.685 5.84504 14.09H2.17004V16.94C3.98004 20.535 7.70004 23 12 23Z" fill="#34A853"/>
-            <path d="M5.84501 14.0899C5.62501 13.4299 5.50001 12.7249 5.50001 11.9999C5.50001 11.2749 5.63001 10.5699 5.84501 9.90992V7.05992H2.17001C1.40001 8.59492 0.950012 10.2849 0.950012 11.9999C0.950012 13.7149 1.40001 15.4049 2.17001 16.9399L5.84501 14.0899Z" fill="#FBBC05"/>
-            <path d="M12 5.375C13.62 5.375 15.06 5.93 16.21 7.02L19.36 3.87C17.45 2.09 14.97 1 12 1C7.70004 1 3.98004 3.465 2.17004 7.06L5.84504 9.91C6.71004 7.315 9.13504 5.375 12 5.375Z" fill="#EA4335"/>
-          </svg>
-          Sign up with Google
-        </Button>
+        />
         
         <div className="text-center mt-6">
           <p className="text-gray-600">
@@ -210,6 +201,45 @@ const SignupForm = ({ logoUrl }: { logoUrl: string | null }) => {
         </div>
       </form>
     </motion.div>
+  );
+};
+
+interface FormFieldProps {
+  id: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled: boolean;
+  required: boolean;
+}
+
+const FormField: React.FC<FormFieldProps> = ({
+  id,
+  label,
+  type,
+  placeholder,
+  value,
+  onChange,
+  disabled,
+  required
+}) => {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        name={id}
+        type={type}
+        placeholder={placeholder}
+        required={required}
+        value={value}
+        onChange={onChange}
+        className="h-12 rounded-lg"
+        disabled={disabled}
+      />
+    </div>
   );
 };
 

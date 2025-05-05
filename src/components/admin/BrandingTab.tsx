@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from '@/components/ui/label';
 import { Upload, Image as ImageIcon } from 'lucide-react';
 import { useBrandingAssets } from '@/hooks/useBrandingAssets';
+import { ImagePreview } from './branding/ImagePreview';
+import { ImageUploader } from './branding/ImageUploader';
 
 const BrandingTab = () => {
   const { toast } = useToast();
@@ -13,6 +16,52 @@ const BrandingTab = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [backgroundFile, setBackgroundFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isBucketCreated, setIsBucketCreated] = useState(false);
+
+  // Check if branding bucket exists on component mount
+  useEffect(() => {
+    const checkBucket = async () => {
+      try {
+        const { data, error } = await supabase.storage.getBucket('branding');
+        if (error && error.message.includes('not found')) {
+          setIsBucketCreated(false);
+        } else {
+          setIsBucketCreated(true);
+        }
+      } catch (error) {
+        console.error("Error checking bucket:", error);
+        setIsBucketCreated(false);
+      }
+    };
+    
+    checkBucket();
+  }, []);
+
+  const createBrandingBucket = async () => {
+    try {
+      setIsUploading(true);
+      const { data, error } = await supabase.storage.createBucket('branding', {
+        public: true,
+        fileSizeLimit: 5242880 // 5MB limit
+      });
+      
+      if (error) throw error;
+      
+      setIsBucketCreated(true);
+      toast({
+        title: "Storage bucket created",
+        description: "The branding storage bucket has been successfully created"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to create storage bucket",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,6 +96,15 @@ const BrandingTab = () => {
   };
 
   const uploadBrandingAssets = async () => {
+    if (!isBucketCreated) {
+      toast({
+        title: "Storage bucket not created",
+        description: "Please create the branding bucket first",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
       // Upload logo if selected
@@ -87,9 +145,7 @@ const BrandingTab = () => {
       
       // Reset file selections
       setLogoFile(null);
-      setBackgroundPreview(null);
       setBackgroundFile(null);
-      setLogoPreview(null);
       
     } catch (error: any) {
       toast({
@@ -111,118 +167,62 @@ const BrandingTab = () => {
         </p>
       </div>
       
+      {!isBucketCreated && (
+        <Card className="border-dashed border-2 border-orange-300 bg-orange-50 dark:bg-orange-950/20">
+          <CardHeader>
+            <CardTitle>Storage Setup Required</CardTitle>
+            <CardDescription>
+              You need to create a storage bucket for branding assets before uploading images.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={createBrandingBucket} 
+              disabled={isUploading} 
+              className="w-full"
+            >
+              {isUploading ? (
+                <>
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-r-transparent mr-2"></span>
+                  Creating Bucket...
+                </>
+              ) : (
+                "Create Branding Bucket"
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Logo</CardTitle>
-            <CardDescription>
-              Upload your company logo (PNG or SVG). This will appear in the navbar, footer, and auth pages.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="border rounded-lg p-4 flex justify-center items-center bg-gray-50">
-              {isLoading ? (
-                <div className="animate-pulse w-40 h-20 bg-gray-200 rounded"></div>
-              ) : logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt="Current logo" 
-                  className="h-20 object-contain"
-                />
-              ) : (
-                <div className="flex flex-col items-center text-gray-400">
-                  <ImageIcon size={48} />
-                  <span>No logo uploaded</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="logo-upload">Upload New Logo</Label>
-              <div className="flex items-center space-x-2">
-                <input
-                  id="logo-upload"
-                  type="file"
-                  accept=".png,.svg"
-                  onChange={handleLogoChange}
-                  className="hidden"
-                />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => document.getElementById('logo-upload')?.click()}
-                  className="w-full"
-                >
-                  <Upload className="mr-2 h-4 w-4" /> Choose File
-                </Button>
-                {logoFile && (
-                  <span className="text-sm text-gray-600 truncate max-w-[150px]">
-                    {logoFile.name}
-                  </span>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ImageUploader 
+          title="Logo" 
+          description="Upload your company logo (PNG or SVG). This will appear in the navbar, footer, and auth pages."
+          imageUrl={logoUrl}
+          isLoading={isLoading}
+          selectedFile={logoFile}
+          onChange={handleLogoChange}
+          fileTypes=".png,.svg"
+          inputId="logo-upload"
+        />
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Background Image</CardTitle>
-            <CardDescription>
-              Upload a background image (PNG or JPG) for login and signup pages.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="border rounded-lg p-4 flex justify-center items-center bg-gray-50 h-40 overflow-hidden">
-              {isLoading ? (
-                <div className="animate-pulse w-full h-full bg-gray-200 rounded"></div>
-              ) : backgroundUrl ? (
-                <img 
-                  src={backgroundUrl} 
-                  alt="Current background" 
-                  className="w-full h-full object-cover rounded"
-                />
-              ) : (
-                <div className="flex flex-col items-center text-gray-400">
-                  <ImageIcon size={48} />
-                  <span>No background uploaded</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="bg-upload">Upload New Background</Label>
-              <div className="flex items-center space-x-2">
-                <input
-                  id="bg-upload"
-                  type="file"
-                  accept=".png,.jpg,.jpeg"
-                  onChange={handleBackgroundChange}
-                  className="hidden"
-                />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => document.getElementById('bg-upload')?.click()}
-                  className="w-full"
-                >
-                  <Upload className="mr-2 h-4 w-4" /> Choose File
-                </Button>
-                {backgroundFile && (
-                  <span className="text-sm text-gray-600 truncate max-w-[150px]">
-                    {backgroundFile.name}
-                  </span>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ImageUploader 
+          title="Background Image" 
+          description="Upload a background image (PNG or JPG) for login and signup pages."
+          imageUrl={backgroundUrl}
+          isLoading={isLoading}
+          selectedFile={backgroundFile}
+          onChange={handleBackgroundChange}
+          fileTypes=".png,.jpg,.jpeg"
+          inputId="bg-upload"
+          className="h-40"
+        />
       </div>
       
       <div className="flex justify-end">
         <Button 
           onClick={uploadBrandingAssets} 
-          disabled={isUploading || (!logoFile && !backgroundFile)} 
+          disabled={isUploading || (!logoFile && !backgroundFile) || !isBucketCreated} 
           className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600"
         >
           {isUploading ? (
