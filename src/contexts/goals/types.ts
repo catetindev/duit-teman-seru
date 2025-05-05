@@ -1,4 +1,5 @@
 
+
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 
