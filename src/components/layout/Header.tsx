@@ -1,39 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { User, Bell } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useBrandingAssets } from '@/hooks/useBrandingAssets';
 
 const Header = ({ isPremium = false, isAdmin = false }) => {
   const { t } = useLanguage();
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  
-  useEffect(() => {
-    // Fetch custom logo
-    const fetchLogo = async () => {
-      try {
-        // Fetch custom logo if it exists
-        const { data: logoData } = await supabase.storage
-          .from('branding')
-          .getPublicUrl('logo.png');
-          
-        if (logoData?.publicUrl) {
-          setLogoUrl(`${logoData.publicUrl}?t=${Date.now()}`);
-        } else {
-          // Fallback to default logo
-          setLogoUrl("/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png");
-        }
-      } catch (error) {
-        console.error('Error fetching logo:', error);
-        setLogoUrl("/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png");
-      }
-    };
-    
-    fetchLogo();
-  }, []);
+  const { logoUrl } = useBrandingAssets();
   
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm py-4">
