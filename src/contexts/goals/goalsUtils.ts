@@ -1,15 +1,13 @@
 
 import { Goal } from '@/hooks/goals/types';
-import { FilterOption, SortDirection, SortOption } from './types';
+import { FilterBy, SortDirection, SortBy } from './types';
 
-export const filterGoals = (goals: Goal[], filterBy: FilterOption, calculateProgress: (saved: number, target: number) => number): Goal[] => {
+export const filterGoals = (goals: Goal[], filterBy: FilterBy, calculateProgress: (goal: Goal) => number): Goal[] => {
   switch(filterBy) {
-    case 'completed':
-      return goals.filter(goal => calculateProgress(goal.saved_amount, goal.target_amount) >= 100);
-    case 'incomplete':
-      return goals.filter(goal => calculateProgress(goal.saved_amount, goal.target_amount) < 100);
-    case 'noDate':
-      return goals.filter(goal => !goal.target_date);
+    case 'collaborative':
+      return goals.filter(goal => goal.has_collaborators);
+    case 'personal':
+      return goals.filter(goal => !goal.has_collaborators);
     default: // 'all'
       return goals;
   }
@@ -17,23 +15,23 @@ export const filterGoals = (goals: Goal[], filterBy: FilterOption, calculateProg
 
 export const sortGoals = (
   goals: Goal[], 
-  sortBy: SortOption, 
+  sortBy: SortBy, 
   sortDirection: SortDirection, 
-  calculateProgress: (saved: number, target: number) => number
+  calculateProgress: (goal: Goal) => number
 ): Goal[] => {
   return [...goals].sort((a, b) => {
     let comparison = 0;
     
     switch(sortBy) {
       case 'progress':
-        const progressA = calculateProgress(a.saved_amount, a.target_amount);
-        const progressB = calculateProgress(b.saved_amount, b.target_amount);
+        const progressA = calculateProgress(a);
+        const progressB = calculateProgress(b);
         comparison = progressA - progressB;
         break;
-      case 'amount':
+      case 'target_amount':
         comparison = a.target_amount - b.target_amount;
         break;
-      case 'date':
+      case 'target_date':
         // Handle cases where one or both goals don't have a target date
         if (!a.target_date && !b.target_date) comparison = 0;
         else if (!a.target_date) comparison = 1;  // Goals without dates go last
@@ -52,10 +50,10 @@ export const sortGoals = (
 
 export const filterAndSortGoals = (
   goals: Goal[], 
-  filterBy: FilterOption, 
-  sortBy: SortOption, 
+  filterBy: FilterBy, 
+  sortBy: SortBy, 
   sortDirection: SortDirection, 
-  calculateProgress: (saved: number, target: number) => number
+  calculateProgress: (goal: Goal) => number
 ): Goal[] => {
   const filteredGoals = filterGoals(goals, filterBy, calculateProgress);
   return sortGoals(filteredGoals, sortBy, sortDirection, calculateProgress);

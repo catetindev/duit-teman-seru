@@ -1,8 +1,9 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
-import { Goal } from '@/hooks/goals/types';
+import { Goal, Collaborator } from '@/hooks/goals/types';
 import { SortBy, SortDirection, FilterBy, GoalFormValues } from './types';
 
 // Define a custom hook to manage goals state
@@ -16,7 +17,7 @@ export function useGoalsState() {
   const [isCollaborateDialogOpen, setIsCollaborateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [goalCollaborators, setGoalCollaborators] = useState<any[]>([]);
+  const [goalCollaborators, setGoalCollaborators] = useState<Collaborator[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>('target_date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -46,10 +47,8 @@ export function useGoalsState() {
         .select('*')
         .order(sortBy, { ascending: sortDirection === 'asc' });
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
+      
       // Convert the data to the Goal type
       const fetchedGoals: Goal[] = data.map(goal => ({
         id: goal.id,
@@ -68,7 +67,6 @@ export function useGoalsState() {
     } catch (error: any) {
       setError(error);
       toast({
-        title: "Error",
         description: error.message || "Failed to fetch goals",
         variant: "destructive",
       });
@@ -88,16 +86,16 @@ export function useGoalsState() {
       setIsSubmitting(true);
       const { data, error } = await supabase
         .from('savings_goals')
-        .insert([
-          {
-            id: uuidv4(),
-            title: values.title,
-            target_amount: values.target_amount,
-            saved_amount: values.saved_amount || 0,
-            target_date: values.target_date || null,
-            currency: values.currency,
-          },
-        ])
+        .insert({
+          id: uuidv4(),
+          title: values.title,
+          target_amount: values.target_amount,
+          saved_amount: values.saved_amount || 0,
+          target_date: values.target_date || null,
+          currency: values.currency,
+          emoji: values.emoji || '🎯',
+          user_id: values.user_id
+        })
         .select();
 
       if (error) {
@@ -118,16 +116,16 @@ export function useGoalsState() {
 
       setGoals((prevGoals) => [...prevGoals, newGoal]);
       toast({
-        title: "Success",
-        description: "Goal added successfully",
+        description: "Goal added successfully"
       });
+      return newGoal;
     } catch (error: any) {
       console.error('Error adding goal:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to add goal",
-        variant: "destructive",
+        variant: "destructive"
       });
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
@@ -145,6 +143,7 @@ export function useGoalsState() {
           saved_amount: values.saved_amount || 0,
           target_date: values.target_date || null,
           currency: values.currency,
+          emoji: values.emoji
         })
         .eq('id', goalId)
         .select();
@@ -169,15 +168,13 @@ export function useGoalsState() {
         prevGoals.map((goal) => (goal.id === goalId ? updatedGoal : goal))
       );
       toast({
-        title: "Success",
-        description: "Goal updated successfully",
+        description: "Goal updated successfully"
       });
     } catch (error: any) {
       console.error('Error updating goal:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to update goal",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
@@ -194,15 +191,13 @@ export function useGoalsState() {
       setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== goalId));
       
       toast({
-        title: "Success",
-        description: "Goal deleted successfully",
+        description: "Goal deleted successfully"
       });
     } catch (error: any) {
       console.error('Error deleting goal:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to delete goal",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
@@ -252,9 +247,8 @@ export function useGoalsState() {
     } catch (error: any) {
       console.error('Error fetching collaborators:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to fetch collaborators",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -330,18 +324,18 @@ export function useGoalsState() {
         {
           goal_id: selectedGoal.id,
           user_id: user.id,
+          email: user.email,
+          full_name: user.full_name
         },
       ]);
       toast({
-        title: "Success",
-        description: "Collaborator invited successfully",
+        description: "Collaborator invited successfully"
       });
     } catch (error: any) {
       console.error('Error inviting collaborator:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to invite collaborator",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
@@ -369,15 +363,13 @@ export function useGoalsState() {
         prevCollaborators.filter((collaborator) => collaborator.user_id !== userId)
       );
       toast({
-        title: "Success",
-        description: "Collaborator removed successfully",
+        description: "Collaborator removed successfully"
       });
     } catch (error: any) {
       console.error('Error removing collaborator:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to remove collaborator",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);

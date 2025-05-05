@@ -40,8 +40,20 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Memoize the filtered goals to prevent render loops
   const filteredAndSortedGoals = useMemo(() => {
-    return filterAndSortGoals(goals || [], state.filterBy, state.sortBy as SortBy, state.sortDirection as SortDirection, calculateProgress);
+    return filterAndSortGoals(goals || [], state.filterBy as FilterBy, state.sortBy as SortBy, state.sortDirection as SortDirection, calculateProgress);
   }, [goals, state.filterBy, state.sortBy, state.sortDirection, calculateProgress]);
+  
+  // Create a dummy function for setGoalToDelete to satisfy the dependency
+  const setGoalToDelete = useCallback((goalId: string | null) => {
+    if (goalId) {
+      const goalToDelete = goals.find(g => g.id === goalId);
+      if (goalToDelete) {
+        state.setSelectedGoal(goalToDelete);
+      }
+    } else {
+      state.setSelectedGoal(null);
+    }
+  }, [goals, state]);
   
   // Get goal operations
   const {
@@ -57,6 +69,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsEditDialogOpen: state.setIsEditDialogOpen,
     setIsDeleteDialogOpen: state.setIsDeleteDialogOpen,
     setSelectedGoal: state.setSelectedGoal,
+    setGoalToDelete,
     setIsCollaborateDialogOpen: state.setIsCollaborateDialogOpen,
     setGoalCollaborators: state.setGoalCollaborators,
     fetchGoals,
@@ -72,7 +85,6 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const handleAddGoal = useCallback(async (goalData: GoalFormData) => {
     if (!user?.id) {
       toast({
-        title: "Error",
         description: "You must be logged in to add a goal",
         variant: "destructive",
       });
@@ -99,7 +111,6 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       
       if (newGoal) {
         toast({
-          title: "Success!",
           description: "Savings goal has been added.",
         });
         
@@ -109,7 +120,6 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } catch (error: any) {
       console.error('Error adding goal:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to add goal",
         variant: "destructive",
       });

@@ -1,6 +1,4 @@
 
-// Modify the GoalCard component to implement direct delete without confirmation dialog
-
 import React from 'react';
 import { formatCurrency } from '@/utils/formatUtils';
 import { Card } from '@/components/ui/card';
@@ -16,13 +14,15 @@ interface GoalCardProps {
   title: string;
   targetAmount: number;
   currentAmount: number;
-  targetDate: string;
+  targetDate?: string;
   currency: 'IDR' | 'USD';
-  isPremium: boolean;
+  isPremium?: boolean;
   hasCollaborators?: boolean;
-  onEdit: () => void;
-  onDelete: (id: string) => void; // Changed to accept ID directly
+  emoji?: string;
+  onEdit?: () => void;
+  onDelete?: (id: string) => void;
   onCollaborate?: () => void;
+  onUpdate?: () => void;
   className?: string;
 }
 
@@ -33,11 +33,13 @@ const GoalCard = ({
   currentAmount,
   targetDate,
   currency,
-  isPremium,
+  isPremium = false,
   hasCollaborators = false,
+  emoji = '🎯',
   onEdit,
   onDelete,
   onCollaborate,
+  onUpdate,
   className = '',
 }: GoalCardProps) => {
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -46,11 +48,11 @@ const GoalCard = ({
   const progress = Math.min(Math.round((currentAmount / targetAmount) * 100), 100);
   
   // Format date
-  const formattedDate = new Date(targetDate).toLocaleDateString('en-US', {
+  const formattedDate = targetDate ? new Date(targetDate).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  });
+  }) : 'No deadline';
   
   // Handle delete
   const handleDelete = async () => {
@@ -58,9 +60,30 @@ const GoalCard = ({
     
     setIsDeleting(true);
     try {
-      onDelete(id);
-    } catch (error) {
-      // Error handling is done in the parent component
+      if (onDelete) {
+        onDelete(id);
+      } else if (onUpdate) {
+        // Direct delete functionality
+        const { error } = await supabase
+          .from('savings_goals')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+        
+        toast({
+          description: "Goal deleted successfully"
+        });
+        
+        onUpdate();
+      }
+    } catch (error: any) {
+      console.error('Error deleting goal:', error);
+      toast({
+        description: "Failed to delete goal: " + error.message,
+        variant: "destructive"
+      });
+    } finally {
       setIsDeleting(false);
     }
   };
@@ -68,7 +91,10 @@ const GoalCard = ({
   return (
     <Card className={cn("p-5 overflow-hidden transition-all duration-300 hover:shadow-md", className)}>
       <div className="flex justify-between items-start mb-3">
-        <h3 className="font-semibold text-lg truncate pr-4">{title}</h3>
+        <div className="flex items-center gap-2">
+          {emoji && <span className="text-xl">{emoji}</span>}
+          <h3 className="font-semibold text-lg truncate pr-4">{title}</h3>
+        </div>
         <div className="flex gap-1">
           {isPremium && onCollaborate && (
             <Button 
@@ -81,15 +107,17 @@ const GoalCard = ({
               <Users className="h-4 w-4" />
             </Button>
           )}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 text-gray-500 hover:text-blue-500" 
-            onClick={onEdit}
-            title="Edit goal"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
+          {onEdit && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-gray-500 hover:text-blue-500" 
+              onClick={onEdit}
+              title="Edit goal"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
           <Button 
             variant="ghost" 
             size="icon" 

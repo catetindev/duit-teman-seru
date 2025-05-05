@@ -24,7 +24,6 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
     try {
       await signOut();
       toast({
-        title: "Logged out",
         description: "You have been successfully logged out."
       });
       
@@ -35,7 +34,6 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
-        title: "Error",
         description: "Failed to sign out. Please try again.",
         variant: "destructive"
       });

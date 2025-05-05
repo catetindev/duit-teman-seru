@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -66,7 +67,6 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
       }
       
       toast({
-        title: "Success!",
         description: "Your savings goal has been added.",
       });
       
@@ -122,10 +122,10 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
               key={goal.id}
               id={goal.id}
               title={goal.title}
-              target={goal.target_amount}
-              current={goal.saved_amount}
+              targetAmount={goal.target_amount}
+              currentAmount={goal.saved_amount}
               currency={goal.currency}
-              deadline={goal.target_date}
+              targetDate={goal.target_date}
               emoji={goal.emoji}
               onUpdate={onGoalAdded}
             />

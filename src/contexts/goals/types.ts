@@ -6,6 +6,10 @@ export type SortBy = 'target_date' | 'progress' | 'target_amount' | 'title';
 export type SortDirection = 'asc' | 'desc';
 export type FilterBy = 'all' | 'collaborative' | 'personal';
 
+// For backward compatibility with existing code
+export type SortOption = 'date' | 'progress' | 'amount' | 'title';
+export type FilterOption = 'all' | 'completed' | 'incomplete' | 'noDate' | 'collaborative' | 'personal';
+
 export interface GoalFormValues {
   title: string;
   target_amount: number;

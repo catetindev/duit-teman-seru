@@ -7,7 +7,7 @@ export interface GoalOperationsDependencies {
   setIsEditDialogOpen: (isOpen: boolean) => void;
   setIsDeleteDialogOpen: (isOpen: boolean) => void;
   setSelectedGoal: (goal: Goal | null) => void;
-  setGoalToDelete: (goalId: string | null) => void;
+  setGoalToDelete?: (goalId: string | null) => void; // Make this optional since we're using selectedGoal directly
   setIsCollaborateDialogOpen: (isOpen: boolean) => void;
   setGoalCollaborators: React.Dispatch<React.SetStateAction<Collaborator[]>>;
   fetchGoals: () => Promise<void>;
