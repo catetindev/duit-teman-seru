@@ -107,9 +107,16 @@ export function useGoalsState() {
     dispatch({ type: 'SET_DELETE_DIALOG_OPEN', payload: isOpen });
   }, []);
 
-  const setGoalCollaborators = useCallback((collaborators: Collaborator[]) => {
-    dispatch({ type: 'SET_GOAL_COLLABORATORS', payload: collaborators });
-  }, []);
+  const setGoalCollaborators = useCallback((collaborators: Collaborator[] | ((prev: Collaborator[]) => Collaborator[])) => {
+    if (typeof collaborators === 'function') {
+      dispatch({ 
+        type: 'SET_GOAL_COLLABORATORS', 
+        payload: collaborators(state.goalCollaborators) 
+      });
+    } else {
+      dispatch({ type: 'SET_GOAL_COLLABORATORS', payload: collaborators });
+    }
+  }, [state.goalCollaborators]);
 
   const setSortBy = useCallback((sortBy: SortBy) => {
     dispatch({ type: 'SET_SORT_BY', payload: sortBy });
