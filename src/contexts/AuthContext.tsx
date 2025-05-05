@@ -155,18 +155,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Clear all state immediately
       setUser(null);
       setSession(null);
       setIsPremium(false);
       setIsAdmin(false);
       setUserRole(null);
       setProfile(null);
-      toast("Logged out successfully");
+      
+      // Show success message
+      toast.success("Logged out successfully");
+      
+      // Return success to allow further actions
+      return Promise.resolve();
     } catch (error: any) {
       console.error('Logout error:', error);
       toast.error(error.message || "Failed to log out");
+      return Promise.reject(error);
     }
   };
 

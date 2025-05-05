@@ -20,8 +20,9 @@ const ProtectedRoute = ({ children, requiredRole = 'free' }: ProtectedRouteProps
     );
   }
 
-  // If not logged in, redirect to login
+  // If not logged in, redirect to login page
   if (!user) {
+    console.log('User not authenticated, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

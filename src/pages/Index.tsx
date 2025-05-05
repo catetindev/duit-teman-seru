@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Import all the section components
 import Navbar from '@/components/landing/Navbar';
@@ -18,6 +19,10 @@ const Index = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+
+  // Let's not automatically redirect to dashboard
+  // Users who have just logged out should see the landing page
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-[#f8faf9] dark:from-gray-900 dark:to-gray-800">
