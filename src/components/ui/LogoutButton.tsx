@@ -23,9 +23,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
   const handleLogout = async () => {
     try {
       await signOut();
-      toast({
-        description: "You have been successfully logged out."
-      });
+      toast("You have been successfully logged out.");
       
       // Force redirect to login page and clear any cached state
       setTimeout(() => {
@@ -33,10 +31,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
       }, 100);
     } catch (error) {
       console.error('Error signing out:', error);
-      toast({
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive"
-      });
+      toast("Failed to sign out. Please try again.");
     }
   };
 

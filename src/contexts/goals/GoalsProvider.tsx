@@ -84,10 +84,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Handle adding a goal
   const handleAddGoal = useCallback(async (goalData: GoalFormData) => {
     if (!user?.id) {
-      toast({
-        description: "You must be logged in to add a goal",
-        variant: "destructive",
-      });
+      toast("You must be logged in to add a goal");
       return;
     }
 
@@ -110,19 +107,14 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const newGoal = await addGoal(goalToAdd);
       
       if (newGoal) {
-        toast({
-          description: "Savings goal has been added.",
-        });
+        toast("Savings goal has been added.");
         
         state.setIsAddDialogOpen(false);
       }
       
     } catch (error: any) {
       console.error('Error adding goal:', error);
-      toast({
-        description: error.message || "Failed to add goal",
-        variant: "destructive",
-      });
+      toast(error.message || "Failed to add goal");
     } finally {
       state.setIsSubmitting(false);
     }

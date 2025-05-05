@@ -2,23 +2,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import GoalCard from '../ui/GoalCard';
-
-interface Goal {
-  id: string;
-  title: string;
-  target_amount: number;
-  saved_amount: number;
-  target_date: string;
-  currency: 'IDR' | 'USD';
-  has_collaborators?: boolean;
-}
+import { Goal } from '@/hooks/goals/types';
 
 interface GoalsListProps {
   goals: Goal[];
   formatCurrency: (amount: number, currency: 'IDR' | 'USD') => string;
   calculateProgress: (goal: Goal) => number;
   onEdit: (goal: Goal) => void;
-  onDelete: (goal: Goal) => void;
+  onDelete: (id: string) => void;
   onCollaborate: (goal: Goal) => void;
   isPremium: boolean;
 }
@@ -34,10 +25,7 @@ const GoalsList = ({
 }: GoalsListProps) => {
   // Handle direct delete
   const handleDelete = (goalId: string) => {
-    const goalToDelete = goals.find(g => g.id === goalId);
-    if (goalToDelete) {
-      onDelete(goalToDelete);
-    }
+    onDelete(goalId);
   };
 
   if (goals.length === 0) {
@@ -70,6 +58,7 @@ const GoalsList = ({
             currency={goal.currency}
             isPremium={isPremium}
             hasCollaborators={goal.has_collaborators}
+            emoji={goal.emoji}
             onEdit={() => onEdit(goal)}
             onDelete={handleDelete}
             onCollaborate={() => onCollaborate(goal)}

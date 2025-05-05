@@ -7,8 +7,8 @@ export type SortDirection = 'asc' | 'desc';
 export type FilterBy = 'all' | 'collaborative' | 'personal';
 
 // For backward compatibility with existing code
-export type SortOption = 'date' | 'progress' | 'amount' | 'title';
-export type FilterOption = 'all' | 'completed' | 'incomplete' | 'noDate' | 'collaborative' | 'personal';
+export type SortOption = SortBy;
+export type FilterOption = FilterBy;
 
 export interface GoalFormValues {
   title: string;
@@ -17,6 +17,7 @@ export interface GoalFormValues {
   target_date?: string;
   currency: 'IDR' | 'USD';
   emoji?: string;
+  user_id?: string;
 }
 
 export type ValidCurrency = 'IDR' | 'USD';
@@ -54,7 +55,7 @@ export interface GoalsContextType {
   handleAddGoal: (goalData: GoalFormData) => Promise<void>;
   handleEditGoal: (goal: Goal) => void;
   handleDeleteGoal: (id: string) => void;
-  confirmDeleteGoal: () => void;
+  confirmDeleteGoal: () => Promise<void>;
   updateGoalHandler: (goalData: GoalFormData) => Promise<void>;
   openCollaborationDialog: (goal: Goal) => Promise<void>;
   handleInviteCollaborator: (email: string) => Promise<void>;

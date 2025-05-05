@@ -66,10 +66,7 @@ export function useGoalsState() {
       setError(null);
     } catch (error: any) {
       setError(error);
-      toast({
-        description: error.message || "Failed to fetch goals",
-        variant: "destructive",
-      });
+      toast(error.message || "Failed to fetch goals");
     } finally {
       setLoading(false);
     }
@@ -81,7 +78,7 @@ export function useGoalsState() {
   }, [fetchGoals]);
 
   // Function to add a new goal
-  const addGoal = async (values: GoalFormValues) => {
+  const addGoal = async (values: GoalFormValues & { user_id: string }) => {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
@@ -115,16 +112,11 @@ export function useGoalsState() {
       };
 
       setGoals((prevGoals) => [...prevGoals, newGoal]);
-      toast({
-        description: "Goal added successfully"
-      });
+      toast("Goal added successfully");
       return newGoal;
     } catch (error: any) {
       console.error('Error adding goal:', error);
-      toast({
-        description: error.message || "Failed to add goal",
-        variant: "destructive"
-      });
+      toast(error.message || "Failed to add goal");
       throw error;
     } finally {
       setIsSubmitting(false);
@@ -167,15 +159,10 @@ export function useGoalsState() {
       setGoals((prevGoals) =>
         prevGoals.map((goal) => (goal.id === goalId ? updatedGoal : goal))
       );
-      toast({
-        description: "Goal updated successfully"
-      });
+      toast("Goal updated successfully");
     } catch (error: any) {
       console.error('Error updating goal:', error);
-      toast({
-        description: error.message || "Failed to update goal",
-        variant: "destructive"
-      });
+      toast(error.message || "Failed to update goal");
     } finally {
       setIsSubmitting(false);
     }
@@ -190,15 +177,10 @@ export function useGoalsState() {
       // Remove the goal from the local state
       setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== goalId));
       
-      toast({
-        description: "Goal deleted successfully"
-      });
+      toast("Goal deleted successfully");
     } catch (error: any) {
       console.error('Error deleting goal:', error);
-      toast({
-        description: error.message || "Failed to delete goal",
-        variant: "destructive"
-      });
+      toast(error.message || "Failed to delete goal");
     } finally {
       setIsSubmitting(false);
     }
@@ -236,25 +218,35 @@ export function useGoalsState() {
     try {
       const { data, error } = await supabase
         .from('goal_collaborators')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            email,
+            full_name
+          )
+        `)
         .eq('goal_id', goal.id);
 
       if (error) {
         throw error;
       }
 
-      setGoalCollaborators(data);
+      // Transform the data to match Collaborator interface
+      const collaborators: Collaborator[] = data.map(item => ({
+        user_id: item.user_id,
+        email: item.profiles?.email || '',
+        full_name: item.profiles?.full_name || ''
+      }));
+
+      setGoalCollaborators(collaborators);
     } catch (error: any) {
       console.error('Error fetching collaborators:', error);
-      toast({
-        description: error.message || "Failed to fetch collaborators",
-        variant: "destructive"
-      });
+      toast(error.message || "Failed to fetch collaborators");
     }
   };
 
   // Function to handle adding a new goal
-  const handleAddGoal = async (values: GoalFormValues) => {
+  const handleAddGoal = async (values: GoalFormValues & { user_id: string }) => {
     await addGoal(values);
     setIsAddDialogOpen(false);
   };
@@ -311,7 +303,7 @@ export function useGoalsState() {
           {
             goal_id: selectedGoal.id,
             user_id: user.id,
-          },
+          }
         ]);
 
       if (inviteError) {
@@ -319,24 +311,17 @@ export function useGoalsState() {
       }
 
       // Update the local state
-      setGoalCollaborators((prevCollaborators) => [
-        ...prevCollaborators,
-        {
-          goal_id: selectedGoal.id,
-          user_id: user.id,
-          email: user.email,
-          full_name: user.full_name
-        },
-      ]);
-      toast({
-        description: "Collaborator invited successfully"
-      });
+      const newCollaborator: Collaborator = {
+        user_id: user.id,
+        email: user.email,
+        full_name: user.full_name
+      };
+      
+      setGoalCollaborators(prevCollaborators => [...prevCollaborators, newCollaborator]);
+      toast("Collaborator invited successfully");
     } catch (error: any) {
       console.error('Error inviting collaborator:', error);
-      toast({
-        description: error.message || "Failed to invite collaborator",
-        variant: "destructive"
-      });
+      toast(error.message || "Failed to invite collaborator");
     } finally {
       setIsSubmitting(false);
     }
@@ -362,15 +347,10 @@ export function useGoalsState() {
       setGoalCollaborators((prevCollaborators) =>
         prevCollaborators.filter((collaborator) => collaborator.user_id !== userId)
       );
-      toast({
-        description: "Collaborator removed successfully"
-      });
+      toast("Collaborator removed successfully");
     } catch (error: any) {
       console.error('Error removing collaborator:', error);
-      toast({
-        description: error.message || "Failed to remove collaborator",
-        variant: "destructive"
-      });
+      toast(error.message || "Failed to remove collaborator");
     } finally {
       setIsSubmitting(false);
     }
@@ -403,13 +383,13 @@ export function useGoalsState() {
     });
   };
 
-  // Function to get filtered and sorted goals
+  // Get filtered and sorted goals
   const filteredAndSortedGoals = sortGoals(filteredGoals);
 
-  // Function for direct delete
-  const confirmDeleteGoal = () => {
+  // Async confirmDeleteGoal for compatibility
+  const confirmDeleteGoal = async () => {
     if (selectedGoal) {
-      handleDeleteGoal(selectedGoal.id);
+      await handleDeleteGoal(selectedGoal.id);
       setIsDeleteDialogOpen(false);
       setSelectedGoal(null);
     }

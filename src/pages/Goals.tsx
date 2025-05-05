@@ -91,7 +91,7 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
   }
 
   if (error) {
-    return <GoalsLoading isPremium={isPremium} error={error} onRetry={fetchGoals} />;
+    return <GoalsLoading isPremium={isPremium} error={error} onRetry={async () => await fetchGoals()} />;
   }
 
   return (

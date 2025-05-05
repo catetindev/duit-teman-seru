@@ -71,18 +71,13 @@ const GoalCard = ({
         
         if (error) throw error;
         
-        toast({
-          description: "Goal deleted successfully"
-        });
+        toast("Goal deleted successfully");
         
         onUpdate();
       }
     } catch (error: any) {
       console.error('Error deleting goal:', error);
-      toast({
-        description: "Failed to delete goal: " + error.message,
-        variant: "destructive"
-      });
+      toast("Failed to delete goal: " + error.message);
     } finally {
       setIsDeleting(false);
     }
