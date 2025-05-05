@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -84,7 +83,7 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
   }, [setIsCollaborateDialogOpen]);
 
   const handleDeleteDialogClose = useCallback(() => {
-    setIsDeleteDialogClose(false);
+    setIsDeleteDialogOpen(false);
   }, [setIsDeleteDialogOpen]);
 
   if (loading) {

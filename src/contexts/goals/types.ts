@@ -44,3 +44,6 @@ export interface GoalsContextType {
   formatCurrency: (amount: number, currency: 'IDR' | 'USD') => string;
   calculateProgress: (goal: Goal) => number;
 }
+
+// Re-export GoalFormData as GoalFormValues for backward compatibility
+export type GoalFormValues = GoalFormData;

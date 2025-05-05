@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { Goal, Collaborator } from '@/hooks/goals/types';
-import { GoalFormValues } from '../types';
+import { GoalFormData } from '@/components/goals/AddGoalDialog';
 
 export function useGoalOperations() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,7 +24,7 @@ export function useGoalOperations() {
   }, []);
 
   // Function to add a new goal
-  const addGoal = useCallback(async (values: GoalFormValues & { user_id: string }) => {
+  const addGoal = useCallback(async (values: GoalFormData & { user_id: string }) => {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
