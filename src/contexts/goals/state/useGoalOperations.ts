@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
+import { GoalFormValues } from '../types';
 
 export function useGoalOperations() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,18 +28,22 @@ export function useGoalOperations() {
   const addGoal = useCallback(async (values: GoalFormData & { user_id: string }) => {
     try {
       setIsSubmitting(true);
+      
+      // Prepare the data correctly for Supabase insert
+      const goalData = {
+        id: uuidv4(),
+        title: values.title,
+        target_amount: parseFloat(values.target_amount),
+        saved_amount: values.saved_amount ? parseFloat(values.saved_amount) : 0,
+        target_date: values.target_date || null,
+        currency: values.currency || 'IDR',
+        emoji: values.emoji || '🎯',
+        user_id: values.user_id
+      };
+      
       const { data, error } = await supabase
         .from('savings_goals')
-        .insert({
-          id: uuidv4(),
-          title: values.title,
-          target_amount: values.target_amount,
-          saved_amount: values.saved_amount || 0,
-          target_date: values.target_date || null,
-          currency: values.currency,
-          emoji: values.emoji || '🎯',
-          user_id: values.user_id
-        })
+        .insert(goalData)
         .select();
 
       if (error) {
@@ -69,17 +74,17 @@ export function useGoalOperations() {
   }, []);
 
   // Function to update an existing goal
-  const updateGoal = useCallback(async (goalId: string, values: GoalFormValues) => {
+  const updateGoal = useCallback(async (goalId: string, values: GoalFormData) => {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
         .from('savings_goals')
         .update({
           title: values.title,
-          target_amount: values.target_amount,
-          saved_amount: values.saved_amount || 0,
+          target_amount: parseFloat(values.target_amount),
+          saved_amount: values.saved_amount ? parseFloat(values.saved_amount) : 0,
           target_date: values.target_date || null,
-          currency: values.currency,
+          currency: values.currency || 'IDR',
           emoji: values.emoji
         })
         .eq('id', goalId)

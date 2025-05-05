@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -26,6 +25,7 @@ export interface GoalFormData {
   saved_amount: string;
   target_date: string;
   emoji: string;
+  currency?: 'IDR' | 'USD';  // Add currency property with default IDR
 }
 
 const initialFormState: GoalFormData = {
