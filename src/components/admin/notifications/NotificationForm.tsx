@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import NotificationFormFields from './NotificationFormFields';
 
+// Define the schema here to ensure consistency
 const notificationSchema = z.object({
   segment: z.string(),
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -20,7 +21,8 @@ const notificationSchema = z.object({
   type: z.enum(["info", "success", "warning", "error"])
 });
 
-type NotificationFormData = z.infer<typeof notificationSchema>;
+// Export the type for reuse
+export type NotificationFormData = z.infer<typeof notificationSchema>;
 
 const NotificationForm = () => {
   const { toast } = useToast();

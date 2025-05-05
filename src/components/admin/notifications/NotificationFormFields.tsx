@@ -4,13 +4,18 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from 'react-hook-form';
+import * as z from "zod";
 
-type NotificationFormData = {
-  segment: string;
-  title: string;
-  message: string;
-  type: string;
-};
+// Define the schema with the same structure as in NotificationForm
+const notificationSchema = z.object({
+  segment: z.string(),
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  message: z.string().min(5, "Message must be at least 5 characters"),
+  type: z.enum(["info", "success", "warning", "error"])
+});
+
+// Use the inferred type from the schema
+type NotificationFormData = z.infer<typeof notificationSchema>;
 
 interface NotificationFormFieldsProps {
   form: UseFormReturn<NotificationFormData>;
