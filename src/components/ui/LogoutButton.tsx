@@ -24,11 +24,13 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
     try {
       await logout();
       
-      // Navigate to login immediately after successful logout
-      navigate('/login');
+      // Navigate to landing page instead of login
+      navigate('/');
+      
+      toast.success("Logged out successfully");
     } catch (error) {
       console.error('Error signing out:', error);
-      toast("Failed to sign out. Please try again.");
+      toast.error("Failed to sign out. Please try again.");
     }
   };
 

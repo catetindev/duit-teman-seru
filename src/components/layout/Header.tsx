@@ -17,7 +17,7 @@ const Header = ({ isPremium = false, isAdmin = false }) => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <img 
-              src={logoUrl || "/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png"} 
+              src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
               alt="App Logo" 
               className="h-9 md:h-10 object-contain" 
             />
