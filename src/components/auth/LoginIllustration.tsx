@@ -19,9 +19,9 @@ const LoginIllustration = () => {
         </div>
       </div>
       <img 
-        src="public/lovable-uploads/d75492ea-96d6-43e6-ab44-7a8b36916d0f.png" 
-        alt="Person waving" 
-        className="w-3/4 max-w-md z-10"
+        src="/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png" 
+        alt="Financial freedom illustration" 
+        className="w-3/4 max-w-md z-10 object-contain rounded-xl"
       />
       <div className="absolute bottom-12 left-12 right-12">
         <h1 className="text-4xl font-outfit font-bold mb-4">

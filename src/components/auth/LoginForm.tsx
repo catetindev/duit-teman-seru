@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Label } from '@/components/ui/label';
 import SocialLoginButtons from './SocialLoginButtons';
 
 interface LoginFormProps {
@@ -34,12 +35,13 @@ const LoginForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
         <div className="relative">
           <Input
             id="email"
             type="email"
-            className="h-12 pl-4 pr-10 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
-            placeholder={language === 'en' ? "Enter Email" : "Masukkan Email"}
+            className="h-12 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+            placeholder={language === 'en' ? "hello@example.com" : "email@contoh.com"}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -49,11 +51,17 @@ const LoginForm = ({
       </div>
       
       <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <Label htmlFor="password">Password</Label>
+          <Link to="/forgot-password" className="text-sm text-gray-600 hover:text-[#28e57d] dark:text-gray-400">
+            {language === 'en' ? 'Forgot Password?' : 'Lupa Kata Sandi?'}
+          </Link>
+        </div>
         <div className="relative">
           <Input
             id="password"
             type={showPassword ? 'text' : 'password'}
-            className="h-12 pl-4 pr-10 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
+            className="h-12 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
             placeholder="••••••••"
             required
             value={password}
@@ -69,11 +77,6 @@ const LoginForm = ({
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
-        <div className="flex justify-end">
-          <Link to="/forgot-password" className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400">
-            {language === 'en' ? 'Recover Password?' : 'Lupa Kata Sandi?'}
-          </Link>
-        </div>
       </div>
       
       <motion.div
@@ -83,7 +86,7 @@ const LoginForm = ({
       >
         <Button 
           type="submit" 
-          className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all"
+          className="w-full h-12 rounded-lg bg-[#28e57d] hover:bg-[#28e57d]/90 text-white font-medium transition-all hover:shadow-md"
           disabled={loading}
         >
           {loading ? (

@@ -67,7 +67,11 @@ const Signup = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
@@ -195,16 +199,6 @@ const Signup = () => {
                 Sign up with Google
               </Button>
               
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/login')}
-                className="w-full h-12 rounded-lg border border-gray-200 hover:bg-gray-50 transition-all"
-                disabled={isLoading}
-              >
-                Login with Email
-              </Button>
-              
               <div className="text-center mt-6">
                 <p className="text-gray-600">
                   Have an account?{" "}
@@ -220,9 +214,11 @@ const Signup = () => {
         {/* Right side - Image */}
         <div className="hidden md:block md:w-1/2 bg-gray-50 p-6">
           <div className="h-full w-full flex items-center justify-center">
-            <div className="bg-gray-200 rounded-xl w-full max-w-md h-96 flex items-center justify-center text-gray-400">
-              Image Placeholder
-            </div>
+            <img 
+              src="/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png" 
+              alt="Financial freedom illustration" 
+              className="max-w-full max-h-full object-contain rounded-xl" 
+            />
           </div>
         </div>
       </div>

@@ -3,12 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from '@/components/auth/LoginForm';
-import LoginIllustration from '@/components/auth/LoginIllustration';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import Navbar from '@/components/landing/Navbar';
+import Footer from '@/components/landing/Footer';
 
 const Login = () => {
   const { user, login } = useAuth();
@@ -55,6 +57,7 @@ const Login = () => {
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to login');
+      toast.error(err.message || 'Failed to login');
     } finally {
       setLoading(false);
     }
@@ -88,31 +91,29 @@ const Login = () => {
     } catch (err: any) {
       console.error('Social login error:', err);
       setError(err.message || `Failed to login with ${provider}`);
+      toast.error(err.message || `Failed to login with ${provider}`);
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="p-4 border-b">
-        <div className="container flex justify-start">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/" className="flex items-center gap-1">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
-        </div>
-      </header>
-
-      <main className="flex-1">
-        <div className="container flex flex-col md:flex-row h-full py-8 md:py-12 gap-8">
-          <div className="md:w-1/2 flex flex-col justify-center">
-            <div className="space-y-2 mb-6">
-              <h1 className="text-3xl font-bold tracking-tighter">Welcome back</h1>
-              <p className="text-muted-foreground">Login to your account to continue</p>
+    <div className="min-h-screen bg-white flex flex-col">
+      <Navbar />
+      
+      <div className="flex flex-1 w-full mt-16 md:mt-20">
+        {/* Left side - Form */}
+        <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md"
+          >
+            <div className="text-center md:text-left mb-8">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome Back</h1>
+              <p className="text-gray-500">Sign in to your account to continue</p>
             </div>
-
+            
             {error && (
               <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
                 {error}
@@ -122,22 +123,33 @@ const Login = () => {
             <LoginForm onLogin={handleLogin} loading={loading} />
             
             <div className="mt-6">
-              <SocialLoginButtons onSocialLogin={handleSocialLogin} />
+              <SocialLoginButtons onSocialLogin={handleSocialLogin} loading={loading} />
             </div>
             
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-primary underline underline-offset-4">
-                Sign up
-              </Link>
-            </p>
-          </div>
-          
-          <div className="hidden md:flex md:w-1/2 items-center justify-center">
-            <LoginIllustration />
+            <div className="text-center mt-6">
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <Link to="/signup" className="text-[#28e57d] hover:underline font-medium">
+                  Sign up
+                </Link>
+              </p>
+            </div>
+          </motion.div>
+        </div>
+        
+        {/* Right side - Image */}
+        <div className="hidden md:block md:w-1/2 bg-gray-50 p-6">
+          <div className="h-full w-full flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png" 
+              alt="Financial freedom illustration" 
+              className="max-w-full max-h-full object-contain rounded-xl" 
+            />
           </div>
         </div>
-      </main>
+      </div>
+      
+      <Footer />
     </div>
   );
 };
