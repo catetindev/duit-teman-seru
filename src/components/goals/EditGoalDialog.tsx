@@ -43,7 +43,8 @@ const EditGoalDialog: React.FC<EditGoalProps> = ({
     target_amount: '',
     saved_amount: '',
     target_date: '',
-    emoji: '🎯'
+    emoji: '🎯',
+    currency: 'IDR'
   });
 
   // Initialize form when selected goal changes
@@ -54,7 +55,8 @@ const EditGoalDialog: React.FC<EditGoalProps> = ({
         target_amount: selectedGoal.target_amount.toString(),
         saved_amount: selectedGoal.saved_amount.toString(),
         target_date: selectedGoal.target_date || '',
-        emoji: selectedGoal.emoji || '🎯'
+        emoji: selectedGoal.emoji || '🎯',
+        currency: selectedGoal.currency || 'IDR'
       });
     }
   }, [selectedGoal]);
