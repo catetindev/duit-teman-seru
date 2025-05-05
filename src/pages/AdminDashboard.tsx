@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +31,7 @@ interface User {
   joined: string;
   lastActive: string;
 }
+
 interface ActivityLog {
   id: string;
   user_id: string;
@@ -42,13 +44,10 @@ interface ActivityLog {
     email: string;
   } | null;
 }
+
 const AdminDashboard = () => {
-  const {
-    t
-  } = useLanguage();
-  const {
-    toast
-  } = useToast();
+  const { t } = useLanguage();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSegment, setSelectedSegment] = useState<string>("all");
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -76,6 +75,7 @@ const AdminDashboard = () => {
     message: z.string().min(5, "Message must be at least 5 characters"),
     type: z.enum(["info", "success", "warning", "error"])
   });
+
   const createUserForm = useForm<z.infer<typeof createUserSchema>>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
@@ -85,6 +85,7 @@ const AdminDashboard = () => {
       role: "free"
     }
   });
+
   const editUserForm = useForm<z.infer<typeof editUserSchema>>({
     resolver: zodResolver(editUserSchema),
     defaultValues: {
@@ -92,6 +93,7 @@ const AdminDashboard = () => {
       role: "free"
     }
   });
+
   const notificationForm = useForm<z.infer<typeof notificationSchema>>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
@@ -110,10 +112,7 @@ const AdminDashboard = () => {
   } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('profiles').select('*');
+      const { data, error } = await supabase.from('profiles').select('*');
       if (error) throw error;
 
       // Transform data
@@ -139,12 +138,12 @@ const AdminDashboard = () => {
     queryKey: ['admin-activity-logs'],
     queryFn: async () => {
       // First, get the activity logs
-      const {
-        data: logsData,
-        error: logsError
-      } = await supabase.from('activity_logs').select('*').order('created_at', {
-        ascending: false
-      }).limit(10);
+      const { data: logsData, error: logsError } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+        
       if (logsError) throw logsError;
 
       // Then, for each log, get the user details
@@ -155,22 +154,27 @@ const AdminDashboard = () => {
             user: null
           } as ActivityLog;
         }
-        const {
-          data: userData,
-          error: userError
-        } = await supabase.from('profiles').select('full_name, email').eq('id', log.user_id).single();
+        
+        const { data: userData, error: userError } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', log.user_id)
+          .single();
+          
         return {
           ...log,
           user: userError ? null : userData
         } as ActivityLog;
       }));
+      
       return logsWithUsers;
     }
   });
 
   // Filter users based on search and selected tab
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
     if (selectedSegment === 'all') return matchesSearch;
     if (selectedSegment === 'premium') return matchesSearch && user.role === 'premium';
     if (selectedSegment === 'free') return matchesSearch && user.role === 'free';
@@ -181,20 +185,20 @@ const AdminDashboard = () => {
   // Create new user
   const handleCreateUser = async (data: z.infer<typeof createUserSchema>) => {
     try {
-      const {
-        data: result,
-        error
-      } = await supabase.rpc('admin_create_user', {
+      const { data: result, error } = await supabase.rpc('admin_create_user', {
         _email: data.email,
         _password: data.password,
         _full_name: data.full_name,
         _role: data.role
       });
+      
       if (error) throw error;
+      
       toast({
         title: "User created successfully",
         description: `New user ${data.full_name} has been added`
       });
+      
       refetchUsers();
       refetchLogs();
       createUserForm.reset();
@@ -210,19 +214,21 @@ const AdminDashboard = () => {
   // Edit user
   const handleEditUser = async (data: z.infer<typeof editUserSchema>) => {
     if (!editingUser) return;
+    
     try {
-      const {
-        error
-      } = await supabase.rpc('admin_update_user', {
+      const { error } = await supabase.rpc('admin_update_user', {
         _user_id: editingUser.id,
         _full_name: data.full_name,
         _role: data.role
       });
+      
       if (error) throw error;
+      
       toast({
         title: "User updated successfully",
         description: `User ${data.full_name} has been updated`
       });
+      
       setEditingUser(null);
       refetchUsers();
       refetchLogs();
@@ -238,17 +244,19 @@ const AdminDashboard = () => {
   // Delete user
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
+    
     try {
-      const {
-        error
-      } = await supabase.rpc('admin_delete_user', {
+      const { error } = await supabase.rpc('admin_delete_user', {
         _user_id: userToDelete.id
       });
+      
       if (error) throw error;
+      
       toast({
         title: "User deleted",
         description: `User ${userToDelete.full_name} has been removed`
       });
+      
       setShowDeleteDialog(false);
       setUserToDelete(null);
       refetchUsers();
@@ -266,6 +274,7 @@ const AdminDashboard = () => {
   const handleSendNotification = async (data: z.infer<typeof notificationSchema>) => {
     try {
       let userId = null;
+      
       if (data.segment !== 'all') {
         // For this example, let's just pick the first user matching the role
         const targetUsers = users.filter(user => {
@@ -274,24 +283,26 @@ const AdminDashboard = () => {
           if (data.segment === 'inactive') return user.status === 'inactive';
           return false;
         });
+        
         if (targetUsers.length > 0) {
           userId = targetUsers[0].id;
         }
       }
-      const {
-        data: result,
-        error
-      } = await supabase.rpc('admin_send_notification', {
+      
+      const { data: result, error } = await supabase.rpc('admin_send_notification', {
         _title: data.title,
         _message: data.message,
         _type: data.type,
         _user_id: userId
       });
+      
       if (error) throw error;
+      
       const recipientText = userId ? "selected user" : "all users";
       sonnerToast.success(`Notification sent to ${recipientText}`, {
         description: `"${data.title}" has been delivered successfully.`
       });
+      
       refetchLogs();
       notificationForm.reset();
     } catch (error: any) {
@@ -314,6 +325,7 @@ const AdminDashboard = () => {
   // Format activity log message for display
   const formatActivityLogMessage = (log: ActivityLog) => {
     const userName = log.user?.full_name || 'Anonymous';
+    
     if (log.action.startsWith('created_user')) {
       return `${userName} added a new user`;
     } else if (log.action.startsWith('updated_user')) {
@@ -327,6 +339,7 @@ const AdminDashboard = () => {
     } else if (log.action === 'completed_goal') {
       return `${userName} reached a savings goal`;
     }
+    
     return log.action;
   };
 
@@ -344,12 +357,15 @@ const AdminDashboard = () => {
     const date = new Date(dateString);
     const now = new Date();
     const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
     if (secondsAgo < 60) return 'Just now';
     if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)} minutes ago`;
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)} hours ago`;
     return `${Math.floor(secondsAgo / 86400)} days ago`;
   };
-  return <DashboardLayout isAdmin={true}>
+
+  return (
+    <DashboardLayout isAdmin={true}>
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -358,20 +374,25 @@ const AdminDashboard = () => {
               Manage users, content, and system settings
             </p>
           </div>
-          
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <StatCard title={t('admin.users')} value={users.length.toString()} icon={<Users size={20} />} variant="purple" />
-        <StatCard title={t('admin.premium')} value={users.filter(u => u.role === 'premium').length.toString()} icon={<UserCheck size={20} className="text-purple-500" />} trend={{
-        value: 8.5,
-        isPositive: true
-      }} variant="purple" />
-        <StatCard title={t('admin.free')} value={users.filter(u => u.role === 'free').length.toString()} icon={<Users size={20} className="text-teal-500" />} trend={{
-        value: 12,
-        isPositive: true
-      }} variant="teal" />
+        <StatCard 
+          title={t('admin.premium')} 
+          value={users.filter(u => u.role === 'premium').length.toString()} 
+          icon={<UserCheck size={20} className="text-purple-500" />} 
+          trend={{ value: 8.5, isPositive: true }} 
+          variant="purple" 
+        />
+        <StatCard 
+          title={t('admin.free')} 
+          value={users.filter(u => u.role === 'free').length.toString()} 
+          icon={<Users size={20} className="text-teal-500" />} 
+          trend={{ value: 12, isPositive: true }} 
+          variant="teal" 
+        />
       </div>
       
       <Tabs defaultValue="users" className="mb-8">
@@ -393,7 +414,13 @@ const AdminDashboard = () => {
                 <CardContent>
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 my-4">
                     <div className="relative">
-                      <Input type="search" placeholder="Search users..." className="pl-8 w-full md:w-64 rounded-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                      <Input 
+                        type="search" 
+                        placeholder="Search users..." 
+                        className="pl-8 w-full md:w-64 rounded-full" 
+                        value={searchQuery} 
+                        onChange={e => setSearchQuery(e.target.value)} 
+                      />
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
                         🔍
                       </div>
@@ -418,39 +445,53 @@ const AdminDashboard = () => {
                           
                           <Form {...createUserForm}>
                             <form onSubmit={createUserForm.handleSubmit(handleCreateUser)} className="space-y-4 py-4">
-                              <FormField control={createUserForm.control} name="email" render={({
-                              field
-                            }) => <FormItem>
+                              <FormField 
+                                control={createUserForm.control} 
+                                name="email" 
+                                render={({ field }) => (
+                                  <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
                                       <Input placeholder="user@example.com" {...field} />
                                     </FormControl>
                                     <FormMessage />
-                                  </FormItem>} />
+                                  </FormItem>
+                                )} 
+                              />
                               
-                              <FormField control={createUserForm.control} name="password" render={({
-                              field
-                            }) => <FormItem>
+                              <FormField 
+                                control={createUserForm.control} 
+                                name="password" 
+                                render={({ field }) => (
+                                  <FormItem>
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
                                       <Input type="password" placeholder="******" {...field} />
                                     </FormControl>
                                     <FormMessage />
-                                  </FormItem>} />
+                                  </FormItem>
+                                )} 
+                              />
                               
-                              <FormField control={createUserForm.control} name="full_name" render={({
-                              field
-                            }) => <FormItem>
+                              <FormField 
+                                control={createUserForm.control} 
+                                name="full_name" 
+                                render={({ field }) => (
+                                  <FormItem>
                                     <FormLabel>Full Name</FormLabel>
                                     <FormControl>
                                       <Input placeholder="John Doe" {...field} />
                                     </FormControl>
                                     <FormMessage />
-                                  </FormItem>} />
+                                  </FormItem>
+                                )} 
+                              />
                               
-                              <FormField control={createUserForm.control} name="role" render={({
-                              field
-                            }) => <FormItem>
+                              <FormField 
+                                control={createUserForm.control} 
+                                name="role" 
+                                render={({ field }) => (
+                                  <FormItem>
                                     <FormLabel>User Role</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                       <FormControl>
@@ -465,7 +506,9 @@ const AdminDashboard = () => {
                                       </SelectContent>
                                     </Select>
                                     <FormMessage />
-                                  </FormItem>} />
+                                  </FormItem>
+                                )} 
+                              />
                               
                               <DialogFooter>
                                 <DialogClose asChild>
@@ -489,9 +532,12 @@ const AdminDashboard = () => {
                     </TabsList>
                     
                     <TabsContent value={selectedSegment}>
-                      {isLoadingUsers ? <div className="flex justify-center py-8">
+                      {isLoadingUsers ? (
+                        <div className="flex justify-center py-8">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
-                        </div> : <div className="overflow-x-auto">
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto">
                           <Table>
                             <TableHeader>
                               <TableRow>
@@ -503,11 +549,15 @@ const AdminDashboard = () => {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {filteredUsers.length === 0 ? <TableRow>
+                              {filteredUsers.length === 0 ? (
+                                <TableRow>
                                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                                     No users found matching your search
                                   </TableCell>
-                                </TableRow> : filteredUsers.map(user => <TableRow key={user.id}>
+                                </TableRow>
+                              ) : (
+                                filteredUsers.map(user => (
+                                  <TableRow key={user.id}>
                                     <TableCell className="font-medium">
                                       <div className="flex flex-col">
                                         <span>{user.full_name}</span>
@@ -518,12 +568,16 @@ const AdminDashboard = () => {
                                       <div className="flex items-center gap-2">
                                         <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
                                         <span>{user.status}</span>
-                                        {user.role === 'premium' && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
+                                        {user.role === 'premium' && (
+                                          <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
                                             Premium
-                                          </span>}
-                                        {user.role === 'admin' && <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full">
+                                          </span>
+                                        )}
+                                        {user.role === 'admin' && (
+                                          <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full">
                                             Admin
-                                          </span>}
+                                          </span>
+                                        )}
                                       </div>
                                     </TableCell>
                                     <TableCell>{user.joined}</TableCell>
@@ -532,7 +586,12 @@ const AdminDashboard = () => {
                                       <div className="flex justify-end gap-2">
                                         <Dialog>
                                           <DialogTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingUser(user)}>
+                                            <Button 
+                                              variant="ghost" 
+                                              size="sm" 
+                                              className="h-8 w-8 p-0" 
+                                              onClick={() => setEditingUser(user)}
+                                            >
                                               <Edit className="h-4 w-4" />
                                               <span className="sr-only">Edit</span>
                                             </Button>
@@ -552,42 +611,58 @@ const AdminDashboard = () => {
                                                   <span className="text-sm">{editingUser?.email}</span>
                                                 </div>
                                                 
-                                                <FormField control={editUserForm.control} name="full_name" render={({
-                                      field
-                                    }) => <FormItem>
-                                                  <FormLabel>Full Name</FormLabel>
-                                                  <FormControl>
-                                                    <Input {...field} />
-                                                  </FormControl>
-                                                  <FormMessage />
-                                                </FormItem>} />
+                                                <FormField 
+                                                  control={editUserForm.control} 
+                                                  name="full_name" 
+                                                  render={({ field }) => (
+                                                    <FormItem>
+                                                      <FormLabel>Full Name</FormLabel>
+                                                      <FormControl>
+                                                        <Input {...field} />
+                                                      </FormControl>
+                                                      <FormMessage />
+                                                    </FormItem>
+                                                  )} 
+                                                />
                                                 
-                                                <FormField control={editUserForm.control} name="role" render={({
-                                      field
-                                    }) => <FormItem>
-                                                  <FormLabel>User Role</FormLabel>
-                                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                      <SelectTrigger>
-                                                        <SelectValue placeholder="Select role" />
-                                                      </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                      <SelectItem value="free">Free</SelectItem>
-                                                      <SelectItem value="premium">Premium</SelectItem>
-                                                      <SelectItem value="admin">Admin</SelectItem>
-                                                    </SelectContent>
-                                                  </Select>
-                                                  <FormMessage />
-                                                </FormItem>} />
+                                                <FormField 
+                                                  control={editUserForm.control} 
+                                                  name="role" 
+                                                  render={({ field }) => (
+                                                    <FormItem>
+                                                      <FormLabel>User Role</FormLabel>
+                                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                          <SelectTrigger>
+                                                            <SelectValue placeholder="Select role" />
+                                                          </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                          <SelectItem value="free">Free</SelectItem>
+                                                          <SelectItem value="premium">Premium</SelectItem>
+                                                          <SelectItem value="admin">Admin</SelectItem>
+                                                        </SelectContent>
+                                                      </Select>
+                                                      <FormMessage />
+                                                    </FormItem>
+                                                  )} 
+                                                />
                                                 
                                                 <DialogFooter>
                                                   <DialogClose asChild>
-                                                    <Button type="button" variant="outline" className="rounded-full" onClick={() => setEditingUser(null)}>
+                                                    <Button 
+                                                      type="button" 
+                                                      variant="outline" 
+                                                      className="rounded-full" 
+                                                      onClick={() => setEditingUser(null)}
+                                                    >
                                                       Cancel
                                                     </Button>
                                                   </DialogClose>
-                                                  <Button type="submit" className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600">
+                                                  <Button 
+                                                    type="submit" 
+                                                    className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600"
+                                                  >
                                                     Save Changes
                                                   </Button>
                                                 </DialogFooter>
@@ -596,20 +671,29 @@ const AdminDashboard = () => {
                                           </DialogContent>
                                         </Dialog>
                                         
-                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => {
-                                  setUserToDelete(user);
-                                  setShowDeleteDialog(true);
-                                }}>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm" 
+                                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" 
+                                          onClick={() => {
+                                            setUserToDelete(user);
+                                            setShowDeleteDialog(true);
+                                          }}
+                                        >
                                           <Trash2 className="h-4 w-4" />
                                           <span className="sr-only">Delete</span>
                                         </Button>
                                       </div>
                                     </TableCell>
-                                  </TableRow>)}
+                                  </TableRow>
+                                ))
+                              )}
                             </TableBody>
                           </Table>
-                        </div>}
-                  </TabsContent>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
                 <CardFooter className="border-t bg-gray-50 dark:bg-gray-800/50">
                   <div className="flex items-center justify-between w-full">
@@ -635,65 +719,85 @@ const AdminDashboard = () => {
                 <CardContent className="pt-4">
                   <Form {...notificationForm}>
                     <form onSubmit={notificationForm.handleSubmit(handleSendNotification)} className="space-y-4">
-                      <FormField control={notificationForm.control} name="segment" render={({
-                      field
-                    }) => <FormItem>
-                          <FormLabel>Recipient</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormField 
+                        control={notificationForm.control} 
+                        name="segment" 
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Recipient</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="rounded-full">
+                                  <SelectValue placeholder="Select recipients" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="all">All Users</SelectItem>
+                                <SelectItem value="premium">Premium Users</SelectItem>
+                                <SelectItem value="free">Free Users</SelectItem>
+                                <SelectItem value="inactive">Inactive Users</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )} 
+                      />
+                      
+                      <FormField 
+                        control={notificationForm.control} 
+                        name="type" 
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Notification Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="rounded-full">
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="info">Information</SelectItem>
+                                <SelectItem value="success">Success</SelectItem>
+                                <SelectItem value="warning">Warning</SelectItem>
+                                <SelectItem value="error">Error</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )} 
+                      />
+                      
+                      <FormField 
+                        control={notificationForm.control} 
+                        name="title" 
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Title</FormLabel>
                             <FormControl>
-                              <SelectTrigger className="rounded-full">
-                                <SelectValue placeholder="Select recipients" />
-                              </SelectTrigger>
+                              <Input placeholder="Notification title" {...field} className="rounded-full" />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="all">All Users</SelectItem>
-                              <SelectItem value="premium">Premium Users</SelectItem>
-                              <SelectItem value="free">Free Users</SelectItem>
-                              <SelectItem value="inactive">Inactive Users</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>} />
+                            <FormMessage />
+                          </FormItem>
+                        )} 
+                      />
                       
-                      <FormField control={notificationForm.control} name="type" render={({
-                      field
-                    }) => <FormItem>
-                          <FormLabel>Notification Type</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormField 
+                        control={notificationForm.control} 
+                        name="message" 
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Message</FormLabel>
                             <FormControl>
-                              <SelectTrigger className="rounded-full">
-                                <SelectValue placeholder="Select type" />
-                              </SelectTrigger>
+                              <textarea 
+                                className="w-full p-2 border rounded-xl min-h-[100px] resize-none" 
+                                placeholder="Enter your message to users..." 
+                                {...field}
+                              ></textarea>
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="info">Information</SelectItem>
-                              <SelectItem value="success">Success</SelectItem>
-                              <SelectItem value="warning">Warning</SelectItem>
-                              <SelectItem value="error">Error</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>} />
-                      
-                      <FormField control={notificationForm.control} name="title" render={({
-                      field
-                    }) => <FormItem>
-                          <FormLabel>Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Notification title" {...field} className="rounded-full" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>} />
-                      
-                      <FormField control={notificationForm.control} name="message" render={({
-                      field
-                    }) => <FormItem>
-                          <FormLabel>Message</FormLabel>
-                          <FormControl>
-                            <textarea className="w-full p-2 border rounded-xl min-h-[100px] resize-none" placeholder="Enter your message to users..." {...field}></textarea>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>} />
+                            <FormMessage />
+                          </FormItem>
+                        )} 
+                      />
                       
                       <div className="pt-2">
                         <Button className="w-full gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600" type="submit">
@@ -713,12 +817,18 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
-                  {isLoadingLogs ? <div className="flex justify-center py-8">
+                  {isLoadingLogs ? (
+                    <div className="flex justify-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
-                    </div> : activityLogs.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+                    </div>
+                  ) : activityLogs.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
                       No activity logs found
-                    </div> : <ul className="space-y-3 text-sm">
-                      {activityLogs.slice(0, 5).map(log => <li key={log.id} className="flex gap-3 items-start pb-3 border-b">
+                    </div>
+                  ) : (
+                    <ul className="space-y-3 text-sm">
+                      {activityLogs.slice(0, 5).map(log => (
+                        <li key={log.id} className="flex gap-3 items-start pb-3 border-b">
                           <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-500">
                             {getActivityIcon(log)}
                           </div>
@@ -729,8 +839,10 @@ const AdminDashboard = () => {
                             </p>
                             <p className="text-xs text-muted-foreground">{getTimeAgo(log.created_at)}</p>
                           </div>
-                        </li>)}
-                    </ul>}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </CardContent>
                 <CardFooter>
                   <Button variant="ghost" size="sm" className="w-full rounded-full">
@@ -754,9 +866,11 @@ const AdminDashboard = () => {
               <CardContent className="pt-4">
                 <Form {...notificationForm}>
                   <form onSubmit={notificationForm.handleSubmit(handleSendNotification)} className="space-y-4">
-                    <FormField control={notificationForm.control} name="segment" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField 
+                      control={notificationForm.control} 
+                      name="segment" 
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Recipient</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
@@ -772,11 +886,15 @@ const AdminDashboard = () => {
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )} 
+                    />
                       
-                      <FormField control={notificationForm.control} name="type" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField 
+                      control={notificationForm.control} 
+                      name="type" 
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Notification Type</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
@@ -792,72 +910,93 @@ const AdminDashboard = () => {
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )} 
+                    />
                       
-                      <FormField control={notificationForm.control} name="title" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField 
+                      control={notificationForm.control} 
+                      name="title" 
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Title</FormLabel>
                           <FormControl>
                             <Input placeholder="Notification title" {...field} className="rounded-full" />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )} 
+                    />
                       
-                      <FormField control={notificationForm.control} name="message" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField 
+                      control={notificationForm.control} 
+                      name="message" 
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Message</FormLabel>
                           <FormControl>
-                            <textarea className="w-full p-2 border rounded-xl min-h-[100px] resize-none" placeholder="Enter your message to users..." {...field}></textarea>
+                            <textarea 
+                              className="w-full p-2 border rounded-xl min-h-[100px] resize-none" 
+                              placeholder="Enter your message to users..." 
+                              {...field}
+                            ></textarea>
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )} 
+                    />
                       
-                      <div className="pt-2">
-                        <Button className="w-full gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600" type="submit">
-                          <Bell size={16} />
-                          Send Notification
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md rounded-xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-                  <CardTitle className="flex items-center gap-2">
-                    <ActivityIcon className="h-5 w-5" /> Recent Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  {isLoadingLogs ? <div className="flex justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
-                    </div> : activityLogs.length === 0 ? <div className="text-center py-8 text-muted-foreground">
-                      No activity logs found
-                    </div> : <ul className="space-y-3 text-sm">
-                      {activityLogs.slice(0, 5).map(log => <li key={log.id} className="flex gap-3 items-start pb-3 border-b">
-                          <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-500">
-                            {getActivityIcon(log)}
-                          </div>
-                          <div>
-                            <p className="font-medium">{formatActivityLogMessage(log)}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {log.user?.email || 'Unknown email'}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{getTimeAgo(log.created_at)}</p>
-                          </div>
-                        </li>)}
-                    </ul>}
-                </CardContent>
-                <CardFooter>
-                  <Button variant="ghost" size="sm" className="w-full rounded-full">
-                    View all activity
-                    <ChevronRight size={16} className="ml-1" />
-                  </Button>
-                </CardFooter>
-              </Card>
+                    <div className="pt-2">
+                      <Button className="w-full gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600" type="submit">
+                        <Bell size={16} />
+                        Send Notification
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-none shadow-md rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+                <CardTitle className="flex items-center gap-2">
+                  <ActivityIcon className="h-5 w-5" /> Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {isLoadingLogs ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
+                  </div>
+                ) : activityLogs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No activity logs found
+                  </div>
+                ) : (
+                  <ul className="space-y-3 text-sm">
+                    {activityLogs.slice(0, 5).map(log => (
+                      <li key={log.id} className="flex gap-3 items-start pb-3 border-b">
+                        <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-500">
+                          {getActivityIcon(log)}
+                        </div>
+                        <div>
+                          <p className="font-medium">{formatActivityLogMessage(log)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {log.user?.email || 'Unknown email'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{getTimeAgo(log.created_at)}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" size="sm" className="w-full rounded-full">
+                  View all activity
+                  <ChevronRight size={16} className="ml-1" />
+                </Button>
+              </CardFooter>
             </Card>
           </div>
         </TabsContent>
@@ -878,18 +1017,26 @@ const AdminDashboard = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-full" onClick={() => {
-            setShowDeleteDialog(false);
-            setUserToDelete(null);
-          }}>
+            <AlertDialogCancel 
+              className="rounded-full" 
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setUserToDelete(null);
+              }}
+            >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteUser} className="rounded-full bg-red-500 hover:bg-red-600">
+            <AlertDialogAction 
+              onClick={handleDeleteUser} 
+              className="rounded-full bg-red-500 hover:bg-red-600"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
+
 export default AdminDashboard;
