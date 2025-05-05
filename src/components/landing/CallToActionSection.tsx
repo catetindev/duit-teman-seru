@@ -10,7 +10,7 @@ const CallToActionSection = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   
-  const goToSignup = () => navigate('/signup');
+  const goToPricing = () => navigate('/pricing');
 
   return (
     <section className="container mx-auto px-4 py-16 md:py-24">
@@ -26,7 +26,7 @@ const CallToActionSection = () => {
           Daftar sekarang dan rasain sendiri serunya atur duit versi kamu.
         </p>
         <Button 
-          onClick={goToSignup} 
+          onClick={goToPricing} 
           size="lg" 
           className="border-2 border-[#28e57d] bg-transparent hover:bg-[#28e57d]/20 text-white font-medium px-8 py-6 h-auto text-lg rounded-xl hover:shadow-[0_0_15px_rgba(40,229,125,0.3)] hover:scale-[1.03] transition-all duration-300"
         >

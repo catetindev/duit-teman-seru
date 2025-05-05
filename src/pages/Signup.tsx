@@ -3,13 +3,14 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 const Signup = () => {
   const { t } = useLanguage();
@@ -17,11 +18,17 @@ const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [plan, setPlan] = useState('free');
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!agreeTerms) {
+      toast.error("Please agree to the terms and privacy policy");
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -43,16 +50,6 @@ const Signup = () => {
       
       // If signup successful, show success message
       toast.success(t('auth.signupSuccess'));
-      
-      // If premium plan selected, we'll need to handle that separately
-      // For now, let's just redirect to dashboard (the profile trigger will create the base profile)
-      if (plan === 'premium') {
-        // In a real app, this would redirect to payment processing
-        // For demo purposes, just add a message
-        toast.info(t('auth.premiumRedirect'));
-      }
-      
-      // Redirect to dashboard (or a verification page in production)
       navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message || t('auth.signupFailed'));
@@ -61,13 +58,30 @@ const Signup = () => {
     }
   };
   
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+  
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-white to-slate-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-white flex flex-col">
       <div className="absolute top-4 left-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="bg-gradient-to-r from-teal-500 to-purple-500 rounded-lg w-8 h-8 flex items-center justify-center text-white font-bold">
-            D
-          </div>
+          <img 
+            src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" 
+            alt="DuitTemanseru Logo" 
+            className="h-8 w-auto object-contain" 
+          />
         </Link>
       </div>
       
@@ -75,111 +89,136 @@ const Signup = () => {
         <LanguageToggle />
       </div>
       
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-outfit">{t('auth.letsGetStarted')} 🚀</CardTitle>
-          <CardDescription>{t('auth.createAccountDesc')}</CardDescription>
-        </CardHeader>
-        
-        <form onSubmit={handleSignup}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">{t('auth.fullName')}</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder={t('auth.namePlaceholder')}
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+      <div className="flex flex-1 w-full">
+        {/* Left side - Form */}
+        <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md"
+          >
+            <div className="text-center md:text-left mb-8">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">Get Started Now</h1>
+              <p className="text-gray-500">Create your account and start managing your finances</p>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="hello@example.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.password')}</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-3">
-              <Label>{t('auth.choosePlan')}</Label>
-              <RadioGroup 
-                value={plan} 
-                onValueChange={setPlan}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            <form onSubmit={handleSignup} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Your name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-12 rounded-lg"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="hello@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-12 rounded-lg"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 rounded-lg"
+                />
+              </div>
+              
+              <div className="flex items-start space-x-2 my-4">
+                <Checkbox 
+                  id="terms" 
+                  checked={agreeTerms} 
+                  onCheckedChange={() => setAgreeTerms(!agreeTerms)}
+                  className="mt-1"
+                />
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-gray-600 leading-tight cursor-pointer"
+                >
+                  I agree to the <Link to="/terms" className="text-[#28e57d] hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-[#28e57d] hover:underline">Privacy Policy</Link>
+                </label>
+              </div>
+              
+              <Button 
+                type="submit" 
+                disabled={isLoading || !agreeTerms}
+                className="w-full h-12 bg-[#28e57d] hover:bg-[#28e57d]/90 text-white rounded-lg font-medium transition-all hover:shadow-md"
               >
-                <div>
-                  <RadioGroupItem 
-                    value="free" 
-                    id="free-plan"
-                    className="peer sr-only"
-                  />
-                  <Label 
-                    htmlFor="free-plan"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-purple-500 [&:has([data-state=checked])]:border-purple-500"
-                  >
-                    <span className="text-lg font-semibold">{t('pricing.freePlan.name')}</span>
-                    <span className="text-sm text-muted-foreground">Rp0/mo</span>
-                  </Label>
+                {isLoading ? "Creating Account..." : "Sign Up"}
+              </Button>
+              
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
                 </div>
-                
-                <div>
-                  <RadioGroupItem 
-                    value="premium" 
-                    id="premium-plan"
-                    className="peer sr-only"
-                  />
-                  <Label 
-                    htmlFor="premium-plan"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-purple-500 [&:has([data-state=checked])]:border-purple-500"
-                  >
-                    <span className="text-lg font-semibold">{t('pricing.premiumPlan.name')}</span>
-                    <span className="text-sm text-muted-foreground">Rp50.000/mo</span>
-                  </Label>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">or continue with</span>
                 </div>
-              </RadioGroup>
-              <p className="text-xs text-muted-foreground text-center">
-                <Link to="/pricing" className="text-purple-500 hover:underline">{t('auth.seeAllFeatures')}</Link>
-              </p>
+              </div>
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleLogin}
+                className="w-full h-12 rounded-lg mb-3 border border-gray-200 hover:bg-gray-50 transition-all"
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 mr-2" />
+                Login with Google
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/login')}
+                className="w-full h-12 rounded-lg border border-gray-200 hover:bg-gray-50 transition-all"
+              >
+                Login with Email
+              </Button>
+              
+              <div className="text-center mt-6">
+                <p className="text-gray-600">
+                  Have an account?{" "}
+                  <Link to="/login" className="text-[#28e57d] hover:underline font-medium">
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+        
+        {/* Right side - Image */}
+        <div className="hidden md:block md:w-1/2 bg-gray-50 p-6">
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="bg-gray-200 rounded-xl w-full max-w-md h-96 flex items-center justify-center text-gray-400">
+              Image Placeholder
             </div>
-          </CardContent>
-          
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full gradient-bg-purple" disabled={isLoading}>
-              {isLoading ? t('auth.creating') : t('auth.createAccount')}
-            </Button>
-            
-            <p className="text-center text-sm">
-              {t('auth.haveAccount')}{' '}
-              <Link to="/login" className="text-purple-500 hover:text-purple-600 font-medium">
-                {t('auth.login')}
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+          </div>
+        </div>
+      </div>
       
-      <p className="mt-8 text-center text-sm text-muted-foreground">
+      <footer className="py-4 text-center text-sm text-gray-500">
         &copy; 2025 DuitTemanseru. {t('landing.footer.allRights')}
-      </p>
+      </footer>
     </div>
   );
 };

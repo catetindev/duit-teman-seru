@@ -13,7 +13,7 @@ const Navbar = () => {
 
   // Navigation functions
   const goToLogin = () => navigate('/login');
-  const goToSignup = () => navigate('/signup');
+  const goToPricing = () => navigate('/pricing'); // Changed to go to pricing first
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-slate-100 dark:border-slate-800">
@@ -26,7 +26,7 @@ const Navbar = () => {
           <Button onClick={goToLogin} variant="outline" size={isMobile ? "sm" : "default"} className={`transition-all hover:scale-[1.03] ${isMobile ? "px-2" : ""}`}>
             Masuk
           </Button>
-          <Button onClick={goToSignup} size={isMobile ? "sm" : "default"} className={`border border-[#28e57d] bg-white text-black dark:bg-transparent dark:text-white hover:bg-[#28e57d]/10 hover:scale-[1.03] transition-all font-medium ${isMobile ? "px-2" : ""}`}>
+          <Button onClick={goToPricing} size={isMobile ? "sm" : "default"} className={`border border-[#28e57d] bg-white text-black dark:bg-transparent dark:text-white hover:bg-[#28e57d]/10 hover:scale-[1.03] transition-all font-medium ${isMobile ? "px-2" : ""}`}>
             Daftar
           </Button>
         </div>
