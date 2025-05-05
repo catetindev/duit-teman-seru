@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
+import { GoalFormValues } from '../types';
 
 export function useGoalOperations() {
   const [isSubmitting, setIsSubmitting] = useState(false);
