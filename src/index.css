@@ -150,6 +150,15 @@
   .mobile-tap-target {
     @apply min-h-[44px] min-w-[44px];
   }
+
+  /* Mobile safe area */
+  .mobile-safe-bottom {
+    @apply pb-24 md:pb-0;
+  }
+
+  .mobile-safe-top {
+    @apply pt-20 md:pt-0;
+  }
 }
 
 /* Mobile-specific adjustments */
@@ -174,4 +183,18 @@
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
   }
+
+  /* Safer spacing for bottom navigation */
+  .content-container {
+    padding-bottom: 5rem;
+  }
+
+  /* Add better spacing for interactive elements on mobile */
+  button, 
+  a.button,
+  [role="button"],
+  input[type="submit"] {
+    min-height: 44px;
+  }
 }
+

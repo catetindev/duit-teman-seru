@@ -139,8 +139,8 @@ const DashboardLayout = ({ children, isPremium, isAdmin }: DashboardLayoutProps)
             {/* Mobile top and bottom spacing for the navbar */}
             {isMobile && (
               <>
-                <div className="h-16"></div> {/* Top spacing */}
-                <div className="pb-20"></div> {/* Bottom spacing to avoid content being hidden by bottom navbar */}
+                <div className="h-20"></div> {/* Increased top spacing */}
+                <div className="pb-24"></div> {/* Increased bottom spacing to avoid content being hidden by bottom navbar */}
               </>
             )}
             {children}
