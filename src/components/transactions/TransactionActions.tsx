@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 import TransactionEditDialog from './TransactionEditDialog';
-import TransactionDeleteDialog from './TransactionDeleteDialog';
 import { Transaction, TransactionFormSchema } from './transaction-types';
 
 interface TransactionActionsProps {
@@ -17,7 +16,7 @@ interface TransactionActionsProps {
 const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) => {
   const { toast } = useToast();
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleSubmit = async (values: z.infer<typeof TransactionFormSchema>) => {
@@ -63,10 +62,11 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
   };
   
   const handleDelete = async () => {
-    setIsSubmitting(true);
+    if (isDeleting) return; // Prevent multiple clicks
+    
+    setIsDeleting(true);
     try {
-      console.log('Deleting transaction with ID:', transaction.id);
-      
+      // Directly delete the transaction without confirmation dialog
       const { error } = await supabase
         .from('transactions')
         .delete()
@@ -82,7 +82,6 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
         description: "Transaction deleted successfully",
       });
       
-      setIsDeleteOpen(false);
       // Immediately call onUpdate to refresh the transactions list
       onUpdate();
     } catch (error: any) {
@@ -93,7 +92,7 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsDeleting(false);
     }
   };
   
@@ -112,9 +111,14 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
         variant="ghost" 
         size="icon" 
         className="h-8 w-8 text-gray-500 hover:text-red-500 hover:bg-red-50"
-        onClick={() => setIsDeleteOpen(true)}
+        onClick={handleDelete}
+        disabled={isDeleting}
       >
-        <Trash2 className="h-4 w-4" />
+        {isDeleting ? (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-r-transparent" />
+        ) : (
+          <Trash2 className="h-4 w-4" />
+        )}
       </Button>
       
       {/* Edit Transaction Dialog */}
@@ -123,14 +127,6 @@ const TransactionActions = ({ transaction, onUpdate }: TransactionActionsProps) 
         onClose={() => setIsEditOpen(false)}
         onSubmit={handleSubmit}
         transaction={transaction}
-        isSubmitting={isSubmitting}
-      />
-      
-      {/* Delete Confirmation Dialog */}
-      <TransactionDeleteDialog
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        onConfirm={handleDelete}
         isSubmitting={isSubmitting}
       />
     </div>

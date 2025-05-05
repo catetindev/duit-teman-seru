@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './button';
 import { LogOut } from 'lucide-react';
@@ -18,7 +18,6 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
   className = ''
 }) => {
   const { signOut } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -28,7 +27,11 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
         title: 'Logged out',
         description: 'You have been successfully logged out.',
       });
-      navigate('/login');
+      
+      // Force redirect to login page and clear any cached state
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 100);
     } catch (error) {
       console.error('Error signing out:', error);
       toast({

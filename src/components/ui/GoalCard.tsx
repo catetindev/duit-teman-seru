@@ -1,246 +1,137 @@
 
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { useLanguage } from "@/hooks/useLanguage";
-import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { formatCurrency } from "@/components/dashboard/DashboardData";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+// Modify the GoalCard component to implement direct delete without confirmation dialog
+
+import React from 'react';
+import { formatCurrency } from '@/utils/formatUtils';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Edit, Trash, Users } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface GoalCardProps {
   id: string;
-  name: string;
-  target: number;
-  current: number;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string;
   currency: 'IDR' | 'USD';
-  deadline?: string;
-  emoji?: string;
+  isPremium: boolean;
+  hasCollaborators?: boolean;
+  onEdit: () => void;
+  onDelete: (id: string) => void; // Changed to accept ID directly
+  onCollaborate?: () => void;
   className?: string;
-  onUpdate?: () => void;
-  onDelete?: () => void;
 }
 
 const GoalCard = ({
   id,
-  name,
-  target,
-  current,
+  title,
+  targetAmount,
+  currentAmount,
+  targetDate,
   currency,
-  deadline,
-  emoji = '🎯',
-  className,
-  onUpdate,
-  onDelete
+  isPremium,
+  hasCollaborators = false,
+  onEdit,
+  onDelete,
+  onCollaborate,
+  className = '',
 }: GoalCardProps) => {
-  const { t } = useLanguage();
-  const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   
-  const percentage = Math.min(Math.round((current / target) * 100), 100);
-  const isComplete = current >= target;
+  // Calculate progress percentage
+  const progress = Math.min(Math.round((currentAmount / targetAmount) * 100), 100);
   
-  const handleAddProgress = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid amount",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      setIsSubmitting(true);
-      
-      const newAmount = current + Number(amount);
-      
-      const { error } = await supabase
-        .from('savings_goals')
-        .update({ saved_amount: newAmount })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Success!",
-        description: "Your goal progress has been updated.",
-      });
-      
-      setIsDialogOpen(false);
-      setAmount('');
-      
-      if (onUpdate) onUpdate();
-      
-    } catch (error: any) {
-      console.error('Error updating goal:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update goal progress",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Format date
+  const formattedDate = new Date(targetDate).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
   
+  // Handle delete
   const handleDelete = async () => {
-    setIsSubmitting(true);
+    if (isDeleting) return;
+    
+    setIsDeleting(true);
     try {
-      console.log('Deleting goal with ID:', id);
-      
-      const { error } = await supabase
-        .from('savings_goals')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Supabase delete error:', error);
-        throw error;
-      }
-      
-      toast({
-        title: "Success",
-        description: "Goal deleted successfully",
-      });
-      
-      setIsDeleteDialogOpen(false);
-      
-      if (onDelete) onDelete();
-      else if (onUpdate) onUpdate(); // Fall back to onUpdate if onDelete isn't provided
-      
-    } catch (error: any) {
-      console.error('Error deleting goal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete goal",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
+      onDelete(id);
+    } catch (error) {
+      // Error handling is done in the parent component
+      setIsDeleting(false);
     }
   };
-  
+
   return (
-    <div className={cn(
-      "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 card-hover relative",
-      className
-    )}>
-      <div className="flex justify-between items-start">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">{emoji}</span>
-          <h4 className="font-medium">{name}</h4>
-        </div>
-        {deadline && (
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-            {deadline}
-          </span>
-        )}
-      </div>
-      
-      <div className="mt-4">
-        <div className="flex justify-between text-sm mb-2">
-          <span>{formatCurrency(current, currency)}</span>
-          <span className="text-muted-foreground">{formatCurrency(target, currency)}</span>
-        </div>
-        <Progress value={percentage} className={cn(
-          isComplete ? "bg-green-100" : "bg-muted",
-          isComplete && "text-green-500"
-        )} />
-        <div className="mt-2 flex justify-between items-center">
-          <span className="text-sm font-medium">{percentage}%</span>
-          <div className="flex gap-1">
+    <Card className={cn("p-5 overflow-hidden transition-all duration-300 hover:shadow-md", className)}>
+      <div className="flex justify-between items-start mb-3">
+        <h3 className="font-semibold text-lg truncate pr-4">{title}</h3>
+        <div className="flex gap-1">
+          {isPremium && onCollaborate && (
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="h-8 gap-1"
-              onClick={() => setIsDialogOpen(true)}
+              size="icon" 
+              className="h-8 w-8 text-gray-500 hover:text-violet-600" 
+              onClick={onCollaborate}
+              title="Manage collaborators"
             >
-              <PlusCircle size={16} />
-              <span>{t('action.add')}</span>
+              <Users className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 text-muted-foreground hover:text-red-500"
-              onClick={() => setIsDeleteDialogOpen(true)}
-            >
-              <Trash2 size={16} />
-            </Button>
-          </div>
+          )}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-gray-500 hover:text-blue-500" 
+            onClick={onEdit}
+            title="Edit goal"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-gray-500 hover:text-red-500" 
+            onClick={handleDelete}
+            disabled={isDeleting}
+            title="Delete goal"
+          >
+            {isDeleting ? (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-r-transparent" />
+            ) : (
+              <Trash className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
-
-      {/* Add Progress Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add to your {name} fund</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleAddProgress}>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount ({currency})</Label>
-                <Input
-                  id="amount"
-                  value={amount}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, '');
-                    setAmount(value);
-                  }}
-                  placeholder="100000"
-                />
-                {amount && (
-                  <p className="text-sm text-muted-foreground">
-                    {formatCurrency(Number(amount), currency)}
-                  </p>
-                )}
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsDialogOpen(false)}
-                type="button"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save Money'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
       
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete your "{name}" savings goal and all its progress.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+      <div className="flex justify-between mb-1 text-sm">
+        <div>Target: {formatCurrency(targetAmount, currency)}</div>
+        <div>By: {formattedDate}</div>
+      </div>
+      
+      <div className="mb-2">
+        <Progress value={progress} className="h-2" />
+      </div>
+      
+      <div className="flex justify-between text-sm">
+        <div className={progress >= 100 ? "text-green-600 font-medium" : ""}>
+          {formatCurrency(currentAmount, currency)} saved
+        </div>
+        <div className={progress >= 100 ? "text-green-600 font-medium" : ""}>
+          {progress}%
+        </div>
+      </div>
+      
+      {hasCollaborators && (
+        <div className="mt-3 bg-purple-50 rounded-md p-2 text-xs text-purple-700 flex items-center gap-1">
+          <Users className="h-3 w-3" />
+          <span>Collaborative Goal</span>
+        </div>
+      )}
+    </Card>
   );
 };
 
