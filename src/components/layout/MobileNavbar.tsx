@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ArrowDownUp, BarChart2, Target, User, Menu, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, ArrowDownUp, BarChart2, Target, User, Menu, ShieldAlert, LogOut } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from '@/integrations/supabase/client';
+import LogoutButton from '@/components/ui/LogoutButton';
 
 interface MobileNavbarProps {
   isPremium?: boolean;
@@ -101,17 +102,13 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
                   );
                 })}
                 
-                {/* Logout option at the bottom */}
+                {/* Logout option at the bottom - Use LogoutButton component instead of Link */}
                 <div className="mt-auto pt-4 border-t">
-                  <Link 
-                    to="/logout" 
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-destructive hover:bg-muted/60 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span>Logout</span>
-                  </Link>
+                  <LogoutButton
+                    variant="ghost"
+                    size="default" 
+                    className="w-full justify-start px-4 py-3 rounded-lg text-destructive hover:bg-muted/60 transition-colors"
+                  />
                 </div>
               </div>
             </SheetContent>

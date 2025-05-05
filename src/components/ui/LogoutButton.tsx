@@ -25,8 +25,9 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
       // Call the logout function from AuthContext
       await logout();
       
-      // Redirect to the home page
-      navigate('/', { replace: true });
+      // Force a complete page reload to ensure all state is cleared
+      // This is more reliable than using React Router navigation
+      window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
       toast.error("Failed to sign out. Please try again.");
