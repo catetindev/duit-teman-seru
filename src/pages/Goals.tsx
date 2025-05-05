@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,7 +92,7 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
   }
 
   if (error) {
-    return <GoalsLoading isPremium={isPremium} error={error} onRetry={fetchGoals} />;
+    return <GoalsLoading isPremium={isPremium} error={error.message || "An unknown error occurred"} onRetry={fetchGoals} />;
   }
 
   return (
