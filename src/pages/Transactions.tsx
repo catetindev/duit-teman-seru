@@ -25,7 +25,7 @@ export default function Transactions() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="p-4 md:p-6 space-y-4">
+      <div className="p-4 md:p-6 space-y-6">
         <TransactionHeader 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}

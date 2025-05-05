@@ -4,7 +4,6 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { PlusCircle, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TransactionHeaderProps {
   searchQuery: string;
@@ -18,10 +17,9 @@ const TransactionHeader = ({
   onAddTransaction
 }: TransactionHeaderProps) => {
   const { t } = useLanguage();
-  const isMobile = useIsMobile();
 
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <h1 className="text-2xl font-bold">{t('nav.transactions')}</h1>
       
       <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
@@ -38,7 +36,6 @@ const TransactionHeader = ({
         <Button 
           onClick={onAddTransaction}
           className="gap-2"
-          size={isMobile ? "sm" : "default"}
         >
           <PlusCircle className="h-4 w-4" />
           Add Transaction

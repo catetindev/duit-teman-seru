@@ -12,13 +12,11 @@ import GoalsSection from '@/components/dashboard/GoalsSection';
 import BadgesSection from '@/components/dashboard/BadgesSection';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { mockBadges } from '@/components/dashboard/DashboardData';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const Dashboard = () => {
   const { type } = useParams();
   const { isPremium } = useAuth();
   const { t } = useLanguage();
-  const isMobile = useIsMobile();
   const { 
     transactions, 
     goals, 
@@ -36,8 +34,8 @@ const Dashboard = () => {
         loading={loading.stats} 
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
           <TransactionsSection 
             transactions={transactions} 
             onTransactionAdded={refreshData}
@@ -47,7 +45,7 @@ const Dashboard = () => {
           {isPremium && <BudgetsSection isPremium={isPremium} />}
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Only render GoalsSection when goals are available or loading */}
           <GoalsSection 
             goals={goals}

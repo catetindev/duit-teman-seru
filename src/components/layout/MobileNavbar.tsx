@@ -96,7 +96,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <img 
               src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" 
               alt="Catatuy Logo" 
-              className="h-8 w-auto object-contain" 
+              className="h-10 w-auto object-contain" 
             />
           </div>
           
@@ -111,8 +111,8 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
         </div>
       </div>
       
-      {/* Bottom navigation bar - Made taller with better padding */}
-      <div className="fixed bottom-0 left-0 right-0 h-20 bg-background border-t flex justify-around items-center px-2 z-50 pb-4 pt-2">
+      {/* Bottom navigation bar */}
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t flex justify-around items-center px-2 z-50">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path || 
@@ -123,7 +123,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
               key={item.path} 
               to={item.path}
               className={cn(
-                "flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors",
+                "flex flex-col items-center justify-center px-2 py-1 rounded-lg transition-colors",
                 isActive 
                   ? "text-primary font-medium" 
                   : "text-muted-foreground hover:text-foreground"
