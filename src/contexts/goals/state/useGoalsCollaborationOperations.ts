@@ -11,7 +11,7 @@ export function useGoalsCollaborationOperations() {
     goal: Goal,
     setSelectedGoal: (goal: Goal | null) => void,
     setIsCollaborateDialogOpen: (isOpen: boolean) => void,
-    setGoalCollaborators: (collaborators: Collaborator[]) => void
+    setGoalCollaborators: (collaborators: Collaborator[] | ((prev: Collaborator[]) => Collaborator[])) => void
   ) => {
     setSelectedGoal(goal);
     setIsCollaborateDialogOpen(true);
@@ -32,7 +32,7 @@ export function useGoalsCollaborationOperations() {
     goals: Goal[],
     setGoals: (goals: Goal[]) => void,
     goalCollaborators: Collaborator[],
-    setGoalCollaborators: (collaborators: Collaborator[]) => void,
+    setGoalCollaborators: (collaborators: Collaborator[] | ((prev: Collaborator[]) => Collaborator[])) => void,
     setIsSubmitting: (isSubmitting: boolean) => void
   ) => {
     if (!selectedGoal) return;
@@ -67,7 +67,7 @@ export function useGoalsCollaborationOperations() {
     goals: Goal[],
     setGoals: (goals: Goal[]) => void,
     goalCollaborators: Collaborator[],
-    setGoalCollaborators: (collaborators: Collaborator[]) => void,
+    setGoalCollaborators: (collaborators: Collaborator[] | ((prev: Collaborator[]) => Collaborator[])) => void,
     setIsSubmitting: (isSubmitting: boolean) => void
   ) => {
     if (!selectedGoal) return;
@@ -77,7 +77,7 @@ export function useGoalsCollaborationOperations() {
       const success = await removeCollaborator(selectedGoal.id, userId);
       if (success) {
         // Use functional update to filter out the removed collaborator
-        setGoalCollaborators((prev) => prev.filter(c => c.user_id !== userId));
+        setGoalCollaborators((prev: Collaborator[]) => prev.filter(c => c.user_id !== userId));
         
         // Check if this was the last collaborator
         const updatedCollaborators = goalCollaborators.filter(c => c.user_id !== userId);
