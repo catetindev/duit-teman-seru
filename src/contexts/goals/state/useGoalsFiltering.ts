@@ -6,15 +6,9 @@ import { FilterBy, SortBy, SortDirection } from '../types';
 export function useGoalsFiltering() {
   // Function to filter goals
   const applyFilters = useCallback((goalsToFilter: Goal[], filterBy: FilterBy) => {
-    let filtered;
-    if (filterBy === 'all') {
-      filtered = goalsToFilter;
-    } else if (filterBy === 'collaborative') {
-      filtered = goalsToFilter.filter((goal) => goal.has_collaborators);
-    } else {
-      filtered = goalsToFilter.filter((goal) => !goal.has_collaborators);
-    }
-    return filtered;
+    // Since we're removing has_collaborators, we'll return all goals for now
+    // and filter 'collaborative' and 'personal' later when we implement a new way to track collaborators
+    return goalsToFilter;
   }, []);
 
   // Function to sort goals

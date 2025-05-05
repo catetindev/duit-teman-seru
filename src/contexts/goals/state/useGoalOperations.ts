@@ -24,7 +24,7 @@ export function useGoalOperations() {
   }, []);
 
   // Function to add a new goal
-  const addGoal = useCallback(async (values: GoalFormValues & { user_id: string; has_collaborators: boolean }) => {
+  const addGoal = useCallback(async (values: GoalFormValues & { user_id: string }) => {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
@@ -37,8 +37,7 @@ export function useGoalOperations() {
           target_date: values.target_date || null,
           currency: values.currency,
           emoji: values.emoji || '🎯',
-          user_id: values.user_id,
-          has_collaborators: values.has_collaborators || false
+          user_id: values.user_id
         })
         .select();
 
@@ -55,8 +54,7 @@ export function useGoalOperations() {
         target_date: data[0].target_date,
         currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
-        emoji: data[0].emoji,
-        has_collaborators: data[0].has_collaborators || false
+        emoji: data[0].emoji
       };
 
       toast("Goal added successfully");
@@ -82,8 +80,7 @@ export function useGoalOperations() {
           saved_amount: values.saved_amount || 0,
           target_date: values.target_date || null,
           currency: values.currency,
-          emoji: values.emoji,
-          has_collaborators: values.has_collaborators || false
+          emoji: values.emoji
         })
         .eq('id', goalId)
         .select();
@@ -101,8 +98,7 @@ export function useGoalOperations() {
         target_date: data[0].target_date,
         currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
-        emoji: data[0].emoji,
-        has_collaborators: data[0].has_collaborators || false
+        emoji: data[0].emoji
       };
 
       toast("Goal updated successfully");

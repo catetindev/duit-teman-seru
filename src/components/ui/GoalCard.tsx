@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { formatCurrency } from '@/utils/formatUtils';
 import { Card } from '@/components/ui/card';
@@ -17,7 +16,7 @@ interface GoalCardProps {
   targetDate?: string;
   currency: 'IDR' | 'USD';
   isPremium?: boolean;
-  hasCollaborators?: boolean;
+  hasCollaborators?: boolean;  // We'll keep this in the props but not require it
   emoji?: string;
   onEdit?: () => void;
   onDelete?: (id: string) => void;
@@ -34,7 +33,7 @@ const GoalCard = ({
   targetDate,
   currency,
   isPremium = false,
-  hasCollaborators = false,
+  hasCollaborators = false,  // Default to false
   emoji = '🎯',
   onEdit,
   onDelete,
@@ -148,6 +147,7 @@ const GoalCard = ({
         </div>
       </div>
       
+      {/* Keep the UI badge but now controlled by the prop with default false */}
       {hasCollaborators && (
         <div className="mt-3 bg-purple-50 rounded-md p-2 text-xs text-purple-700 flex items-center gap-1">
           <Users className="h-3 w-3" />

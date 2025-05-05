@@ -9,8 +9,7 @@ export function useGoalsOperations() {
   // Function to handle adding a new goal
   const handleAddGoal = useCallback(async (values: any, goals: Goal[], setGoals: (goals: Goal[]) => void, closeDialog: () => void) => {
     const newGoal = await addGoal({ 
-      ...values, 
-      has_collaborators: false 
+      ...values
     });
     if (newGoal) {
       setGoals([...goals, newGoal]);
@@ -21,10 +20,7 @@ export function useGoalsOperations() {
   // Function to handle updating a goal
   const updateGoalHandler = useCallback(async (values: any, selectedGoal: Goal | null, goals: Goal[], setGoals: (goals: Goal[]) => void, closeDialog: () => void) => {
     if (selectedGoal) {
-      const updatedGoal = await updateGoal(selectedGoal.id, { 
-        ...values, 
-        has_collaborators: selectedGoal.has_collaborators 
-      });
+      const updatedGoal = await updateGoal(selectedGoal.id, values);
       if (updatedGoal) {
         setGoals(goals.map(g => g.id === updatedGoal.id ? updatedGoal : g));
       }

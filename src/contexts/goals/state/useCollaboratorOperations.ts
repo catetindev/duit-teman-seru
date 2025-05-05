@@ -95,17 +95,6 @@ export function useCollaboratorOperations() {
       if (inviteError) {
         throw inviteError;
       }
-
-      // Update the has_collaborators flag
-      const { error: updateError } = await supabase
-        .from('savings_goals')
-        .update({ has_collaborators: true })
-        .eq('id', goalId);
-
-      if (updateError) {
-        console.error('Error updating goal collaborator flag:', updateError);
-        // Continue execution as this is not critical
-      }
       
       toast(`Collaborator invited successfully: ${email}`);
       return true;
@@ -130,25 +119,6 @@ export function useCollaboratorOperations() {
 
       if (error) {
         throw error;
-      }
-
-      // Check if any collaborators remain
-      const { data: remainingCollaborators, error: checkError } = await supabase
-        .from('goal_collaborators')
-        .select('*')
-        .eq('goal_id', goalId);
-
-      if (!checkError && (!remainingCollaborators || remainingCollaborators.length === 0)) {
-        // Update the has_collaborators flag if no collaborators remain
-        const { error: updateError } = await supabase
-          .from('savings_goals')
-          .update({ has_collaborators: false })
-          .eq('id', goalId);
-
-        if (updateError) {
-          console.error('Error updating goal collaborator flag:', updateError);
-          // Continue execution as this is not critical
-        }
       }
       
       toast("Collaborator removed successfully");

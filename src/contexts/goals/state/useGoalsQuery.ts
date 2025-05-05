@@ -31,8 +31,7 @@ export function useGoalsQuery() {
         target_date: goal.target_date,
         currency: goal.currency as 'IDR' | 'USD',
         user_id: goal.user_id,
-        emoji: goal.emoji,
-        has_collaborators: goal.has_collaborators || false
+        emoji: goal.emoji
       }));
 
       setGoals(fetchedGoals);

@@ -18,7 +18,6 @@ export interface GoalFormValues {
   currency: 'IDR' | 'USD';
   emoji?: string;
   user_id?: string;
-  has_collaborators?: boolean;
 }
 
 export type ValidCurrency = 'IDR' | 'USD';

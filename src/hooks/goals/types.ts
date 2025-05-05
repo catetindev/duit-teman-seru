@@ -8,7 +8,6 @@ export interface Goal {
   currency: 'IDR' | 'USD';
   target_date?: string;
   emoji?: string;
-  has_collaborators: boolean;
 }
 
 export interface Collaborator {

@@ -44,14 +44,6 @@ export function useGoalsCollaborationOperations() {
         // Refresh collaborators list
         const collaborators = await fetchCollaborators(selectedGoal.id);
         setGoalCollaborators(collaborators);
-        
-        // Update goal has_collaborators flag in the goals list
-        const updatedGoals = goals.map(g => 
-          g.id === selectedGoal?.id 
-            ? { ...g, has_collaborators: true } 
-            : g
-        );
-        setGoals(updatedGoals);
       }
     } catch (error) {
       console.error('Error inviting collaborator:', error);
@@ -78,18 +70,6 @@ export function useGoalsCollaborationOperations() {
       if (success) {
         // Use functional update to filter out the removed collaborator
         setGoalCollaborators((prev: Collaborator[]) => prev.filter(c => c.user_id !== userId));
-        
-        // Check if this was the last collaborator
-        const updatedCollaborators = goalCollaborators.filter(c => c.user_id !== userId);
-        if (updatedCollaborators.length === 0) {
-          // Update goal has_collaborators flag in the goals list
-          const updatedGoals = goals.map(g => 
-            g.id === selectedGoal?.id 
-              ? { ...g, has_collaborators: false } 
-              : g
-          );
-          setGoals(updatedGoals);
-        }
       }
     } catch (error) {
       console.error('Error removing collaborator:', error);
