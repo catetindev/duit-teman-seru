@@ -42,9 +42,16 @@ const Login = () => {
       
       if (error) throw error;
       
-      // Login successful - the session check will redirect automatically
+      // Login successful
+      toast.success(t('auth.loginSuccess') || "Login successful");
+      
+      // Redirect to dashboard with a slight delay to show the success message
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 100);
     } catch (error: any) {
       toast.error(error.message || t('auth.loginFailed'));
+    } finally {
       setIsLoading(false);
     }
   };

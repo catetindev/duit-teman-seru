@@ -57,7 +57,6 @@ const GoalsList = ({
             targetDate={goal.target_date}
             currency={goal.currency}
             isPremium={isPremium}
-            hasCollaborators={goal.has_collaborators}
             emoji={goal.emoji}
             onEdit={() => onEdit(goal)}
             onDelete={handleDelete}

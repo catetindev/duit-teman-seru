@@ -5,9 +5,11 @@ import { FilterBy, SortDirection, SortBy } from './types';
 export const filterGoals = (goals: Goal[], filterBy: FilterBy, calculateProgress: (goal: Goal) => number): Goal[] => {
   switch(filterBy) {
     case 'collaborative':
-      return goals.filter(goal => goal.has_collaborators);
+      // Since we no longer have has_collaborators, we return all goals for 'collaborative' filter
+      return goals;
     case 'personal':
-      return goals.filter(goal => !goal.has_collaborators);
+      // Since we no longer have has_collaborators, we return all goals for 'personal' filter
+      return goals;
     default: // 'all'
       return goals;
   }
