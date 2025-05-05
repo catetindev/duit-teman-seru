@@ -105,7 +105,8 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         target_date: goalData.target_date || null,
         emoji: goalData.emoji || '🎯',
         user_id: user.id,
-        currency: 'IDR' as const
+        currency: 'IDR' as const,
+        has_collaborators: false
       };
       
       const newGoal = await addGoal(goalToAdd);

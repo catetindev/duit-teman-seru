@@ -79,7 +79,7 @@ export function useGoalsState() {
   }, [fetchGoals]);
 
   // Function to add a new goal
-  const addGoal = async (values: GoalFormValues & { user_id: string }) => {
+  const addGoal = async (values: GoalFormValues & { user_id: string, has_collaborators: boolean }) => {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
@@ -93,7 +93,7 @@ export function useGoalsState() {
           currency: values.currency,
           emoji: values.emoji || '🎯',
           user_id: values.user_id,
-          has_collaborators: false
+          has_collaborators: values.has_collaborators || false
         })
         .select();
 
@@ -138,7 +138,8 @@ export function useGoalsState() {
           saved_amount: values.saved_amount || 0,
           target_date: values.target_date || null,
           currency: values.currency,
-          emoji: values.emoji
+          emoji: values.emoji,
+          has_collaborators: values.has_collaborators
         })
         .eq('id', goalId)
         .select();
