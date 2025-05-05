@@ -1,7 +1,7 @@
 
 import React from 'react';
-import NotificationForm from './NotificationForm';
-import ActivityFeed from './ActivityFeed';
+import NotificationForm from './notifications/NotificationForm';
+import ActivityFeed from './activity/ActivityFeed';
 
 const NotificationsTab = () => {
   return (
