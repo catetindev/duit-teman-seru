@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import ActivityFeed from './ActivityFeed';
-import NotificationForm from './NotificationForm';
+import NotificationForm from './notifications/NotificationForm';
 
 interface User {
   id: string;
