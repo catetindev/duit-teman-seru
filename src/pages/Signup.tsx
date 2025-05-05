@@ -7,7 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import LanguageToggle from '@/components/ui/LanguageToggle';
+import Navbar from '@/components/landing/Navbar';
+import Footer from '@/components/landing/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -75,21 +76,9 @@ const Signup = () => {
   
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <div className="absolute top-4 left-4">
-        <Link to="/" className="flex items-center gap-2">
-          <img 
-            src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" 
-            alt="DuitTemanseru Logo" 
-            className="h-8 w-auto object-contain" 
-          />
-        </Link>
-      </div>
+      <Navbar />
       
-      <div className="absolute top-4 right-4">
-        <LanguageToggle />
-      </div>
-      
-      <div className="flex flex-1 w-full">
+      <div className="flex flex-1 w-full mt-16 md:mt-20">
         {/* Left side - Form */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12">
           <motion.div
@@ -216,9 +205,7 @@ const Signup = () => {
         </div>
       </div>
       
-      <footer className="py-4 text-center text-sm text-gray-500">
-        &copy; 2025 DuitTemanseru. {t('landing.footer.allRights')}
-      </footer>
+      <Footer />
     </div>
   );
 };
