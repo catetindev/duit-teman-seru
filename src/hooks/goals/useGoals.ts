@@ -137,6 +137,8 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
   useEffect(() => {
     if (!userId) return;
 
+    console.log('Setting up realtime subscriptions for user:', userId);
+    
     const channel = supabase
       .channel('public:savings_goals')
       .on(
@@ -167,6 +169,7 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
       .subscribe();
 
     return () => {
+      console.log('Removing realtime channel subscription');
       supabase.removeChannel(channel);
     };
   }, [userId]);
@@ -174,8 +177,10 @@ export function useGoals(userId: string | undefined, shouldFetch: boolean = true
   // Use useEffect to fetch goals when component mounts
   useEffect(() => {
     if (shouldFetch && userId) {
+      console.log('Initial fetch of goals for user:', userId);
       fetchGoals();
     } else if (!userId) {
+      console.log('No userId provided, setting loading to false');
       setLoading(false);
     }
     

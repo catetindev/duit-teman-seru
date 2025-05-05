@@ -41,13 +41,20 @@ export function useGoalOperations() {
         user_id: values.user_id
       };
       
+      console.log('Adding new goal with data:', goalData);
+      
       const { data, error } = await supabase
         .from('savings_goals')
         .insert(goalData)
         .select();
 
       if (error) {
+        console.error('Supabase error when adding goal:', error);
         throw error;
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("No data returned after inserting goal");
       }
 
       // Convert the inserted data to the Goal type
@@ -62,6 +69,7 @@ export function useGoalOperations() {
         emoji: data[0].emoji
       };
 
+      console.log('Goal added successfully:', newGoal);
       toast("Goal added successfully");
       return newGoal;
     } catch (error: any) {
@@ -77,6 +85,8 @@ export function useGoalOperations() {
   const updateGoal = useCallback(async (goalId: string, values: GoalFormData) => {
     try {
       setIsSubmitting(true);
+      console.log('Updating goal with ID:', goalId, 'Values:', values);
+      
       const { data, error } = await supabase
         .from('savings_goals')
         .update({
@@ -91,7 +101,12 @@ export function useGoalOperations() {
         .select();
 
       if (error) {
+        console.error('Supabase error when updating goal:', error);
         throw error;
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("No data returned after updating goal");
       }
 
       // Convert the updated data to the Goal type
@@ -106,6 +121,7 @@ export function useGoalOperations() {
         emoji: data[0].emoji
       };
 
+      console.log('Goal updated successfully:', updatedGoal);
       toast("Goal updated successfully");
       return updatedGoal;
     } catch (error: any) {
@@ -121,15 +137,19 @@ export function useGoalOperations() {
   const deleteGoal = useCallback(async (goalId: string) => {
     try {
       setIsSubmitting(true);
+      console.log('Deleting goal with ID:', goalId);
+      
       const { error } = await supabase
         .from('savings_goals')
         .delete()
         .eq('id', goalId);
 
       if (error) {
+        console.error('Supabase error when deleting goal:', error);
         throw error;
       }
       
+      console.log('Goal deleted successfully');
       toast("Goal deleted successfully");
       return true;
     } catch (error: any) {

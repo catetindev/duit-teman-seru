@@ -35,13 +35,19 @@ const Login = () => {
     
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting to login with email:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
       
+      console.log('Login successful:', data);
       // Login successful
       toast.success(t('auth.loginSuccess') || "Login successful");
       
@@ -50,6 +56,7 @@ const Login = () => {
         navigate('/dashboard');
       }, 100);
     } catch (error: any) {
+      console.error('Login error caught:', error);
       toast.error(error.message || t('auth.loginFailed'));
     } finally {
       setIsLoading(false);
@@ -59,14 +66,24 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('Attempting to login with Google');
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: window.location.origin + '/dashboard'
         }
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Google login error:', error);
+        throw error;
+      }
+      
+      console.log('Google login initiated:', data);
+      // No need for toast as the user will be redirected to Google
     } catch (error: any) {
+      console.error('Google login error caught:', error);
       toast.error(error.message || t('auth.socialLoginFailed'));
       setIsLoading(false);
     }

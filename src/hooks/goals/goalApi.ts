@@ -9,13 +9,24 @@ export function useGoalApi() {
         throw new Error('User ID is required to fetch goals');
       }
       
-      // Fix: Use a simple equality check instead of a complex OR condition that might be causing recursion
+      console.log('Using supabase to fetch goals for user:', userId);
+      
+      // Make a simple query for the user's goals
       const { data, error } = await supabase
         .from('savings_goals')
         .select('*')
         .eq('user_id', userId);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error when fetching goals:', error);
+        throw error;
+      }
+      
+      console.log('Fetched goals data from supabase:', data);
+      
+      if (!data) {
+        return [];
+      }
       
       // Cast the currency to the valid type
       return data.map(goal => ({
@@ -30,13 +41,24 @@ export function useGoalApi() {
 
   const addGoal = async (goal: Omit<Goal, 'id'>): Promise<Goal> => {
     try {
+      console.log('Using supabase to insert goal:', goal);
+      
       const { data, error } = await supabase
         .from('savings_goals')
         .insert(goal)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error when adding goal:', error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error('No data returned from goal insertion');
+      }
+      
+      console.log('Successfully added goal, received data:', data);
       
       // Cast the currency to the valid type
       return {
@@ -51,6 +73,8 @@ export function useGoalApi() {
 
   const updateGoal = async (id: string, goal: Partial<Omit<Goal, 'id'>>): Promise<Goal> => {
     try {
+      console.log('Using supabase to update goal:', id, goal);
+      
       const { data, error } = await supabase
         .from('savings_goals')
         .update(goal)
@@ -58,7 +82,16 @@ export function useGoalApi() {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error when updating goal:', error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error('No data returned from goal update');
+      }
+      
+      console.log('Successfully updated goal, received data:', data);
       
       // Cast the currency to the valid type
       return {
@@ -73,12 +106,19 @@ export function useGoalApi() {
 
   const deleteGoal = async (id: string): Promise<boolean> => {
     try {
+      console.log('Using supabase to delete goal:', id);
+      
       const { error } = await supabase
         .from('savings_goals')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error when deleting goal:', error);
+        throw error;
+      }
+      
+      console.log('Successfully deleted goal');
       
       return true;
     } catch (error) {

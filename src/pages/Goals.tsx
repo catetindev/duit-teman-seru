@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -20,17 +20,17 @@ import { SortBy, SortDirection, FilterBy } from '@/contexts/goals/types';
 
 // Main component that wraps everything with the context provider
 const GoalsPage = () => {
-  const { isPremium } = useAuth();
+  const { isPremium, user } = useAuth();
   
   return (
     <GoalsProvider>
-      <GoalsContent isPremium={isPremium} />
+      <GoalsContent isPremium={isPremium} userId={user?.id} />
     </GoalsProvider>
   );
 };
 
 // Inner component that consumes the context
-const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
+const GoalsContent = ({ isPremium, userId }: { isPremium: boolean; userId?: string }) => {
   const { 
     loading, 
     error,
@@ -66,6 +66,14 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
     fetchGoals,
   } = useGoalsContext();
 
+  // Refetch goals when user ID changes
+  useEffect(() => {
+    if (userId) {
+      console.log('User ID changed, fetching goals for:', userId);
+      fetchGoals();
+    }
+  }, [userId, fetchGoals]);
+
   // Use stable callback to prevent re-renders
   const handleAddDialogOpen = useCallback(() => {
     setIsAddDialogOpen(true);
@@ -87,12 +95,28 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
     setIsDeleteDialogOpen(false);
   }, [setIsDeleteDialogOpen]);
 
+  // Handle adding a goal with the current user ID
+  const handleAddGoalWithUser = useCallback(async (goalData: any) => {
+    console.log('handleAddGoalWithUser called with:', goalData);
+    if (userId) {
+      await handleAddGoal({ ...goalData, user_id: userId });
+    } else {
+      console.error('Cannot add goal: No user ID available');
+    }
+  }, [handleAddGoal, userId]);
+
   if (loading) {
     return <GoalsLoading isPremium={isPremium} />;
   }
 
   if (error) {
-    return <GoalsLoading isPremium={isPremium} error={error.message || "An unknown error occurred"} onRetry={fetchGoals} />;
+    return (
+      <GoalsLoading 
+        isPremium={isPremium} 
+        error={error instanceof Error ? error.message : String(error)} 
+        onRetry={fetchGoals} 
+      />
+    );
   }
 
   return (
@@ -133,7 +157,7 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
       <AddGoalDialog
         isOpen={isAddDialogOpen}
         onClose={handleAddDialogClose}
-        onSubmit={handleAddGoal}
+        onSubmit={handleAddGoalWithUser}
         isSubmitting={isSubmitting}
       />
       

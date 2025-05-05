@@ -13,17 +13,37 @@ export function useGoalsQuery() {
   // Function to fetch goals from Supabase
   const fetchGoals = useCallback(async (sortBy: SortBy = 'target_date', sortDirection: SortDirection = 'asc') => {
     setLoading(true);
+    setError(null);
     try {
+      console.log('Fetching goals with sort:', sortBy, sortDirection);
+      
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('No authenticated user found');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Fetching goals for user:', user.id);
+      
       // Use savings_goals table instead of goals
       const { data, error } = await supabase
         .from('savings_goals')
         .select('*')
+        .eq('user_id', user.id)
         .order(sortBy, { ascending: sortDirection === 'asc' });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error when fetching goals:', error);
+        throw error;
+      }
+      
+      console.log('Fetched goals:', data);
       
       // Convert the data to the Goal type
-      const fetchedGoals: Goal[] = data.map(goal => ({
+      const fetchedGoals: Goal[] = (data || []).map(goal => ({
         id: goal.id,
         title: goal.title,
         target_amount: goal.target_amount,
@@ -37,12 +57,18 @@ export function useGoalsQuery() {
       setGoals(fetchedGoals);
       setError(null);
     } catch (error: any) {
+      console.error('Error fetching goals:', error);
       setError(error);
       toast(error.message || "Failed to fetch goals");
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // Fetch goals on component mount
+  useEffect(() => {
+    fetchGoals();
+  }, [fetchGoals]);
 
   return {
     goals,

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -10,7 +11,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AddGoalProps {
   isOpen: boolean;
@@ -25,7 +27,7 @@ export interface GoalFormData {
   saved_amount: string;
   target_date: string;
   emoji: string;
-  currency?: 'IDR' | 'USD';  // Add currency property with default IDR
+  currency: 'IDR' | 'USD';  // Add currency property with default IDR
 }
 
 const initialFormState: GoalFormData = {
@@ -33,7 +35,8 @@ const initialFormState: GoalFormData = {
   target_amount: '',
   saved_amount: '',
   target_date: '',
-  emoji: '🎯'
+  emoji: '🎯',
+  currency: 'IDR'
 };
 
 const AddGoalDialog: React.FC<AddGoalProps> = ({
@@ -44,7 +47,6 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
 }) => {
   const [goalData, setGoalData] = useState<GoalFormData>(initialFormState);
   const [validationErrors, setValidationErrors] = useState<Partial<Record<keyof GoalFormData, string>>>({});
-  const { toast } = useToast();
 
   // Reset form when dialog opens/closes
   useEffect(() => {
@@ -80,11 +82,7 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
     
     // Validate before submitting
     if (!validateForm()) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the form errors before submitting",
-        variant: "destructive",
-      });
+      toast("Please fix the form errors before submitting");
       return;
     }
     
@@ -144,8 +142,26 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
           </div>
           
           <div className="space-y-2">
+            <Label htmlFor="currency">Currency</Label>
+            <Select 
+              value={goalData.currency} 
+              onValueChange={(value: 'IDR' | 'USD') => 
+                setGoalData(prev => ({ ...prev, currency: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
+                <SelectItem value="USD">USD - US Dollar</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="goal-amount" className={validationErrors.target_amount ? "text-destructive" : ""}>
-              Target Amount (IDR) *
+              Target Amount ({goalData.currency}) *
             </Label>
             <Input 
               id="goal-amount" 
@@ -160,16 +176,20 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
             />
             {validationErrors.target_amount ? (
               <p className="text-sm text-destructive">{validationErrors.target_amount}</p>
-            ) : goalData.target_amount && (
+            ) : goalData.target_amount && goalData.currency === 'IDR' ? (
               <p className="text-sm text-muted-foreground">
                 Rp {parseInt(goalData.target_amount).toLocaleString('id-ID')}
               </p>
-            )}
+            ) : goalData.target_amount && goalData.currency === 'USD' ? (
+              <p className="text-sm text-muted-foreground">
+                $ {parseInt(goalData.target_amount).toLocaleString('en-US')}
+              </p>
+            ) : null}
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="goal-saved" className={validationErrors.saved_amount ? "text-destructive" : ""}>
-              Current Savings (IDR)
+              Current Savings ({goalData.currency})
             </Label>
             <Input 
               id="goal-saved" 
@@ -183,11 +203,15 @@ const AddGoalDialog: React.FC<AddGoalProps> = ({
             />
             {validationErrors.saved_amount ? (
               <p className="text-sm text-destructive">{validationErrors.saved_amount}</p>
-            ) : goalData.saved_amount && (
+            ) : goalData.saved_amount && goalData.currency === 'IDR' ? (
               <p className="text-sm text-muted-foreground">
                 Rp {parseInt(goalData.saved_amount).toLocaleString('id-ID')}
               </p>
-            )}
+            ) : goalData.saved_amount && goalData.currency === 'USD' ? (
+              <p className="text-sm text-muted-foreground">
+                $ {parseInt(goalData.saved_amount).toLocaleString('en-US')}
+              </p>
+            ) : null}
           </div>
           
           <div className="space-y-2">
