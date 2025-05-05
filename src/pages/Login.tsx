@@ -11,12 +11,14 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
+import LoginIllustration from '@/components/auth/LoginIllustration';
 
 const Login = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // If already logged in, redirect to dashboard
@@ -40,6 +42,28 @@ const Login = () => {
     };
     
     checkForRedirectResponse();
+    
+    // Fetch custom background
+    const fetchBackground = async () => {
+      try {
+        // Fetch custom background if it exists
+        const { data: bgData } = await supabase.storage
+          .from('branding')
+          .getPublicUrl('background.jpg');
+          
+        if (bgData?.publicUrl) {
+          setBackgroundUrl(`${bgData.publicUrl}?t=${Date.now()}`);
+        } else {
+          // Fallback to default background
+          setBackgroundUrl("/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png");
+        }
+      } catch (error) {
+        console.error('Error fetching background:', error);
+        setBackgroundUrl("/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png");
+      }
+    };
+    
+    fetchBackground();
   }, [user, navigate]);
 
   const handleLogin = async (email: string, password: string) => {
@@ -141,7 +165,7 @@ const Login = () => {
         <div className="hidden md:block md:w-1/2 bg-gray-50 p-6">
           <div className="h-full w-full flex items-center justify-center">
             <img 
-              src="/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png" 
+              src={backgroundUrl || "/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png"} 
               alt="Financial freedom illustration" 
               className="max-w-full max-h-full object-contain rounded-xl" 
             />

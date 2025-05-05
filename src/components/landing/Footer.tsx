@@ -1,12 +1,46 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+
 const Footer = () => {
-  return <footer className="bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch custom logo
+    const fetchLogo = async () => {
+      try {
+        // Fetch custom logo if it exists
+        const { data: logoData } = await supabase.storage
+          .from('branding')
+          .getPublicUrl('logo.png');
+          
+        if (logoData?.publicUrl) {
+          setLogoUrl(`${logoData.publicUrl}?t=${Date.now()}`);
+        } else {
+          // Fallback to default logo
+          setLogoUrl("/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png");
+        }
+      } catch (error) {
+        console.error('Error fetching logo:', error);
+        setLogoUrl("/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png");
+      }
+    };
+    
+    fetchLogo();
+  }, []);
+  
+  return (
+    <footer className="bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800">
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src="/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png" alt="Catatyo Logo" className="h-8 object-contain" />
+              <img 
+                src={logoUrl || "/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png"} 
+                alt="App Logo" 
+                className="h-8 object-contain" 
+              />
             </Link>
             <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-sm">
               Manage your money without stress. Simple, fun, and made for you.
@@ -66,6 +100,8 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;

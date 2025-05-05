@@ -8,7 +8,7 @@ import { toast as sonnerToast } from '@/components/ui/sonner';
 import StatCard from '@/components/ui/StatCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronRight, Users, UserCheck, Award, Bell, Trash2, Edit, AlertTriangle, Activity as ActivityIcon } from 'lucide-react';
+import { ChevronRight, Users, UserCheck, Award, Bell, Trash2, Edit, AlertTriangle, Activity as ActivityIcon, Image } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import BrandingTab from '@/components/admin/BrandingTab';
 
 interface User {
   id: string;
@@ -373,177 +374,185 @@ const AdminDashboard = () => {
       }} variant="teal" />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card className="border-none shadow-md rounded-xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" /> User Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 my-4">
-                <div className="relative">
-                  <Input type="search" placeholder="Search users..." className="pl-8 w-full md:w-64 rounded-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                    🔍
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="rounded-full">Export</Button>
-                  
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600">
-                        Add User
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px] rounded-xl">
-                      <DialogHeader>
-                        <DialogTitle>Add New User</DialogTitle>
-                        <DialogDescription>
-                          Create a new user account. The user will be notified by email.
-                        </DialogDescription>
-                      </DialogHeader>
+      <Tabs defaultValue="users" className="mb-8">
+        <TabsList className="mb-4">
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="branding">Branding</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="users">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Card className="border-none shadow-md rounded-xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" /> User Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 my-4">
+                    <div className="relative">
+                      <Input type="search" placeholder="Search users..." className="pl-8 w-full md:w-64 rounded-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                        🔍
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="rounded-full">Export</Button>
                       
-                      <Form {...createUserForm}>
-                        <form onSubmit={createUserForm.handleSubmit(handleCreateUser)} className="space-y-4 py-4">
-                          <FormField control={createUserForm.control} name="email" render={({
-                          field
-                        }) => <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="user@example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>} />
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="sm" className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600">
+                            Add User
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] rounded-xl">
+                          <DialogHeader>
+                            <DialogTitle>Add New User</DialogTitle>
+                            <DialogDescription>
+                              Create a new user account. The user will be notified by email.
+                            </DialogDescription>
+                          </DialogHeader>
                           
-                          <FormField control={createUserForm.control} name="password" render={({
-                          field
-                        }) => <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                  <Input type="password" placeholder="******" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>} />
-                          
-                          <FormField control={createUserForm.control} name="full_name" render={({
-                          field
-                        }) => <FormItem>
-                                <FormLabel>Full Name</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="John Doe" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>} />
-                          
-                          <FormField control={createUserForm.control} name="role" render={({
-                          field
-                        }) => <FormItem>
-                                <FormLabel>User Role</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select role" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="free">Free</SelectItem>
-                                    <SelectItem value="premium">Premium</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>} />
-                          
-                          <DialogFooter>
-                            <DialogClose asChild>
-                              <Button type="button" variant="outline" className="rounded-full">Cancel</Button>
-                            </DialogClose>
-                            <Button type="submit" className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600">Create User</Button>
-                          </DialogFooter>
-                        </form>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
-              
-              <Tabs defaultValue="all" value={selectedSegment} onValueChange={setSelectedSegment}>
-                <TabsList className="mb-4">
-                  <TabsTrigger value="all">All Users</TabsTrigger>
-                  <TabsTrigger value="premium">Premium</TabsTrigger>
-                  <TabsTrigger value="free">Free Users</TabsTrigger>
-                  <TabsTrigger value="inactive">Inactive</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value={selectedSegment}>
-                  {isLoadingUsers ? <div className="flex justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
-                    </div> : <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Joined</TableHead>
-                            <TableHead>Last Active</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredUsers.length === 0 ? <TableRow>
-                              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                No users found matching your search
-                              </TableCell>
-                            </TableRow> : filteredUsers.map(user => <TableRow key={user.id}>
-                                <TableCell className="font-medium">
-                                  <div className="flex flex-col">
-                                    <span>{user.full_name}</span>
-                                    <span className="text-xs text-muted-foreground">{user.email}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
-                                    <span>{user.status}</span>
-                                    {user.role === 'premium' && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
-                                        Premium
-                                      </span>}
-                                    {user.role === 'admin' && <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full">
-                                        Admin
-                                      </span>}
-                                  </div>
-                                </TableCell>
-                                <TableCell>{user.joined}</TableCell>
-                                <TableCell>{user.lastActive}</TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingUser(user)}>
-                                          <Edit className="h-4 w-4" />
-                                          <span className="sr-only">Edit</span>
-                                        </Button>
-                                      </DialogTrigger>
-                                      <DialogContent className="sm:max-w-[425px] rounded-xl">
-                                        <DialogHeader>
-                                          <DialogTitle>Edit User</DialogTitle>
-                                          <DialogDescription>
-                                            Update user information. Email cannot be changed.
-                                          </DialogDescription>
-                                        </DialogHeader>
-                                        
-                                        <Form {...editUserForm}>
-                                          <form onSubmit={editUserForm.handleSubmit(handleEditUser)} className="space-y-4 py-4">
-                                            <div className="flex items-center gap-2 py-2 px-3 bg-muted rounded-md">
-                                              <span className="text-muted-foreground text-sm">Email:</span>
-                                              <span className="text-sm">{editingUser?.email}</span>
-                                            </div>
+                          <Form {...createUserForm}>
+                            <form onSubmit={createUserForm.handleSubmit(handleCreateUser)} className="space-y-4 py-4">
+                              <FormField control={createUserForm.control} name="email" render={({
+                              field
+                            }) => <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="user@example.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>} />
+                              
+                              <FormField control={createUserForm.control} name="password" render={({
+                              field
+                            }) => <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                      <Input type="password" placeholder="******" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>} />
+                              
+                              <FormField control={createUserForm.control} name="full_name" render={({
+                              field
+                            }) => <FormItem>
+                                    <FormLabel>Full Name</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="John Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>} />
+                              
+                              <FormField control={createUserForm.control} name="role" render={({
+                              field
+                            }) => <FormItem>
+                                    <FormLabel>User Role</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select role" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="free">Free</SelectItem>
+                                        <SelectItem value="premium">Premium</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>} />
+                              
+                              <DialogFooter>
+                                <DialogClose asChild>
+                                  <Button type="button" variant="outline" className="rounded-full">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit" className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600">Create User</Button>
+                              </DialogFooter>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                  
+                  <Tabs defaultValue="all" value={selectedSegment} onValueChange={setSelectedSegment}>
+                    <TabsList className="mb-4">
+                      <TabsTrigger value="all">All Users</TabsTrigger>
+                      <TabsTrigger value="premium">Premium</TabsTrigger>
+                      <TabsTrigger value="free">Free Users</TabsTrigger>
+                      <TabsTrigger value="inactive">Inactive</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value={selectedSegment}>
+                      {isLoadingUsers ? <div className="flex justify-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
+                        </div> : <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Joined</TableHead>
+                                <TableHead>Last Active</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {filteredUsers.length === 0 ? <TableRow>
+                                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                    No users found matching your search
+                                  </TableCell>
+                                </TableRow> : filteredUsers.map(user => <TableRow key={user.id}>
+                                    <TableCell className="font-medium">
+                                      <div className="flex flex-col">
+                                        <span>{user.full_name}</span>
+                                        <span className="text-xs text-muted-foreground">{user.email}</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
+                                        <span>{user.status}</span>
+                                        {user.role === 'premium' && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
+                                            Premium
+                                          </span>}
+                                        {user.role === 'admin' && <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full">
+                                            Admin
+                                          </span>}
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>{user.joined}</TableCell>
+                                    <TableCell>{user.lastActive}</TableCell>
+                                    <TableCell className="text-right">
+                                      <div className="flex justify-end gap-2">
+                                        <Dialog>
+                                          <DialogTrigger asChild>
+                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingUser(user)}>
+                                              <Edit className="h-4 w-4" />
+                                              <span className="sr-only">Edit</span>
+                                            </Button>
+                                          </DialogTrigger>
+                                          <DialogContent className="sm:max-w-[425px] rounded-xl">
+                                            <DialogHeader>
+                                              <DialogTitle>Edit User</DialogTitle>
+                                              <DialogDescription>
+                                                Update user information. Email cannot be changed.
+                                              </DialogDescription>
+                                            </DialogHeader>
                                             
-                                            <FormField control={editUserForm.control} name="full_name" render={({
+                                            <Form {...editUserForm}>
+                                              <form onSubmit={editUserForm.handleSubmit(handleEditUser)} className="space-y-4 py-4">
+                                                <div className="flex items-center gap-2 py-2 px-3 bg-muted rounded-md">
+                                                  <span className="text-muted-foreground text-sm">Email:</span>
+                                                  <span className="text-sm">{editingUser?.email}</span>
+                                                </div>
+                                                
+                                                <FormField control={editUserForm.control} name="full_name" render={({
                                       field
                                     }) => <FormItem>
                                                   <FormLabel>Full Name</FormLabel>
@@ -552,8 +561,8 @@ const AdminDashboard = () => {
                                                   </FormControl>
                                                   <FormMessage />
                                                 </FormItem>} />
-                                            
-                                            <FormField control={editUserForm.control} name="role" render={({
+                                                
+                                                <FormField control={editUserForm.control} name="role" render={({
                                       field
                                     }) => <FormItem>
                                                   <FormLabel>User Role</FormLabel>
@@ -571,168 +580,292 @@ const AdminDashboard = () => {
                                                   </Select>
                                                   <FormMessage />
                                                 </FormItem>} />
-                                            
-                                            <DialogFooter>
-                                              <DialogClose asChild>
-                                                <Button type="button" variant="outline" className="rounded-full" onClick={() => setEditingUser(null)}>
-                                                  Cancel
-                                                </Button>
-                                              </DialogClose>
-                                              <Button type="submit" className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600">
-                                                Save Changes
-                                              </Button>
-                                            </DialogFooter>
-                                          </form>
-                                        </Form>
-                                      </DialogContent>
-                                    </Dialog>
-                                    
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => {
-                              setUserToDelete(user);
-                              setShowDeleteDialog(true);
-                            }}>
-                                      <Trash2 className="h-4 w-4" />
-                                      <span className="sr-only">Delete</span>
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>)}
-                        </TableBody>
-                      </Table>
-                    </div>}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-            <CardFooter className="border-t bg-gray-50 dark:bg-gray-800/50">
-              <div className="flex items-center justify-between w-full">
-                <div className="text-sm text-muted-foreground">
-                  Showing <strong>{filteredUsers.length}</strong> of <strong>{users.length}</strong> users
-                </div>
-                <div className="flex gap-1">
-                  <Button variant="outline" size="sm" className="rounded-full" disabled>Previous</Button>
-                  <Button variant="outline" size="sm" className="rounded-full" disabled>Next</Button>
-                </div>
-              </div>
-            </CardFooter>
-          </Card>
-        </div>
-        
-        <div className="space-y-8">
-          <Card className="border-none shadow-md rounded-xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" /> Send Notification
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <Form {...notificationForm}>
-                <form onSubmit={notificationForm.handleSubmit(handleSendNotification)} className="space-y-4">
-                  <FormField control={notificationForm.control} name="segment" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Recipient</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="rounded-full">
-                              <SelectValue placeholder="Select recipients" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="all">All Users</SelectItem>
-                            <SelectItem value="premium">Premium Users</SelectItem>
-                            <SelectItem value="free">Free Users</SelectItem>
-                            <SelectItem value="inactive">Inactive Users</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>} />
-                  
-                  <FormField control={notificationForm.control} name="type" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Notification Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="rounded-full">
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="info">Information</SelectItem>
-                            <SelectItem value="success">Success</SelectItem>
-                            <SelectItem value="warning">Warning</SelectItem>
-                            <SelectItem value="error">Error</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>} />
-                  
-                  <FormField control={notificationForm.control} name="title" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Notification title" {...field} className="rounded-full" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>} />
-                  
-                  <FormField control={notificationForm.control} name="message" render={({
-                  field
-                }) => <FormItem>
-                        <FormLabel>Message</FormLabel>
-                        <FormControl>
-                          <textarea className="w-full p-2 border rounded-xl min-h-[100px] resize-none" placeholder="Enter your message to users..." {...field}></textarea>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>} />
-                  
-                  <div className="pt-2">
-                    <Button className="w-full gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600" type="submit">
-                      <Bell size={16} />
-                      Send Notification
-                    </Button>
+                                                
+                                                <DialogFooter>
+                                                  <DialogClose asChild>
+                                                    <Button type="button" variant="outline" className="rounded-full" onClick={() => setEditingUser(null)}>
+                                                      Cancel
+                                                    </Button>
+                                                  </DialogClose>
+                                                  <Button type="submit" className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600">
+                                                    Save Changes
+                                                  </Button>
+                                                </DialogFooter>
+                                              </form>
+                                            </Form>
+                                          </DialogContent>
+                                        </Dialog>
+                                        
+                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => {
+                                  setUserToDelete(user);
+                                  setShowDeleteDialog(true);
+                                }}>
+                                          <Trash2 className="h-4 w-4" />
+                                          <span className="sr-only">Delete</span>
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>)}
+                            </TableBody>
+                          </Table>
+                        </div>}
+                  </TabsContent>
+                </CardContent>
+                <CardFooter className="border-t bg-gray-50 dark:bg-gray-800/50">
+                  <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground">
+                      Showing <strong>{filteredUsers.length}</strong> of <strong>{users.length}</strong> users
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="outline" size="sm" className="rounded-full" disabled>Previous</Button>
+                      <Button variant="outline" size="sm" className="rounded-full" disabled>Next</Button>
+                    </div>
                   </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-none shadow-md rounded-xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-              <CardTitle className="flex items-center gap-2">
-                <ActivityIcon className="h-5 w-5" /> Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              {isLoadingLogs ? <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
-                </div> : activityLogs.length === 0 ? <div className="text-center py-8 text-muted-foreground">
-                  No activity logs found
-                </div> : <ul className="space-y-3 text-sm">
-                  {activityLogs.slice(0, 5).map(log => <li key={log.id} className="flex gap-3 items-start pb-3 border-b">
-                      <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-500">
-                        {getActivityIcon(log)}
+                </CardFooter>
+              </Card>
+            </div>
+            
+            <div className="space-y-8">
+              <Card className="border-none shadow-md rounded-xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="h-5 w-5" /> Send Notification
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <Form {...notificationForm}>
+                    <form onSubmit={notificationForm.handleSubmit(handleSendNotification)} className="space-y-4">
+                      <FormField control={notificationForm.control} name="segment" render={({
+                      field
+                    }) => <FormItem>
+                          <FormLabel>Recipient</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="rounded-full">
+                                <SelectValue placeholder="Select recipients" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="all">All Users</SelectItem>
+                              <SelectItem value="premium">Premium Users</SelectItem>
+                              <SelectItem value="free">Free Users</SelectItem>
+                              <SelectItem value="inactive">Inactive Users</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <FormField control={notificationForm.control} name="type" render={({
+                      field
+                    }) => <FormItem>
+                          <FormLabel>Notification Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="rounded-full">
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="info">Information</SelectItem>
+                              <SelectItem value="success">Success</SelectItem>
+                              <SelectItem value="warning">Warning</SelectItem>
+                              <SelectItem value="error">Error</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <FormField control={notificationForm.control} name="title" render={({
+                      field
+                    }) => <FormItem>
+                          <FormLabel>Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Notification title" {...field} className="rounded-full" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <FormField control={notificationForm.control} name="message" render={({
+                      field
+                    }) => <FormItem>
+                          <FormLabel>Message</FormLabel>
+                          <FormControl>
+                            <textarea className="w-full p-2 border rounded-xl min-h-[100px] resize-none" placeholder="Enter your message to users..." {...field}></textarea>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <div className="pt-2">
+                        <Button className="w-full gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600" type="submit">
+                          <Bell size={16} />
+                          Send Notification
+                        </Button>
                       </div>
-                      <div>
-                        <p className="font-medium">{formatActivityLogMessage(log)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {log.user?.email || 'Unknown email'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{getTimeAgo(log.created_at)}</p>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-md rounded-xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+                  <CardTitle className="flex items-center gap-2">
+                    <ActivityIcon className="h-5 w-5" /> Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {isLoadingLogs ? <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
+                    </div> : activityLogs.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+                      No activity logs found
+                    </div> : <ul className="space-y-3 text-sm">
+                      {activityLogs.slice(0, 5).map(log => <li key={log.id} className="flex gap-3 items-start pb-3 border-b">
+                          <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-500">
+                            {getActivityIcon(log)}
+                          </div>
+                          <div>
+                            <p className="font-medium">{formatActivityLogMessage(log)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {log.user?.email || 'Unknown email'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{getTimeAgo(log.created_at)}</p>
+                          </div>
+                        </li>)}
+                    </ul>}
+                </CardContent>
+                <CardFooter>
+                  <Button variant="ghost" size="sm" className="w-full rounded-full">
+                    View all activity
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="notifications">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border-none shadow-md rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" /> Send Notification
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <Form {...notificationForm}>
+                  <form onSubmit={notificationForm.handleSubmit(handleSendNotification)} className="space-y-4">
+                    <FormField control={notificationForm.control} name="segment" render={({
+                    field
+                  }) => <FormItem>
+                          <FormLabel>Recipient</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="rounded-full">
+                                <SelectValue placeholder="Select recipients" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="all">All Users</SelectItem>
+                              <SelectItem value="premium">Premium Users</SelectItem>
+                              <SelectItem value="free">Free Users</SelectItem>
+                              <SelectItem value="inactive">Inactive Users</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <FormField control={notificationForm.control} name="type" render={({
+                    field
+                  }) => <FormItem>
+                          <FormLabel>Notification Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="rounded-full">
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="info">Information</SelectItem>
+                              <SelectItem value="success">Success</SelectItem>
+                              <SelectItem value="warning">Warning</SelectItem>
+                              <SelectItem value="error">Error</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <FormField control={notificationForm.control} name="title" render={({
+                    field
+                  }) => <FormItem>
+                          <FormLabel>Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Notification title" {...field} className="rounded-full" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <FormField control={notificationForm.control} name="message" render={({
+                    field
+                  }) => <FormItem>
+                          <FormLabel>Message</FormLabel>
+                          <FormControl>
+                            <textarea className="w-full p-2 border rounded-xl min-h-[100px] resize-none" placeholder="Enter your message to users..." {...field}></textarea>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>} />
+                      
+                      <div className="pt-2">
+                        <Button className="w-full gap-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600" type="submit">
+                          <Bell size={16} />
+                          Send Notification
+                        </Button>
                       </div>
-                    </li>)}
-                </ul>}
-            </CardContent>
-            <CardFooter>
-              <Button variant="ghost" size="sm" className="w-full rounded-full">
-                View all activity
-                <ChevronRight size={16} className="ml-1" />
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-md rounded-xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
+                  <CardTitle className="flex items-center gap-2">
+                    <ActivityIcon className="h-5 w-5" /> Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {isLoadingLogs ? <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-700"></div>
+                    </div> : activityLogs.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+                      No activity logs found
+                    </div> : <ul className="space-y-3 text-sm">
+                      {activityLogs.slice(0, 5).map(log => <li key={log.id} className="flex gap-3 items-start pb-3 border-b">
+                          <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-500">
+                            {getActivityIcon(log)}
+                          </div>
+                          <div>
+                            <p className="font-medium">{formatActivityLogMessage(log)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {log.user?.email || 'Unknown email'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{getTimeAgo(log.created_at)}</p>
+                          </div>
+                        </li>)}
+                    </ul>}
+                </CardContent>
+                <CardFooter>
+                  <Button variant="ghost" size="sm" className="w-full rounded-full">
+                    View all activity
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="branding">
+          <BrandingTab />
+        </TabsContent>
+      </Tabs>
       
       {/* Confirm Delete Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,46 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Fetch branding assets
+    const fetchBrandingAssets = async () => {
+      try {
+        // Fetch custom logo if it exists
+        const { data: logoData } = await supabase.storage
+          .from('branding')
+          .getPublicUrl('logo.png');
+          
+        if (logoData?.publicUrl) {
+          setLogoUrl(`${logoData.publicUrl}?t=${Date.now()}`);
+        } else {
+          // Fallback to default logo
+          setLogoUrl("/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png");
+        }
+        
+        // Fetch custom background if it exists
+        const { data: bgData } = await supabase.storage
+          .from('branding')
+          .getPublicUrl('background.jpg');
+          
+        if (bgData?.publicUrl) {
+          setBackgroundUrl(`${bgData.publicUrl}?t=${Date.now()}`);
+        } else {
+          // Fallback to default background
+          setBackgroundUrl("/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png");
+        }
+      } catch (error) {
+        console.error('Error fetching branding assets:', error);
+        // Set fallbacks if error occurs
+        setLogoUrl("/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png");
+        setBackgroundUrl("/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png");
+      }
+    };
+    
+    fetchBrandingAssets();
+  }, []);
   
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +135,16 @@ const Signup = () => {
             transition={{ duration: 0.5 }}
             className="w-full max-w-md"
           >
+            <div className="flex md:hidden items-center justify-center mb-8">
+              {logoUrl && (
+                <img 
+                  src={logoUrl}
+                  alt="App Logo" 
+                  className="h-12 object-contain" 
+                />
+              )}
+            </div>
+            
             <div className="text-center md:text-left mb-8">
               <h1 className="text-3xl md:text-4xl font-bold mb-2">Get Started Now</h1>
               <p className="text-gray-500">Create your account and start managing your finances</p>
@@ -212,10 +262,22 @@ const Signup = () => {
         </div>
         
         {/* Right side - Image */}
-        <div className="hidden md:block md:w-1/2 bg-gray-50 p-6">
+        <div className="hidden md:block md:w-1/2 bg-gray-50 p-6 relative">
+          <div className="absolute top-8 left-8">
+            <Link to="/" className="flex items-center gap-2">
+              {logoUrl && (
+                <img 
+                  src={logoUrl}
+                  alt="App Logo" 
+                  className="h-12 object-contain" 
+                />
+              )}
+            </Link>
+          </div>
+          
           <div className="h-full w-full flex items-center justify-center">
             <img 
-              src="/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png" 
+              src={backgroundUrl || "/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png"}
               alt="Financial freedom illustration" 
               className="max-w-full max-h-full object-contain rounded-xl" 
             />
