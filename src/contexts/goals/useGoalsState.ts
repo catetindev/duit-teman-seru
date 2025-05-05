@@ -58,7 +58,8 @@ export function useGoalsState() {
         target_date: goal.target_date,
         currency: goal.currency as 'IDR' | 'USD',
         user_id: goal.user_id,
-        emoji: goal.emoji
+        emoji: goal.emoji,
+        has_collaborators: goal.has_collaborators
       }));
 
       setGoals(fetchedGoals);
@@ -108,7 +109,8 @@ export function useGoalsState() {
         target_date: data[0].target_date,
         currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
-        emoji: data[0].emoji
+        emoji: data[0].emoji,
+        has_collaborators: false
       };
 
       setGoals((prevGoals) => [...prevGoals, newGoal]);
@@ -153,7 +155,8 @@ export function useGoalsState() {
         target_date: data[0].target_date,
         currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
-        emoji: data[0].emoji
+        emoji: data[0].emoji,
+        has_collaborators: data[0].has_collaborators
       };
 
       setGoals((prevGoals) =>
@@ -232,11 +235,13 @@ export function useGoalsState() {
       }
 
       // Transform the data to match Collaborator interface
-      const collaborators: Collaborator[] = data.map(item => ({
-        user_id: item.user_id,
-        email: item.profiles?.email || '',
-        full_name: item.profiles?.full_name || ''
-      }));
+      const collaborators: Collaborator[] = data
+        .filter(item => item.profiles)
+        .map(item => ({
+          user_id: item.user_id,
+          email: item.profiles?.email || '',
+          full_name: item.profiles?.full_name || ''
+        }));
 
       setGoalCollaborators(collaborators);
     } catch (error: any) {

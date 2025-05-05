@@ -4,7 +4,7 @@ import { Goal } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { GoalOperationsDependencies, GoalOperations } from './types/operationTypes';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export const useGoalOperations = (dependencies: GoalOperationsDependencies): GoalOperations => {
   // Extract dependencies with default values for safety
@@ -22,7 +22,7 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
     addCollaborator,
     removeCollaborator,
     setIsSubmitting,
-    toast = useToast().toast // Use the hook directly as fallback if not provided
+    toast: customToast = toast // Use the imported toast as fallback
   } = dependencies || {};
 
   const handleEditGoal = useCallback((goal: Goal) => {
@@ -43,23 +43,16 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
     try {
       console.log('Deleting goal with ID:', goalToDeleteId);
       await deleteGoal(goalToDeleteId);
-      toast({
-        title: "Success",
-        description: "Goal has been deleted successfully",
-      });
+      toast("Goal has been deleted successfully");
     } catch (error: any) {
       console.error('Error deleting goal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete goal",
-        variant: "destructive",
-      });
+      toast(error.message || "Failed to delete goal");
     } finally {
       setIsSubmitting(false);
       setGoalToDelete(null);
       setIsDeleteDialogOpen(false);
     }
-  }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen, setIsSubmitting, toast]);
+  }, [selectedGoal, deleteGoal, setGoalToDelete, setIsDeleteDialogOpen, setIsSubmitting]);
 
   const openCollaborationDialog = useCallback(async (goal: Goal) => {
     setSelectedGoal(goal);
@@ -70,13 +63,9 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       setGoalCollaborators(collaborators);
     } catch (error) {
       console.error("Failed to fetch collaborators:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load collaborators",
-        variant: "destructive"
-      });
+      toast("Failed to load collaborators");
     }
-  }, [setSelectedGoal, setIsCollaborateDialogOpen, fetchCollaborators, setGoalCollaborators, toast]);
+  }, [setSelectedGoal, setIsCollaborateDialogOpen, fetchCollaborators, setGoalCollaborators]);
 
   const updateGoalHandler = useCallback(async (goalData: GoalFormData) => {
     if (!selectedGoal) return;
@@ -101,25 +90,18 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       
       if (error) throw error;
       
-      toast({
-        title: "Success!",
-        description: "Goal has been updated successfully.",
-      });
+      toast("Goal has been updated successfully.");
       
       setIsEditDialogOpen(false);
       await fetchGoals();
       
     } catch (error: any) {
       console.error('Error updating goal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update goal",
-        variant: "destructive",
-      });
+      toast(error.message || "Failed to update goal");
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedGoal, setIsSubmitting, toast, setIsEditDialogOpen, fetchGoals]);
+  }, [selectedGoal, setIsSubmitting, setIsEditDialogOpen, fetchGoals]);
 
   const handleInviteCollaborator = useCallback(async (email: string) => {
     if (!selectedGoal) return;
@@ -130,10 +112,7 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       const success = await addCollaborator(selectedGoal.id, email);
       
       if (success) {
-        toast({
-          title: "Success!",
-          description: `Invitation sent to ${email}`,
-        });
+        toast(`Invitation sent to ${email}`);
         
         // Refresh collaborators list
         const collaborators = await fetchCollaborators(selectedGoal.id);
@@ -141,15 +120,11 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       }
     } catch (error: any) {
       console.error('Error inviting collaborator:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to invite collaborator",
-        variant: "destructive",
-      });
+      toast(error.message || "Failed to invite collaborator");
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedGoal, setIsSubmitting, addCollaborator, toast, fetchCollaborators, setGoalCollaborators]);
+  }, [selectedGoal, setIsSubmitting, addCollaborator, fetchCollaborators, setGoalCollaborators]);
 
   const handleRemoveCollaborator = useCallback(async (userId: string) => {
     if (!selectedGoal) return;
@@ -159,25 +134,18 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       const success = await removeCollaborator(selectedGoal.id, userId);
       
       if (success) {
-        toast({
-          title: "Success!",
-          description: "Collaborator has been removed",
-        });
+        toast("Collaborator has been removed");
         
         // Use functional update to filter out the removed collaborator
         setGoalCollaborators((prev) => prev.filter(c => c.user_id !== userId));
       }
     } catch (error: any) {
       console.error('Error removing collaborator:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to remove collaborator",
-        variant: "destructive",
-      });
+      toast(error.message || "Failed to remove collaborator");
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedGoal, setIsSubmitting, removeCollaborator, toast, setGoalCollaborators]);
+  }, [selectedGoal, setIsSubmitting, removeCollaborator, setGoalCollaborators]);
 
   return {
     handleEditGoal,

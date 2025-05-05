@@ -4,7 +4,7 @@ import { Goal } from '@/hooks/goals/types';
 import { useGoals } from '@/hooks/goals/useGoals';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { GoalsContextType, SortBy, SortDirection, FilterBy } from './types';
 import { filterAndSortGoals } from './goalsUtils';
 import { useGoalOperations } from './goalOperations';
@@ -15,7 +15,6 @@ const GoalsContext = createContext<GoalsContextType | undefined>(undefined);
 
 export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { isPremium, user } = useAuth();
-  const { toast } = useToast();
   const location = useLocation();
   
   // Only fetch goals if we're on the goals page
