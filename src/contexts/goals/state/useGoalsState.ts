@@ -1,4 +1,5 @@
-import { useReducer, useCallback } from 'react';
+
+import { useReducer } from 'react';
 import { Goal } from '@/hooks/goals/types';
 import { SortBy, SortDirection, FilterBy } from '../types';
 import { goalReducer } from './goalReducer';
@@ -7,6 +8,7 @@ import { useGoalsQuery } from './useGoalsQuery';
 import { useGoalsFiltering } from './useGoalsFiltering';
 import { useGoalsActions } from './useGoalsActions';
 import { useGoalStateModifiers } from './useGoalStateModifiers';
+import { useEffect } from 'react';
 
 // Define initial state
 const initialState: GoalsState = {
@@ -26,28 +28,23 @@ const initialState: GoalsState = {
   filterBy: 'all'
 };
 
-// Define a custom hook to manage goals state
+/**
+ * Custom hook that manages the goals state and related functionality
+ */
 export function useGoalsState() {
   const [state, dispatch] = useReducer(goalReducer, initialState);
+  
+  // Get query-related functionality
   const { goals, loading, error, fetchGoals, setGoals } = useGoalsQuery();
+  
+  // Get filtering and sorting functionality
   const { applyFilters, sortGoals } = useGoalsFiltering();
   
-  // Get state modifiers (setters)
+  // Get state modifiers
   const stateModifiers = useGoalStateModifiers(dispatch);
-
-  // Get actions that interact with the goals
-  const {
-    formatCurrency,
-    calculateProgress,
-    addGoal: handleAddGoal,
-    updateGoal: updateGoalHandler,
-    handleEditGoal,
-    handleDeleteGoal,
-    confirmDeleteGoal,
-    openCollaborationDialog,
-    handleInviteCollaborator,
-    handleRemoveCollaborator
-  } = useGoalsActions({
+  
+  // Get goal operations and actions
+  const goalActions = useGoalsActions({
     goals: state.goals,
     selectedGoal: state.selectedGoal,
     goalCollaborators: state.goalCollaborators,
@@ -56,15 +53,28 @@ export function useGoalsState() {
     ...stateModifiers
   });
 
-  // Set loading state
-  useGoalsStateEffects({
-    loading,
-    error,
-    goals,
-    filterBy: state.filterBy,
-    dispatch,
-    applyFilters
-  });
+  // Update loading state
+  useEffect(() => {
+    dispatch({ type: 'SET_LOADING', payload: loading });
+  }, [loading]);
+
+  // Update error state
+  useEffect(() => {
+    dispatch({ type: 'SET_ERROR', payload: error });
+  }, [error]);
+
+  // Update goals state
+  useEffect(() => {
+    dispatch({ type: 'SET_GOALS', payload: goals });
+    const filtered = applyFilters(goals, state.filterBy);
+    dispatch({ type: 'SET_FILTERED_GOALS', payload: filtered });
+  }, [goals, applyFilters, state.filterBy]);
+
+  // Update filtered goals when filter changes
+  useEffect(() => {
+    const filtered = applyFilters(goals, state.filterBy);
+    dispatch({ type: 'SET_FILTERED_GOALS', payload: filtered });
+  }, [state.filterBy, goals, applyFilters]);
 
   // Get filtered and sorted goals
   const filteredAndSortedGoals = sortGoals(state.filteredGoals, state.sortBy, state.sortDirection);
@@ -73,48 +83,8 @@ export function useGoalsState() {
     ...state,
     filteredAndSortedGoals,
     setGoals,
-    ...stateModifiers,
     fetchGoals,
-    formatCurrency,
-    calculateProgress,
-    handleEditGoal,
-    handleDeleteGoal,
-    openCollaborationDialog,
-    addGoal: handleAddGoal,
-    updateGoal: updateGoalHandler,
-    handleInviteCollaborator,
-    handleRemoveCollaborator,
-    confirmDeleteGoal,
-    handleAddGoal,
-    updateGoalHandler
+    ...stateModifiers,
+    ...goalActions
   };
-}
-
-// Extract effects to a separate function to keep the main hook clean
-function useGoalsStateEffects({ loading, error, goals, filterBy, dispatch, applyFilters }) {
-  // Import and use useEffect
-  const { useEffect } = require('react');
-
-  // Set loading state
-  useEffect(() => {
-    dispatch({ type: 'SET_LOADING', payload: loading });
-  }, [loading, dispatch]);
-
-  // Set error state
-  useEffect(() => {
-    dispatch({ type: 'SET_ERROR', payload: error });
-  }, [error, dispatch]);
-
-  // Set goals state
-  useEffect(() => {
-    dispatch({ type: 'SET_GOALS', payload: goals });
-    const filtered = applyFilters(goals, filterBy);
-    dispatch({ type: 'SET_FILTERED_GOALS', payload: filtered });
-  }, [goals, applyFilters, filterBy, dispatch]);
-
-  // Watch for filter changes
-  useEffect(() => {
-    const filtered = applyFilters(goals, filterBy);
-    dispatch({ type: 'SET_FILTERED_GOALS', payload: filtered });
-  }, [filterBy, goals, applyFilters, dispatch]);
 }

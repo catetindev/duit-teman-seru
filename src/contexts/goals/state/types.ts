@@ -29,7 +29,7 @@ export type GoalsStateAction =
   | { type: 'SET_COLLABORATE_DIALOG_OPEN'; payload: boolean }
   | { type: 'SET_DELETE_DIALOG_OPEN'; payload: boolean }
   | { type: 'SET_SELECTED_GOAL'; payload: Goal | null }
-  | { type: 'SET_GOAL_COLLABORATORS'; payload: Collaborator[] }
+  | { type: 'SET_GOAL_COLLABORATORS'; payload: Collaborator[] | ((prev: Collaborator[]) => Collaborator[]) }
   | { type: 'SET_IS_SUBMITTING'; payload: boolean }
   | { type: 'SET_SORT_BY'; payload: SortBy }
   | { type: 'SET_SORT_DIRECTION'; payload: SortDirection }

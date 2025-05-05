@@ -26,14 +26,8 @@ export function useGoalStateModifiers(dispatch: React.Dispatch<GoalsStateAction>
   }, [dispatch]);
 
   const setGoalCollaborators = useCallback((collaborators: Collaborator[] | ((prev: Collaborator[]) => Collaborator[])) => {
-    if (typeof collaborators === 'function') {
-      dispatch({ 
-        type: 'SET_GOAL_COLLABORATORS', 
-        payload: collaborators([]) // This will be fixed by the reducer which has access to current state
-      });
-    } else {
-      dispatch({ type: 'SET_GOAL_COLLABORATORS', payload: collaborators });
-    }
+    // Pass the function or array directly to the reducer
+    dispatch({ type: 'SET_GOAL_COLLABORATORS', payload: collaborators });
   }, [dispatch]);
 
   const setIsSubmitting = useCallback((isSubmitting: boolean) => {
