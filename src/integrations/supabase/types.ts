@@ -197,6 +197,7 @@ export type Database = {
         Row: {
           currency: string
           emoji: string | null
+          has_collaborators: boolean | null
           id: string
           saved_amount: number
           target_amount: number
@@ -207,6 +208,7 @@ export type Database = {
         Insert: {
           currency?: string
           emoji?: string | null
+          has_collaborators?: boolean | null
           id?: string
           saved_amount?: number
           target_amount: number
@@ -217,6 +219,7 @@ export type Database = {
         Update: {
           currency?: string
           emoji?: string | null
+          has_collaborators?: boolean | null
           id?: string
           saved_amount?: number
           target_amount?: number
