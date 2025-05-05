@@ -59,7 +59,7 @@ export function useGoalsState() {
         currency: goal.currency as 'IDR' | 'USD',
         user_id: goal.user_id,
         emoji: goal.emoji,
-        has_collaborators: goal.has_collaborators
+        has_collaborators: goal.has_collaborators || false
       }));
 
       setGoals(fetchedGoals);
@@ -92,7 +92,8 @@ export function useGoalsState() {
           target_date: values.target_date || null,
           currency: values.currency,
           emoji: values.emoji || '🎯',
-          user_id: values.user_id
+          user_id: values.user_id,
+          has_collaborators: false
         })
         .select();
 
@@ -110,7 +111,7 @@ export function useGoalsState() {
         currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
         emoji: data[0].emoji,
-        has_collaborators: false
+        has_collaborators: data[0].has_collaborators || false
       };
 
       setGoals((prevGoals) => [...prevGoals, newGoal]);
@@ -156,7 +157,7 @@ export function useGoalsState() {
         currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
         emoji: data[0].emoji,
-        has_collaborators: data[0].has_collaborators
+        has_collaborators: data[0].has_collaborators || false
       };
 
       setGoals((prevGoals) =>
@@ -219,34 +220,39 @@ export function useGoalsState() {
 
     // Fetch collaborators for the selected goal
     try {
-      const { data, error } = await supabase
+      // First, get user_ids from goal_collaborators
+      const { data: collaboratorsData, error: collaboratorsError } = await supabase
         .from('goal_collaborators')
-        .select(`
-          *,
-          profiles:user_id (
-            email,
-            full_name
-          )
-        `)
+        .select('user_id')
         .eq('goal_id', goal.id);
-
-      if (error) {
-        throw error;
+        
+      if (collaboratorsError) throw collaboratorsError;
+      
+      if (!collaboratorsData || collaboratorsData.length === 0) {
+        setGoalCollaborators([]);
+        return;
       }
-
-      // Transform the data to match Collaborator interface
-      const collaborators: Collaborator[] = data
-        .filter(item => item.profiles)
-        .map(item => ({
-          user_id: item.user_id,
-          email: item.profiles?.email || '',
-          full_name: item.profiles?.full_name || ''
-        }));
-
+      
+      // Then, get the user details for each user_id
+      const userIds = collaboratorsData.map(item => item.user_id);
+      const { data: usersData, error: usersError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', userIds);
+        
+      if (usersError) throw usersError;
+      
+      // Transform the data to match the Collaborator type
+      const collaborators: Collaborator[] = usersData.map(user => ({
+        user_id: user.id,
+        email: user.email,
+        full_name: user.full_name
+      }));
+        
       setGoalCollaborators(collaborators);
-    } catch (error: any) {
-      console.error('Error fetching collaborators:', error);
-      toast(error.message || "Failed to fetch collaborators");
+    } catch (error) {
+      console.error("Failed to fetch collaborators:", error);
+      toast("Failed to load collaborators");
     }
   };
 
@@ -315,6 +321,17 @@ export function useGoalsState() {
         throw inviteError;
       }
 
+      // Update the has_collaborators flag
+      const { error: updateError } = await supabase
+        .from('savings_goals')
+        .update({ has_collaborators: true })
+        .eq('id', selectedGoal.id);
+
+      if (updateError) {
+        console.error('Error updating goal collaborator flag:', updateError);
+        // Continue execution as this is not critical
+      }
+
       // Update the local state
       const newCollaborator: Collaborator = {
         user_id: user.id,
@@ -346,6 +363,24 @@ export function useGoalsState() {
 
       if (error) {
         throw error;
+      }
+
+      // Update the has_collaborators flag if this was the last collaborator
+      const { data: remainingCollaborators, error: checkError } = await supabase
+        .from('goal_collaborators')
+        .select('count')
+        .eq('goal_id', selectedGoal.id);
+
+      if (!checkError && (!remainingCollaborators || remainingCollaborators.length === 0)) {
+        const { error: updateError } = await supabase
+          .from('savings_goals')
+          .update({ has_collaborators: false })
+          .eq('id', selectedGoal.id);
+
+        if (updateError) {
+          console.error('Error updating goal collaborator flag:', updateError);
+          // Continue execution as this is not critical
+        }
       }
 
       // Update the local state

@@ -7,27 +7,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ArrowDownNarrowWide, ArrowUpNarrowWide, Filter } from "lucide-react";
+import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
-
-export type SortOption = 'progress' | 'amount' | 'date' | 'title';
-export type SortDirection = 'asc' | 'desc';
-export type FilterOption = 'all' | 'completed' | 'incomplete' | 'noDate';
+import { SortBy, SortDirection, FilterBy } from '@/contexts/goals/types';
 
 interface GoalsFiltersProps {
-  sortBy: SortOption;
-  setSortBy: (option: SortOption) => void;
+  sortBy: SortBy;
+  setSortBy: (option: SortBy) => void;
   sortDirection: SortDirection;
   setSortDirection: (direction: SortDirection) => void;
-  filterBy: FilterOption;
-  setFilterBy: (filter: FilterOption) => void;
+  filterBy: FilterBy;
+  setFilterBy: (filter: FilterBy) => void;
 }
 
 const GoalsFilters: React.FC<GoalsFiltersProps> = ({
@@ -44,24 +35,96 @@ const GoalsFilters: React.FC<GoalsFiltersProps> = ({
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
 
+  // Map sort values from the component to context values
+  const handleSortChange = (value: string) => {
+    let sortByValue: SortBy;
+    switch (value) {
+      case 'progress':
+        sortByValue = 'progress';
+        break;
+      case 'amount':
+        sortByValue = 'target_amount';
+        break;
+      case 'date':
+        sortByValue = 'target_date';
+        break;
+      case 'title':
+        sortByValue = 'title';
+        break;
+      default:
+        sortByValue = 'target_date';
+    }
+    setSortBy(sortByValue);
+  };
+
+  // Map filter values from the component to context values
+  const handleFilterChange = (value: string) => {
+    let filterByValue: FilterBy;
+    switch (value) {
+      case 'all':
+        filterByValue = 'all';
+        break;
+      case 'collaborative':
+        filterByValue = 'collaborative';
+        break;
+      case 'personal':
+        filterByValue = 'personal';
+        break;
+      case 'completed':
+      case 'incomplete':
+      case 'noDate':
+        filterByValue = 'all'; // Default fallback for old values
+        break;
+      default:
+        filterByValue = 'all';
+    }
+    setFilterBy(filterByValue);
+  };
+
+  // Map context values back to component display values
+  const getSortDisplayValue = () => {
+    switch (sortBy) {
+      case 'progress':
+        return 'progress';
+      case 'target_amount':
+        return 'amount';
+      case 'target_date':
+        return 'date';
+      case 'title':
+        return 'title';
+      default:
+        return 'date';
+    }
+  };
+
+  const getFilterDisplayValue = () => {
+    switch (filterBy) {
+      case 'collaborative':
+        return 'collaborative';
+      case 'personal':
+        return 'personal';
+      default:
+        return 'all';
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-2 w-full mb-4">
       <div className="flex items-center gap-2 w-full sm:w-auto">
-        <Select value={filterBy} onValueChange={(value) => setFilterBy(value as FilterOption)}>
+        <Select value={getFilterDisplayValue()} onValueChange={handleFilterChange}>
           <SelectTrigger className="w-full sm:w-36">
             <SelectValue placeholder="Filter" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Goals</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="incomplete">Incomplete</SelectItem>
-            <SelectItem value="noDate">No End Date</SelectItem>
+            <SelectItem value="collaborative">Collaborative</SelectItem>
+            <SelectItem value="personal">Personal</SelectItem>
           </SelectContent>
         </Select>
       </div>
       
       <div className="flex items-center gap-2 w-full sm:w-auto ml-auto">
-        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+        <Select value={getSortDisplayValue()} onValueChange={handleSortChange}>
           <SelectTrigger className="w-full sm:w-36">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>

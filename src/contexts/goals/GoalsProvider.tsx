@@ -33,9 +33,14 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     fetchCollaborators, 
     addCollaborator,
     removeCollaborator,
-    formatCurrency,
-    calculateProgress
+    formatCurrency
   } = useGoals(user?.id, shouldFetchGoals);
+
+  // Define calculateProgress here to ensure it takes a Goal object
+  const calculateProgress = useCallback((goal: Goal) => {
+    const progress = Math.min(Math.round((goal.saved_amount / goal.target_amount) * 100), 100);
+    return progress;
+  }, []);
 
   // Memoize the filtered goals to prevent render loops
   const filteredAndSortedGoals = useMemo(() => {
@@ -117,7 +122,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } finally {
       state.setIsSubmitting(false);
     }
-  }, [user, addGoal, toast, state]);
+  }, [user, addGoal, state]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo((): GoalsContextType => ({
