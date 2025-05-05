@@ -1,11 +1,13 @@
+
 import { useState, useEffect, useReducer, useCallback } from 'react';
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { SortBy, SortDirection, FilterBy } from '../types';
-import { useGoalOperations } from './useGoalOperations';
-import { useGoalsQuery } from './useGoalsQuery';
-import { useCollaboratorOperations } from './useCollaboratorOperations';
 import { goalReducer } from './goalReducer';
 import { GoalsState } from './types';
+import { useGoalsQuery } from './useGoalsQuery';
+import { useGoalsFiltering } from './useGoalsFiltering';
+import { useGoalsOperations } from './useGoalsOperations';
+import { useGoalsCollaborationOperations } from './useGoalsCollaborationOperations';
 
 // Define initial state
 const initialState: GoalsState = {
@@ -29,8 +31,22 @@ const initialState: GoalsState = {
 export function useGoalsState() {
   const [state, dispatch] = useReducer(goalReducer, initialState);
   const { goals, loading, error, fetchGoals, setGoals } = useGoalsQuery();
-  const { isSubmitting, setIsSubmitting, formatCurrency, calculateProgress, addGoal, updateGoal, deleteGoal } = useGoalOperations();
-  const { fetchCollaborators, inviteCollaborator, removeCollaborator } = useCollaboratorOperations();
+  const { applyFilters, sortGoals } = useGoalsFiltering();
+  const { 
+    setIsSubmitting, 
+    formatCurrency, 
+    calculateProgress, 
+    handleAddGoal, 
+    updateGoalHandler, 
+    handleEditGoal, 
+    handleDeleteGoal, 
+    confirmDeleteGoal 
+  } = useGoalsOperations();
+  const { 
+    openCollaborationDialog, 
+    handleInviteCollaborator, 
+    handleRemoveCollaborator 
+  } = useGoalsCollaborationOperations();
 
   // Set loading state
   useEffect(() => {
@@ -45,45 +61,18 @@ export function useGoalsState() {
   // Set goals state
   useEffect(() => {
     dispatch({ type: 'SET_GOALS', payload: goals });
-    applyFilters(goals, state.filterBy);
-  }, [goals]);
-
-  // Function to filter goals
-  const applyFilters = useCallback((goalsToFilter: Goal[], filterBy: FilterBy) => {
-    let filtered;
-    if (filterBy === 'all') {
-      filtered = goalsToFilter;
-    } else if (filterBy === 'collaborative') {
-      filtered = goalsToFilter.filter((goal) => goal.has_collaborators);
-    } else {
-      filtered = goalsToFilter.filter((goal) => !goal.has_collaborators);
-    }
+    const filtered = applyFilters(goals, state.filterBy);
     dispatch({ type: 'SET_FILTERED_GOALS', payload: filtered });
-  }, []);
+  }, [goals, applyFilters, state.filterBy]);
 
   // Watch for filter changes
   useEffect(() => {
-    applyFilters(state.goals, state.filterBy);
+    const filtered = applyFilters(state.goals, state.filterBy);
+    dispatch({ type: 'SET_FILTERED_GOALS', payload: filtered });
   }, [state.filterBy, state.goals, applyFilters]);
 
-  // Function to sort goals
-  const sortGoals = useCallback((goalsToSort: Goal[]) => {
-    return [...goalsToSort].sort((a, b) => {
-      const aValue = a[state.sortBy as keyof Goal];
-      const bValue = b[state.sortBy as keyof Goal];
-
-      if (aValue < bValue) {
-        return state.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return state.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-  }, [state.sortBy, state.sortDirection]);
-
   // Get filtered and sorted goals
-  const filteredAndSortedGoals = sortGoals(state.filteredGoals);
+  const filteredAndSortedGoals = sortGoals(state.filteredGoals, state.sortBy, state.sortDirection);
 
   // Create action dispatchers
   const setSelectedGoal = useCallback((goal: Goal | null) => {
@@ -129,125 +118,70 @@ export function useGoalsState() {
     dispatch({ type: 'SET_FILTER_BY', payload: filter });
   }, []);
 
-  // Function to handle adding a new goal
-  const handleAddGoal = async (values: any) => {
-    const newGoal = await addGoal({ 
-      ...values, 
-      has_collaborators: false 
-    });
-    if (newGoal) {
-      setGoals([...state.goals, newGoal]);
-    }
-    setIsAddDialogOpen(false);
-  };
+  // Wrap the extracted operations with state context
+  const handleAddGoalWithState = useCallback(async (values: any) => {
+    await handleAddGoal(values, state.goals, setGoals, () => setIsAddDialogOpen(false));
+  }, [handleAddGoal, state.goals, setGoals, setIsAddDialogOpen]);
 
-  // Function to handle updating a goal
-  const updateGoalHandler = async (values: any) => {
-    if (state.selectedGoal) {
-      const updatedGoal = await updateGoal(state.selectedGoal.id, { 
-        ...values, 
-        has_collaborators: state.selectedGoal.has_collaborators 
-      });
-      if (updatedGoal) {
-        setGoals(state.goals.map(g => g.id === updatedGoal.id ? updatedGoal : g));
-      }
-      setIsEditDialogOpen(false);
-    }
-  };
+  const updateGoalHandlerWithState = useCallback(async (values: any) => {
+    await updateGoalHandler(values, state.selectedGoal, state.goals, setGoals, () => setIsEditDialogOpen(false));
+  }, [updateGoalHandler, state.selectedGoal, state.goals, setGoals, setIsEditDialogOpen]);
 
-  // Function to handle opening the edit dialog
-  const handleEditGoal = useCallback((goal: Goal) => {
-    setSelectedGoal(goal);
-    setIsEditDialogOpen(true);
-  }, [setSelectedGoal, setIsEditDialogOpen]);
+  const handleEditGoalWithState = useCallback((goal: Goal) => {
+    handleEditGoal(goal, setSelectedGoal, setIsEditDialogOpen);
+  }, [handleEditGoal, setSelectedGoal, setIsEditDialogOpen]);
 
-  // Function to handle opening the collaboration dialog
-  const openCollaborationDialog = useCallback(async (goal: Goal) => {
-    setSelectedGoal(goal);
-    setIsCollaborateDialogOpen(true);
-    
-    try {
-      const collaborators = await fetchCollaborators(goal.id);
-      setGoalCollaborators(collaborators);
-    } catch (error) {
-      console.error("Failed to fetch collaborators:", error);
-      // toast("Failed to load collaborators");
-    }
-  }, [setSelectedGoal, setIsCollaborateDialogOpen, fetchCollaborators, setGoalCollaborators]);
+  const handleDeleteGoalWithState = useCallback(async (goalId: string) => {
+    await handleDeleteGoal(goalId, state.goals, setGoals);
+  }, [handleDeleteGoal, state.goals, setGoals]);
 
-  // Function to handle deleting a goal
-  const handleDeleteGoal = useCallback(async (goalId: string) => {
-    const success = await deleteGoal(goalId);
-    if (success) {
-      setGoals(state.goals.filter((goal) => goal.id !== goalId));
-    }
-  }, [deleteGoal, state.goals, setGoals]);
+  const confirmDeleteGoalWithState = useCallback(async () => {
+    await confirmDeleteGoal(state.selectedGoal, state.goals, setGoals, setIsDeleteDialogOpen, setSelectedGoal);
+  }, [confirmDeleteGoal, state.selectedGoal, state.goals, setGoals, setIsDeleteDialogOpen, setSelectedGoal]);
 
-  // Async confirmDeleteGoal for compatibility
-  const confirmDeleteGoal = useCallback(async () => {
-    if (state.selectedGoal) {
-      await handleDeleteGoal(state.selectedGoal.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedGoal(null);
-    }
-  }, [state.selectedGoal, handleDeleteGoal, setIsDeleteDialogOpen, setSelectedGoal]);
+  const openCollaborationDialogWithState = useCallback(async (goal: Goal) => {
+    await openCollaborationDialog(goal, setSelectedGoal, setIsCollaborateDialogOpen, setGoalCollaborators);
+  }, [openCollaborationDialog, setSelectedGoal, setIsCollaborateDialogOpen, setGoalCollaborators]);
 
-  // Function to handle inviting a collaborator
-  const handleInviteCollaborator = useCallback(async (email: string) => {
-    if (!state.selectedGoal) return;
-    
-    setIsSubmitting(true);
-    try {
-      const success = await inviteCollaborator(state.selectedGoal.id, email);
-      if (success) {
-        // Refresh collaborators list
-        const collaborators = await fetchCollaborators(state.selectedGoal.id);
-        setGoalCollaborators(collaborators);
-        
-        // Update goal has_collaborators flag in the goals list
-        const updatedGoals = state.goals.map(g => 
-          g.id === state.selectedGoal?.id 
-            ? { ...g, has_collaborators: true } 
-            : g
-        );
-        setGoals(updatedGoals);
-      }
-    } catch (error) {
-      console.error('Error inviting collaborator:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [state.selectedGoal, state.goals, inviteCollaborator, fetchCollaborators, setGoalCollaborators, setGoals, setIsSubmitting]);
+  const handleInviteCollaboratorWithState = useCallback(async (email: string) => {
+    await handleInviteCollaborator(
+      email, 
+      state.selectedGoal, 
+      state.goals, 
+      setGoals, 
+      state.goalCollaborators, 
+      setGoalCollaborators,
+      setIsSubmitting
+    );
+  }, [
+    handleInviteCollaborator, 
+    state.selectedGoal, 
+    state.goals, 
+    setGoals, 
+    state.goalCollaborators, 
+    setGoalCollaborators,
+    setIsSubmitting
+  ]);
 
-  // Function to handle removing a collaborator
-  const handleRemoveCollaborator = useCallback(async (userId: string) => {
-    if (!state.selectedGoal) return;
-    
-    setIsSubmitting(true);
-    try {
-      const success = await removeCollaborator(state.selectedGoal.id, userId);
-      if (success) {
-        // Use functional update to filter out the removed collaborator
-        setGoalCollaborators((prev) => prev.filter(c => c.user_id !== userId));
-        
-        // Check if this was the last collaborator
-        const updatedCollaborators = state.goalCollaborators.filter(c => c.user_id !== userId);
-        if (updatedCollaborators.length === 0) {
-          // Update goal has_collaborators flag in the goals list
-          const updatedGoals = state.goals.map(g => 
-            g.id === state.selectedGoal?.id 
-              ? { ...g, has_collaborators: false } 
-              : g
-          );
-          setGoals(updatedGoals);
-        }
-      }
-    } catch (error) {
-      console.error('Error removing collaborator:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [state.selectedGoal, state.goals, state.goalCollaborators, removeCollaborator, setGoalCollaborators, setGoals, setIsSubmitting]);
+  const handleRemoveCollaboratorWithState = useCallback(async (userId: string) => {
+    await handleRemoveCollaborator(
+      userId, 
+      state.selectedGoal, 
+      state.goals, 
+      setGoals, 
+      state.goalCollaborators, 
+      setGoalCollaborators,
+      setIsSubmitting
+    );
+  }, [
+    handleRemoveCollaborator, 
+    state.selectedGoal, 
+    state.goals, 
+    setGoals, 
+    state.goalCollaborators, 
+    setGoalCollaborators,
+    setIsSubmitting
+  ]);
 
   return {
     ...state,
@@ -266,15 +200,15 @@ export function useGoalsState() {
     fetchGoals,
     formatCurrency,
     calculateProgress,
-    handleEditGoal,
-    handleDeleteGoal,
-    openCollaborationDialog,
-    addGoal,
-    updateGoal,
-    handleInviteCollaborator,
-    handleRemoveCollaborator,
-    confirmDeleteGoal,
-    handleAddGoal,
-    updateGoalHandler
+    handleEditGoal: handleEditGoalWithState,
+    handleDeleteGoal: handleDeleteGoalWithState,
+    openCollaborationDialog: openCollaborationDialogWithState,
+    addGoal: handleAddGoal,
+    updateGoal: updateGoalHandler,
+    handleInviteCollaborator: handleInviteCollaboratorWithState,
+    handleRemoveCollaborator: handleRemoveCollaboratorWithState,
+    confirmDeleteGoal: confirmDeleteGoalWithState,
+    handleAddGoal: handleAddGoalWithState,
+    updateGoalHandler: updateGoalHandlerWithState
   };
 }
