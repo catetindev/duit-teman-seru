@@ -6,6 +6,9 @@ interface BrandingAssets {
   logoUrl: string | null;
   backgroundUrl: string | null;
   isLoading: boolean;
+  uploadLogo: (file: File) => Promise<void>;
+  uploadBackground: (file: File) => Promise<void>;
+  refreshAssets: () => void;
 }
 
 export const useBrandingAssets = (
@@ -29,10 +32,10 @@ export const useBrandingAssets = (
       try {
         setIsLoading(true);
         
-        // Fetch custom logo if it exists
+        // Fetch logo from branding-assets bucket
         const { data: logoData } = await supabase.storage
-          .from('branding')
-          .getPublicUrl('logo.png');
+          .from('branding-assets')
+          .getPublicUrl('logo/logo.png');
           
         if (logoData?.publicUrl) {
           setLogoUrl(`${logoData.publicUrl}?t=${cacheKey}`);
@@ -41,10 +44,10 @@ export const useBrandingAssets = (
           setLogoUrl(defaultLogoUrl);
         }
         
-        // Fetch custom background if it exists
+        // Fetch background from branding-assets bucket
         const { data: bgData } = await supabase.storage
-          .from('branding')
-          .getPublicUrl('background.jpg');
+          .from('branding-assets')
+          .getPublicUrl('background/background.jpg');
           
         if (bgData?.publicUrl) {
           setBackgroundUrl(`${bgData.publicUrl}?t=${cacheKey}`);
@@ -72,5 +75,54 @@ export const useBrandingAssets = (
     };
   }, [defaultLogoUrl, defaultBackgroundUrl, cacheKey]);
 
-  return { logoUrl, backgroundUrl, isLoading };
+  // Function to upload a logo file
+  const uploadLogo = async (file: File): Promise<void> => {
+    try {
+      const { error } = await supabase.storage
+        .from('branding-assets')
+        .upload('logo/logo.png', file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+        
+      if (error) throw error;
+      
+      // Refresh assets to show the new logo
+      refreshAssets();
+      
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      throw error;
+    }
+  };
+
+  // Function to upload a background file
+  const uploadBackground = async (file: File): Promise<void> => {
+    try {
+      const { error } = await supabase.storage
+        .from('branding-assets')
+        .upload('background/background.jpg', file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+        
+      if (error) throw error;
+      
+      // Refresh assets to show the new background
+      refreshAssets();
+      
+    } catch (error) {
+      console.error('Error uploading background:', error);
+      throw error;
+    }
+  };
+
+  return { 
+    logoUrl, 
+    backgroundUrl, 
+    isLoading,
+    uploadLogo,
+    uploadBackground,
+    refreshAssets
+  };
 };

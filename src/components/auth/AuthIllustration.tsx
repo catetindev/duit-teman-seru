@@ -1,22 +1,17 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useBrandingAssets } from '@/hooks/useBrandingAssets';
 
 interface AuthIllustrationProps {
-  logoUrl: string | null;
-  backgroundUrl: string | null;
-  defaultLogoUrl: string;
-  defaultBackgroundUrl: string;
+  className?: string;
 }
 
-const AuthIllustration = ({ 
-  logoUrl, 
-  backgroundUrl, 
-  defaultLogoUrl, 
-  defaultBackgroundUrl 
-}: AuthIllustrationProps) => {
+const AuthIllustration = ({ className = "" }: AuthIllustrationProps) => {
+  const { logoUrl, backgroundUrl } = useBrandingAssets();
+  
   return (
-    <div className="hidden md:block md:w-1/2 bg-gray-50 p-6 relative">
+    <div className={`hidden md:block md:w-1/2 bg-gray-50 p-6 relative ${className}`}>
       <div className="absolute top-8 left-8">
         <Link to="/" className="flex items-center gap-2">
           {logoUrl && (
@@ -31,7 +26,7 @@ const AuthIllustration = ({
       
       <div className="h-full w-full flex items-center justify-center">
         <img 
-          src={backgroundUrl || defaultBackgroundUrl}
+          src={backgroundUrl}
           alt="Financial freedom illustration" 
           className="max-w-full max-h-full object-contain rounded-xl" 
         />

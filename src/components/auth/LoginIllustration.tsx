@@ -1,50 +1,11 @@
 
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
-import { supabase } from '@/integrations/supabase/client';
+import { useBrandingAssets } from '@/hooks/useBrandingAssets';
 
 const LoginIllustration = () => {
   const { t, language } = useLanguage();
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const fetchBrandingAssets = async () => {
-      try {
-        // Fetch custom logo if it exists
-        const { data: logoData } = await supabase.storage
-          .from('branding')
-          .getPublicUrl('logo.png');
-          
-        if (logoData?.publicUrl) {
-          setLogoUrl(`${logoData.publicUrl}?t=${Date.now()}`);
-        } else {
-          // Fallback to default logo
-          setLogoUrl("/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png");
-        }
-        
-        // Fetch custom background if it exists
-        const { data: bgData } = await supabase.storage
-          .from('branding')
-          .getPublicUrl('background.jpg');
-          
-        if (bgData?.publicUrl) {
-          setBackgroundUrl(`${bgData.publicUrl}?t=${Date.now()}`);
-        } else {
-          // Fallback to default background
-          setBackgroundUrl("/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png");
-        }
-      } catch (error) {
-        console.error('Error fetching branding assets:', error);
-        // Set fallbacks if error occurs
-        setLogoUrl("/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png");
-        setBackgroundUrl("/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png");
-      }
-    };
-    
-    fetchBrandingAssets();
-  }, []);
+  const { logoUrl, backgroundUrl } = useBrandingAssets();
   
   return (
     <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-indigo-950 items-center justify-center relative overflow-hidden">
