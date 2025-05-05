@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -78,7 +79,7 @@ export function useGoalsState() {
   }, [fetchGoals]);
 
   // Function to add a new goal
-  const addGoal = async (values: GoalFormValues & { user_id: string; has_collaborators?: boolean }) => {
+  const addGoal = async (values: GoalFormValues & { user_id: string; has_collaborators: boolean }) => {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
