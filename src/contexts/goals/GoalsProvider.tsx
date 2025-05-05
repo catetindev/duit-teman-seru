@@ -1,11 +1,11 @@
 
-import React, { createContext, useContext, ReactNode, useMemo, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { Goal } from '@/hooks/goals/types';
 import { useGoals } from '@/hooks/goals/useGoals';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 import { useToast } from '@/hooks/use-toast';
-import { GoalsContextType } from './types';
+import { GoalsContextType, SortBy, SortDirection, FilterBy } from './types';
 import { filterAndSortGoals } from './goalsUtils';
 import { useGoalOperations } from './goalOperations';
 import { useLocation } from 'react-router-dom';
@@ -40,7 +40,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Memoize the filtered goals to prevent render loops
   const filteredAndSortedGoals = useMemo(() => {
-    return filterAndSortGoals(goals || [], state.filterBy, state.sortBy, state.sortDirection, calculateProgress);
+    return filterAndSortGoals(goals || [], state.filterBy, state.sortBy as SortBy, state.sortDirection as SortDirection, calculateProgress);
   }, [goals, state.filterBy, state.sortBy, state.sortDirection, calculateProgress]);
   
   // Get goal operations
@@ -57,7 +57,6 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsEditDialogOpen: state.setIsEditDialogOpen,
     setIsDeleteDialogOpen: state.setIsDeleteDialogOpen,
     setSelectedGoal: state.setSelectedGoal,
-    setGoalToDelete: state.setGoalToDelete,
     setIsCollaborateDialogOpen: state.setIsCollaborateDialogOpen,
     setGoalCollaborators: state.setGoalCollaborators,
     fetchGoals,
@@ -120,16 +119,15 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, [user, addGoal, toast, state]);
 
   // Memoize the context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => ({
+  const contextValue = useMemo((): GoalsContextType => ({
     goals,
     loading,
     error,
     selectedGoal: state.selectedGoal,
-    goalToDelete: state.goalToDelete,
     isSubmitting: state.isSubmitting,
-    sortBy: state.sortBy,
-    sortDirection: state.sortDirection,
-    filterBy: state.filterBy,
+    sortBy: state.sortBy as SortBy,
+    sortDirection: state.sortDirection as SortDirection,
+    filterBy: state.filterBy as FilterBy,
     goalCollaborators: state.goalCollaborators,
     filteredAndSortedGoals,
     isAddDialogOpen: state.isAddDialogOpen,
@@ -142,7 +140,6 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsEditDialogOpen: state.setIsEditDialogOpen,
     setIsCollaborateDialogOpen: state.setIsCollaborateDialogOpen,
     setIsDeleteDialogOpen: state.setIsDeleteDialogOpen,
-    setGoalToDelete: state.setGoalToDelete,
     setSortBy: state.setSortBy,
     setSortDirection: state.setSortDirection,
     setFilterBy: state.setFilterBy,

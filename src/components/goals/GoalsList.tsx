@@ -2,7 +2,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import GoalCard from '../ui/GoalCard';
-import { Button } from '../ui/button';
 
 interface Goal {
   id: string;
@@ -19,7 +18,7 @@ interface GoalsListProps {
   formatCurrency: (amount: number, currency: 'IDR' | 'USD') => string;
   calculateProgress: (goal: Goal) => number;
   onEdit: (goal: Goal) => void;
-  onDelete: (goal: Goal) => void; // Changed to accept goal directly
+  onDelete: (goal: Goal) => void;
   onCollaborate: (goal: Goal) => void;
   isPremium: boolean;
 }

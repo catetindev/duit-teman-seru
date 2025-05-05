@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -58,7 +57,7 @@ export default function BudgetForm({
   onSubmit,
   selectedBudget,
 }: BudgetFormProps) {
-  const form = useForm<z.infer<typeof budgetFormSchema>>({
+  const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetFormSchema),
     defaultValues: {
       category: selectedBudget?.category || "",
@@ -86,7 +85,7 @@ export default function BudgetForm({
 
   const isSubmitting = form.formState.isSubmitting;
   
-  async function handleSubmit(values: z.infer<typeof budgetFormSchema>) {
+  async function handleSubmit(values: BudgetFormValues) {
     await onSubmit(values);
     onOpenChange(false);
     form.reset();

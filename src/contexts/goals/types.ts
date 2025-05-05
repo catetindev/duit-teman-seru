@@ -2,20 +2,30 @@
 import { Goal, Collaborator } from '@/hooks/goals/types';
 import { GoalFormData } from '@/components/goals/AddGoalDialog';
 
-export type SortOption = 'progress' | 'amount' | 'date' | 'title';
+export type SortBy = 'target_date' | 'progress' | 'target_amount' | 'title';
 export type SortDirection = 'asc' | 'desc';
-export type FilterOption = 'all' | 'completed' | 'incomplete' | 'noDate';
+export type FilterBy = 'all' | 'collaborative' | 'personal';
+
+export interface GoalFormValues {
+  title: string;
+  target_amount: number;
+  saved_amount?: number;
+  target_date?: string;
+  currency: 'IDR' | 'USD';
+  emoji?: string;
+}
+
+export type ValidCurrency = 'IDR' | 'USD';
 
 export interface GoalsContextType {
   goals: Goal[];
   loading: boolean;
   error: string | null;
   selectedGoal: Goal | null;
-  goalToDelete: string | null;
   isSubmitting: boolean;
-  sortBy: SortOption;
+  sortBy: SortBy;
   sortDirection: SortDirection;
-  filterBy: FilterOption;
+  filterBy: FilterBy;
   goalCollaborators: Collaborator[];
   filteredAndSortedGoals: Goal[];
   
@@ -32,16 +42,15 @@ export interface GoalsContextType {
   setIsEditDialogOpen: (isOpen: boolean) => void;
   setIsCollaborateDialogOpen: (isOpen: boolean) => void;
   setIsDeleteDialogOpen: (isOpen: boolean) => void;
-  setGoalToDelete: (goalId: string | null) => void;
-  setSortBy: (option: SortOption) => void;
+  setSortBy: (option: SortBy) => void;
   setSortDirection: (direction: SortDirection) => void;
-  setFilterBy: (filter: FilterOption) => void;
+  setFilterBy: (filter: FilterBy) => void;
   
   // Goal operations
   handleAddGoal: (goalData: GoalFormData) => Promise<void>;
   handleEditGoal: (goal: Goal) => void;
   handleDeleteGoal: (id: string) => void;
-  confirmDeleteGoal: () => Promise<void>;
+  confirmDeleteGoal: () => void;
   updateGoalHandler: (goalData: GoalFormData) => Promise<void>;
   openCollaborationDialog: (goal: Goal) => Promise<void>;
   handleInviteCollaborator: (email: string) => Promise<void>;
@@ -49,5 +58,5 @@ export interface GoalsContextType {
   
   // Utility methods
   formatCurrency: (amount: number, currency: 'IDR' | 'USD') => string;
-  calculateProgress: (saved: number, target: number) => number;
+  calculateProgress: (goal: Goal) => number;
 }

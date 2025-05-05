@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -122,7 +121,7 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
             <GoalCard
               key={goal.id}
               id={goal.id}
-              name={goal.title}
+              title={goal.title}
               target={goal.target_amount}
               current={goal.saved_amount}
               currency={goal.currency}

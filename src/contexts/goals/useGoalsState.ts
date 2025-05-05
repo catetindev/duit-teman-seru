@@ -2,11 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
-import { Goal, GoalFormValues, ValidCurrency, SortBy, SortDirection, FilterBy } from './types';
-import { Database } from '@/integrations/supabase/types';
-
-type GoalType = Database['public']['Tables']['goals']['Row'];
-type CollaboratorType = Database['public']['Tables']['goal_collaborators']['Row'];
+import { Goal } from '@/hooks/goals/types';
+import { SortBy, SortDirection, FilterBy, GoalFormValues } from './types';
 
 // Define a custom hook to manage goals state
 export function useGoalsState() {
@@ -19,14 +16,14 @@ export function useGoalsState() {
   const [isCollaborateDialogOpen, setIsCollaborateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [goalCollaborators, setGoalCollaborators] = useState<CollaboratorType[]>([]);
+  const [goalCollaborators, setGoalCollaborators] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>('target_date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [filterBy, setFilterBy] = useState<FilterBy>('all');
 
   // Function to format currency
-  const formatCurrency = (amount: number, currency: ValidCurrency) => {
+  const formatCurrency = (amount: number, currency: 'IDR' | 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
@@ -43,8 +40,9 @@ export function useGoalsState() {
   const fetchGoals = useCallback(async () => {
     setLoading(true);
     try {
+      // Use savings_goals table instead of goals
       const { data, error } = await supabase
-        .from('goals')
+        .from('savings_goals')
         .select('*')
         .order(sortBy, { ascending: sortDirection === 'asc' });
 
@@ -59,9 +57,9 @@ export function useGoalsState() {
         target_amount: goal.target_amount,
         saved_amount: goal.saved_amount,
         target_date: goal.target_date,
-        currency: goal.currency as ValidCurrency,
+        currency: goal.currency as 'IDR' | 'USD',
         user_id: goal.user_id,
-        has_collaborators: goal.has_collaborators,
+        emoji: goal.emoji
       }));
 
       setGoals(fetchedGoals);
@@ -89,14 +87,14 @@ export function useGoalsState() {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
-        .from('goals')
+        .from('savings_goals')
         .insert([
           {
             id: uuidv4(),
             title: values.title,
             target_amount: values.target_amount,
-            saved_amount: values.saved_amount,
-            target_date: values.target_date,
+            saved_amount: values.saved_amount || 0,
+            target_date: values.target_date || null,
             currency: values.currency,
           },
         ])
@@ -113,9 +111,9 @@ export function useGoalsState() {
         target_amount: data[0].target_amount,
         saved_amount: data[0].saved_amount,
         target_date: data[0].target_date,
-        currency: data[0].currency as ValidCurrency,
+        currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
-        has_collaborators: data[0].has_collaborators,
+        emoji: data[0].emoji
       };
 
       setGoals((prevGoals) => [...prevGoals, newGoal]);
@@ -140,12 +138,12 @@ export function useGoalsState() {
     try {
       setIsSubmitting(true);
       const { data, error } = await supabase
-        .from('goals')
+        .from('savings_goals')
         .update({
           title: values.title,
           target_amount: values.target_amount,
-          saved_amount: values.saved_amount,
-          target_date: values.target_date,
+          saved_amount: values.saved_amount || 0,
+          target_date: values.target_date || null,
           currency: values.currency,
         })
         .eq('id', goalId)
@@ -162,9 +160,9 @@ export function useGoalsState() {
         target_amount: data[0].target_amount,
         saved_amount: data[0].saved_amount,
         target_date: data[0].target_date,
-        currency: data[0].currency as ValidCurrency,
+        currency: data[0].currency as 'IDR' | 'USD',
         user_id: data[0].user_id,
-        has_collaborators: data[0].has_collaborators,
+        emoji: data[0].emoji
       };
 
       setGoals((prevGoals) =>
@@ -215,7 +213,7 @@ export function useGoalsState() {
   const deleteGoal = async (goalId: string) => {
     try {
       const { error } = await supabase
-        .from('goals')
+        .from('savings_goals')
         .delete()
         .eq('id', goalId);
 
@@ -276,7 +274,9 @@ export function useGoalsState() {
   };
 
   // Function to handle inviting a collaborator
-  const handleInviteCollaborator = async (goalId: string, email: string) => {
+  const handleInviteCollaborator = async (email: string) => {
+    if (!selectedGoal) return;
+    
     try {
       setIsSubmitting(true);
       // Check if the user with the given email exists
@@ -299,7 +299,7 @@ export function useGoalsState() {
       const { data: existingCollaborators, error: collabError } = await supabase
         .from('goal_collaborators')
         .select('*')
-        .eq('goal_id', goalId)
+        .eq('goal_id', selectedGoal.id)
         .eq('user_id', user.id);
 
       if (collabError) {
@@ -315,7 +315,7 @@ export function useGoalsState() {
         .from('goal_collaborators')
         .insert([
           {
-            goal_id: goalId,
+            goal_id: selectedGoal.id,
             user_id: user.id,
           },
         ]);
@@ -328,7 +328,7 @@ export function useGoalsState() {
       setGoalCollaborators((prevCollaborators) => [
         ...prevCollaborators,
         {
-          goal_id: goalId,
+          goal_id: selectedGoal.id,
           user_id: user.id,
         },
       ]);
@@ -349,13 +349,15 @@ export function useGoalsState() {
   };
 
   // Function to handle removing a collaborator
-  const handleRemoveCollaborator = async (goalId: string, userId: string) => {
+  const handleRemoveCollaborator = async (userId: string) => {
+    if (!selectedGoal) return;
+    
     try {
       setIsSubmitting(true);
       const { error } = await supabase
         .from('goal_collaborators')
         .delete()
-        .eq('goal_id', goalId)
+        .eq('goal_id', selectedGoal.id)
         .eq('user_id', userId);
 
       if (error) {
@@ -396,8 +398,8 @@ export function useGoalsState() {
   // Function to sort goals
   const sortGoals = (goalsToSort: Goal[]) => {
     return [...goalsToSort].sort((a, b) => {
-      const aValue = a[sortBy];
-      const bValue = b[sortBy];
+      const aValue = a[sortBy as keyof Goal];
+      const bValue = b[sortBy as keyof Goal];
 
       if (aValue < bValue) {
         return sortDirection === 'asc' ? -1 : 1;
@@ -412,7 +414,7 @@ export function useGoalsState() {
   // Function to get filtered and sorted goals
   const filteredAndSortedGoals = sortGoals(filteredGoals);
 
-  // Replaced confirmDeleteGoal with direct delete function
+  // Function for direct delete
   const confirmDeleteGoal = () => {
     if (selectedGoal) {
       handleDeleteGoal(selectedGoal.id);
@@ -452,10 +454,10 @@ export function useGoalsState() {
     formatCurrency,
     calculateProgress,
     handleEditGoal,
-    handleDeleteGoal, // Add this function to directly delete without confirmation
+    handleDeleteGoal,
     openCollaborationDialog,
-    handleAddGoal,
-    updateGoalHandler,
+    addGoal,
+    updateGoal,
     handleInviteCollaborator,
     handleRemoveCollaborator,
     confirmDeleteGoal,
