@@ -84,7 +84,7 @@ const GoalsContent = ({ isPremium }: { isPremium: boolean }) => {
   }, [setIsCollaborateDialogOpen]);
 
   const handleDeleteDialogClose = useCallback(() => {
-    setIsDeleteDialogOpen(false);
+    setIsDeleteDialogClose(false);
   }, [setIsDeleteDialogOpen]);
 
   if (loading) {
