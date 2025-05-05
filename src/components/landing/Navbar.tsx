@@ -1,22 +1,20 @@
-
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/hooks/useLanguage';
-
 const Navbar = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { t } = useLanguage();
+  const {
+    t
+  } = useLanguage();
 
   // Navigation functions
   const goToLogin = () => navigate('/login');
-  const goToPricing = () => navigate('/pricing'); 
-
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-slate-100 dark:border-slate-800">
+  const goToPricing = () => navigate('/pricing');
+  return <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-slate-100 dark:border-slate-800">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
@@ -25,12 +23,8 @@ const Navbar = () => {
           
           {/* Navigation Links - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-6">
-            <Link to="/about" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-              About
-            </Link>
-            <Link to="/contact" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-              Contact
-            </Link>
+            
+            
           </div>
         </div>
         
@@ -44,8 +38,6 @@ const Navbar = () => {
           </Button>
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Navbar;
