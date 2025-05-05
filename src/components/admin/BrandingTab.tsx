@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,10 +82,14 @@ const BrandingTab = () => {
         description: "Your changes have been saved and will be reflected throughout the app",
       });
       
-      // Force reload to see changes
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // Dispatch a custom event to notify all components that branding has been updated
+      window.dispatchEvent(new CustomEvent('branding-updated'));
+      
+      // Reset file selections
+      setLogoFile(null);
+      setBackgroundPreview(null);
+      setBackgroundFile(null);
+      setLogoPreview(null);
       
     } catch (error: any) {
       toast({

@@ -15,6 +15,14 @@ export const useBrandingAssets = (
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  // This key will change to force a reload of assets
+  const [cacheKey, setCacheKey] = useState<string>(Date.now().toString());
+
+  // Function to force refresh the assets
+  const refreshAssets = () => {
+    setCacheKey(Date.now().toString());
+  };
 
   useEffect(() => {
     const fetchBrandingAssets = async () => {
@@ -27,7 +35,7 @@ export const useBrandingAssets = (
           .getPublicUrl('logo.png');
           
         if (logoData?.publicUrl) {
-          setLogoUrl(`${logoData.publicUrl}?t=${Date.now()}`);
+          setLogoUrl(`${logoData.publicUrl}?t=${cacheKey}`);
         } else {
           // Fallback to default logo
           setLogoUrl(defaultLogoUrl);
@@ -39,7 +47,7 @@ export const useBrandingAssets = (
           .getPublicUrl('background.jpg');
           
         if (bgData?.publicUrl) {
-          setBackgroundUrl(`${bgData.publicUrl}?t=${Date.now()}`);
+          setBackgroundUrl(`${bgData.publicUrl}?t=${cacheKey}`);
         } else {
           // Fallback to default background
           setBackgroundUrl(defaultBackgroundUrl);
@@ -55,7 +63,14 @@ export const useBrandingAssets = (
     };
     
     fetchBrandingAssets();
-  }, [defaultLogoUrl, defaultBackgroundUrl]);
+    
+    // Set up a listener for branding-updated events
+    window.addEventListener('branding-updated', refreshAssets);
+    
+    return () => {
+      window.removeEventListener('branding-updated', refreshAssets);
+    };
+  }, [defaultLogoUrl, defaultBackgroundUrl, cacheKey]);
 
   return { logoUrl, backgroundUrl, isLoading };
 };
