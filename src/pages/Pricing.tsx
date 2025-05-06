@@ -250,7 +250,7 @@ const Pricing = () => {
       
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 text-center text-gray-500 mt-12">
-        <p>&copy; 2025 DuitTemanseru. {t('landing.footer.allRights')}</p>
+        <p>&copy; 2025 Catatyo. All rights reserved.</p>
       </footer>
     </div>
   );
