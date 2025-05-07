@@ -28,22 +28,13 @@ const MobileAppSection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="outline" size="lg" className="border-[#28e57d] text-[#28e57d] hover:bg-[#28e57d]/5 hover:border-[#28e57d] rounded-xl px-6">
-                <img src="/lovable-uploads/9990595e-be96-4dac-9fce-6ee0303ee188.png" alt="App Store" className="h-7 mr-2" />
-                App Store
-              </Button>
               
-              <Button variant="outline" size="lg" className="border-[#28e57d] text-[#28e57d] hover:bg-[#28e57d]/5 hover:border-[#28e57d] rounded-xl px-6">
-                <img src="/lovable-uploads/9dfb4bc1-064f-4b55-b196-360715fddf7f.png" alt="Google Play" className="h-7 mr-2" />
-                Google Play
-              </Button>
+              
+              
             </div>
             
             <div className="mt-8 text-gray-500 dark:text-gray-400 text-sm">
-              <p className="flex items-center">
-                <DownloadCloud className="h-4 w-4 mr-2" />
-                10k+ downloads dengan rating 4.9/5
-              </p>
+              
             </div>
           </motion.div>
           
