@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -66,6 +67,7 @@ const Login = () => {
     setError(null);
     
     try {
+      // Use window.location.origin to get the current domain instead of hardcoded localhost
       const redirectTo = `${window.location.origin}/dashboard`;
       console.log('Redirecting to:', redirectTo);
       
