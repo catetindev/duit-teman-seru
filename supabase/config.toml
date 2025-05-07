@@ -1,36 +1,37 @@
 
-project_id = "yfrknhddxvixxqfgggdy"
+project_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
 
 [api]
-enabled = true
+# Port to use for the API URL.
 port = 54321
-schemas = ["public", "storage"]
+# Enable JWT verification for API requests
+enabled = true
 
 [db]
+# Port to use for the local database URL.
 port = 54322
-shadow_port = 54320
-major_version = 15
 
 [studio]
-enabled = true
+# Port to use for Supabase Studio.
 port = 54323
-api_url = "http://localhost"
 
+# Email testing server. Emails sent with the local dev setup are not actually delivered, rather they
+# are captured and can be viewed from the configured port.
 [inbucket]
-enabled = true
+# Port to use for the email testing server web interface.
 port = 54324
 
-[auth]
-enabled = true
-port = 9999
-
 [storage]
-enabled = true
+# Port to use for the storage server.
+port = 54325
+
+[auth]
+# Port to use for the auth server.
+port = 54326
 
 [edge_functions]
-[edge_functions.goal_collaborators]
+# Port to use for the Edge Functions server.
+port = 54327
 
-[edge_functions.goal_helpers]
-
-[edge_functions.check_expired_invitations]
+[functions.create-payment]
 verify_jwt = false

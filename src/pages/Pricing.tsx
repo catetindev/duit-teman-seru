@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -9,14 +8,56 @@ import { motion } from 'framer-motion';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/contexts/AuthContext';
+import { initiatePayment } from '@/utils/midtransPayment';
+import { toast } from '@/components/ui/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 const Pricing = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   
   const goToSignup = () => {
     navigate('/signup');
+  };
+  
+  const handleUpgrade = async () => {
+    if (!user) {
+      // If user is not logged in, redirect to signup
+      navigate('/signup');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const price = billingCycle === 'monthly' ? 29000 : 290000;
+      const itemName = `Catatyo Premium (${billingCycle === 'monthly' ? 'Monthly' : 'Yearly'})`;
+      
+      const paymentUrl = await initiatePayment({
+        id: user.id,
+        amount: price,
+        itemName,
+        customerName: user.user_metadata?.name || '',
+        customerEmail: user.email || '',
+        billingCycle,
+      });
+      
+      // Redirect to Midtrans payment page
+      window.location.href = paymentUrl;
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: "Failed to process payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Animation variants
@@ -219,10 +260,11 @@ const Pricing = () => {
                 
                 <CardFooter className="pt-4">
                   <Button 
-                    onClick={goToSignup} 
+                    onClick={handleUpgrade} 
+                    disabled={isLoading}
                     className="w-full bg-[#28e57d] hover:bg-[#28e57d]/90 text-white transition-all rounded-lg py-6"
                   >
-                    Upgrade Sekarang
+                    {isLoading ? 'Processing...' : 'Upgrade Sekarang'}
                   </Button>
                 </CardFooter>
               </Card>
