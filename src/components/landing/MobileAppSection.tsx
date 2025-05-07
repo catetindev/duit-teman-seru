@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { DownloadCloud } from 'lucide-react';
@@ -52,7 +51,7 @@ const MobileAppSection = () => {
         }} className="order-1 md:order-2 flex justify-center">
             <div className="relative">
               <div className="rounded-[3rem] p-4 w-[380px] mx-auto bg-gray-900/0">
-                <img src="/lovable-uploads/b2e023e4-8b66-4848-89b7-af73cf396e8e.png" alt="Mobile app illustration" className="w-full h-auto" />
+                <img src="/lovable-uploads/b2e023e4-8b66-4848-89b7-af73cf396e8e.png" alt="Mobile app illustration" className="w-full h-auto 380px to 420px" />
               </div>
             </div>
           </motion.div>
