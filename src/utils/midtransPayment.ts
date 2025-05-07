@@ -21,7 +21,8 @@ export async function initiatePayment(paymentDetails: PaymentDetails): Promise<s
     });
 
     if (!response.ok) {
-      throw new Error('Payment initiation failed');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Payment initiation failed');
     }
 
     const data = await response.json();

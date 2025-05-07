@@ -77,6 +77,23 @@ serve(async (req) => {
       email: customerEmail || "",
     };
 
+    // Set enabled payment methods (QRIS, e-wallets, bank transfers)
+    const enabledPayments = [
+      "credit_card", 
+      "gopay", 
+      "shopeepay", 
+      "qris",
+      "bank_transfer", 
+      "bca_va", 
+      "bni_va", 
+      "bri_va",
+      "permata_va",
+      "other_va",
+      "danamon_online",
+      "ovo",
+      "dana"
+    ];
+
     // Create Midtrans Snap API request
     const snapApiUrl = midtransConfig.isProduction
       ? "https://app.midtrans.com/snap/v1/transactions"
@@ -93,6 +110,11 @@ serve(async (req) => {
         transaction_details: transactionDetails,
         item_details: itemDetails,
         customer_details: customerDetails,
+        enabled_payments: enabledPayments,
+        callbacks: {
+          finish: `${supabaseUrl}/payment-success?order_id=${transactionDetails.order_id}`,
+          error: `${supabaseUrl}/payment-failed?order_id=${transactionDetails.order_id}`,
+        },
       }),
     });
 

@@ -29,9 +29,11 @@ const PremiumPlan = ({ billingCycle }: PremiumPlanProps) => {
     setIsLoading(true);
     
     try {
+      // Calculate price based on billing cycle
       const price = billingCycle === 'monthly' ? 29000 : 290000;
       const itemName = `Catatyo Premium (${billingCycle === 'monthly' ? 'Monthly' : 'Yearly'})`;
       
+      // Call the payment API
       const paymentUrl = await initiatePayment({
         id: user.id,
         amount: price,
