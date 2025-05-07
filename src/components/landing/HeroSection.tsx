@@ -21,7 +21,7 @@ const HeroSection = () => {
       }} transition={{
         duration: 0.5
       }} className="mb-6">
-          <h1 className="md:text-4xl font-bold mb-4 leading-tight md:leading-tight my-[51px] text-4xl">
+          <h1 className="font-bold mb-4 leading-tight md:leading-tight my-[51px] text-4xl md:text-5xl">
             Catat Keuangan Makin Gampang & Menyenangkan!
           </h1>
           <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 mb-6 my-0 mx-0">
