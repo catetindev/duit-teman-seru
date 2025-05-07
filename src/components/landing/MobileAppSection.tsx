@@ -21,7 +21,7 @@ const MobileAppSection = () => {
         }} viewport={{
           once: true
         }} className="order-2 md:order-1">
-            <h2 className="text-2xl md:text-4xl font-bold mb-6">Lebih Fun Lagi, dan Bisa di Bawa Kemana-mana!</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-6">Sengaja Kita Bikin Gampang dan Nyenengin! </h2>
             <p className="text-gray-600 dark:text-gray-300 text-lg mb-8">Semuanya emang didesain biar kamu ngerasa nyaman dan gampang dipake kapan pun, di mana pun. No ribet-ribet!</p>
             
             <div className="flex flex-col sm:flex-row gap-4">
