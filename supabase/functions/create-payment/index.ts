@@ -112,8 +112,8 @@ serve(async (req) => {
         customer_details: customerDetails,
         enabled_payments: enabledPayments,
         callbacks: {
-          finish: `${supabaseUrl}/payment-success?order_id=${transactionDetails.order_id}`,
-          error: `${supabaseUrl}/payment-failed?order_id=${transactionDetails.order_id}`,
+          finish: `${supabaseUrl}/dashboard?payment_status=success&order_id=${transactionDetails.order_id}`,
+          error: `${supabaseUrl}/pricing?payment_status=error&order_id=${transactionDetails.order_id}`,
         },
       }),
     });

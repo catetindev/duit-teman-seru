@@ -20,12 +20,6 @@ const PremiumPlan = ({ billingCycle }: PremiumPlanProps) => {
   const navigate = useNavigate();
   
   const handleUpgrade = async () => {
-    if (!user) {
-      // If user is not logged in, redirect to signup
-      navigate('/signup');
-      return;
-    }
-    
     setIsLoading(true);
     
     try {
@@ -33,13 +27,13 @@ const PremiumPlan = ({ billingCycle }: PremiumPlanProps) => {
       const price = billingCycle === 'monthly' ? 29000 : 290000;
       const itemName = `Catatyo Premium (${billingCycle === 'monthly' ? 'Monthly' : 'Yearly'})`;
       
-      // Call the payment API
+      // Call the payment API directly without checking login status
       const paymentUrl = await initiatePayment({
-        id: user.id,
+        id: user?.id || `guest-${Date.now()}`, // Use a guest ID if no user
         amount: price,
         itemName,
-        customerName: user.user_metadata?.name || '',
-        customerEmail: user.email || '',
+        customerName: user?.user_metadata?.name || '',
+        customerEmail: user?.email || '',
         billingCycle,
       });
       
@@ -47,11 +41,22 @@ const PremiumPlan = ({ billingCycle }: PremiumPlanProps) => {
       window.location.href = paymentUrl;
     } catch (error) {
       console.error('Payment error:', error);
-      toast({
-        title: "Payment Error",
-        description: "Failed to process payment. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Check if error is due to authentication
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please login or create an account to continue with payment.",
+          variant: "default",
+        });
+        navigate('/signup', { state: { redirectAfter: '/pricing' } });
+      } else {
+        toast({
+          title: "Payment Error",
+          description: "Failed to process payment. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
