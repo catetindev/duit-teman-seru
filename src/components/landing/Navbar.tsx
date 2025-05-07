@@ -1,24 +1,41 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useBrandingAssets } from '@/hooks/useBrandingAssets';
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { t } = useLanguage();
   const { logoUrl } = useBrandingAssets();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Navigation functions
   const goToLogin = () => navigate('/login');
   const goToPricing = () => navigate('/pricing');
+  const goToSignup = () => navigate('/signup');
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-slate-100 dark:border-slate-800">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-sm' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
@@ -31,22 +48,65 @@ const Navbar = () => {
           
           {/* Navigation Links - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-6">
-            
-            
-            
+            {/* Add navigation links here if needed */}
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-3">
           <LanguageToggle />
-          <Button onClick={goToLogin} variant="outline" size={isMobile ? "sm" : "default"} className={`transition-all hover:scale-[1.03] ${isMobile ? "px-2" : ""}`}>
+          <Button onClick={goToLogin} variant="outline" className="transition-all hover:scale-[1.03]">
             {t('auth.login')}
           </Button>
-          <Button onClick={goToPricing} size={isMobile ? "sm" : "default"} className={`border border-[#28e57d] bg-white text-black dark:bg-transparent dark:text-white hover:bg-[#28e57d]/10 hover:scale-[1.03] transition-all font-medium ${isMobile ? "px-2" : ""}`}>
+          <Button 
+            onClick={goToSignup} 
+            className="bg-[#28e57d] hover:bg-[#28e57d]/90 text-white hover:scale-[1.03] transition-all font-medium"
+          >
             {t('auth.signup')}
           </Button>
         </div>
+        
+        {/* Mobile Navigation */}
+        <div className="md:hidden flex items-center gap-2">
+          <LanguageToggle />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="ml-2"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </Button>
+        </div>
       </div>
+      
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg p-4">
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={goToLogin} 
+              variant="outline" 
+              className="w-full justify-start"
+            >
+              {t('auth.login')}
+            </Button>
+            <Button 
+              onClick={goToSignup}
+              className="bg-[#28e57d] hover:bg-[#28e57d]/90 text-white w-full justify-start"
+            >
+              {t('auth.signup')}
+            </Button>
+            <Button 
+              onClick={goToPricing}
+              variant="ghost"
+              className="w-full justify-start"
+            >
+              Lihat Harga
+            </Button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
