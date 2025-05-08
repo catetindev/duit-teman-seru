@@ -68,7 +68,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ logoUrl }) => {
         throw error;
       }
       
-      // Our database trigger will automatically create the profile from the auth data
+      console.log('Sign up data:', data);
       
       // If signup successful, show success message and redirect
       toast.success(t('auth.signupSuccess') || "Sign up successful! Redirecting to dashboard...");
