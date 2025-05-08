@@ -52,7 +52,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ logoUrl }) => {
     setIsLoading(true);
     
     try {
-      // Create the user with Supabase auth
+      // Create the user with Supabase auth - adding full_name to user metadata
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -67,6 +67,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ logoUrl }) => {
       if (error) {
         throw error;
       }
+      
+      // Our database trigger will automatically create the profile from the auth data
       
       // If signup successful, show success message and redirect
       toast.success(t('auth.signupSuccess') || "Sign up successful! Redirecting to dashboard...");

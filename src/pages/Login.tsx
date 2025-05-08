@@ -67,7 +67,7 @@ const Login = () => {
     setError(null);
     
     try {
-      // Use window.location.origin to get the current domain instead of hardcoded localhost
+      // Use current origin for redirectTo to ensure proper redirect back
       const redirectTo = `${window.location.origin}/dashboard`;
       console.log('Redirecting to:', redirectTo);
       
