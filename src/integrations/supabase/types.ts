@@ -166,6 +166,42 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_records: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          id: string
+          payment_method: string | null
+          reference_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          reference_id: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          reference_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -174,6 +210,7 @@ export type Database = {
           id: string
           role: Database["public"]["Enums"]["user_role"]
           subscription_expiry: string | null
+          subscription_id: string | null
         }
         Insert: {
           created_at?: string
@@ -182,6 +219,7 @@ export type Database = {
           id: string
           role?: Database["public"]["Enums"]["user_role"]
           subscription_expiry?: string | null
+          subscription_id?: string | null
         }
         Update: {
           created_at?: string
@@ -190,6 +228,7 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
           subscription_expiry?: string | null
+          subscription_id?: string | null
         }
         Relationships: []
       }

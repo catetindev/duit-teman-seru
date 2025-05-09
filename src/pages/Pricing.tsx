@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
+import { usePayment } from '@/hooks/usePayment';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PenLine, ChartBar, Target, Rainbow, Check } from 'lucide-react';
@@ -9,14 +11,52 @@ import { motion } from 'framer-motion';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Pricing = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { user, isPremium } = useAuth();
+  const { createPayment, isLoading } = usePayment();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   
   const goToSignup = () => {
     navigate('/signup');
+  };
+  
+  const handlePremiumUpgrade = async () => {
+    // If user is already premium, show toast
+    if (isPremium) {
+      toast.info('You already have a premium account!');
+      navigate('/dashboard');
+      return;
+    }
+    
+    // If user is not logged in, show login dialog
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
+    
+    try {
+      const result = await createPayment(billingCycle);
+      
+      if (result.success && result.paymentUrl) {
+        // Redirect to payment page
+        window.location.href = result.paymentUrl;
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Failed to process payment. Please try again.');
+    }
   };
   
   // Animation variants
@@ -39,8 +79,14 @@ const Pricing = () => {
           </Link>
           <div className="flex items-center gap-3">
             <LanguageToggle />
-            <Button onClick={() => navigate('/login')} variant="outline" size="sm">{t('auth.login')}</Button>
-            <Button onClick={goToSignup} size="sm" className="border border-[#28e57d] bg-white text-black hover:bg-[#28e57d]/10 hover:scale-[1.03] transition-all">{t('auth.signup')}</Button>
+            {!user ? (
+              <>
+                <Button onClick={() => navigate('/login')} variant="outline" size="sm">{t('auth.login')}</Button>
+                <Button onClick={goToSignup} size="sm" className="border border-[#28e57d] bg-white text-black hover:bg-[#28e57d]/10 hover:scale-[1.03] transition-all">{t('auth.signup')}</Button>
+              </>
+            ) : (
+              <Button onClick={() => navigate('/dashboard')} size="sm">Dashboard</Button>
+            )}
           </div>
         </div>
       </header>
@@ -219,10 +265,11 @@ const Pricing = () => {
                 
                 <CardFooter className="pt-4">
                   <Button 
-                    onClick={goToSignup} 
+                    onClick={handlePremiumUpgrade}
+                    disabled={isLoading || isPremium}
                     className="w-full bg-[#28e57d] hover:bg-[#28e57d]/90 text-white transition-all rounded-lg py-6"
                   >
-                    Upgrade Sekarang
+                    {isLoading ? 'Processing...' : isPremium ? 'Sudah Premium' : 'Upgrade Sekarang'}
                   </Button>
                 </CardFooter>
               </Card>
@@ -247,6 +294,28 @@ const Pricing = () => {
           </motion.div>
         </div>
       </section>
+      
+      {/* Login prompt dialog */}
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Login Required</DialogTitle>
+            <DialogDescription>
+              You need to login before upgrading to premium. Would you like to login now?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setShowLoginDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              navigate('/login', { state: { from: '/pricing' } });
+            }}>
+              Login
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 text-center text-gray-500 mt-12">
