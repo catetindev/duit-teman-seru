@@ -4,19 +4,38 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PenLine, ChartBar, Target, Rainbow, Check } from 'lucide-react';
+import { PenLine, ChartBar, Target, Rainbow, Check, Loader2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Pricing = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   const goToSignup = () => {
     navigate('/signup');
+  };
+  
+  const handleUpgrade = () => {
+    setIsRedirecting(true);
+    
+    // Show toast notification
+    toast({
+      title: "Redirecting to payment",
+      description: "You're being redirected to a secure payment page",
+      duration: 3000,
+    });
+    
+    // Redirect to Mayar payment URL after a short delay
+    setTimeout(() => {
+      window.location.href = 'https://catatyo.myr.id/membership/premium-user';
+    }, 500);
   };
   
   // Animation variants
@@ -218,12 +237,33 @@ const Pricing = () => {
                 </CardContent>
                 
                 <CardFooter className="pt-4">
-                  <Button 
-                    onClick={goToSignup} 
-                    className="w-full bg-[#28e57d] hover:bg-[#28e57d]/90 text-white transition-all rounded-lg py-6"
-                  >
-                    Upgrade Sekarang
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          onClick={handleUpgrade} 
+                          disabled={isRedirecting}
+                          aria-disabled={isRedirecting}
+                          className="w-full bg-[#28e57d] hover:bg-[#28e57d]/90 text-white transition-all rounded-lg py-6 focus:ring-2 focus:ring-[#28e57d]/30"
+                        >
+                          {isRedirecting ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Redirecting...
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-2">
+                              🚀 Upgrade to Premium
+                              <ArrowRight className="h-4 w-4" />
+                            </span>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-gray-800 text-white">
+                        <p>You'll be redirected to a secure payment page</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </CardFooter>
               </Card>
             </motion.div>
