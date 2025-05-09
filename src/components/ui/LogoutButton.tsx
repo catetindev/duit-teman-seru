@@ -26,7 +26,6 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
       await logout();
       
       // Force a complete page reload to ensure all state is cleared
-      // This is more reliable than using React Router navigation
       window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);

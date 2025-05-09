@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { SignupFormHeader } from './signup/SignupFormHeader';
 import { SocialLoginButton } from './signup/SocialLoginButton';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SignupFormProps {
   logoUrl: string | null;
@@ -17,6 +18,7 @@ interface SignupFormProps {
 
 const SignupForm: React.FC<SignupFormProps> = ({ logoUrl }) => {
   const { t } = useLanguage();
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -52,23 +54,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ logoUrl }) => {
     setIsLoading(true);
     
     try {
-      // Create the user with Supabase auth - adding full_name to user metadata
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.name,
-          },
-          emailRedirectTo: `${window.location.origin}/dashboard`
-        }
-      });
+      // Use the signup method from AuthContext that now properly handles full_name
+      const error = await signup(formData.email, formData.password, formData.name);
       
       if (error) {
         throw error;
       }
-      
-      console.log('Sign up data:', data);
       
       // If signup successful, show success message and redirect
       toast.success(t('auth.signupSuccess') || "Sign up successful! Redirecting to dashboard...");

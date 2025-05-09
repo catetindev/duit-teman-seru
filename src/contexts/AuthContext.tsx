@@ -13,7 +13,7 @@ interface AuthContextProps {
   isLoading: boolean;
   profile: any;
   login: (email: string, password?: string) => Promise<any>;
-  signup: (email: string, password?: string) => Promise<any>;
+  signup: (email: string, password?: string, fullName?: string) => Promise<any>;
   logout: () => Promise<void>;
   signOut: () => Promise<void>; // Alias for logout for compatibility
 }
@@ -128,11 +128,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (email: string, password?: string) => {
+  const signup = async (email: string, password?: string, fullName?: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName || '',
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
       });
 
       if (error) {
@@ -140,6 +146,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         toast.error(error.message || "Failed to sign up");
         return error;
       }
+      
+      console.log('Signup successful, user data:', data);
     } catch (error: any) {
       console.error('Signup failed', error);
       toast.error(error.message || "An unexpected error occurred");
