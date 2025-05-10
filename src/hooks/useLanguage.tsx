@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 type Language = 'id' | 'en';
 
@@ -101,6 +102,22 @@ const translations = {
   'transactions.empty': {
     en: 'No transactions yet. Time to add your first one!',
     id: 'Belum ada transaksi. Saatnya tambah yang pertama!'
+  },
+  'transactions.loading': {
+    en: 'Loading your transactions...',
+    id: 'Memuat transaksimu...'
+  },
+  'transactions.deleted': {
+    en: 'Transaction deleted',
+    id: 'Transaksi dihapus'
+  },
+  'transactions.added': {
+    en: 'Transaction added',
+    id: 'Transaksi ditambahkan'
+  },
+  'transactions.updated': {
+    en: 'Transaction updated',
+    id: 'Transaksi diperbarui'
   },
   
   // Budget
@@ -445,6 +462,36 @@ const translations = {
     en: 'Get Premium',
     id: 'Dapatkan Premium'
   },
+  'pricing.upgradeNow': {
+    en: '🚀 Upgrade to Premium',
+    id: '🚀 Upgrade ke Premium'
+  },
+  'pricing.redirecting': {
+    en: 'Redirecting...',
+    id: 'Mengalihkan...'
+  },
+  
+  // Notifications
+  'notifications.title': {
+    en: 'Notifications',
+    id: 'Notifikasi'
+  },
+  'notifications.markAllAsRead': {
+    en: 'Mark all as read',
+    id: 'Tandai semua sudah dibaca'
+  },
+  'notifications.empty': {
+    en: 'No notifications yet',
+    id: 'Belum ada notifikasi'
+  },
+  'notifications.newAnnouncement': {
+    en: 'New announcement from admin',
+    id: 'Pengumuman baru dari admin'
+  },
+  'notifications.loading': {
+    en: 'Loading notifications...',
+    id: 'Memuat notifikasi...'
+  },
   
   // Actions
   'action.save': {
@@ -478,7 +525,20 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 // Define the LanguageProvider as a proper React functional component
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('id'); // Default to Indonesian
+  
+  // Load language preference from localStorage on initial render
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('preferred_language');
+    if (savedLanguage === 'en' || savedLanguage === 'id') {
+      setLanguage(savedLanguage);
+    }
+  }, []);
+  
+  // Save language preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('preferred_language', language);
+  }, [language]);
   
   const t = (key: string): string => {
     if (!translations[key]) {

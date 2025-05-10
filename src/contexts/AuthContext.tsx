@@ -103,6 +103,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUserRole(profile?.role || 'free');
       setIsAdmin(profile?.role === 'admin');
       setIsPremium(profile?.role === 'premium' || profile?.role === 'admin');
+      
+      // Set up real-time subscription to profile changes
+      const channel = supabase
+        .channel(`profile-${userId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${userId}`,
+          },
+          (payload) => {
+            console.log('Profile updated:', payload);
+            const updatedProfile = payload.new;
+            
+            // Check if role has changed
+            if (updatedProfile.role !== profile?.role) {
+              // Show toast notification
+              toast.success(`Your account has been upgraded to ${updatedProfile.role} status!`);
+            }
+            
+            // Update state
+            setProfile(updatedProfile);
+            setUserRole(updatedProfile.role || 'free');
+            setIsAdmin(updatedProfile.role === 'admin');
+            setIsPremium(updatedProfile.role === 'premium' || updatedProfile.role === 'admin');
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     } catch (error) {
       console.error('Error fetching user profile:', error);
     } finally {

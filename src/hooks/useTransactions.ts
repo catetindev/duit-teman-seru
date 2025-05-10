@@ -112,30 +112,83 @@ export const useTransactions = () => {
     return categoryIcons[category.toLowerCase()] || '💸';
   };
   
-  // Fetch transactions initially
+  // Set up real-time transaction subscription
   useEffect(() => {
     if (!user) return;
     
+    // Initial fetch
     fetchTransactions();
     
     // Set up real-time subscription
     const channel = supabase
-      .channel('public:transactions')
+      .channel('transactions-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'transactions',
-          filter: `user_id=eq.${user?.id}`,
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
           console.log('Transaction change detected:', payload);
-          fetchTransactions(); // Refresh data on any change
+          
+          // Handle different types of changes
+          if (payload.eventType === 'INSERT') {
+            // Add new transaction to the list
+            const newTransaction = payload.new;
+            const formattedTransaction = {
+              id: newTransaction.id,
+              type: newTransaction.type as 'income' | 'expense',
+              amount: Number(newTransaction.amount),
+              currency: newTransaction.currency as 'IDR' | 'USD',
+              category: newTransaction.category,
+              description: newTransaction.description || '',
+              date: new Date(newTransaction.date).toISOString().split('T')[0],
+              icon: getCategoryIcon(newTransaction.category)
+            };
+            
+            setTransactions(prev => [formattedTransaction, ...prev]);
+            toast({
+              title: "Transaction Added",
+              description: "Your transaction has been successfully added.",
+            });
+          } 
+          else if (payload.eventType === 'DELETE') {
+            // Remove deleted transaction from the list
+            setTransactions(prev => prev.filter(t => t.id !== payload.old.id));
+            toast({
+              title: "Transaction Deleted",
+              description: "Your transaction has been successfully removed.",
+            });
+          }
+          else if (payload.eventType === 'UPDATE') {
+            // Update the modified transaction in the list
+            const updatedTransaction = payload.new;
+            const formattedTransaction = {
+              id: updatedTransaction.id,
+              type: updatedTransaction.type as 'income' | 'expense',
+              amount: Number(updatedTransaction.amount),
+              currency: updatedTransaction.currency as 'IDR' | 'USD',
+              category: updatedTransaction.category,
+              description: updatedTransaction.description || '',
+              date: new Date(updatedTransaction.date).toISOString().split('T')[0],
+              icon: getCategoryIcon(updatedTransaction.category)
+            };
+            
+            setTransactions(prev => 
+              prev.map(t => t.id === updatedTransaction.id ? formattedTransaction : t)
+            );
+            toast({
+              title: "Transaction Updated",
+              description: "Your transaction has been successfully updated.",
+            });
+          }
         }
       )
       .subscribe();
     
+    // Cleanup function
     return () => {
       supabase.removeChannel(channel);
     };

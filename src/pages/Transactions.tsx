@@ -6,9 +6,11 @@ import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
 import TransactionHeader from '@/components/transactions/TransactionHeader';
 import TransactionLayout from '@/components/transactions/TransactionLayout';
 import { useTransactions } from '@/hooks/useTransactions';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function Transactions() {
   const { isPremium } = useAuth();
+  const { t } = useLanguage();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
   const {
@@ -19,8 +21,7 @@ export default function Transactions() {
     timeFilter,
     setTimeFilter,
     categoryFilter,
-    setCategoryFilter,
-    refreshTransactions
+    setCategoryFilter
   } = useTransactions();
 
   return (
@@ -40,14 +41,14 @@ export default function Transactions() {
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
           isLoading={isLoading}
-          onUpdate={refreshTransactions}
+          onUpdate={() => {}} // The real-time updates handle this now
         />
       </div>
       
       <AddTransactionDialog 
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={refreshTransactions}
+        onTransactionAdded={() => {}} // Real-time updates handle this now
       />
     </DashboardLayout>
   );
