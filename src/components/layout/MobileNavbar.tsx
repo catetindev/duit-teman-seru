@@ -13,7 +13,7 @@ interface MobileNavbarProps {
 
 const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
   const location = useLocation();
-  const { unreadCount } = useNotifications({ userId: 'current' });
+  const { unreadCount } = useNotifications('current');
   
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
