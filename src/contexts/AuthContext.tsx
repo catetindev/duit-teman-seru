@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,9 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Only fetch profile after session change
         if (session?.user) {
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
-          }, 0);
+          fetchUserProfile(session.user.id);
         } else {
           setIsPremium(false);
           setIsAdmin(false);
@@ -95,14 +92,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (profileError) {
         console.error('Error fetching user profile:', profileError);
+        setIsLoading(false);
         return;
       }
 
       console.log('User profile data:', profile);
-      setProfile(profile);
-      setUserRole(profile?.role || 'free');
-      setIsAdmin(profile?.role === 'admin');
-      setIsPremium(profile?.role === 'premium' || profile?.role === 'admin');
+      updateUserState(profile);
       
       // Set up real-time subscription to profile changes
       const channel = supabase
@@ -116,20 +111,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             filter: `id=eq.${userId}`,
           },
           (payload) => {
-            console.log('Profile updated:', payload);
+            console.log('Profile updated in real-time:', payload);
             const updatedProfile = payload.new;
             
             // Check if role has changed
             if (updatedProfile.role !== profile?.role) {
-              // Show toast notification
-              toast.success(`Your account has been upgraded to ${updatedProfile.role} status!`);
+              // Show toast notification with role-specific message
+              if (updatedProfile.role === 'premium') {
+                toast.success('Congratulations! Your account has been upgraded to Premium!', {
+                  duration: 6000,
+                  icon: '🎉'
+                });
+              } else if (updatedProfile.role === 'admin') {
+                toast.success('You now have Admin privileges!', {
+                  duration: 6000,
+                  icon: '✨'
+                });
+              } else if (updatedProfile.role === 'free' && profile?.role !== 'free') {
+                toast.info('Your account status has been updated', {
+                  duration: 5000
+                });
+              }
             }
             
-            // Update state
-            setProfile(updatedProfile);
-            setUserRole(updatedProfile.role || 'free');
-            setIsAdmin(updatedProfile.role === 'admin');
-            setIsPremium(updatedProfile.role === 'premium' || updatedProfile.role === 'admin');
+            // Update state with new profile data
+            updateUserState(updatedProfile);
           }
         )
         .subscribe();
@@ -142,6 +148,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Helper function to update user state based on profile
+  const updateUserState = (profileData: any) => {
+    if (!profileData) return;
+    
+    setProfile(profileData);
+    setUserRole(profileData.role || 'free');
+    setIsAdmin(profileData.role === 'admin');
+    setIsPremium(profileData.role === 'premium' || profileData.role === 'admin');
   };
 
   const login = async (email: string, password?: string) => {
