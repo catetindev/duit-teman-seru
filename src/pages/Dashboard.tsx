@@ -12,11 +12,21 @@ import GoalsSection from '@/components/dashboard/GoalsSection';
 import BadgesSection from '@/components/dashboard/BadgesSection';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { mockBadges } from '@/components/dashboard/DashboardData';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
+import { EntrepreneurDashboard } from '@/components/entrepreneur/EntrepreneurDashboard';
+import { useState } from 'react';
+import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
 
 const Dashboard = () => {
   const { type } = useParams();
   const { isPremium } = useAuth();
   const { t } = useLanguage();
+  const { isEntrepreneurMode } = useEntrepreneurMode();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [transactionCategory, setTransactionCategory] = useState('');
+  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
+  
   const { 
     transactions, 
     goals, 
@@ -25,38 +35,72 @@ const Dashboard = () => {
     refreshData 
   } = useDashboardData();
 
+  const handleAddBusinessIncome = () => {
+    setTransactionType('income');
+    setTransactionCategory('Business');
+    setIsAddDialogOpen(true);
+  };
+
+  const handleAddBusinessExpense = () => {
+    setTransactionType('expense');
+    setTransactionCategory('Business');
+    setIsAddDialogOpen(true);
+  };
+
   return (
     <DashboardLayout isPremium={isPremium}>
-      <DashboardHeader isPremium={isPremium} />
-      
-      <StatCardsSection 
-        stats={stats} 
-        loading={loading.stats} 
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <TransactionsSection 
-            transactions={transactions} 
-            onTransactionAdded={refreshData}
-            loading={loading.transactions} 
-          />
-          
-          {isPremium && <BudgetsSection isPremium={isPremium} />}
-        </div>
-        
-        <div className="space-y-8">
-          {/* Only render GoalsSection when goals are available or loading */}
-          <GoalsSection 
-            goals={goals}
-            isPremium={isPremium}
-            onGoalAdded={refreshData}
-            loading={loading.goals}
-          />
-          
-          {isPremium && <BadgesSection badges={mockBadges} />}
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <DashboardHeader isPremium={isPremium} />
+        {isPremium && <EntrepreneurModeToggle />}
       </div>
+      
+      {isEntrepreneurMode ? (
+        // Entrepreneur Mode Dashboard
+        <EntrepreneurDashboard 
+          onAddIncome={handleAddBusinessIncome}
+          onAddExpense={handleAddBusinessExpense}
+        />
+      ) : (
+        // Regular Dashboard
+        <>
+          <StatCardsSection 
+            stats={stats} 
+            loading={loading.stats} 
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <TransactionsSection 
+                transactions={transactions} 
+                onTransactionAdded={refreshData}
+                loading={loading.transactions} 
+              />
+              
+              {isPremium && <BudgetsSection isPremium={isPremium} />}
+            </div>
+            
+            <div className="space-y-8">
+              {/* Only render GoalsSection when goals are available or loading */}
+              <GoalsSection 
+                goals={goals}
+                isPremium={isPremium}
+                onGoalAdded={refreshData}
+                loading={loading.goals}
+              />
+              
+              {isPremium && <BadgesSection badges={mockBadges} />}
+            </div>
+          </div>
+        </>
+      )}
+
+      <AddTransactionDialog 
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onTransactionAdded={refreshData}
+        initialCategory={transactionCategory}
+        initialType={transactionType}
+      />
     </DashboardLayout>
   );
 };

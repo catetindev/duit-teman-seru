@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +6,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
 import LogoutButton from '@/components/ui/LogoutButton';
 import MobileNavbar from '@/components/layout/MobileNavbar';
-import { BarChart2, LayoutDashboard, PieChart, ArrowDownUp, Target, Settings, Bell, ShieldAlert, MessageSquare } from 'lucide-react';
+import { BarChart2, LayoutDashboard, PieChart, ArrowDownUp, Target, Settings, Bell, ShieldAlert, MessageSquare, Brain } from 'lucide-react';
+import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -64,6 +64,9 @@ const DashboardLayout = ({
                 <div className="flex items-center gap-2">
                   <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-10" />
                 </div>
+                {isPremium && (
+                  <EntrepreneurModeToggle className="mr-2" />
+                )}
               </div>
             </SidebarHeader>
             <SidebarContent>
