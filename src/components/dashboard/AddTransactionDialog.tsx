@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,8 @@ interface AddTransactionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onTransactionAdded: () => void;
+  initialCategory?: string;
+  initialType?: 'income' | 'expense';
 }
 
 const CATEGORIES = [
@@ -26,24 +28,34 @@ const CATEGORIES = [
   { label: 'Bills', value: 'bills', icon: '📄' },
   { label: 'Salary', value: 'salary', icon: '💰' },
   { label: 'Gift', value: 'gift', icon: '🎁' },
+  { label: 'Business', value: 'Business', icon: '💼' },
   { label: 'Other', value: 'other', icon: '📦' }
 ];
 
-const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded }: AddTransactionDialogProps) => {
+const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded, initialCategory = '', initialType = 'expense' }: AddTransactionDialogProps) => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useAuth();
   
   const [transaction, setTransaction] = useState({
-    type: 'expense' as 'income' | 'expense',
+    type: initialType,
     amount: '',
-    category: '',
+    category: initialCategory,
     description: '',
     date: new Date().toISOString().split('T')[0]
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Reset form when initialType or initialCategory changes
+  useEffect(() => {
+    setTransaction(prev => ({
+      ...prev,
+      type: initialType,
+      category: initialCategory
+    }));
+  }, [initialType, initialCategory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,9 +94,9 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded }: AddTransa
       
       // Reset form
       setTransaction({
-        type: 'expense',
+        type: initialType,
         amount: '',
-        category: '',
+        category: initialCategory,
         description: '',
         date: new Date().toISOString().split('T')[0]
       });
@@ -168,7 +180,7 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded }: AddTransa
               <SelectContent>
                 {CATEGORIES.filter(cat => 
                   transaction.type === 'income' ? 
-                    ['salary', 'gift', 'other'].includes(cat.value) : 
+                    ['salary', 'gift', 'Business', 'other'].includes(cat.value) : 
                     !['salary'].includes(cat.value)
                 ).map(category => (
                   <SelectItem key={category.value} value={category.value}>
