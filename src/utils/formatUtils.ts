@@ -33,3 +33,33 @@ export const calculateProgress = (current: number, target: number): number => {
   const progress = (current / target) * 100;
   return Math.min(100, Math.round(progress));
 };
+
+// Format date to a readable string
+export const formatDate = (dateString: string): string => {
+  if (!dateString) return '';
+  
+  const date = new Date(dateString);
+  
+  // Check if date is valid
+  if (isNaN(date.getTime())) return '';
+  
+  // Format based on how recent the date is
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  
+  if (diffInMinutes < 1) {
+    return 'just now';
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes} min ago`;
+  } else if (diffInHours < 24) {
+    return `${diffInHours} hr ago`;
+  } else if (diffInDays < 7) {
+    return `${diffInDays} days ago`;
+  } else {
+    // For older dates, format as MM/DD/YYYY
+    return date.toLocaleDateString();
+  }
+};
