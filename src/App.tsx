@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 import GoalsCollaborationDocs from "./pages/GoalsCollaborationDocs";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Feedback from "./pages/Feedback";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,11 @@ const App = () => (
               <Route path="/notifications" element={
                 <ProtectedRoute>
                   <Notifications />
+                </ProtectedRoute>
+              } />
+              <Route path="/feedback" element={
+                <ProtectedRoute>
+                  <Feedback />
                 </ProtectedRoute>
               } />
               <Route path="/admin" element={

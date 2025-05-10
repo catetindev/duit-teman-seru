@@ -1,0 +1,54 @@
+
+import React from 'react';
+import { useLanguage } from '@/hooks/useLanguage';
+import NotificationItem from './NotificationItem';
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  created_at: string;
+  is_read: boolean;
+}
+
+interface NotificationsListProps {
+  notifications: Notification[];
+  loading: boolean;
+  onMarkAsRead: (id: string) => void;
+}
+
+const NotificationsList = ({ notifications, loading, onMarkAsRead }: NotificationsListProps) => {
+  const { t } = useLanguage();
+  
+  if (loading) {
+    return (
+      <div className="py-8 text-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mx-auto mb-2"></div>
+        <p className="text-sm text-muted-foreground">{t('notifications.loading')}</p>
+      </div>
+    );
+  }
+  
+  if (notifications.length === 0) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-sm text-muted-foreground">{t('notifications.empty')}</p>
+      </div>
+    );
+  }
+  
+  return (
+    <ul>
+      {notifications.map((notification) => (
+        <NotificationItem 
+          key={notification.id} 
+          notification={notification}
+          onMarkAsRead={onMarkAsRead}
+        />
+      ))}
+    </ul>
+  );
+};
+
+export default NotificationsList;

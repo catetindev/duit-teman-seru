@@ -1,0 +1,75 @@
+
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+export const useAuthMethods = () => {
+  const login = async (email: string, password?: string) => {
+    try {
+      const { error } = password
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signInWithOtp({ email });
+
+      if (error) {
+        console.error('Login error:', error);
+        toast.error(error.message || "Failed to login");
+        return error;
+      }
+    } catch (error: any) {
+      console.error('Login failed', error);
+      toast.error(error.message || "An unexpected error occurred");
+      return error;
+    }
+  };
+
+  const signup = async (email: string, password?: string, fullName?: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName || '',
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) {
+        console.error('Signup error:', error);
+        toast.error(error.message || "Failed to sign up");
+        return error;
+      }
+      
+      console.log('Signup successful, user data:', data);
+    } catch (error: any) {
+      console.error('Signup failed', error);
+      toast.error(error.message || "An unexpected error occurred");
+      return error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Show success message
+      toast.success("Logged out successfully");
+      
+      // Return success to allow further actions
+      return Promise.resolve();
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      toast.error(error.message || "Failed to log out");
+      return Promise.reject(error);
+    }
+  };
+
+  return {
+    login,
+    signup,
+    logout,
+    signOut: logout // Alias for compatibility
+  };
+};

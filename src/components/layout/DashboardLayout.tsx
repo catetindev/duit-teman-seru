@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,32 +7,34 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
 import LogoutButton from '@/components/ui/LogoutButton';
 import MobileNavbar from '@/components/layout/MobileNavbar';
-import { BarChart2, LayoutDashboard, PieChart, ArrowDownUp, Target, Settings, Bell, ShieldAlert } from 'lucide-react';
+import { BarChart2, LayoutDashboard, PieChart, ArrowDownUp, Target, Settings, Bell, ShieldAlert, MessageSquare } from 'lucide-react';
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
   isPremium?: boolean;
   isAdmin?: boolean;
 }
+
 const DashboardLayout = ({
   children,
   isPremium,
   isAdmin
 }: DashboardLayoutProps) => {
-  const {
-    t
-  } = useLanguage();
-  const {
-    user,
-    isLoading
-  } = useAuth();
+  const { t } = useLanguage();
+  const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
+
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">
+    return (
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>;
+      </div>
+    );
   }
+
   if (!user) {
-    return <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
         <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-20 mb-8" />
         <h2 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">You need to log in</h2>
         <p className="mb-6 text-center text-gray-600 dark:text-gray-300">Please log in to access the dashboard</p>
@@ -43,15 +46,19 @@ const DashboardLayout = ({
             Sign Up
           </Link>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <SidebarProvider>
+
+  return (
+    <SidebarProvider>
       <div className="min-h-screen flex w-full relative">
         {/* Display Mobile Navbar when on mobile */}
         {isMobile && <MobileNavbar isPremium={isPremium} isAdmin={isAdmin} />}
         
         {/* Desktop Sidebar */}
-        {!isMobile && <Sidebar>
+        {!isMobile && (
+          <Sidebar>
             <SidebarHeader>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
@@ -87,6 +94,9 @@ const DashboardLayout = ({
                   <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
                     Notifications
                   </SidebarNavLink>
+                  <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />}>
+                    Feedback
+                  </SidebarNavLink>
                   <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
                     {t('nav.settings')}
                   </SidebarNavLink>
@@ -101,19 +111,24 @@ const DashboardLayout = ({
                 <LogoutButton variant="outline" className="w-full rounded-full" />
               </div>
             </SidebarFooter>
-          </Sidebar>}
+          </Sidebar>
+        )}
 
         <div className={`flex-1 ${isMobile ? '' : 'ml-64'} transition-all duration-300`}>
           <main className="h-full p-4 md:p-6 lg:p-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10">
             {/* Mobile top and bottom spacing for the navbar */}
-            {isMobile && <>
+            {isMobile && (
+              <>
                 <div className="h-16"></div> {/* Top spacing */}
                  {/* Bottom spacing to avoid content being hidden by bottom navbar */}
-              </>}
+              </>
+            )}
             {children}
           </main>
         </div>
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 };
+
 export default DashboardLayout;
