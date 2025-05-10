@@ -1,10 +1,15 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart2, Bell, LayoutDashboard, MessageSquare, PieChart, Settings, ShieldAlert, Target } from 'lucide-react';
+import { 
+  BarChart2, Bell, LayoutDashboard, MessageSquare, PieChart, 
+  Settings, ShieldAlert, Target, Package, ShoppingCart, 
+  Users, Calculator, FileText, FileBarChart 
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 
 interface MobileNavbarProps {
   isPremium?: boolean;
@@ -14,6 +19,7 @@ interface MobileNavbarProps {
 const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
   const location = useLocation();
   const { unreadCount } = useNotifications('current');
+  const { isEntrepreneurMode } = useEntrepreneurMode();
   
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -61,88 +67,161 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
         </div>
       </div>
       
-      {/* Bottom navbar */}
+      {/* Bottom navbar - display different navigation based on mode */}
       <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t flex items-center justify-between px-4 z-50">
-        <Link 
-          to="/dashboard" 
-          className={cn(
-            "flex flex-1 flex-col items-center justify-center text-xs", 
-            isActive('/dashboard') 
-              ? "text-primary" 
-              : "text-muted-foreground"
-          )}
-        >
-          <LayoutDashboard className="h-5 w-5 mb-1" />
-          Dashboard
-        </Link>
-        
-        <Link 
-          to="/transactions" 
-          className={cn(
-            "flex flex-1 flex-col items-center justify-center text-xs", 
-            isActive('/transactions') 
-              ? "text-primary" 
-              : "text-muted-foreground"
-          )}
-        >
-          <Target className="h-5 w-5 mb-1" />
-          Transactions
-        </Link>
-        
-        <Link 
-          to="/budget" 
-          className={cn(
-            "flex flex-1 flex-col items-center justify-center text-xs", 
-            isActive('/budget') 
-              ? "text-primary" 
-              : "text-muted-foreground"
-          )}
-        >
-          <BarChart2 className="h-5 w-5 mb-1" />
-          Budget
-        </Link>
-        
-        {isPremium && (
-          <Link 
-            to="/analytics" 
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center text-xs", 
-              isActive('/analytics') 
-                ? "text-primary" 
-                : "text-muted-foreground"
+        {isEntrepreneurMode ? (
+          // Entrepreneur mode mobile navigation
+          <>
+            <Link 
+              to="/dashboard" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/dashboard') 
+                  ? "text-amber-500" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <LayoutDashboard className="h-5 w-5 mb-1" />
+              Dashboard
+            </Link>
+            
+            <Link 
+              to="/products" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/products') 
+                  ? "text-amber-500" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <Package className="h-5 w-5 mb-1" />
+              Products
+            </Link>
+            
+            <Link 
+              to="/orders" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/orders') 
+                  ? "text-amber-500" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <ShoppingCart className="h-5 w-5 mb-1" />
+              Orders
+            </Link>
+            
+            <Link 
+              to="/profit-loss" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/profit-loss') 
+                  ? "text-amber-500" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <PieChart className="h-5 w-5 mb-1" />
+              Reports
+            </Link>
+            
+            <Link 
+              to="/calculator" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/calculator') 
+                  ? "text-amber-500" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <Calculator className="h-5 w-5 mb-1" />
+              HPP
+            </Link>
+          </>
+        ) : (
+          // Regular mode mobile navigation
+          <>
+            <Link 
+              to="/dashboard" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/dashboard') 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <LayoutDashboard className="h-5 w-5 mb-1" />
+              Dashboard
+            </Link>
+            
+            <Link 
+              to="/transactions" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/transactions') 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <Target className="h-5 w-5 mb-1" />
+              Transactions
+            </Link>
+            
+            <Link 
+              to="/budget" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/budget') 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <BarChart2 className="h-5 w-5 mb-1" />
+              Budget
+            </Link>
+            
+            {isPremium && (
+              <Link 
+                to="/analytics" 
+                className={cn(
+                  "flex flex-1 flex-col items-center justify-center text-xs", 
+                  isActive('/analytics') 
+                    ? "text-primary" 
+                    : "text-muted-foreground"
+                )}
+              >
+                <PieChart className="h-5 w-5 mb-1" />
+                Analytics
+              </Link>
             )}
-          >
-            <PieChart className="h-5 w-5 mb-1" />
-            Analytics
-          </Link>
-        )}
-        
-        <Link 
-          to="/feedback" 
-          className={cn(
-            "flex flex-1 flex-col items-center justify-center text-xs", 
-            isActive('/feedback') 
-              ? "text-primary" 
-              : "text-muted-foreground"
-          )}
-        >
-          <MessageSquare className="h-5 w-5 mb-1" />
-          Feedback
-        </Link>
-        
-        {isAdmin && (
-          <Link 
-            to="/admin" 
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center text-xs", 
-              isActive('/admin') 
-                ? "text-primary" 
-                : "text-muted-foreground"
+            
+            <Link 
+              to="/feedback" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/feedback') 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <MessageSquare className="h-5 w-5 mb-1" />
+              Feedback
+            </Link>
+            
+            {isAdmin && (
+              <Link 
+                to="/admin" 
+                className={cn(
+                  "flex flex-1 flex-col items-center justify-center text-xs", 
+                  isActive('/admin') 
+                    ? "text-primary" 
+                    : "text-muted-foreground"
+                )}
+              >
+                <ShieldAlert className="h-5 w-5 mb-1" />
+                Admin
+              </Link>
             )}
-          >
-            <ShieldAlert className="h-5 w-5 mb-1" />
-            Admin
-          </Link>
+          </>
         )}
       </div>
     </>

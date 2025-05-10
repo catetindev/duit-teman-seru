@@ -52,9 +52,9 @@ export function useEntrepreneurMode() {
     }
     
     toast({
-      title: newValue ? "Entrepreneur Mode Activated" : "Personal Mode Activated",
+      title: newValue ? "Business Mode Activated" : "Personal Mode Activated",
       description: newValue 
-        ? "Now viewing your business finances" 
+        ? "Now viewing your business finances and tools" 
         : "Switched back to personal finance view",
     });
   };

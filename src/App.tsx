@@ -1,117 +1,80 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Index from '@/pages/Index';
+import Signup from '@/pages/Signup';
+import Login from '@/pages/Login';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
+import Pricing from '@/pages/Pricing';
+import Privacy from '@/pages/Privacy';
+import Terms from '@/pages/Terms';
+import NotFound from '@/pages/NotFound';
+import Dashboard from '@/pages/Dashboard';
+import Goals from '@/pages/Goals';
+import Transactions from '@/pages/Transactions';
+import Budget from '@/pages/Budget';
+import Analytics from '@/pages/Analytics';
+import Settings from '@/pages/Settings';
+import Notifications from '@/pages/Notifications';
+import Feedback from '@/pages/Feedback';
+import AdminDashboard from '@/pages/AdminDashboard';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import ScrollToTop from '@/components/utils/ScrollToTop';
+import { Toaster } from '@/components/ui/toaster';
+import GoalsCollaborationDocs from '@/pages/GoalsCollaborationDocs';
 
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { LanguageProvider } from "@/hooks/useLanguage";
-import { AuthProvider } from "@/contexts/AuthContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import ScrollToTop from "@/components/ScrollToTop";
+// App component to handle page routing
+const App = () => {
+  return (
+    <Router>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/goals-collaboration-docs" element={<GoalsCollaborationDocs />} />
+        
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/goals" element={<Goals />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/budget" element={<Budget />} />
+          <Route path="/analytics" element={
+            <ProtectedRoute premium>
+              <Analytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/feedback" element={<Feedback />} />
+          
+          {/* Entrepreneur Mode Routes */}
+          <Route path="/products" element={<ProtectedRoute premium><div>Products & Services</div></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute premium><div>Orders & Transactions</div></ProtectedRoute>} />
+          <Route path="/customers" element={<ProtectedRoute premium><div>Customers</div></ProtectedRoute>} />
+          <Route path="/profit-loss" element={<ProtectedRoute premium><div>Profit & Loss Reports</div></ProtectedRoute>} />
+          <Route path="/calculator" element={<ProtectedRoute premium><Calculator /></ProtectedRoute>} />
+          <Route path="/invoices" element={<ProtectedRoute premium><div>Invoice Generator</div></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute premium><div>Finance & Reports</div></ProtectedRoute>} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <ProtectedRoute admin>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster />
+    </Router>
+  );
+}
 
-// Pages
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Pricing from "./pages/Pricing";
-import Dashboard from "./pages/Dashboard";
-import Transactions from "./pages/Transactions";
-import Goals from "./pages/Goals";
-import Budget from "./pages/Budget";
-import Analytics from "./pages/Analytics";
-import Settings from "./pages/Settings";
-import Notifications from "./pages/Notifications";
-import AdminDashboard from "./pages/AdminDashboard";
-import NotFound from "./pages/NotFound";
-import GoalsCollaborationDocs from "./pages/GoalsCollaborationDocs";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import Feedback from "./pages/Feedback";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/logout" element={<Navigate to="/" replace />} />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/:type" element={
-                <ProtectedRoute requiredRole="premium">
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/transactions" element={
-                <ProtectedRoute>
-                  <Transactions />
-                </ProtectedRoute>
-              } />
-              <Route path="/goals" element={
-                <ProtectedRoute>
-                  <Goals />
-                </ProtectedRoute>
-              } />
-              <Route path="/goals/collaboration-docs" element={
-                <ProtectedRoute>
-                  <GoalsCollaborationDocs />
-                </ProtectedRoute>
-              } />
-              <Route path="/budget" element={
-                <ProtectedRoute>
-                  <Budget />
-                </ProtectedRoute>
-              } />
-              <Route path="/analytics" element={
-                <ProtectedRoute requiredRole="premium">
-                  <Analytics />
-                </ProtectedRoute>
-              } />
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } />
-              <Route path="/notifications" element={
-                <ProtectedRoute>
-                  <Notifications />
-                </ProtectedRoute>
-              } />
-              <Route path="/feedback" element={
-                <ProtectedRoute>
-                  <Feedback />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin" element={
-                <ProtectedRoute requiredRole="admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
-);
-
+import Calculator from './pages/entrepreneur/Calculator';
 export default App;

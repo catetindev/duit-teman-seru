@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,8 +7,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
 import LogoutButton from '@/components/ui/LogoutButton';
 import MobileNavbar from '@/components/layout/MobileNavbar';
-import { BarChart2, LayoutDashboard, PieChart, ArrowDownUp, Target, Settings, Bell, ShieldAlert, MessageSquare, Brain } from 'lucide-react';
+import { 
+  BarChart2, LayoutDashboard, PieChart, ArrowDownUp, Target, Settings, 
+  Bell, ShieldAlert, MessageSquare, Package, ShoppingCart, Users, 
+  Calculator, FileText, FileBarChart 
+} from 'lucide-react';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -23,6 +29,7 @@ const DashboardLayout = ({
   const { t } = useLanguage();
   const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
+  const { isEntrepreneurMode } = useEntrepreneurMode();
 
   if (isLoading) {
     return (
@@ -50,6 +57,114 @@ const DashboardLayout = ({
     );
   }
 
+  // Different menu items for personal and entrepreneur modes
+  const renderSidebarContent = () => {
+    if (isEntrepreneurMode) {
+      // Entrepreneur mode menu items
+      return (
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Business</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
+                Dashboard
+              </SidebarNavLink>
+              <SidebarNavLink to="/products" icon={<Package className="h-5 w-5" />}>
+                Products & Services
+              </SidebarNavLink>
+              <SidebarNavLink to="/orders" icon={<ShoppingCart className="h-5 w-5" />}>
+                Orders & Transactions
+              </SidebarNavLink>
+              <SidebarNavLink to="/customers" icon={<Users className="h-5 w-5" />}>
+                Customers
+              </SidebarNavLink>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          
+          <SidebarGroup>
+            <SidebarGroupLabel>Finance</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarNavLink to="/profit-loss" icon={<PieChart className="h-5 w-5" />}>
+                Profit & Loss Report
+              </SidebarNavLink>
+              <SidebarNavLink to="/calculator" icon={<Calculator className="h-5 w-5" />}>
+                HPP Calculator
+              </SidebarNavLink>
+              <SidebarNavLink to="/invoices" icon={<FileText className="h-5 w-5" />}>
+                Invoice Generator
+              </SidebarNavLink>
+              <SidebarNavLink to="/reports" icon={<FileBarChart className="h-5 w-5" />}>
+                Finance & Reports
+              </SidebarNavLink>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          
+          <SidebarGroup>
+            <SidebarGroupLabel>User</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
+                Notifications
+              </SidebarNavLink>
+              <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />}>
+                Feedback
+              </SidebarNavLink>
+              <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
+                {t('nav.settings')}
+              </SidebarNavLink>
+              {isAdmin && <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
+                  Admin
+                </SidebarNavLink>}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      );
+    } else {
+      // Regular mode menu items
+      return (
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Main</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
+                {t('nav.dashboard')}
+              </SidebarNavLink>
+              <SidebarNavLink to="/transactions" icon={<ArrowDownUp className="h-5 w-5" />}>
+                {t('nav.transactions')}
+              </SidebarNavLink>
+              <SidebarNavLink to="/goals" icon={<Target className="h-5 w-5" />}>
+                {t('nav.goals')}
+              </SidebarNavLink>
+              <SidebarNavLink to="/budget" icon={<BarChart2 className="h-5 w-5" />}>
+                {t('nav.budget')}
+              </SidebarNavLink>
+              {isPremium && <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
+                  {t('nav.analytics')}
+                </SidebarNavLink>}
+            </SidebarGroupContent>
+          </SidebarGroup>
+          
+          <SidebarGroup>
+            <SidebarGroupLabel>User</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
+                Notifications
+              </SidebarNavLink>
+              <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />}>
+                Feedback
+              </SidebarNavLink>
+              <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
+                {t('nav.settings')}
+              </SidebarNavLink>
+              {isAdmin && <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
+                  Admin
+                </SidebarNavLink>}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      );
+    }
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full relative">
@@ -69,46 +184,7 @@ const DashboardLayout = ({
                 )}
               </div>
             </SidebarHeader>
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupLabel>Main</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
-                    {t('nav.dashboard')}
-                  </SidebarNavLink>
-                  <SidebarNavLink to="/transactions" icon={<ArrowDownUp className="h-5 w-5" />}>
-                    {t('nav.transactions')}
-                  </SidebarNavLink>
-                  <SidebarNavLink to="/goals" icon={<Target className="h-5 w-5" />}>
-                    {t('nav.goals')}
-                  </SidebarNavLink>
-                  <SidebarNavLink to="/budget" icon={<BarChart2 className="h-5 w-5" />}>
-                    {t('nav.budget')}
-                  </SidebarNavLink>
-                  {isPremium && <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
-                      {t('nav.analytics')}
-                    </SidebarNavLink>}
-                </SidebarGroupContent>
-              </SidebarGroup>
-              
-              <SidebarGroup>
-                <SidebarGroupLabel>User</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
-                    Notifications
-                  </SidebarNavLink>
-                  <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />}>
-                    Feedback
-                  </SidebarNavLink>
-                  <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />}>
-                    {t('nav.settings')}
-                  </SidebarNavLink>
-                  {isAdmin && <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
-                      Admin
-                    </SidebarNavLink>}
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
+            {renderSidebarContent()}
             <SidebarFooter>
               <div className="px-3 py-2">
                 <LogoutButton variant="outline" className="w-full rounded-full" />
@@ -123,7 +199,7 @@ const DashboardLayout = ({
             {isMobile && (
               <>
                 <div className="h-16"></div> {/* Top spacing */}
-                 {/* Bottom spacing to avoid content being hidden by bottom navbar */}
+                <div className="h-16 pb-4"></div> {/* Bottom spacing */}
               </>
             )}
             {children}
