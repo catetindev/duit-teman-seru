@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -38,7 +37,7 @@ const PREDEFINED_CATEGORIES = [
 export default function ProductFormDialog({ open, onClose, product, onSubmitSuccess }: ProductFormDialogProps) {
   const isEditMode = !!product;
   
-  const [formData, setFormData] = useState<Partial<Product>>({
+  const [formData, setFormData] = useState<Partial<Product> & { name: string, type: string, category: string, price: number, cost: number }>({
     name: '',
     type: 'product',
     category: 'Other',
@@ -238,6 +237,7 @@ export default function ProductFormDialog({ open, onClose, product, onSubmitSucc
         ...formData,
         image_url: imageUrl,
         category: formData.category === 'Other' && customCategory ? customCategory : formData.category,
+        user_id: isEditMode ? product!.user_id : (await supabase.auth.getUser()).data.user?.id,
       };
       
       if (isEditMode) {
@@ -245,7 +245,7 @@ export default function ProductFormDialog({ open, onClose, product, onSubmitSucc
         const { error } = await supabase
           .from('products')
           .update(productData)
-          .eq('id', product.id);
+          .eq('id', product!.id);
           
         if (error) throw error;
         

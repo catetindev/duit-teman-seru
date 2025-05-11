@@ -35,7 +35,7 @@ export default function CustomerFormDialog({
 }: CustomerFormDialogProps) {
   const isEditMode = !!customer;
   
-  const [formData, setFormData] = useState<Partial<Customer>>({
+  const [formData, setFormData] = useState<Partial<Customer> & { name: string }>({
     name: '',
     phone: '',
     email: '',
@@ -145,12 +145,17 @@ export default function CustomerFormDialog({
     setSubmitting(true);
     
     try {
+      const userData = {
+        ...formData,
+        user_id: isEditMode ? customer!.user_id : (await supabase.auth.getUser()).data.user?.id,
+      };
+
       if (isEditMode) {
         // Update existing customer
         const { error } = await supabase
           .from('customers')
-          .update(formData)
-          .eq('id', customer.id);
+          .update(userData)
+          .eq('id', customer!.id);
           
         if (error) throw error;
         
@@ -159,7 +164,7 @@ export default function CustomerFormDialog({
         // Add new customer
         const { error } = await supabase
           .from('customers')
-          .insert(formData);
+          .insert(userData);
           
         if (error) throw error;
         

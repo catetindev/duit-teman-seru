@@ -4,10 +4,10 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 
 // Format currency
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number, currency: string = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: currency,
     minimumFractionDigits: 2
   }).format(amount);
 }

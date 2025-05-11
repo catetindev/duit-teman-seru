@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -36,7 +35,7 @@ export default function OrderFormDialog({
 }: OrderFormDialogProps) {
   const isEditMode = !!order;
   
-  const [formData, setFormData] = useState<Partial<Order>>({
+  const [formData, setFormData] = useState<Partial<Order> & { customer_id: string, payment_method: string, total: number }>({
     customer_id: '',
     products: [],
     total: 0,
@@ -141,7 +140,7 @@ export default function OrderFormDialog({
       const selectedProduct = products.find(p => p.id === value);
       newProducts[index] = {
         ...newProducts[index],
-        [field]: value,
+        [field]: String(value), // Ensure product_id is always a string
         name: selectedProduct?.name,
         price: selectedProduct?.price
       };
@@ -253,7 +252,8 @@ export default function OrderFormDialog({
       const orderData = {
         ...formData,
         products: productsData,
-        payment_proof_url: proofUrl
+        payment_proof_url: proofUrl,
+        user_id: isEditMode ? order!.user_id : (await supabase.auth.getUser()).data.user?.id,
       };
       
       if (isEditMode) {
@@ -261,7 +261,7 @@ export default function OrderFormDialog({
         const { error } = await supabase
           .from('orders')
           .update(orderData)
-          .eq('id', order.id);
+          .eq('id', order!.id);
           
         if (error) throw error;
         
