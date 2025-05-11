@@ -1,13 +1,21 @@
 
-import { Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   requiredRole?: 'free' | 'premium' | 'admin';
+  premium?: boolean;
+  admin?: boolean;
 }
 
-const ProtectedRoute = ({ children, requiredRole = 'free' }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ 
+  children, 
+  requiredRole = 'free', 
+  premium = false,
+  admin = false
+}: ProtectedRouteProps) => {
   const { user, userRole, isLoading } = useAuth();
   const location = useLocation();
 
@@ -26,19 +34,24 @@ const ProtectedRoute = ({ children, requiredRole = 'free' }: ProtectedRouteProps
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Set the required role based on premium or admin props
+  let effectiveRole = requiredRole;
+  if (premium) effectiveRole = 'premium';
+  if (admin) effectiveRole = 'admin';
+
   // Check role-based permissions
-  if (requiredRole === 'admin' && userRole !== 'admin') {
+  if (effectiveRole === 'admin' && userRole !== 'admin') {
     // Admin-only route but user is not admin
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (requiredRole === 'premium' && userRole !== 'premium' && userRole !== 'admin') {
+  if (effectiveRole === 'premium' && userRole !== 'premium' && userRole !== 'admin') {
     // Premium route but user is not premium or admin
     return <Navigate to="/pricing" replace />;
   }
 
   // User is authenticated and has required permission
-  return <>{children}</>;
+  return <>{children || <Outlet />}</>;
 };
 
 export default ProtectedRoute;
