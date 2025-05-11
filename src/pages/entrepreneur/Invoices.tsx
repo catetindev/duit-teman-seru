@@ -57,8 +57,8 @@ const Invoices = () => {
         description: 'Your invoice has been generated successfully'
       });
     },
-    // Use the correct property name 'content' instead of 'content'
-    content: () => pdfRef.current,
+    // Use the correct property name 'documentElement' instead of 'content'
+    documentElement: () => pdfRef.current,
   });
 
   // Fetch customers and products
