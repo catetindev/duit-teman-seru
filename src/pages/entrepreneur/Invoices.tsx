@@ -50,14 +50,15 @@ const Invoices = () => {
 
   // Print functionality
   const handlePrint = useReactToPrint({
-    content: () => pdfRef.current,
     documentTitle: `Invoice_${selectedInvoice?.invoice_number || 'unknown'}`,
     onAfterPrint: () => {
       toast({
         title: 'PDF Ready',
         description: 'Your invoice has been generated successfully'
       });
-    }
+    },
+    // Use the correct property name 'content' instead of 'content'
+    content: () => pdfRef.current,
   });
 
   // Fetch customers and products
