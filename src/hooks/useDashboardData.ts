@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatCurrency, calculateProgress } from '@/utils/formatUtils';
+import { formatCurrency } from '@/utils/formatUtils';
+import { calculateProgress } from '@/utils/formatUtils';
 import { DashboardStats } from '@/hooks/goals/types';
 import { useTransactions } from './dashboard/useTransactions';
 import { useGoals } from './dashboard/useGoals';

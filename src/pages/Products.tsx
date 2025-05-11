@@ -37,10 +37,15 @@ export default function Products() {
       if (error) throw error;
 
       if (data) {
-        setProducts(data as Product[]);
+        const typedProducts = data.map(item => ({
+          ...item,
+          type: item.type === 'product' ? 'product' : 'service' 
+        } as Product));
+        
+        setProducts(typedProducts);
         
         // Extract unique categories
-        const uniqueCategories = [...new Set(data.map((product: Product) => product.category))];
+        const uniqueCategories = [...new Set(typedProducts.map(product => product.category))];
         setCategories(uniqueCategories);
       }
     } catch (error: any) {

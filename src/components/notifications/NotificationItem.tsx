@@ -36,7 +36,7 @@ const NotificationItem = ({ notification, onMarkAsRead }: NotificationItemProps)
         <div>
           <h4 className="text-sm font-medium">{notification.title}</h4>
           <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
-          <p className="text-xs text-muted-foreground mt-1">{formatDate(notification.created_at)}</p>
+          <p className="text-xs text-muted-foreground mt-1">{formatDate(new Date(notification.created_at))}</p>
         </div>
       </div>
     </li>

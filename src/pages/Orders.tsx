@@ -49,7 +49,7 @@ export default function Orders() {
       // Fetch customers for filter
       const { data: customersData, error: customersError } = await supabase
         .from('customers')
-        .select('id, name');
+        .select('*');
       
       if (customersError) throw customersError;
       
@@ -67,8 +67,8 @@ export default function Orders() {
       }));
 
       setOrders(transformedOrders);
-      setCustomers(customersData);
-      setProducts(productsData);
+      setCustomers(customersData as Customer[]);
+      setProducts(productsData as Product[]);
     } catch (error: any) {
       toast({
         title: 'Error',

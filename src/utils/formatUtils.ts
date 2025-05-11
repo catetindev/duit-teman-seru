@@ -23,3 +23,8 @@ export function formatDateRange(range: DateRange): string {
   if (!range.to) return `${format(range.from, 'MMM dd, yyyy')}`;
   return `${format(range.from, 'MMM dd, yyyy')} - ${format(range.to, 'MMM dd, yyyy')}`;
 }
+
+// Calculate progress percentage
+export function calculateProgress(saved: number, target: number): number {
+  return Math.min(Math.round((saved / target) * 100), 100);
+}
