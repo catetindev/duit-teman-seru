@@ -23,59 +23,62 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import { Toaster } from '@/components/ui/toaster';
 import GoalsCollaborationDocs from '@/pages/GoalsCollaborationDocs';
+import { LanguageProvider } from './hooks/useLanguage';
+import Calculator from './pages/entrepreneur/Calculator';
 
 // App component to handle page routing
 const App = () => {
   return (
-    <Router>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/goals-collaboration-docs" element={<GoalsCollaborationDocs />} />
-        
-        <Route path="/" element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/goals" element={<Goals />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/budget" element={<Budget />} />
-          <Route path="/analytics" element={
-            <ProtectedRoute premium>
-              <Analytics />
-            </ProtectedRoute>
-          } />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/feedback" element={<Feedback />} />
+    <LanguageProvider>
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/goals-collaboration-docs" element={<GoalsCollaborationDocs />} />
           
-          {/* Entrepreneur Mode Routes */}
-          <Route path="/products" element={<ProtectedRoute premium><div>Products & Services</div></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute premium><div>Orders & Transactions</div></ProtectedRoute>} />
-          <Route path="/customers" element={<ProtectedRoute premium><div>Customers</div></ProtectedRoute>} />
-          <Route path="/profit-loss" element={<ProtectedRoute premium><div>Profit & Loss Reports</div></ProtectedRoute>} />
-          <Route path="/calculator" element={<ProtectedRoute premium><Calculator /></ProtectedRoute>} />
-          <Route path="/invoices" element={<ProtectedRoute premium><div>Invoice Generator</div></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute premium><div>Finance & Reports</div></ProtectedRoute>} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute admin>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </Router>
+          <Route path="/" element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/goals" element={<Goals />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/budget" element={<Budget />} />
+            <Route path="/analytics" element={
+              <ProtectedRoute premium>
+                <Analytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/feedback" element={<Feedback />} />
+            
+            {/* Entrepreneur Mode Routes */}
+            <Route path="/products" element={<ProtectedRoute premium><div>Products & Services</div></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute premium><div>Orders & Transactions</div></ProtectedRoute>} />
+            <Route path="/customers" element={<ProtectedRoute premium><div>Customers</div></ProtectedRoute>} />
+            <Route path="/profit-loss" element={<ProtectedRoute premium><div>Profit & Loss Reports</div></ProtectedRoute>} />
+            <Route path="/calculator" element={<ProtectedRoute premium><Calculator /></ProtectedRoute>} />
+            <Route path="/invoices" element={<ProtectedRoute premium><div>Invoice Generator</div></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute premium><div>Finance & Reports</div></ProtectedRoute>} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute admin>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </Router>
+    </LanguageProvider>
   );
 }
 
-import Calculator from './pages/entrepreneur/Calculator';
 export default App;
