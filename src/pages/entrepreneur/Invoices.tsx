@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -56,8 +57,8 @@ const Invoices = () => {
         description: 'Your invoice has been generated successfully'
       });
     },
-    // Use the correct property name 'content' instead of 'documentElement'
-    content: () => pdfRef.current,
+    // Using the correct property as per react-to-print types
+    printRef: pdfRef,
   });
 
   // Fetch customers and products
