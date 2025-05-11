@@ -28,6 +28,9 @@ import Calculator from './pages/entrepreneur/Calculator';
 import Products from './pages/Products';
 import Customers from './pages/Customers';
 import Orders from './pages/Orders';
+import ProfitLoss from './pages/entrepreneur/ProfitLoss';
+import Invoices from './pages/entrepreneur/Invoices';
+import FinanceReports from './pages/entrepreneur/FinanceReports';
 
 // App component to handle page routing
 const App = () => {
@@ -63,10 +66,10 @@ const App = () => {
           <Route path="/products" element={<ProtectedRoute premium><Products /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute premium><Orders /></ProtectedRoute>} />
           <Route path="/customers" element={<ProtectedRoute premium><Customers /></ProtectedRoute>} />
-          <Route path="/profit-loss" element={<ProtectedRoute premium><div>Profit & Loss Reports</div></ProtectedRoute>} />
+          <Route path="/profit-loss" element={<ProtectedRoute premium><ProfitLoss /></ProtectedRoute>} />
           <Route path="/calculator" element={<ProtectedRoute premium><Calculator /></ProtectedRoute>} />
-          <Route path="/invoices" element={<ProtectedRoute premium><div>Invoice Generator</div></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute premium><div>Finance & Reports</div></ProtectedRoute>} />
+          <Route path="/invoices" element={<ProtectedRoute premium><Invoices /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute premium><FinanceReports /></ProtectedRoute>} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={

@@ -66,6 +66,39 @@ export type Database = {
         }
         Relationships: []
       }
+      business_expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
@@ -165,6 +198,68 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          customer_id: string
+          discount: number
+          id: string
+          invoice_number: string
+          items: Json
+          notes: string | null
+          payment_due_date: string
+          payment_method: string | null
+          payment_proof_url: string | null
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          discount?: number
+          id?: string
+          invoice_number: string
+          items?: Json
+          notes?: string | null
+          payment_due_date: string
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          status?: string
+          subtotal: number
+          tax?: number
+          total: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          discount?: number
+          id?: string
+          invoice_number?: string
+          items?: Json
+          notes?: string | null
+          payment_due_date?: string
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
