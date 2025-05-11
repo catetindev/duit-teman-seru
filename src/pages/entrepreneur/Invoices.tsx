@@ -57,8 +57,8 @@ const Invoices = () => {
         description: 'Your invoice has been generated successfully'
       });
     },
-    // Using the correct property as per react-to-print types
-    printRef: pdfRef,
+    // The correct property is 'content' which should be a function returning the ref
+    content: () => pdfRef.current,
   });
 
   // Fetch customers and products
