@@ -13,7 +13,7 @@ import { InvoiceForm } from '@/components/finance/invoices/InvoiceForm';
 import { InvoicesList } from '@/components/finance/invoices/InvoicesList';
 import { InvoicePdf } from '@/components/finance/invoices/InvoicePdf';
 import { useInvoices } from '@/hooks/finance/useInvoices';
-import { Invoice, InvoiceFormData } from '@/types/finance';
+import { Invoice, InvoiceFormData, InvoiceStatus } from '@/types/finance';
 import { Customer, Product } from '@/types/entrepreneur';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -188,6 +188,26 @@ const Invoices = () => {
     return customer;
   };
 
+  // Create a function to properly cast Invoice to InvoiceFormData
+  const prepareInvoiceForForm = (invoice: Invoice): Partial<InvoiceFormData> => {
+    // Parse items if they're a string
+    const items = Array.isArray(invoice.items) 
+      ? invoice.items 
+      : JSON.parse(typeof invoice.items === 'string' 
+          ? invoice.items 
+          : JSON.stringify(invoice.items));
+    
+    // Ensure status is a valid InvoiceStatus type
+    const status = invoice.status as InvoiceStatus;
+    
+    return {
+      ...invoice,
+      items,
+      status,
+      payment_due_date: new Date(invoice.payment_due_date)
+    };
+  };
+
   return (
     <DashboardLayout isPremium={isPremium}>
       <div className="space-y-6">
@@ -287,15 +307,7 @@ const Invoices = () => {
             </SheetHeader>
             <div className="mt-6">
               <InvoiceForm
-                defaultValues={selectedInvoice ? {
-                  ...selectedInvoice,
-                  items: Array.isArray(selectedInvoice.items) 
-                    ? selectedInvoice.items 
-                    : JSON.parse(typeof selectedInvoice.items === 'string' 
-                        ? selectedInvoice.items 
-                        : JSON.stringify(selectedInvoice.items)),
-                  payment_due_date: new Date(selectedInvoice.payment_due_date)
-                } : undefined}
+                defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : undefined}
                 customers={customers}
                 products={products}
                 onSubmit={handleFormSubmit}

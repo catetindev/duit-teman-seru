@@ -108,7 +108,7 @@ export function useFinancialData() {
       const productMap = new Map<string, { revenue: number, count: number }>();
       
       ordersData.forEach(order => {
-        const products = Array.isArray(order.products) ? order.products : JSON.parse(order.products);
+        const products = Array.isArray(order.products) ? order.products : JSON.parse(typeof order.products === 'string' ? order.products : JSON.stringify(order.products));
         products.forEach((product: any) => {
           const name = product.name || product.product_name || 'Unknown';
           const revenue = Number(product.price || 0) * Number(product.quantity || 0);

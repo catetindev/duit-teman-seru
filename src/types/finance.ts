@@ -14,6 +14,8 @@ export type InvoiceItem = {
   total: number;
 };
 
+export type InvoiceStatus = 'Paid' | 'Unpaid' | 'Overdue';
+
 export type InvoiceFormData = {
   id?: string;
   invoice_number: string;
@@ -23,7 +25,7 @@ export type InvoiceFormData = {
   tax: number;
   discount: number;
   total: number;
-  status: 'Paid' | 'Unpaid' | 'Overdue';
+  status: InvoiceStatus;
   payment_method: string;
   payment_due_date: Date;
   payment_proof_url?: string;
