@@ -24,6 +24,10 @@ import ScrollToTop from './components/ScrollToTop';
 import { Toaster } from '@/components/ui/toaster';
 import GoalsCollaborationDocs from '@/pages/GoalsCollaborationDocs';
 import Calculator from './pages/entrepreneur/Calculator';
+// Import our new pages
+import Products from './pages/Products';
+import Customers from './pages/Customers';
+import Orders from './pages/Orders';
 
 // App component to handle page routing
 const App = () => {
@@ -56,9 +60,9 @@ const App = () => {
           <Route path="/feedback" element={<Feedback />} />
           
           {/* Entrepreneur Mode Routes */}
-          <Route path="/products" element={<ProtectedRoute premium><div>Products & Services</div></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute premium><div>Orders & Transactions</div></ProtectedRoute>} />
-          <Route path="/customers" element={<ProtectedRoute premium><div>Customers</div></ProtectedRoute>} />
+          <Route path="/products" element={<ProtectedRoute premium><Products /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute premium><Orders /></ProtectedRoute>} />
+          <Route path="/customers" element={<ProtectedRoute premium><Customers /></ProtectedRoute>} />
           <Route path="/profit-loss" element={<ProtectedRoute premium><div>Profit & Loss Reports</div></ProtectedRoute>} />
           <Route path="/calculator" element={<ProtectedRoute premium><Calculator /></ProtectedRoute>} />
           <Route path="/invoices" element={<ProtectedRoute premium><div>Invoice Generator</div></ProtectedRoute>} />

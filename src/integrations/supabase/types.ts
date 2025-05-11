@@ -66,6 +66,42 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          last_order_date: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_order_date?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_order_date?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       goal_collaborators: {
         Row: {
           created_at: string
@@ -166,6 +202,53 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          order_date: string
+          payment_method: string
+          payment_proof_url: string | null
+          products: Json
+          status: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          order_date?: string
+          payment_method: string
+          payment_proof_url?: string | null
+          products?: Json
+          status?: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          order_date?: string
+          payment_method?: string
+          payment_proof_url?: string | null
+          products?: Json
+          status?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_records: {
         Row: {
           amount: number
@@ -198,6 +281,51 @@ export type Database = {
           reference_id?: string
           status?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string
+          cost: number
+          created_at: string
+          id: string
+          image_url: string | null
+          is_best_seller: boolean
+          name: string
+          price: number
+          status: boolean
+          stock: number
+          type: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          cost: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_best_seller?: boolean
+          name: string
+          price: number
+          status?: boolean
+          stock?: number
+          type: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          cost?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_best_seller?: boolean
+          name?: string
+          price?: number
+          status?: boolean
+          stock?: number
+          type?: string
           user_id?: string
         }
         Relationships: []
