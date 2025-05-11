@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -18,8 +19,8 @@ import Settings from '@/pages/Settings';
 import Notifications from '@/pages/Notifications';
 import Feedback from '@/pages/Feedback';
 import AdminDashboard from '@/pages/AdminDashboard';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import ScrollToTop from '@/components/utils/ScrollToTop';
+import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 import { Toaster } from '@/components/ui/toaster';
 import GoalsCollaborationDocs from '@/pages/GoalsCollaborationDocs';
 
