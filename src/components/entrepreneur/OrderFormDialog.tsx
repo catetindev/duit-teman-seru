@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { Customer, Order, OrderProduct, Product } from '@/types/entrepreneur';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Plus, Trash } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Loader2, Plus } from 'lucide-react';
 import { formatCurrency } from '@/utils/formatUtils';
 import { v4 as uuidv4 } from 'uuid';
+import { OrderFormHeader } from './order/OrderFormHeader';
+import { CustomerSelection } from './order/CustomerSelection';
+import { PaymentMethodSelection } from './order/PaymentMethodSelection';
+import { OrderProductsTable } from './order/OrderProductsTable';
+import { OrderStatusSelection } from './order/OrderStatusSelection';
+import { PaymentProofUploader } from './order/PaymentProofUploader';
 
 interface OrderFormDialogProps {
   open: boolean;
@@ -298,56 +300,29 @@ export default function OrderFormDialog({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-md md:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Order' : 'Create New Order'}</DialogTitle>
-        </DialogHeader>
+        <OrderFormHeader isEditMode={isEditMode} />
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Customer Selection */}
-            <div>
-              <Label htmlFor="customer">Customer *</Label>
-              <Select
-                value={formData.customer_id}
-                onValueChange={(value) => handleSelectChange('customer_id', value)}
-              >
-                <SelectTrigger className={errors.customer_id ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map(customer => (
-                    <SelectItem key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.customer_id && <p className="text-red-500 text-xs mt-1">{errors.customer_id}</p>}
-            </div>
+            <CustomerSelection
+              customers={customers}
+              selectedCustomerId={formData.customer_id}
+              onCustomerChange={(value) => handleSelectChange('customer_id', value)}
+              error={errors.customer_id}
+            />
             
             {/* Payment Method */}
-            <div>
-              <Label htmlFor="payment_method">Payment Method</Label>
-              <Select
-                value={formData.payment_method}
-                onValueChange={(value) => handleSelectChange('payment_method', value as Order['payment_method'])}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Transfer">Transfer</SelectItem>
-                  <SelectItem value="QRIS">QRIS</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <PaymentMethodSelection 
+              value={formData.payment_method}
+              onChange={(value) => handleSelectChange('payment_method', value)}
+            />
           </div>
           
           {/* Products Section */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Products/Services *</Label>
+              <label className="text-sm font-medium">Products/Services *</label>
               <Button 
                 type="button" 
                 onClick={handleAddProduct} 
@@ -361,72 +336,12 @@ export default function OrderFormDialog({
             
             {errors.products && <p className="text-red-500 text-xs mb-2">{errors.products}</p>}
             
-            {orderProducts.length === 0 ? (
-              <div className="text-center p-4 border rounded-md bg-muted/20">
-                No products added yet. Click "Add Product" to begin.
-              </div>
-            ) : (
-              <div className="border rounded-md overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead className="w-24">Quantity</TableHead>
-                      <TableHead className="text-right">Unit Price</TableHead>
-                      <TableHead className="text-right">Total</TableHead>
-                      <TableHead className="w-16"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orderProducts.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <Select
-                            value={item.product_id}
-                            onValueChange={(value) => handleProductChange(index, 'product_id', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select product" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {products.map(product => (
-                                <SelectItem key={product.id} value={product.id}>
-                                  {product.name} ({product.type})
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value) || 1)}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {item.price ? formatCurrency(item.price) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {item.price ? formatCurrency(item.price * (item.quantity || 0)) : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveProduct(index)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+            <OrderProductsTable
+              products={products}
+              orderProducts={orderProducts}
+              onProductChange={handleProductChange}
+              onRemoveProduct={handleRemoveProduct}
+            />
             
             {/* Order Total */}
             <div className="flex justify-end mt-2">
@@ -441,58 +356,20 @@ export default function OrderFormDialog({
           
           {/* Payment Status & Proof */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="status">Payment Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleSelectChange('status', value as Order['status'])}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
-                  <SelectItem value="Canceled">Canceled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <OrderStatusSelection
+              value={formData.status || 'Pending'}
+              onChange={(value) => handleSelectChange('status', value)}
+            />
             
-            <div>
-              <Label htmlFor="payment_proof">Payment Proof (Optional)</Label>
-              <div className="mt-1">
-                {paymentProofPreview ? (
-                  <div className="relative">
-                    <img
-                      src={paymentProofPreview}
-                      alt="Payment Proof"
-                      className="h-32 object-cover rounded-md border"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => {
-                        setPaymentProof(null);
-                        setPaymentProofPreview(null);
-                        setFormData(prev => ({ ...prev, payment_proof_url: undefined }));
-                      }}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : (
-                  <Input
-                    id="payment_proof"
-                    name="payment_proof"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePaymentProofChange}
-                  />
-                )}
-              </div>
-            </div>
+            <PaymentProofUploader
+              previewUrl={paymentProofPreview}
+              onFileChange={handlePaymentProofChange}
+              onRemove={() => {
+                setPaymentProof(null);
+                setPaymentProofPreview(null);
+                setFormData(prev => ({ ...prev, payment_proof_url: undefined }));
+              }}
+            />
           </div>
           
           <div className="flex justify-end gap-3 pt-4">

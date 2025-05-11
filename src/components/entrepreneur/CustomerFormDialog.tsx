@@ -1,15 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Customer } from '@/types/entrepreneur';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Plus, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { CustomerFormHeader } from './customer/CustomerFormHeader';
+import { CustomerForm } from './customer/CustomerForm';
 
 interface CustomerFormDialogProps {
   open: boolean;
@@ -86,22 +82,13 @@ export default function CustomerFormDialog({
     }
   };
 
-  const handleAddTag = () => {
+  const handleAddTag = (newTag: string) => {
     if (!newTag.trim()) return;
     
     setFormData(prev => ({
       ...prev,
       tags: [...(prev.tags || []), newTag.trim()]
     }));
-    
-    setNewTag('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newTag.trim()) {
-      e.preventDefault();
-      handleAddTag();
-    }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -186,123 +173,21 @@ export default function CustomerFormDialog({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-md md:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Customer' : 'Add New Customer'}</DialogTitle>
-        </DialogHeader>
+        <CustomerFormHeader isEditMode={isEditMode} />
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name || ''}
-              onChange={handleInputChange}
-              className={errors.name ? 'border-red-500' : ''}
-            />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                name="phone"
-                value={formData.phone || ''}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email || ''}
-                onChange={handleInputChange}
-                className={errors.email ? 'border-red-500' : ''}
-              />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="tags">Tags</Label>
-            <div className="mt-2 mb-2">
-              {/* Common/available tags */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {allAvailableTags.map(tag => (
-                  <Badge 
-                    key={tag}
-                    variant={formData.tags?.includes(tag) ? 'default' : 'outline'}
-                    className="cursor-pointer"
-                    onClick={() => handleSelectTag(tag)}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-              
-              {/* Add custom tag */}
-              <div className="flex gap-2">
-                <Input
-                  id="newTag"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Add custom tag..."
-                  className="flex-grow"
-                />
-                <Button 
-                  type="button"
-                  onClick={handleAddTag}
-                  disabled={!newTag.trim()}
-                  size="icon"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            {/* Selected tags */}
-            {formData.tags && formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                <Label className="w-full text-sm">Selected Tags:</Label>
-                {formData.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="gap-1">
-                    {tag}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => handleRemoveTag(tag)}
-                    />
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              name="notes"
-              value={formData.notes || ''}
-              onChange={handleInputChange}
-              placeholder="Add customer notes here..."
-              rows={3}
-            />
-          </div>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditMode ? 'Update Customer' : 'Add Customer'}
-            </Button>
-          </div>
-        </form>
+        <CustomerForm
+          formData={formData}
+          errors={errors}
+          submitting={submitting}
+          availableTags={allAvailableTags}
+          onInputChange={handleInputChange}
+          onAddTag={handleAddTag}
+          onRemoveTag={handleRemoveTag}
+          onSelectTag={handleSelectTag}
+          onSubmit={handleSubmit}
+          onClose={onClose}
+          isEditMode={isEditMode}
+        />
       </DialogContent>
     </Dialog>
   );

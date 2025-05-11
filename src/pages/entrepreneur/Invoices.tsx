@@ -1,18 +1,21 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { TabsContent } from '@/components/ui/tabs';
+import { FileText } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { InvoiceForm } from '@/components/finance/invoices/InvoiceForm';
 import { InvoicesList } from '@/components/finance/invoices/InvoicesList';
 import { InvoicePdf } from '@/components/finance/invoices/InvoicePdf';
+import { InvoiceHeader } from '@/components/finance/invoices/InvoiceHeader';
+import { InvoiceStatusFilter } from '@/components/finance/invoices/InvoiceStatusFilter';
+import { Button } from '@/components/ui/button';
 import { useInvoices } from '@/hooks/finance/useInvoices';
-import { Invoice, InvoiceFormData, InvoiceStatus } from '@/types/finance';
+import { Invoice, InvoiceFormData } from '@/types/finance';
 import { Customer, Product } from '@/types/entrepreneur';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -105,9 +108,6 @@ const Invoices = () => {
     const invoiceNumber = await generateInvoiceNumber();
     setSelectedInvoice(null);
     setIsFormOpen(true);
-    
-    // Pre-fill form with default values
-    // Implementation details will depend on your form structure
   };
 
   // Handle form submission
@@ -197,7 +197,7 @@ const Invoices = () => {
           : JSON.stringify(invoice.items));
     
     // Ensure status is a valid InvoiceStatus type
-    const status = invoice.status as InvoiceStatus;
+    const status = invoice.status as any;
     
     return {
       ...invoice,
@@ -211,73 +211,25 @@ const Invoices = () => {
     <DashboardLayout isPremium={isPremium}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Invoices</h1>
-            <p className="text-muted-foreground">
-              Create, manage, and download professional invoices
-            </p>
-          </div>
-          <Button onClick={handleAddInvoice}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Invoice
-          </Button>
-        </div>
+        <InvoiceHeader onAddInvoice={handleAddInvoice} />
 
         {/* Status Filters */}
-        <Tabs 
-          defaultValue="All" 
-          value={selectedFilter}
-          onValueChange={handleFilterChange}
-          className="space-y-4"
-        >
-          <TabsList>
-            <TabsTrigger value="All">All</TabsTrigger>
-            <TabsTrigger value="Paid">Paid</TabsTrigger>
-            <TabsTrigger value="Unpaid">Unpaid</TabsTrigger>
-            <TabsTrigger value="Overdue">Overdue</TabsTrigger>
-          </TabsList>
+        <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange} />
 
-          <TabsContent value="All" className="space-y-4">
+        <div className="space-y-4">
+          {/* Invoice List for current filter */}
+          <TabsContent value={selectedFilter} className="space-y-4 mt-0">
             <InvoicesList 
-              invoices={invoices} 
+              invoices={selectedFilter === 'All' 
+                ? invoices 
+                : invoices.filter(inv => inv.status === selectedFilter)} 
               onViewInvoice={handleViewInvoice}
               onEditInvoice={handleEditInvoice}
               onDeleteInvoice={handleDeleteInvoice}
               onDownloadPdf={handleDownloadPdf}
             />
           </TabsContent>
-
-          <TabsContent value="Paid" className="space-y-4">
-            <InvoicesList 
-              invoices={invoices.filter(inv => inv.status === 'Paid')} 
-              onViewInvoice={handleViewInvoice}
-              onEditInvoice={handleEditInvoice}
-              onDeleteInvoice={handleDeleteInvoice}
-              onDownloadPdf={handleDownloadPdf}
-            />
-          </TabsContent>
-
-          <TabsContent value="Unpaid" className="space-y-4">
-            <InvoicesList 
-              invoices={invoices.filter(inv => inv.status === 'Unpaid')} 
-              onViewInvoice={handleViewInvoice}
-              onEditInvoice={handleEditInvoice}
-              onDeleteInvoice={handleDeleteInvoice}
-              onDownloadPdf={handleDownloadPdf}
-            />
-          </TabsContent>
-
-          <TabsContent value="Overdue" className="space-y-4">
-            <InvoicesList 
-              invoices={invoices.filter(inv => inv.status === 'Overdue')} 
-              onViewInvoice={handleViewInvoice}
-              onEditInvoice={handleEditInvoice}
-              onDeleteInvoice={handleDeleteInvoice}
-              onDownloadPdf={handleDownloadPdf}
-            />
-          </TabsContent>
-        </Tabs>
+        </div>
 
         {/* Hidden div for PDF generation */}
         <div className="hidden">
