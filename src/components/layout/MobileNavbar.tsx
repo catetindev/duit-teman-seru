@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   BarChart2, Bell, LayoutDashboard, MessageSquare, PieChart, 
   Settings, ShieldAlert, Target, Package, ShoppingCart, 
-  Users, Calculator, FileText, FileBarChart 
+  Users, Calculator, FileText, FileBarChart, CreditCard 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
@@ -68,85 +67,72 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
       </div>
       
       {/* Bottom navbar - display different navigation based on mode */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t flex items-center justify-between px-4 z-50">
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t flex items-center justify-around px-2 z-50">
         {isEntrepreneurMode ? (
           // Entrepreneur mode mobile navigation
           <>
             <Link 
               to="/dashboard" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/dashboard') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
               )}
             >
-              <LayoutDashboard className="h-5 w-5 mb-1" />
+              <LayoutDashboard className="h-5 w-5 mb-0.5" />
               Dashboard
             </Link>
             
             <Link 
               to="/products" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/products') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
               )}
             >
-              <Package className="h-5 w-5 mb-1" />
-              Products
+              <Package className="h-5 w-5 mb-0.5" />
+              Produk
             </Link>
             
             <Link 
               to="/orders" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/orders') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
               )}
             >
-              <ShoppingCart className="h-5 w-5 mb-1" />
-              Orders
+              <ShoppingCart className="h-5 w-5 mb-0.5" />
+              Pesanan
             </Link>
             
             <Link 
               to="/profit-loss" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/profit-loss') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
               )}
             >
-              <PieChart className="h-5 w-5 mb-1" />
-              Reports
-            </Link>
-            
-            <Link 
-              to="/calculator" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
-                isActive('/calculator') 
-                  ? "text-amber-500" 
-                  : "text-muted-foreground"
-              )}
-            >
-              <Calculator className="h-5 w-5 mb-1" />
-              HPP
+              <PieChart className="h-5 w-5 mb-0.5" />
+              Laporan
             </Link>
             
             <Link 
               to="/pos" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/pos') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
               )}
             >
-              <Package className="h-5 w-5 mb-1" />
+              <CreditCard className="h-5 w-5 mb-0.5" />
               POS
             </Link>
           </>
@@ -156,39 +142,52 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/dashboard" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/dashboard') 
                   ? "text-primary" 
                   : "text-muted-foreground"
               )}
             >
-              <LayoutDashboard className="h-5 w-5 mb-1" />
+              <LayoutDashboard className="h-5 w-5 mb-0.5" />
               Dashboard
             </Link>
             
             <Link 
               to="/transactions" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/transactions') 
                   ? "text-primary" 
                   : "text-muted-foreground"
               )}
             >
-              <Target className="h-5 w-5 mb-1" />
-              Transactions
+              <ArrowDownUp className="h-5 w-5 mb-0.5" />
+              Transaksi
+            </Link>
+            
+            <Link 
+              to="/goals" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                isActive('/goals') 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <Target className="h-5 w-5 mb-0.5" />
+              Target
             </Link>
             
             <Link 
               to="/budget" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                 isActive('/budget') 
                   ? "text-primary" 
                   : "text-muted-foreground"
               )}
             >
-              <BarChart2 className="h-5 w-5 mb-1" />
+              <BarChart2 className="h-5 w-5 mb-0.5" />
               Budget
             </Link>
             
@@ -196,42 +195,14 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
               <Link 
                 to="/analytics" 
                 className={cn(
-                  "flex flex-1 flex-col items-center justify-center text-xs", 
+                  "flex flex-1 flex-col items-center justify-center text-xs px-1", 
                   isActive('/analytics') 
                     ? "text-primary" 
                     : "text-muted-foreground"
                 )}
               >
-                <PieChart className="h-5 w-5 mb-1" />
-                Analytics
-              </Link>
-            )}
-            
-            <Link 
-              to="/feedback" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs", 
-                isActive('/feedback') 
-                  ? "text-primary" 
-                  : "text-muted-foreground"
-              )}
-            >
-              <MessageSquare className="h-5 w-5 mb-1" />
-              Feedback
-            </Link>
-            
-            {isAdmin && (
-              <Link 
-                to="/admin" 
-                className={cn(
-                  "flex flex-1 flex-col items-center justify-center text-xs", 
-                  isActive('/admin') 
-                    ? "text-primary" 
-                    : "text-muted-foreground"
-                )}
-              >
-                <ShieldAlert className="h-5 w-5 mb-1" />
-                Admin
+                <PieChart className="h-5 w-5 mb-0.5" />
+                Analitik
               </Link>
             )}
           </>

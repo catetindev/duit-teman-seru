@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,10 +13,14 @@ import { ProductCard } from '@/components/pos/ProductCard';
 import { CartItem } from '@/components/pos/CartItem';
 import { PaymentPanel } from '@/components/pos/PaymentPanel';
 import { PosReceipt } from '@/components/pos/PosReceipt';
-import { Printer, RefreshCcw } from 'lucide-react';
+import { Printer, RefreshCcw, Edit, Trash2 } from 'lucide-react';
+import { PasswordConfirmationDialog } from '@/components/pos/PasswordConfirmationDialog';
+import { PosTransaction } from '@/hooks/usePos'; 
+import { supabase } from '@/integrations/supabase/client'; 
+import { formatCurrency } from '@/utils/formatUtils';
 
 const PosRefactored = () => {
-  const { isPremium } = useAuth();
+  const { isPremium, user } = useAuth(); 
   const { toast } = useToast();
   const receiptRef = useRef<HTMLDivElement>(null);
   
@@ -35,38 +38,77 @@ const PosRefactored = () => {
     saveTransaction,
     resetTransaction,
     fetchRecentTransactions,
+    deleteTransaction, 
   } = usePosRefactored();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [receiptVisible, setReceiptVisible] = useState(false);
-  
-  // Filter products based on search term and active tab
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.nama.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = activeTab === 'all' || activeTab === 'favorit'; // Implement favorites if needed
-    return matchesSearch && matchesCategory;
-  });
-  
-  // Handle print receipt
+  const [selectedTxForPrint, setSelectedTxForPrint] = useState<PosTransaction | null>(null);
+  const [isPasswordConfirmOpen, setIsPasswordConfirmOpen] = useState(false);
+  const [actionToConfirm, setActionToConfirm] = useState<(() => Promise<void>) | null>(null);
+  const [passwordDialogTitle, setPasswordDialogTitle] = useState('');
+  const [passwordDialogDescription, setPasswordDialogDescription] = useState('');
+
   const handlePrint = useReactToPrint({
-    documentTitle: `Struk_${new Date().toISOString()}`,
+    documentTitle: `Struk_${selectedTxForPrint?.nama_pembeli || new Date().toISOString()}`,
     onAfterPrint: () => {
       setReceiptVisible(false);
-      toast({
-        title: 'Struk Siap!',
-        description: 'Struk berhasil dicetak',
-      });
+      setSelectedTxForPrint(null);
+      toast({ title: 'Struk Siap!', description: 'Struk berhasil dicetak' });
     },
     contentRef: receiptRef,
   });
   
-  const printReceipt = () => {
+  const printSpecificReceipt = (tx: PosTransaction) => {
+    setSelectedTxForPrint(tx);
     setReceiptVisible(true);
     setTimeout(() => {
       handlePrint();
     }, 100);
   };
+
+  const verifyPasswordAndExecute = async (password: string): Promise<boolean> => {
+    if (!user?.email) {
+      toast({ title: "Error", description: "User email not found.", variant: "destructive" });
+      return false;
+    }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: password,
+      });
+      if (error) {
+        console.error("Password verification failed:", error);
+        return false; 
+      }
+      if (actionToConfirm) {
+        await actionToConfirm(); 
+      }
+      return true; 
+    } catch (e) {
+      console.error("Error during password verification:", e);
+      return false;
+    }
+  };
+
+  const handleDeleteClick = (txId: string) => {
+    setActionToConfirm(async () => {
+      const success = await deleteTransaction(txId);
+      if (success) {
+        fetchRecentTransactions(); // Refresh the list only after successful deletion
+      }
+    });
+    setPasswordDialogTitle("Konfirmasi Hapus Transaksi");
+    setPasswordDialogDescription("Tindakan ini tidak dapat dibatalkan. Masukkan kata sandi Anda untuk menghapus transaksi ini.");
+    setIsPasswordConfirmOpen(true);
+  };
+  
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.nama.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = activeTab === 'all' || activeTab === 'favorit';
+    return matchesSearch && matchesCategory;
+  });
   
   return (
     <DashboardLayout isPremium={isPremium}>
@@ -76,7 +118,6 @@ const PosRefactored = () => {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Product Section */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="bg-white">
             <CardHeader className="pb-3">
@@ -85,8 +126,6 @@ const PosRefactored = () => {
                   <CardTitle className="text-xl">Daftar Produk</CardTitle>
                   <CardDescription>Pilih produk untuk ditambahkan ke keranjang</CardDescription>
                 </div>
-                
-                {/* Search and Tabs */}
                 <div className="w-full md:w-auto">
                   <Input
                     type="search"
@@ -95,7 +134,6 @@ const PosRefactored = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="mb-3"
                   />
-                  
                   <Tabs defaultValue="all" className="w-full" value={activeTab} onValueChange={setActiveTab}>
                     <TabsList className="w-full">
                       <TabsTrigger value="all" className="flex-1">Semua</TabsTrigger>
@@ -105,7 +143,6 @@ const PosRefactored = () => {
                 </div>
               </div>
             </CardHeader>
-            
             <CardContent>
               {!loading && filteredProducts.length === 0 ? (
                 <div className="text-center py-10">
@@ -115,62 +152,46 @@ const PosRefactored = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredProducts.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAdd={addToCart}
-                    />
+                    <ProductCard key={product.id} product={product} onAdd={addToCart} />
                   ))}
                 </div>
               )}
-              
-              {loading && (
-                <div className="text-center py-10">
-                  <p className="text-muted-foreground">Memuat produk...</p>
-                </div>
-              )}
+              {loading && <div className="text-center py-10"><p className="text-muted-foreground">Memuat produk...</p></div>}
             </CardContent>
           </Card>
           
-          {/* Recent Transactions */}
           <Card className="bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="flex justify-between items-center">
                 <span>Transaksi Terbaru</span>
-                <Button variant="ghost" size="icon" onClick={fetchRecentTransactions}>
-                  <RefreshCcw size={18} />
-                </Button>
+                <Button variant="ghost" size="icon" onClick={fetchRecentTransactions}><RefreshCcw size={18} /></Button>
               </CardTitle>
             </CardHeader>
-            
             <CardContent>
               {recentTransactions.length === 0 ? (
                 <p className="text-center text-muted-foreground py-4">Belum ada transaksi</p>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {recentTransactions.map((tx) => (
-                    <div key={tx.id} className="border rounded-lg p-3 hover:bg-slate-50">
-                      <div className="flex justify-between mb-1">
-                        <div className="font-medium">
-                          {tx.nama_pembeli || 'Pelanggan'}
-                        </div>
+                    <div key={tx.id} className="border rounded-lg p-3 hover:bg-slate-50 flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">{tx.nama_pembeli || 'Pelanggan'}</div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(tx.created_at).toLocaleDateString('id-ID')}
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <div className="text-sm text-muted-foreground">
+                          {new Date(tx.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          {' - '}
                           {tx.metode_pembayaran} • {tx.produk.length} items
                         </div>
                         <div className="font-medium text-purple-700">
-                          {new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          }).format(tx.total)}
+                          {formatCurrency(tx.total, 'IDR')}
                         </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(tx.id)} title="Delete">
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => printSpecificReceipt(tx as PosTransaction)} title="Print">
+                          <Printer className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -180,19 +201,14 @@ const PosRefactored = () => {
           </Card>
         </div>
         
-        {/* Order Section */}
         <div className="space-y-6">
-          {/* Cart */}
           <Card className="bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="flex justify-between items-center">
                 <span>Keranjang</span>
-                <span className="text-muted-foreground text-sm font-normal">
-                  {transaction.produk.length} item
-                </span>
+                <span className="text-muted-foreground text-sm font-normal">{transaction.produk.length} item</span>
               </CardTitle>
             </CardHeader>
-            
             <CardContent className="p-0">
               {transaction.produk.length === 0 ? (
                 <div className="text-center py-10">
@@ -204,39 +220,18 @@ const PosRefactored = () => {
                   <ScrollArea className="h-[300px]">
                     <div className="px-6 py-1">
                       {transaction.produk.map((item) => (
-                        <CartItem
-                          key={item.id}
-                          product={item}
-                          onUpdateQuantity={updateQuantity}
-                          onRemove={removeFromCart}
-                        />
+                        <CartItem key={item.id} product={item} onUpdateQuantity={updateQuantity} onRemove={removeFromCart} />
                       ))}
                     </div>
                   </ScrollArea>
-                  
                   <div className="p-6 pt-3 border-t">
                     <div className="flex justify-between mb-2">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-medium">
-                        {new Intl.NumberFormat('id-ID', {
-                          style: 'currency',
-                          currency: 'IDR',
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        }).format(transaction.total)}
-                      </span>
+                      <span className="font-medium">{formatCurrency(transaction.total, 'IDR')}</span>
                     </div>
-                    
                     <div className="flex justify-between">
                       <span className="font-medium">Total Bayar</span>
-                      <span className="font-bold text-lg text-purple-700">
-                        {new Intl.NumberFormat('id-ID', {
-                          style: 'currency',
-                          currency: 'IDR',
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        }).format(transaction.total)}
-                      </span>
+                      <span className="font-bold text-lg text-purple-700">{formatCurrency(transaction.total, 'IDR')}</span>
                     </div>
                   </div>
                 </>
@@ -244,39 +239,40 @@ const PosRefactored = () => {
             </CardContent>
           </Card>
           
-          {/* Payment Panel */}
           <PaymentPanel
             transaction={transaction}
             onPaymentMethodChange={updatePaymentMethod}
             onCashReceivedChange={updateCashReceived}
             onCustomerNameChange={updateCustomerName}
-            onSaveTransaction={saveTransaction}
+            onSaveTransaction={() => saveTransaction(transaction)} 
             onResetTransaction={resetTransaction}
             loading={loading}
           />
           
-          {/* Print Receipt Button */}
           {transaction.produk.length > 0 && (
-            <Button
-              onClick={printReceipt}
-              className="w-full bg-gradient-to-r from-[#E5E0FF] to-[#CAB8FF] hover:from-[#CAB8FF] hover:to-[#B69FFF] text-purple-900"
-            >
-              <Printer size={18} className="mr-2" />
-              Cetak Struk
+            <Button onClick={() => printSpecificReceipt(transaction)} className="w-full bg-gradient-to-r from-[#E5E0FF] to-[#CAB8FF] hover:from-[#CAB8FF] hover:to-[#B69FFF] text-purple-900">
+              <Printer size={18} className="mr-2" /> Cetak Struk
             </Button>
           )}
           
-          {/* Hidden Receipt for Printing */}
           <div className="hidden">
-            {receiptVisible && (
-              <PosReceipt
-                ref={receiptRef}
-                transaction={transaction}
-              />
+            {receiptVisible && selectedTxForPrint && (
+              <PosReceipt ref={receiptRef} transaction={selectedTxForPrint} />
             )}
           </div>
         </div>
       </div>
+
+      <PasswordConfirmationDialog
+        isOpen={isPasswordConfirmOpen}
+        onClose={() => {
+          setIsPasswordConfirmOpen(false);
+          setActionToConfirm(null);
+        }}
+        onConfirm={verifyPasswordAndExecute}
+        title={passwordDialogTitle}
+        description={passwordDialogDescription}
+      />
     </DashboardLayout>
   );
 };

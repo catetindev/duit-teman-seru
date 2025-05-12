@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Bar, 
@@ -52,15 +51,15 @@ export function IncomeExpenseChart({
           <div className="space-y-1">
             <p className="text-sm flex items-center">
               <span className="w-3 h-3 inline-block mr-2 bg-emerald-500 rounded-full"></span>
-              Income: {formatCurrency(payload[0].value)}
+              Income: {formatCurrency(payload[0].value, 'IDR')}
             </p>
             <p className="text-sm flex items-center">
               <span className="w-3 h-3 inline-block mr-2 bg-rose-500 rounded-full"></span>
-              Expenses: {formatCurrency(payload[1].value)}
+              Expenses: {formatCurrency(payload[1].value, 'IDR')}
             </p>
             <p className="text-sm flex items-center">
               <span className="w-3 h-3 inline-block mr-2 bg-blue-500 rounded-full"></span>
-              Profit: {formatCurrency(payload[2].value)}
+              Profit: {formatCurrency(payload[2].value, 'IDR')}
             </p>
           </div>
         </div>

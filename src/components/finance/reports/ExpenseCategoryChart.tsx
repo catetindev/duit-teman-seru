@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { ExpenseCategory } from '@/types/finance';
@@ -36,7 +35,7 @@ export function ExpenseCategoryChart({ data }: ExpenseCategoryChartProps) {
       return (
         <div className="bg-background p-3 border rounded-lg shadow-md">
           <p className="font-medium">{data.category}</p>
-          <p className="text-sm">{formatCurrency(data.amount)}</p>
+          <p className="text-sm">{formatCurrency(data.amount, 'IDR')}</p>
           <p className="text-xs text-muted-foreground">{data.percentage.toFixed(1)}% of expenses</p>
         </div>
       );

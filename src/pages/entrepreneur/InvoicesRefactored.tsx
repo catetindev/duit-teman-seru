@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'; // Changed from Sheet
 import { Card, CardContent } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+// Removed Sheet imports: Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
 import { InvoiceFormRefactored } from '@/components/finance/invoices/InvoiceFormRefactored';
 import { InvoicesList } from '@/components/finance/invoices/InvoicesList';
 import { InvoicePdf } from '@/components/finance/invoices/InvoicePdf';
@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { FileText } from 'lucide-react';
 import { useInvoiceCustomization } from '@/contexts/InvoiceCustomizationContext';
+
 const InvoicesRefactored = () => {
   const {
     isPremium
@@ -118,7 +119,7 @@ const InvoicesRefactored = () => {
       return;
     }
     const invoiceNumber = await generateInvoiceNumber();
-    setSelectedInvoice(null);
+    setSelectedInvoice(null); // Ensure we are in "create" mode
     setIsFormOpen(true);
   };
 
@@ -227,20 +228,27 @@ const InvoicesRefactored = () => {
           {selectedInvoice && getCurrentCustomer() && <InvoicePdf ref={pdfRef} invoice={selectedInvoice} customer={getCurrentCustomer() as Customer} />}
         </div>
 
-        {/* Invoice Form Sheet */}
-        <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <SheetContent side="right" className="w-full sm:w-[1000px] md:w-[1000px] overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}</SheetTitle>
-              <SheetDescription>
+        {/* Invoice Form Dialog */}
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle>{selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}</DialogTitle>
+              <DialogDescription>
                 {selectedInvoice ? `Mengedit Faktur #${selectedInvoice.invoice_number}` : 'Masukkan detail faktur baru Anda'}
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-6">
-              <InvoiceFormRefactored defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : undefined} customers={customers} products={products} onSubmit={handleFormSubmit} onCancel={() => setIsFormOpen(false)} loading={loading.customers || loading.products} />
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-grow overflow-y-auto px-6 pb-6"> {/* Added px-6 pb-6 for padding around form */}
+              <InvoiceFormRefactored 
+                defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : { invoice_number: invoicesLoading ? 'Loading...' : generateInvoiceNumber() } as Partial<InvoiceFormData>}
+                customers={customers} 
+                products={products} 
+                onSubmit={handleFormSubmit} 
+                onCancel={() => setIsFormOpen(false)} 
+                loading={loading.customers || loading.products || invoicesLoading}
+              />
             </div>
-          </SheetContent>
-        </Sheet>
+          </DialogContent>
+        </Dialog>
 
         {/* Invoice PDF Viewer Dialog */}
         <Dialog open={isPdfOpen} onOpenChange={setIsPdfOpen}>

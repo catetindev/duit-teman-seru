@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TrendingDown, TrendingUp, ArrowRight, DollarSign } from 'lucide-react';
 import { FinanceSummary } from '@/types/finance';
@@ -44,7 +43,7 @@ export function FinancialSummaryCards({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="mt-1">
-            <h3 className="text-2xl font-bold">{formatCurrency(totalIncome)}</h3>
+            <h3 className="text-2xl font-bold">{formatCurrency(totalIncome, 'IDR')}</h3>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             Revenue from orders
@@ -59,7 +58,7 @@ export function FinancialSummaryCards({
             <TrendingDown className={`h-4 w-4 ${totalExpenses > totalIncome && showWarning ? 'text-destructive' : 'text-muted-foreground'}`} />
           </div>
           <div className="mt-1">
-            <h3 className="text-2xl font-bold">{formatCurrency(totalExpenses)}</h3>
+            <h3 className="text-2xl font-bold">{formatCurrency(totalExpenses, 'IDR')}</h3>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             Cost of operations
@@ -79,7 +78,7 @@ export function FinancialSummaryCards({
           </div>
           <div className="mt-1">
             <h3 className={`text-2xl font-bold ${isLoss ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-500'}`}>
-              {formatCurrency(netProfit)}
+              {formatCurrency(netProfit, 'IDR')}
             </h3>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">

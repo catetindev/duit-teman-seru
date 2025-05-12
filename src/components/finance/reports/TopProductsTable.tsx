@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TopProduct } from '@/types/finance';
 import {
@@ -9,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatCurrency } from '@/utils/formatUtils';
+import { formatCurrency } from '@/utils/formatUtils'; // Updated import
 
 interface TopProductsTableProps {
   products: TopProduct[];
@@ -40,7 +39,7 @@ export function TopProductsTable({ products }: TopProductsTableProps) {
               <TableCell className="font-medium">{product.name}</TableCell>
               <TableCell className="text-right">{product.count}</TableCell>
               <TableCell className="text-right">
-                {formatCurrency(product.revenue)}
+                {formatCurrency(product.revenue, 'IDR')}
               </TableCell>
             </TableRow>
           ))}

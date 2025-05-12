@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Product } from '@/types/entrepreneur';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -43,15 +42,15 @@ export default function ProductList({ products, loading, onEdit, onDelete }: Pro
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Product/Service</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead className="text-right">Price</TableHead>
-            <TableHead className="text-right">Cost</TableHead>
+            <TableHead>Produk/Layanan</TableHead>
+            <TableHead>Tipe</TableHead>
+            <TableHead>Kategori</TableHead>
+            <TableHead className="text-right">Harga</TableHead>
+            <TableHead className="text-right">Modal</TableHead>
             <TableHead className="text-right">Profit</TableHead>
-            <TableHead className="text-right">Stock</TableHead>
+            <TableHead className="text-right">Stok</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -66,36 +65,36 @@ export default function ProductList({ products, loading, onEdit, onDelete }: Pro
                   <div>
                     <div className="font-medium">{product.name}</div>
                     {product.is_best_seller && (
-                      <Badge variant="secondary" className="mt-1">Best Seller</Badge>
+                      <Badge variant="secondary" className="mt-1">Lagi Hits!</Badge>
                     )}
                   </div>
                 </div>
               </TableCell>
               <TableCell>
                 <Badge variant={product.type === 'product' ? 'default' : 'outline'}>
-                  {product.type}
+                  {product.type === 'product' ? 'Produk' : 'Layanan'}
                 </Badge>
               </TableCell>
               <TableCell>{product.category}</TableCell>
-              <TableCell className="text-right">{formatCurrency(product.price)}</TableCell>
-              <TableCell className="text-right">{formatCurrency(product.cost)}</TableCell>
+              <TableCell className="text-right">{formatCurrency(product.price, 'IDR')}</TableCell>
+              <TableCell className="text-right">{formatCurrency(product.cost, 'IDR')}</TableCell>
               <TableCell className="text-right">
-                <div>{formatCurrency(calculateProfit(product.price, product.cost))}</div>
+                <div>{formatCurrency(calculateProfit(product.price, product.cost), 'IDR')}</div>
                 <div className="text-xs text-muted-foreground">
                   {calculateProfitMargin(product.price, product.cost).toFixed(1)}%
                 </div>
               </TableCell>
               <TableCell className="text-right">
                 <div className={product.stock < 5 && product.type === 'product' ? 'text-red-500 font-medium' : ''}>
-                  {product.type === 'product' ? product.stock : '—'}
+                  {product.type === 'product' ? product.stock : 'N/A'}
                 </div>
                 {product.stock < 5 && product.type === 'product' && (
-                  <div className="text-xs text-red-500">Low stock!</div>
+                  <div className="text-xs text-red-500">Stok Tipis!</div>
                 )}
               </TableCell>
               <TableCell>
                 <Badge variant={product.status ? 'success' : 'destructive'}>
-                  {product.status ? 'Active' : 'Inactive'}
+                  {product.status ? 'Aktif' : 'Nonaktif'}
                 </Badge>
               </TableCell>
               <TableCell>

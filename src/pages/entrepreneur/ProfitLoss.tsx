@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { format, subDays, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -221,7 +220,7 @@ const ProfitLoss = () => {
                           </div>
                         </div>
                         <p className="text-sm font-medium">
-                          -{Intl.NumberFormat('en-US', { 
+                          -{Intl.NumberFormat('id-ID', { 
                             style: 'currency', 
                             currency: 'IDR',
                             minimumFractionDigits: 0,
@@ -257,7 +256,7 @@ const ProfitLoss = () => {
                 {/* We can implement more detailed income analysis here */}
                 <div className="flex flex-col items-center justify-center py-8">
                   <p className="text-2xl font-bold mb-2">
-                    {Intl.NumberFormat('en-US', { 
+                    {Intl.NumberFormat('id-ID', { 
                       style: 'currency', 
                       currency: 'IDR',
                       minimumFractionDigits: 0,

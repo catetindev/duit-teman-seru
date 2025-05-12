@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -124,9 +123,9 @@ export default function Products() {
     <DashboardLayout isPremium={isPremium}>
       <div className="p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold mb-4 md:mb-0">Products & Services</h1>
+          <h1 className="text-2xl font-bold mb-4 md:mb-0">Produk & Layanan</h1>
           <Button onClick={handleAddNew} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add New
+            <Plus className="h-4 w-4" /> Tambah Produk Baru
           </Button>
         </div>
         
@@ -135,7 +134,7 @@ export default function Products() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder="Cari produk..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -146,11 +145,11 @@ export default function Products() {
             <SelectTrigger className="w-full">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
-                <span>{categoryFilter === 'all' ? 'All Categories' : categoryFilter}</span>
+                <span>{categoryFilter === 'all' ? 'Semua Kategori' : categoryFilter}</span>
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">Semua Kategori</SelectItem>
               {categories.map(category => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
@@ -162,15 +161,15 @@ export default function Products() {
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 <span>
-                  {statusFilter === 'all' ? 'All Status' : 
-                   statusFilter === 'active' ? 'Active Only' : 'Inactive Only'}
+                  {statusFilter === 'all' ? 'Semua Status' : 
+                   statusFilter === 'active' ? 'Aktif Saja' : 'Nonaktif Saja'}
                 </span>
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active Only</SelectItem>
-              <SelectItem value="inactive">Inactive Only</SelectItem>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="active">Aktif Saja</SelectItem>
+              <SelectItem value="inactive">Nonaktif Saja</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -1,4 +1,3 @@
-
 import { useProductManagement } from './useProductManagement';
 import { useCartManagement } from './useCartManagement';
 import { useTransactionManagement } from './useTransactionManagement';
@@ -26,6 +25,7 @@ export function usePosRefactored() {
     loading: transactionLoading,
     recentTransactions,
     saveTransaction,
+    deleteTransaction, // Added deleteTransaction
     fetchRecentTransactions
   } = useTransactionManagement();
 
@@ -44,7 +44,7 @@ export function usePosRefactored() {
   useEffect(() => {
     fetchProducts();
     fetchRecentTransactions();
-  }, []);
+  }, [fetchProducts, fetchRecentTransactions]); // Added fetchProducts and fetchRecentTransactions to dependency array
 
   return {
     products,
@@ -58,8 +58,9 @@ export function usePosRefactored() {
     updateCashReceived,
     updateCustomerName,
     saveTransaction: handleSaveTransaction,
+    deleteTransaction, // Export deleteTransaction
     resetTransaction,
-    fetchProducts,
-    fetchRecentTransactions,
+    fetchProducts, // Still export if needed for manual refresh elsewhere
+    fetchRecentTransactions, // Still export if needed for manual refresh elsewhere
   };
 }

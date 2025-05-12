@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Order } from '@/types/entrepreneur';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatDate } from '@/utils/formatUtils';
+import { formatCurrency, formatDate } from '@/utils/formatUtils'; // Updated import
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface OrderListProps {
@@ -85,7 +84,7 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
                 </div>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {formatCurrency(order.total)}
+                {formatCurrency(order.total, 'IDR')}
               </TableCell>
               <TableCell>
                 <Select

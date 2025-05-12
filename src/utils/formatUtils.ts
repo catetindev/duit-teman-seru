@@ -1,14 +1,22 @@
-
 // This file already exists, so we'll append to it
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 
 // Format currency
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
+export function formatCurrency(amount: number, currency: string = 'IDR'): string { // Default to IDR
+  if (currency === 'IDR') {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+  // For other currencies, keep original behavior or define as needed
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 2
+    currency: currency, // This will use the provided currency symbol
+    minimumFractionDigits: 2, // Standard for USD, EUR etc.
   }).format(amount);
 }
 

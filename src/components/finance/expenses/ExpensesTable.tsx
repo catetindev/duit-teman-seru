@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Table,
@@ -17,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import { BusinessExpense } from '@/types/finance';
-import { formatCurrency, formatDate } from '@/utils/formatUtils';
+import { formatCurrency, formatDate } from '@/utils/formatUtils'; // Updated import
 
 interface ExpensesTableProps {
   expenses: BusinessExpense[];
@@ -57,7 +56,7 @@ export function ExpensesTable({ expenses, onEdit, onDelete }: ExpensesTableProps
                   </TableCell>
                   <TableCell>{formatDate(new Date(expense.date))}</TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatCurrency(Number(expense.amount))}
+                    {formatCurrency(Number(expense.amount), 'IDR')}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

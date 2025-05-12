@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { ComparisonData } from '@/types/finance';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatCurrency } from '@/utils/formatUtils';
+import { formatCurrency } from '@/utils/formatUtils'; // Updated import
 
 interface ComparisonCardsProps {
   data: ComparisonData;
@@ -53,10 +52,10 @@ export function ComparisonCards({ data }: ComparisonCardsProps) {
               </div>
             </div>
             <p className="text-xl font-semibold">
-              {formatCurrency(data.current.totalIncome)}
+              {formatCurrency(data.current.totalIncome, 'IDR')}
             </p>
             <p className="text-xs text-muted-foreground">
-              vs {formatCurrency(data.previous.totalIncome)} last month
+              vs {formatCurrency(data.previous.totalIncome, 'IDR')} last month
             </p>
           </div>
         </CardContent>
@@ -75,10 +74,10 @@ export function ComparisonCards({ data }: ComparisonCardsProps) {
               </div>
             </div>
             <p className="text-xl font-semibold">
-              {formatCurrency(data.current.totalExpenses)}
+              {formatCurrency(data.current.totalExpenses, 'IDR')}
             </p>
             <p className="text-xs text-muted-foreground">
-              vs {formatCurrency(data.previous.totalExpenses)} last month
+              vs {formatCurrency(data.previous.totalExpenses, 'IDR')} last month
             </p>
           </div>
         </CardContent>
@@ -97,10 +96,10 @@ export function ComparisonCards({ data }: ComparisonCardsProps) {
               </div>
             </div>
             <p className="text-xl font-semibold">
-              {formatCurrency(data.current.netProfit)}
+              {formatCurrency(data.current.netProfit, 'IDR')}
             </p>
             <p className="text-xs text-muted-foreground">
-              vs {formatCurrency(data.previous.netProfit)} last month
+              vs {formatCurrency(data.previous.netProfit, 'IDR')} last month
             </p>
           </div>
         </CardContent>
