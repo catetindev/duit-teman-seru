@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +13,7 @@ import { InvoiceItemsSection } from './form/InvoiceItemsSection';
 import { InvoicePaymentForm } from './form/InvoicePaymentForm';
 import { InvoiceTotalsSection } from './form/InvoiceTotalsSection';
 import { LogoUploader } from './form/LogoUploader';
+import { cn } from '@/lib/utils'; // Import cn utility
 
 // Define schema for invoice form
 const invoiceItemSchema = z.object({
@@ -136,10 +136,13 @@ export function InvoiceFormRefactored({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="informasi">Informasi Faktur</TabsTrigger>
-            <TabsTrigger value="produk">Item & Produk</TabsTrigger>
-            <TabsTrigger value="pembayaran">Pembayaran</TabsTrigger>
+          <TabsList className={cn(
+            "w-full grid grid-cols-3", // Use grid for mobile
+            "bg-muted/60 rounded-full p-1 mb-2" // Existing styles
+          )}>
+            <TabsTrigger value="informasi" className="rounded-full">Informasi Faktur</TabsTrigger>
+            <TabsTrigger value="produk" className="rounded-full">Item & Produk</TabsTrigger>
+            <TabsTrigger value="pembayaran" className="rounded-full">Pembayaran</TabsTrigger>
           </TabsList>
           
           <div className="mt-6">

@@ -24,7 +24,7 @@ export function TopProductsTable({ products }: TopProductsTableProps) {
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto"> {/* Added overflow-x-auto */}
       <Table>
         <TableHeader>
           <TableRow>
