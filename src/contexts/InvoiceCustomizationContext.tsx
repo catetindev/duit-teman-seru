@@ -14,6 +14,12 @@ interface InvoiceCustomization {
   setBusinessName: (name: string) => void;
 }
 
+interface InvoiceSettings {
+  logoUrl: string | null;
+  showLogo: boolean;
+  businessName: string;
+}
+
 const defaultCustomization: InvoiceCustomization = {
   logoUrl: null,
   showLogo: true,
@@ -42,20 +48,26 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
       if (!user?.id) return;
 
       try {
-        // Load business settings from user_settings or dedicated table
+        // Check if the user has custom logo settings as a JSON string in a column
         const { data, error } = await supabase
           .from('user_settings')
-          .select('invoice_settings')
+          .select('*')
           .eq('user_id', user.id)
           .single();
 
         if (error) throw error;
         
-        if (data?.invoice_settings) {
-          const settings = data.invoice_settings;
-          setLogoUrl(settings.logoUrl || null);
-          setShowLogo(settings.showLogo !== undefined ? settings.showLogo : true);
-          setBusinessName(settings.businessName || 'Nama Bisnis Anda');
+        // Using a custom JSON field for invoice settings
+        if (data) {
+          // Try to parse custom_settings if it exists, or create it if it doesn't
+          const settings = data.custom_settings ? 
+            JSON.parse(data.custom_settings)?.invoice_settings : null;
+            
+          if (settings) {
+            setLogoUrl(settings.logoUrl || null);
+            setShowLogo(settings.showLogo !== undefined ? settings.showLogo : true);
+            setBusinessName(settings.businessName || 'Nama Bisnis Anda');
+          }
         }
       } catch (error) {
         console.error('Error loading invoice preferences:', error);
@@ -70,14 +82,38 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
     if (!user?.id) return;
 
     try {
+      // First, get existing settings
+      const { data: existingSettings } = await supabase
+        .from('user_settings')
+        .select('custom_settings')
+        .eq('user_id', user.id)
+        .single();
+
+      // Prepare the updated custom_settings object
+      let customSettings = {};
+      if (existingSettings?.custom_settings) {
+        try {
+          customSettings = JSON.parse(existingSettings.custom_settings);
+        } catch (e) {
+          console.warn('Failed to parse existing custom_settings, creating new object');
+        }
+      }
+
+      // Update the invoice_settings part
+      customSettings = {
+        ...customSettings,
+        invoice_settings: {
+          logoUrl,
+          showLogo,
+          businessName
+        }
+      };
+
+      // Update the user_settings table with the new JSON
       const { error } = await supabase
         .from('user_settings')
         .update({
-          invoice_settings: {
-            logoUrl,
-            showLogo,
-            businessName
-          }
+          custom_settings: JSON.stringify(customSettings)
         })
         .eq('user_id', user.id);
 

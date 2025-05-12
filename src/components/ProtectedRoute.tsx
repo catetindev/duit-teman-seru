@@ -8,13 +8,15 @@ interface ProtectedRouteProps {
   requiredRole?: 'free' | 'premium' | 'admin';
   premium?: boolean;
   admin?: boolean;
+  adminOnly?: boolean; // Add this prop
 }
 
 const ProtectedRoute = ({ 
   children, 
   requiredRole = 'free', 
   premium = false,
-  admin = false
+  admin = false,
+  adminOnly = false // Add default value
 }: ProtectedRouteProps) => {
   const { user, userRole, isLoading } = useAuth();
   const location = useLocation();
@@ -37,7 +39,7 @@ const ProtectedRoute = ({
   // Set the required role based on premium or admin props
   let effectiveRole = requiredRole;
   if (premium) effectiveRole = 'premium';
-  if (admin) effectiveRole = 'admin';
+  if (admin || adminOnly) effectiveRole = 'admin'; // Handle both admin and adminOnly props
 
   // Check role-based permissions
   if (effectiveRole === 'admin' && userRole !== 'admin') {
