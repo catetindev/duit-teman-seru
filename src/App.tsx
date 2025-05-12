@@ -27,6 +27,8 @@ import { InvoiceCustomizationProvider } from '@/contexts/InvoiceCustomizationCon
 import PosRefactored from '@/pages/entrepreneur/PosRefactored';
 import FinanceReports from '@/pages/entrepreneur/FinanceReports';
 import InvoicesRefactored from '@/pages/entrepreneur/InvoicesRefactored';
+import ProfitLoss from '@/pages/entrepreneur/ProfitLoss';
+import Calculator from '@/pages/entrepreneur/Calculator';
 
 function App() {
   return (
@@ -59,6 +61,8 @@ function App() {
         <Route path="/pos" element={<ProtectedRoute><PosRefactored /></ProtectedRoute>} />
         <Route path="/finance-reports" element={<ProtectedRoute><FinanceReports /></ProtectedRoute>} />
         <Route path="/invoices" element={<ProtectedRoute><InvoicesRefactored /></ProtectedRoute>} />
+        <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
+        <Route path="/calculator" element={<ProtectedRoute><Calculator /></ProtectedRoute>} />
         
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />

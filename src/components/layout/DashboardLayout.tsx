@@ -96,7 +96,7 @@ const DashboardLayout = ({
               <SidebarNavLink to="/invoices" icon={<FileText className="h-5 w-5" />}>
                 Invoice Generator
               </SidebarNavLink>
-              <SidebarNavLink to="/reports" icon={<FileBarChart className="h-5 w-5" />}>
+              <SidebarNavLink to="/finance-reports" icon={<FileBarChart className="h-5 w-5" />}>
                 Laporan Keuangan
               </SidebarNavLink>
             </SidebarGroupContent>
@@ -182,9 +182,7 @@ const DashboardLayout = ({
                 <div className="flex items-center gap-2">
                   <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-10" />
                 </div>
-                {isPremium && (
-                  <EntrepreneurModeToggle className="mr-2" />
-                )}
+                {/* Removing the redundant EntrepreneurModeToggle here */}
               </div>
             </SidebarHeader>
             {renderSidebarContent()}
