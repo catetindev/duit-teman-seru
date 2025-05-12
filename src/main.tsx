@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './hooks/useLanguage'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter } from 'react-router-dom'
 
 // Create a client
 const queryClient = new QueryClient()
@@ -13,11 +14,13 @@ const queryClient = new QueryClient()
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <LanguageProvider>
-        <TooltipProvider>
-          <App />
-        </TooltipProvider>
-      </LanguageProvider>
+      <BrowserRouter>
+        <LanguageProvider>
+          <TooltipProvider>
+            <App />
+          </TooltipProvider>
+        </LanguageProvider>
+      </BrowserRouter>
     </AuthProvider>
   </QueryClientProvider>
 );
