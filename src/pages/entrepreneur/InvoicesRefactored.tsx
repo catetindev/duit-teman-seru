@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -19,11 +18,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { FileText } from 'lucide-react';
 import { useInvoiceCustomization } from '@/contexts/InvoiceCustomizationContext';
-
 const InvoicesRefactored = () => {
-  const { isPremium } = useAuth();
-  const { toast } = useToast();
-  const { logoUrl, showLogo, businessName } = useInvoiceCustomization();
+  const {
+    isPremium
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    logoUrl,
+    showLogo,
+    businessName
+  } = useInvoiceCustomization();
 
   // States for invoice management
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -41,9 +47,9 @@ const InvoicesRefactored = () => {
   const pdfRef = useRef<HTMLDivElement>(null);
 
   // Invoice hooks
-  const { 
-    invoices, 
-    loading: invoicesLoading, 
+  const {
+    invoices,
+    loading: invoicesLoading,
     fetchInvoices,
     generateInvoiceNumber,
     addInvoice,
@@ -60,27 +66,30 @@ const InvoicesRefactored = () => {
         description: 'Faktur Anda telah berhasil dibuat'
       });
     },
-    contentRef: pdfRef,
+    contentRef: pdfRef
   });
 
   // Fetch customers and products
   const fetchData = async () => {
     try {
-      setLoading({ customers: true, products: true });
+      setLoading({
+        customers: true,
+        products: true
+      });
 
       // Fetch customers
-      const { data: customersData, error: customersError } = await supabase
-        .from('customers')
-        .select('*');
-      
+      const {
+        data: customersData,
+        error: customersError
+      } = await supabase.from('customers').select('*');
       if (customersError) throw customersError;
       setCustomers(customersData as Customer[]);
 
       // Fetch products
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('*');
-      
+      const {
+        data: productsData,
+        error: productsError
+      } = await supabase.from('products').select('*');
       if (productsError) throw productsError;
       setProducts(productsData as Product[]);
     } catch (error: any) {
@@ -91,7 +100,10 @@ const InvoicesRefactored = () => {
         variant: 'destructive'
       });
     } finally {
-      setLoading({ customers: false, products: false });
+      setLoading({
+        customers: false,
+        products: false
+      });
     }
   };
 
@@ -105,7 +117,6 @@ const InvoicesRefactored = () => {
       });
       return;
     }
-
     const invoiceNumber = await generateInvoiceNumber();
     setSelectedInvoice(null);
     setIsFormOpen(true);
@@ -147,19 +158,16 @@ const InvoicesRefactored = () => {
     setSelectedInvoice(invoice);
     setIsPdfOpen(true);
   };
-
   const handleEditInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setIsFormOpen(true);
   };
-
   const handleDeleteInvoice = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus faktur ini?')) {
       await deleteInvoice(id);
       fetchInvoices(selectedFilter !== 'All' ? selectedFilter : undefined);
     }
   };
-
   const handleDownloadPdf = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setTimeout(() => {
@@ -183,23 +191,17 @@ const InvoicesRefactored = () => {
   const getCurrentCustomer = () => {
     if (!selectedInvoice) return null;
     // Look up customer from the nested customers data in the invoice
-    const customer = (selectedInvoice as any).customers || 
-      customers.find(c => c.id === selectedInvoice.customer_id);
+    const customer = (selectedInvoice as any).customers || customers.find(c => c.id === selectedInvoice.customer_id);
     return customer;
   };
 
   // Create a function to properly cast Invoice to InvoiceFormData
   const prepareInvoiceForForm = (invoice: Invoice): Partial<InvoiceFormData> => {
     // Parse items if they're a string
-    const items = Array.isArray(invoice.items) 
-      ? invoice.items 
-      : JSON.parse(typeof invoice.items === 'string' 
-          ? invoice.items 
-          : JSON.stringify(invoice.items));
-    
+    const items = Array.isArray(invoice.items) ? invoice.items : JSON.parse(typeof invoice.items === 'string' ? invoice.items : JSON.stringify(invoice.items));
+
     // Ensure status is a valid InvoiceStatus type
     const status = invoice.status as any;
-    
     return {
       ...invoice,
       items,
@@ -207,9 +209,7 @@ const InvoicesRefactored = () => {
       payment_due_date: new Date(invoice.payment_due_date)
     };
   };
-
-  return (
-    <DashboardLayout isPremium={isPremium}>
+  return <DashboardLayout isPremium={isPremium}>
       <div className="space-y-6">
         {/* Header */}
         <InvoiceHeader onAddInvoice={handleAddInvoice} />
@@ -218,52 +218,26 @@ const InvoicesRefactored = () => {
         <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
           <div className="space-y-4">
             {/* Invoice List for current filter */}
-            <InvoicesList 
-              invoices={selectedFilter === 'All' 
-                ? invoices 
-                : invoices.filter(inv => inv.status === selectedFilter)} 
-              onViewInvoice={handleViewInvoice}
-              onEditInvoice={handleEditInvoice}
-              onDeleteInvoice={handleDeleteInvoice}
-              onDownloadPdf={handleDownloadPdf}
-            />
+            <InvoicesList invoices={selectedFilter === 'All' ? invoices : invoices.filter(inv => inv.status === selectedFilter)} onViewInvoice={handleViewInvoice} onEditInvoice={handleEditInvoice} onDeleteInvoice={handleDeleteInvoice} onDownloadPdf={handleDownloadPdf} />
           </div>
         </InvoiceStatusFilter>
 
         {/* Hidden div for PDF generation */}
         <div className="hidden">
-          {selectedInvoice && getCurrentCustomer() && (
-            <InvoicePdf 
-              ref={pdfRef}
-              invoice={selectedInvoice}
-              customer={getCurrentCustomer() as Customer}
-            />
-          )}
+          {selectedInvoice && getCurrentCustomer() && <InvoicePdf ref={pdfRef} invoice={selectedInvoice} customer={getCurrentCustomer() as Customer} />}
         </div>
 
         {/* Invoice Form Sheet */}
-        <Sheet 
-          open={isFormOpen} 
-          onOpenChange={setIsFormOpen}
-        >
-          <SheetContent side="right" className="w-full sm:w-[600px] md:w-[900px] overflow-y-auto">
+        <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <SheetContent side="right" className="w-full sm:w-[800px] md:w-[900px] overflow-y-auto">
             <SheetHeader>
               <SheetTitle>{selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}</SheetTitle>
               <SheetDescription>
-                {selectedInvoice
-                  ? `Mengedit Faktur #${selectedInvoice.invoice_number}`
-                  : 'Masukkan detail faktur baru Anda'}
+                {selectedInvoice ? `Mengedit Faktur #${selectedInvoice.invoice_number}` : 'Masukkan detail faktur baru Anda'}
               </SheetDescription>
             </SheetHeader>
             <div className="mt-6">
-              <InvoiceFormRefactored
-                defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : undefined}
-                customers={customers}
-                products={products}
-                onSubmit={handleFormSubmit}
-                onCancel={() => setIsFormOpen(false)}
-                loading={loading.customers || loading.products}
-              />
+              <InvoiceFormRefactored defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : undefined} customers={customers} products={products} onSubmit={handleFormSubmit} onCancel={() => setIsFormOpen(false)} loading={loading.customers || loading.products} />
             </div>
           </SheetContent>
         </Sheet>
@@ -273,28 +247,18 @@ const InvoicesRefactored = () => {
           <DialogContent className="max-w-4xl">
             <Card className="overflow-hidden">
               <CardContent className="p-0">
-                {selectedInvoice && getCurrentCustomer() && (
-                  <div className="relative">
-                    <Button
-                      className="absolute top-4 right-4"
-                      onClick={handlePrint}
-                    >
+                {selectedInvoice && getCurrentCustomer() && <div className="relative">
+                    <Button className="absolute top-4 right-4" onClick={handlePrint}>
                       <FileText className="h-4 w-4 mr-2" />
                       Unduh PDF
                     </Button>
-                    <InvoicePdf 
-                      invoice={selectedInvoice}
-                      customer={getCurrentCustomer() as Customer}
-                    />
-                  </div>
-                )}
+                    <InvoicePdf invoice={selectedInvoice} customer={getCurrentCustomer() as Customer} />
+                  </div>}
               </CardContent>
             </Card>
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default InvoicesRefactored;
