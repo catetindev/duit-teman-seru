@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { cn } from '@/lib/utils'; // Import cn utility
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -56,10 +57,8 @@ const DashboardLayout = ({
     );
   }
 
-  // Different menu items for personal and entrepreneur modes
   const renderSidebarContent = () => {
     if (isEntrepreneurMode) {
-      // Entrepreneur mode menu items
       return (
         <SidebarContent>
           <SidebarGroup>
@@ -121,7 +120,6 @@ const DashboardLayout = ({
         </SidebarContent>
       );
     } else {
-      // Regular mode menu items
       return (
         <SidebarContent>
           <SidebarGroup>
@@ -170,18 +168,15 @@ const DashboardLayout = ({
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full relative">
-        {/* Display Mobile Navbar when on mobile */}
         {isMobile && <MobileNavbar isPremium={isPremium} isAdmin={isAdmin} />}
         
-        {/* Desktop Sidebar */}
         {!isMobile && (
           <Sidebar>
             <SidebarHeader>
-              <div className="flex items-center justify-between w-full">
+              <div className="flex items-center justify-center w-full"> {/* Centered logo */}
                 <div className="flex items-center gap-2">
                   <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-10" />
                 </div>
-                {/* Removing the redundant EntrepreneurModeToggle here */}
               </div>
             </SidebarHeader>
             {renderSidebarContent()}
@@ -193,15 +188,13 @@ const DashboardLayout = ({
           </Sidebar>
         )}
 
-        <div className={`flex-1 ${isMobile ? '' : 'ml-64'} transition-all duration-300`}>
-          <main className="h-full p-4 md:p-6 lg:p-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10">
-            {/* Mobile top and bottom spacing for the navbar */}
-            {isMobile && (
-              <>
-                <div className="h-16"></div> {/* Top spacing */}
-                <div className="h-16 pb-4"></div> {/* Bottom spacing */}
-              </>
+        <div className={cn("flex-1 transition-all duration-300", !isMobile && "ml-64")}>
+          <main 
+            className={cn(
+              "h-full p-4 md:p-6 lg:p-8 overflow-y-auto bg-gradient-to-b from-purple-50/30 to-white/80 dark:from-gray-900/20 dark:to-gray-800/10",
+              isMobile && "pt-20 pb-20" // Padding top for top navbar, padding bottom for bottom navbar
             )}
+          >
             {children}
           </main>
         </div>

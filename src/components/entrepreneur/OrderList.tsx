@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Edit, Trash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatDate } from '@/utils/formatUtils'; // Updated import
+import { formatCurrency, formatDate } from '@/utils/formatUtils'; 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface OrderListProps {
@@ -28,7 +28,6 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
     );
   }
 
-  // Helper for status badge color
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'Paid':
@@ -48,9 +47,9 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
         <TableHeader>
           <TableRow>
             <TableHead>Order ID</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead className="hidden sm:table-cell">Date</TableHead>
             <TableHead>Customer</TableHead>
-            <TableHead>Payment</TableHead>
+            <TableHead className="hidden md:table-cell">Payment</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
@@ -60,15 +59,16 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
           {orders.map((order) => (
             <TableRow key={order.id}>
               <TableCell className="font-medium">
-                {order.id.substring(0, 8)}...
+                <span className="block sm:hidden">{order.id.substring(0, 4)}...</span>
+                <span className="hidden sm:block">{order.id.substring(0, 8)}...</span>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden sm:table-cell">
                 {formatDate(new Date(order.order_date))}
               </TableCell>
               <TableCell>
                 {order.customer?.name || 'Unknown Customer'}
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 <div className="space-y-1">
                   <div>{order.payment_method}</div>
                   {order.payment_proof_url && (
@@ -91,8 +91,8 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
                   value={order.status}
                   onValueChange={(value: Order['status']) => onStatusChange(order.id, value)}
                 >
-                  <SelectTrigger className="w-32 h-8 px-2">
-                    <Badge variant={getStatusBadgeVariant(order.status)}>
+                  <SelectTrigger className="w-full sm:w-32 h-8 px-2 text-xs sm:text-sm">
+                    <Badge variant={getStatusBadgeVariant(order.status)} className="truncate">
                       {order.status}
                     </Badge>
                   </SelectTrigger>
@@ -104,7 +104,7 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
                 </Select>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
                   <Button variant="ghost" size="icon" onClick={() => onEdit(order)}>
                     <Edit className="h-4 w-4" />
                   </Button>

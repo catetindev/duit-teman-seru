@@ -1,14 +1,21 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   BarChart2, Bell, LayoutDashboard, MessageSquare, PieChart, 
   Settings, ShieldAlert, Target, Package, ShoppingCart, 
-  Users, Calculator, FileText, FileBarChart, CreditCard, ArrowDownUp // Added ArrowDownUp
+  Users, Calculator, FileText, FileBarChart, CreditCard, ArrowDownUp,
+  Menu, X, LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/hooks/useLanguage';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { SidebarNavLink } from '@/components/ui/sidebar';
+import LogoutButton from '@/components/ui/LogoutButton';
 
 interface MobileNavbarProps {
   isPremium?: boolean;
@@ -17,28 +24,120 @@ interface MobileNavbarProps {
 
 const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
   const location = useLocation();
-  const { unreadCount } = useNotifications('current'); // Assuming 'current' is a valid user ID or placeholder
+  const navigate = useNavigate();
+  const { user } = useAuth(); 
+  const { unreadCount } = useNotifications(user?.id); 
   const { isEntrepreneurMode } = useEntrepreneurMode();
+  const { t } = useLanguage();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
+
+  const handleLinkClick = () => {
+    setIsSheetOpen(false);
+  };
   
+  const commonUserLinks = (
+    <>
+      <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />} onClick={handleLinkClick}>
+        Notifikasi
+      </SidebarNavLink>
+      <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />} onClick={handleLinkClick}>
+        Feedback
+      </SidebarNavLink>
+      <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />} onClick={handleLinkClick}>
+        {t('nav.settings')}
+      </SidebarNavLink>
+      {isAdmin && (
+        <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />} onClick={handleLinkClick}>
+          Admin
+        </SidebarNavLink>
+      )}
+    </>
+  );
+
+  const entrepreneurModeLinks = (
+    <>
+      <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} onClick={handleLinkClick} end>
+        Dashboard
+      </SidebarNavLink>
+      <SidebarNavLink to="/products" icon={<Package className="h-5 w-5" />} onClick={handleLinkClick}>
+        Produk & Layanan
+      </SidebarNavLink>
+      <SidebarNavLink to="/pos" icon={<CreditCard className="h-5 w-5" />} onClick={handleLinkClick}>
+        POS / Kasir
+      </SidebarNavLink>
+      <SidebarNavLink to="/orders" icon={<ShoppingCart className="h-5 w-5" />} onClick={handleLinkClick}>
+        Pesanan & Transaksi
+      </SidebarNavLink>
+      <SidebarNavLink to="/customers" icon={<Users className="h-5 w-5" />} onClick={handleLinkClick}>
+        Pelanggan
+      </SidebarNavLink>
+      <SidebarNavLink to="/profit-loss" icon={<PieChart className="h-5 w-5" />} onClick={handleLinkClick}>
+        Laporan Untung Rugi
+      </SidebarNavLink>
+      <SidebarNavLink to="/calculator" icon={<Calculator className="h-5 w-5" />} onClick={handleLinkClick}>
+        Kalkulator HPP
+      </SidebarNavLink>
+      <SidebarNavLink to="/invoices" icon={<FileText className="h-5 w-5" />} onClick={handleLinkClick}>
+        Invoice Generator
+      </SidebarNavLink>
+      <SidebarNavLink to="/finance-reports" icon={<FileBarChart className="h-5 w-5" />} onClick={handleLinkClick}>
+        Laporan Keuangan
+      </SidebarNavLink>
+      {commonUserLinks}
+    </>
+  );
+
+  const personalModeLinks = (
+     <>
+      <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} onClick={handleLinkClick} end>
+        {t('nav.dashboard')}
+      </SidebarNavLink>
+      <SidebarNavLink to="/transactions" icon={<ArrowDownUp className="h-5 w-5" />} onClick={handleLinkClick}>
+        {t('nav.transactions')}
+      </SidebarNavLink>
+      <SidebarNavLink to="/goals" icon={<Target className="h-5 w-5" />} onClick={handleLinkClick}>
+        {t('nav.goals')}
+      </SidebarNavLink>
+      <SidebarNavLink to="/budget" icon={<BarChart2 className="h-5 w-5" />} onClick={handleLinkClick}>
+        {t('nav.budget')}
+      </SidebarNavLink>
+      {isPremium && (
+        <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />} onClick={handleLinkClick}>
+          {t('nav.analytics')}
+        </SidebarNavLink>
+      )}
+      {commonUserLinks}
+    </>
+  );
+
   return (
     <>
       {/* Top navbar */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-background border-b flex items-center justify-between px-4 z-50">
-        <Link to="/dashboard" className="flex items-center">
-          <img 
-            src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
-            alt="Catatuy Logo" 
-            className="h-8" 
-          />
-        </Link>
+        {/* Left Item: Toggle */}
+        <div className="flex-shrink-0">
+            {isPremium && <EntrepreneurModeToggle />}
+        </div>
+
+        {/* Center Item: Logo */}
+        {/* The parent uses justify-between, so this div will be pushed by the left and right items.
+            To truly center it irrespective of left/right content width, absolute positioning is better. */}
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <Link to="/dashboard" className="flex items-center">
+                <img 
+                    src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+                    alt="Catatuy Logo" 
+                    className="h-8" 
+                />
+            </Link>
+        </div>
         
-        <div className="flex items-center gap-2">
-          {isPremium && <EntrepreneurModeToggle />}
-          
+        {/* Right Items: Notifications and Menu */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Link 
             to="/notifications" 
             className={cn(
@@ -54,27 +153,42 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             )}
           </Link>
           
-          <Link 
-            to="/settings" 
-            className={cn(
-              "p-2 rounded-full hover:bg-accent", 
-              isActive('/settings') && "bg-accent"
-            )}
-          >
-            <Settings className="h-5 w-5" />
-          </Link>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-2">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] p-0 flex flex-col">
+              <SheetHeader className="p-4 border-b">
+                <SheetTitle className="flex items-center gap-2">
+                   <img 
+                    src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+                    alt="Catatuy Logo" 
+                    className="h-8" 
+                  />
+                  Menu
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex-grow overflow-y-auto p-4 space-y-2">
+                {isEntrepreneurMode ? entrepreneurModeLinks : personalModeLinks}
+              </div>
+              <div className="p-4 border-t">
+                <LogoutButton variant="outline" className="w-full" />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
       
       {/* Bottom navbar - display different navigation based on mode */}
       <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t flex items-center justify-around px-2 z-50">
         {isEntrepreneurMode ? (
-          // Entrepreneur mode mobile navigation
           <>
             <Link 
               to="/dashboard" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/dashboard') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
@@ -87,7 +201,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/products" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/products') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
@@ -100,7 +214,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/orders" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/orders') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
@@ -113,7 +227,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/profit-loss" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/profit-loss') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
@@ -126,7 +240,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/pos" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/pos') 
                   ? "text-amber-500" 
                   : "text-muted-foreground"
@@ -137,12 +251,11 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             </Link>
           </>
         ) : (
-          // Regular mode mobile navigation
           <>
             <Link 
               to="/dashboard" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/dashboard') 
                   ? "text-primary" 
                   : "text-muted-foreground"
@@ -155,7 +268,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/transactions" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/transactions') 
                   ? "text-primary" 
                   : "text-muted-foreground"
@@ -168,7 +281,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/goals" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/goals') 
                   ? "text-primary" 
                   : "text-muted-foreground"
@@ -181,7 +294,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             <Link 
               to="/budget" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                 isActive('/budget') 
                   ? "text-primary" 
                   : "text-muted-foreground"
@@ -195,7 +308,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
               <Link 
                 to="/analytics" 
                 className={cn(
-                  "flex flex-1 flex-col items-center justify-center text-xs px-1", 
+                  "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
                   isActive('/analytics') 
                     ? "text-primary" 
                     : "text-muted-foreground"

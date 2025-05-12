@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useEntrepreneurModeSwitcher } from '@/hooks/useEntrepreneurModeSwitcher';
 import { Switch } from '@/components/ui/switch';
@@ -41,14 +40,7 @@ export function EntrepreneurModeToggle({ className }: EntrepreneurModeToggleProp
                 isEntrepreneurMode && "data-[state=checked]:bg-amber-500"
               )}
             />
-            {isEntrepreneurMode && (
-              <Badge 
-                variant="outline" 
-                className="text-xs bg-amber-500/10 text-amber-700 border-amber-200 dark:text-amber-400"
-              >
-                Bisnis
-              </Badge>
-            )}
+            {/* Removed the "Bisnis" badge that was here */}
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">

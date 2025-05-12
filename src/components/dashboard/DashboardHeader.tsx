@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -10,7 +9,7 @@ const DashboardHeader = ({ isPremium }: DashboardHeaderProps) => {
   const { t } = useLanguage();
   
   return (
-    <div className="mb-8">
+    <div> {/* Removed mb-8 from here */}
       <h1 className="text-3xl font-bold mb-2">{t('dashboard.welcome')}</h1>
       <p className="text-muted-foreground">
         {isPremium 

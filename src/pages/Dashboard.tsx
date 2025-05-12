@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -17,6 +16,7 @@ import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurMo
 import { EntrepreneurDashboard } from '@/components/entrepreneur/EntrepreneurDashboard';
 import { useState } from 'react';
 import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
+import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile
 
 const Dashboard = () => {
   const { type } = useParams();
@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [transactionCategory, setTransactionCategory] = useState('');
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
+  const isMobile = useIsMobile(); // Use the hook
   
   const { 
     transactions, 
@@ -49,9 +50,22 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="flex justify-between items-center mb-6">
-        <DashboardHeader isPremium={isPremium} />
-        {isPremium && <EntrepreneurModeToggle />}
+      <div className="mb-6"> {/* This div now controls the bottom margin for the header area */}
+        {isMobile ? (
+          <>
+            <DashboardHeader isPremium={isPremium} />
+            {isPremium && (
+              <div className="mt-3"> {/* Spacing for the toggle on mobile */}
+                <EntrepreneurModeToggle />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex items-center gap-4"> {/* Desktop: toggle and header side-by-side */}
+            {isPremium && <EntrepreneurModeToggle />}
+            <DashboardHeader isPremium={isPremium} />
+          </div>
+        )}
       </div>
       
       {isEntrepreneurMode ? (

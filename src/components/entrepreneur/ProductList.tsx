@@ -27,7 +27,6 @@ export default function ProductList({ products, loading, onEdit, onDelete }: Pro
     );
   }
 
-  // Calculate profit margin
   const calculateProfit = (price: number, cost: number) => {
     return price - cost;
   };
@@ -43,11 +42,11 @@ export default function ProductList({ products, loading, onEdit, onDelete }: Pro
         <TableHeader>
           <TableRow>
             <TableHead>Produk/Layanan</TableHead>
-            <TableHead>Tipe</TableHead>
-            <TableHead>Kategori</TableHead>
+            <TableHead className="hidden sm:table-cell">Tipe</TableHead>
+            <TableHead className="hidden md:table-cell">Kategori</TableHead>
             <TableHead className="text-right">Harga</TableHead>
-            <TableHead className="text-right">Modal</TableHead>
-            <TableHead className="text-right">Profit</TableHead>
+            <TableHead className="text-right hidden lg:table-cell">Modal</TableHead>
+            <TableHead className="text-right hidden md:table-cell">Profit</TableHead>
             <TableHead className="text-right">Stok</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Aksi</TableHead>
@@ -58,7 +57,7 @@ export default function ProductList({ products, loading, onEdit, onDelete }: Pro
             <TableRow key={product.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
-                  <Avatar>
+                  <Avatar className="hidden sm:flex">
                     <AvatarImage src={product.image_url} />
                     <AvatarFallback>{product.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
@@ -70,15 +69,15 @@ export default function ProductList({ products, loading, onEdit, onDelete }: Pro
                   </div>
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden sm:table-cell">
                 <Badge variant={product.type === 'product' ? 'default' : 'outline'}>
                   {product.type === 'product' ? 'Produk' : 'Layanan'}
                 </Badge>
               </TableCell>
-              <TableCell>{product.category}</TableCell>
+              <TableCell className="hidden md:table-cell">{product.category}</TableCell>
               <TableCell className="text-right">{formatCurrency(product.price, 'IDR')}</TableCell>
-              <TableCell className="text-right">{formatCurrency(product.cost, 'IDR')}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right hidden lg:table-cell">{formatCurrency(product.cost, 'IDR')}</TableCell>
+              <TableCell className="text-right hidden md:table-cell">
                 <div>{formatCurrency(calculateProfit(product.price, product.cost), 'IDR')}</div>
                 <div className="text-xs text-muted-foreground">
                   {calculateProfitMargin(product.price, product.cost).toFixed(1)}%
@@ -98,7 +97,7 @@ export default function ProductList({ products, loading, onEdit, onDelete }: Pro
                 </Badge>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
                   <Button variant="ghost" size="icon" onClick={() => onEdit(product)} title="Edit">
                     <Edit className="h-4 w-4" />
                   </Button>
