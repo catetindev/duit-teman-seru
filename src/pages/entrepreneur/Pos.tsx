@@ -53,7 +53,6 @@ const Pos = () => {
   
   // Handle print receipt
   const handlePrint = useReactToPrint({
-    content: () => receiptRef.current,
     documentTitle: `Receipt_${new Date().toISOString()}`,
     onAfterPrint: () => {
       setReceiptVisible(false);
@@ -62,6 +61,8 @@ const Pos = () => {
         description: 'Struk berhasil dicetak',
       });
     },
+    // Fixed: Use the correct property name for referencing content
+    contentRef: receiptRef,
   });
   
   const printReceipt = () => {

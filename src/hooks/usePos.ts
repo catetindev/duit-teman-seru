@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { Json } from '@/integrations/supabase/types';
 
 export interface PosProduct {
   id: string;
@@ -151,8 +152,9 @@ export function usePos() {
     setLoading(true);
 
     try {
+      // Fix for the type error: Convert PosProduct[] to Json to match Supabase expectations
       const { error } = await supabase.from('pos_transactions').insert({
-        produk: transaction.produk,
+        produk: transaction.produk as unknown as Json,  // Type casting to Json
         total: transaction.total,
         metode_pembayaran: transaction.metode_pembayaran,
         nama_pembeli: transaction.nama_pembeli || null,
