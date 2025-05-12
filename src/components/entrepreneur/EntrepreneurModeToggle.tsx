@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { useEntrepreneurModeSwitcher } from '@/hooks/useEntrepreneurModeSwitcher';
 import { Switch } from '@/components/ui/switch';
 import { 
   Tooltip,
@@ -20,7 +20,7 @@ export function EntrepreneurModeToggle({ className }: EntrepreneurModeToggleProp
     isEntrepreneurMode,
     toggleEntrepreneurMode,
     isPremiumRequired 
-  } = useEntrepreneurMode();
+  } = useEntrepreneurModeSwitcher();
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
@@ -46,17 +46,17 @@ export function EntrepreneurModeToggle({ className }: EntrepreneurModeToggleProp
                 variant="outline" 
                 className="text-xs bg-amber-500/10 text-amber-700 border-amber-200 dark:text-amber-400"
               >
-                Business
+                Bisnis
               </Badge>
             )}
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
           {isPremiumRequired 
-            ? "Entrepreneur Mode (Premium Feature)" 
+            ? "Mode Pengusaha (Fitur Premium)" 
             : isEntrepreneurMode 
-              ? "Switch to Personal Mode" 
-              : "Switch to Entrepreneur Mode"
+              ? "Beralih ke Mode Personal" 
+              : "Beralih ke Mode Pengusaha"
           }
         </TooltipContent>
       </Tooltip>

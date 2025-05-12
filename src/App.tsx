@@ -1,89 +1,73 @@
 
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Index from '@/pages/Index';
-import Signup from '@/pages/Signup';
-import Login from '@/pages/Login';
-import About from '@/pages/About';
-import Contact from '@/pages/Contact';
-import Pricing from '@/pages/Pricing';
-import Privacy from '@/pages/Privacy';
-import Terms from '@/pages/Terms';
-import NotFound from '@/pages/NotFound';
-import Dashboard from '@/pages/Dashboard';
-import Goals from '@/pages/Goals';
-import Transactions from '@/pages/Transactions';
-import Budget from '@/pages/Budget';
-import Analytics from '@/pages/Analytics';
-import Settings from '@/pages/Settings';
-import Notifications from '@/pages/Notifications';
-import Feedback from '@/pages/Feedback';
-import AdminDashboard from '@/pages/AdminDashboard';
-import ProtectedRoute from './components/ProtectedRoute';
-import ScrollToTop from './components/ScrollToTop';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import GoalsCollaborationDocs from '@/pages/GoalsCollaborationDocs';
-import Calculator from './pages/entrepreneur/Calculator';
-// Import our new pages
-import Products from './pages/Products';
-import Customers from './pages/Customers';
-import Orders from './pages/Orders';
-import ProfitLoss from './pages/entrepreneur/ProfitLoss';
-import Invoices from './pages/entrepreneur/Invoices';
-import FinanceReports from './pages/entrepreneur/FinanceReports';
-import Pos from './pages/entrepreneur/Pos';  // Import the new POS page
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import Signup from '@/pages/Signup';
+import Dashboard from '@/pages/Dashboard';
+import NotFound from '@/pages/NotFound';
+import Transactions from '@/pages/Transactions';
+import Goals from '@/pages/Goals';
+import Analytics from '@/pages/Analytics';
+import Budget from '@/pages/Budget';
+import Notifications from '@/pages/Notifications';
+import About from '@/pages/About';
+import Settings from '@/pages/Settings';
+import Pricing from '@/pages/Pricing';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import ScrollToTop from '@/components/ScrollToTop';
+import AdminDashboard from '@/pages/AdminDashboard';
+import Products from '@/pages/Products';
+import Orders from '@/pages/Orders';
+import Customers from '@/pages/Customers';
+import { RoutePreserver } from '@/components/layout/RoutePreserver';
+import { InvoiceCustomizationProvider } from '@/contexts/InvoiceCustomizationContext';
 
-// App component to handle page routing
-const App = () => {
+import PosRefactored from '@/pages/entrepreneur/PosRefactored';
+import FinanceReports from '@/pages/entrepreneur/FinanceReports';
+import InvoicesRefactored from '@/pages/entrepreneur/InvoicesRefactored';
+
+function App() {
   return (
-    <Router>
+    <InvoiceCustomizationProvider>
       <ScrollToTop />
+      <RoutePreserver />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Index />} />
-        <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/goals-collaboration-docs" element={<GoalsCollaborationDocs />} />
         
-        <Route path="/" element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/goals" element={<Goals />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/budget" element={<Budget />} />
-          <Route path="/analytics" element={
-            <ProtectedRoute premium>
-              <Analytics />
-            </ProtectedRoute>
-          } />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/feedback" element={<Feedback />} />
-          
-          {/* Entrepreneur Mode Routes */}
-          <Route path="/products" element={<ProtectedRoute premium><Products /></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute premium><Orders /></ProtectedRoute>} />
-          <Route path="/customers" element={<ProtectedRoute premium><Customers /></ProtectedRoute>} />
-          <Route path="/profit-loss" element={<ProtectedRoute premium><ProfitLoss /></ProtectedRoute>} />
-          <Route path="/calculator" element={<ProtectedRoute premium><Calculator /></ProtectedRoute>} />
-          <Route path="/invoices" element={<ProtectedRoute premium><Invoices /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute premium><FinanceReports /></ProtectedRoute>} />
-          <Route path="/pos" element={<ProtectedRoute premium><Pos /></ProtectedRoute>} />  {/* Add the POS route */}
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute admin>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-        </Route>
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/dashboard/:type" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+        <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+        <Route path="/budget" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
+        <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+        <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+        
+        {/* Entrepreneur Routes */}
+        <Route path="/pos" element={<ProtectedRoute><PosRefactored /></ProtectedRoute>} />
+        <Route path="/finance-reports" element={<ProtectedRoute><FinanceReports /></ProtectedRoute>} />
+        <Route path="/invoices" element={<ProtectedRoute><InvoicesRefactored /></ProtectedRoute>} />
+        
+        {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      
+      {/* Toast notifications */}
       <Toaster />
-    </Router>
+      <Sonner />
+    </InvoiceCustomizationProvider>
   );
 }
 

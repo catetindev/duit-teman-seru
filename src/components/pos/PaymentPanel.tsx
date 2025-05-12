@@ -76,13 +76,13 @@ export function PaymentPanel({
             <RadioGroup 
               value={transaction.metode_pembayaran} 
               onValueChange={(value: 'Cash' | 'Bank Transfer' | 'QRIS') => onPaymentMethodChange(value)}
-              className="grid grid-cols-3 gap-2"
+              className="flex flex-col space-y-2"
             >
               <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-slate-50 transition-colors">
                 <RadioGroupItem value="Cash" id="cash" />
                 <Label htmlFor="cash" className="flex items-center cursor-pointer">
                   <Banknote size={16} className="mr-2" />
-                  Cash
+                  Tunai
                 </Label>
               </div>
               
@@ -90,7 +90,7 @@ export function PaymentPanel({
                 <RadioGroupItem value="Bank Transfer" id="bank" />
                 <Label htmlFor="bank" className="flex items-center cursor-pointer">
                   <CreditCard size={16} className="mr-2" />
-                  Transfer
+                  Transfer Bank
                 </Label>
               </div>
               
