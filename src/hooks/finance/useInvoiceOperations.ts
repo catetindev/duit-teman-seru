@@ -4,7 +4,7 @@ import { Invoice, InvoiceFormData } from '@/types/finance';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export function useInvoiceOperations(setInvoices: (invoices: Invoice[]) => void) {
+export function useInvoiceOperations(setInvoices: React.Dispatch<React.SetStateAction<Invoice[]>>) {
   const { toast } = useToast();
   const [operationLoading, setOperationLoading] = useState(false);
 
@@ -70,9 +70,9 @@ export function useInvoiceOperations(setInvoices: (invoices: Invoice[]) => void)
         description: `Invoice ${invoiceData.invoice_number} created successfully`,
       });
 
-      // Update local state
-      setInvoices(prev => [data as any, ...prev]);
-      return data;
+      // Update local state - Fixed typing issue here
+      setInvoices((prev) => [data as Invoice, ...prev]);
+      return data as Invoice;
     } catch (error: any) {
       console.error('Error creating invoice:', error);
       toast({
@@ -115,9 +115,9 @@ export function useInvoiceOperations(setInvoices: (invoices: Invoice[]) => void)
         description: `Invoice ${invoice.invoice_number} updated successfully`,
       });
 
-      // Update local state
-      setInvoices(prev => prev.map(inv => inv.id === invoice.id ? (data as any) : inv));
-      return data;
+      // Update local state - Fixed typing issue here
+      setInvoices((prev) => prev.map(inv => inv.id === invoice.id ? (data as Invoice) : inv));
+      return data as Invoice;
     } catch (error: any) {
       console.error('Error updating invoice:', error);
       toast({
@@ -147,8 +147,8 @@ export function useInvoiceOperations(setInvoices: (invoices: Invoice[]) => void)
         description: 'The invoice was deleted successfully',
       });
 
-      // Update local state
-      setInvoices(prev => prev.filter(inv => inv.id !== id));
+      // Update local state - Fixed typing issue here
+      setInvoices((prev) => prev.filter(inv => inv.id !== id));
       return true;
     } catch (error: any) {
       console.error('Error deleting invoice:', error);
