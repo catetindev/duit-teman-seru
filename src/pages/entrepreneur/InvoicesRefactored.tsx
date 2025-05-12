@@ -229,7 +229,7 @@ const InvoicesRefactored = () => {
 
         {/* Invoice Form Sheet */}
         <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <SheetContent side="right" className="w-full sm:w-[800px] md:w-[900px] overflow-y-auto">
+          <SheetContent side="right" className="w-full sm:w-[1000px] md:w-[1000px] overflow-y-auto">
             <SheetHeader>
               <SheetTitle>{selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}</SheetTitle>
               <SheetDescription>
