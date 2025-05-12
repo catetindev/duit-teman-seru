@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -213,12 +212,10 @@ const Invoices = () => {
         {/* Header */}
         <InvoiceHeader onAddInvoice={handleAddInvoice} />
 
-        {/* Status Filters */}
-        <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange} />
-
-        <div className="space-y-4">
-          {/* Invoice List for current filter */}
-          <TabsContent value={selectedFilter} className="space-y-4 mt-0">
+        {/* Status Filters with the content inside it now */}
+        <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
+          <div className="space-y-4">
+            {/* Invoice List for current filter */}
             <InvoicesList 
               invoices={selectedFilter === 'All' 
                 ? invoices 
@@ -228,8 +225,8 @@ const Invoices = () => {
               onDeleteInvoice={handleDeleteInvoice}
               onDownloadPdf={handleDownloadPdf}
             />
-          </TabsContent>
-        </div>
+          </div>
+        </InvoiceStatusFilter>
 
         {/* Hidden div for PDF generation */}
         <div className="hidden">
