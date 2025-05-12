@@ -560,6 +560,7 @@ export type Database = {
       user_settings: {
         Row: {
           created_at: string
+          custom_settings: Json | null
           id: string
           preferred_currency: string
           preferred_language: string
@@ -568,6 +569,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custom_settings?: Json | null
           id?: string
           preferred_currency?: string
           preferred_language?: string
@@ -576,6 +578,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custom_settings?: Json | null
           id?: string
           preferred_currency?: string
           preferred_language?: string

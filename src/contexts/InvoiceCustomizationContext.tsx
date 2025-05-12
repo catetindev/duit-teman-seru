@@ -20,6 +20,17 @@ interface InvoiceSettings {
   businessName: string;
 }
 
+// Define an interface for the user_settings table including our custom_settings column
+interface UserSettings {
+  id: string;
+  user_id: string;
+  preferred_currency: string;
+  preferred_language: string;
+  custom_settings?: string; // JSON stored as string
+  created_at: string;
+  updated_at: string;
+}
+
 const defaultCustomization: InvoiceCustomization = {
   logoUrl: null,
   showLogo: true,
@@ -48,7 +59,7 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
       if (!user?.id) return;
 
       try {
-        // Check if the user has custom logo settings as a JSON string in a column
+        // Check if the user has custom settings
         const { data, error } = await supabase
           .from('user_settings')
           .select('*')
@@ -58,10 +69,10 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
         if (error) throw error;
         
         // Using a custom JSON field for invoice settings
-        if (data) {
-          // Try to parse custom_settings if it exists, or create it if it doesn't
-          const settings = data.custom_settings ? 
-            JSON.parse(data.custom_settings)?.invoice_settings : null;
+        if (data && data.custom_settings) {
+          // Parse custom_settings JSON
+          const customSettings = JSON.parse(data.custom_settings as string);
+          const settings = customSettings?.invoice_settings;
             
           if (settings) {
             setLogoUrl(settings.logoUrl || null);
@@ -90,10 +101,11 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
         .single();
 
       // Prepare the updated custom_settings object
-      let customSettings = {};
+      let customSettings: Record<string, any> = {};
+      
       if (existingSettings?.custom_settings) {
         try {
-          customSettings = JSON.parse(existingSettings.custom_settings);
+          customSettings = JSON.parse(existingSettings.custom_settings as string);
         } catch (e) {
           console.warn('Failed to parse existing custom_settings, creating new object');
         }
