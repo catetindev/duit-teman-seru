@@ -4,8 +4,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Edit, Trash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatDate } from '@/utils/formatUtils'; 
+import { formatCurrency, formatDate } from '@/utils/formatUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card'; // Import Card components
+import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile hook
 
 interface OrderListProps {
   orders: Order[];
@@ -16,6 +18,8 @@ interface OrderListProps {
 }
 
 export default function OrderList({ orders, loading, onEdit, onDelete, onStatusChange }: OrderListProps) {
+  const isMobile = useIsMobile(); // Use the hook
+
   if (loading) {
     return <div className="flex justify-center p-8">Loading orders...</div>;
   }
@@ -41,8 +45,74 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
     }
   };
 
+  // Render mobile card view
+  if (isMobile) {
+    return (
+      <div className="md:hidden space-y-4">
+        {orders.map((order) => (
+          <Card key={order.id} className="overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <h3 className="font-medium text-base leading-tight">Order #{order.id.substring(0, 8)}...</h3>
+                  <p className="text-sm text-muted-foreground">{order.customer?.name || 'Unknown Customer'}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => onEdit(order)} className="h-7 w-7">
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => onDelete(order.id)} className="h-7 w-7 text-destructive">
+                    <Trash className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm mb-2">
+                 <span className="text-muted-foreground">{formatDate(new Date(order.order_date))}</span>
+                 <span className="font-semibold text-lg">{formatCurrency(order.total, 'IDR')}</span>
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <div className="text-muted-foreground">{order.payment_method}</div>
+                <Select
+                  value={order.status}
+                  onValueChange={(value: Order['status']) => onStatusChange(order.id, value)}
+                >
+                  <SelectTrigger className="w-full max-w-[120px] h-7 px-2 text-xs">
+                    <Badge variant={getStatusBadgeVariant(order.status)} className="truncate">
+                      {order.status}
+                    </Badge>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Paid">Paid</SelectItem>
+                    <SelectItem value="Canceled">Canceled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {order.payment_proof_url && (
+                <div className="mt-2 text-right">
+                  <a 
+                    href={order.payment_proof_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-500 hover:underline"
+                  >
+                    View payment proof
+                  </a>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Render desktop table view
   return (
-    <div className="overflow-x-auto border rounded-lg">
+    <div className="hidden md:block border rounded-lg overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -72,9 +142,9 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
                 <div className="space-y-1">
                   <div>{order.payment_method}</div>
                   {order.payment_proof_url && (
-                    <a 
-                      href={order.payment_proof_url} 
-                      target="_blank" 
+                    <a
+                      href={order.payment_proof_url}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-blue-500 hover:underline"
                     >
