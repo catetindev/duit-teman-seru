@@ -380,6 +380,39 @@ export type Database = {
         }
         Relationships: []
       }
+      pos_transactions: {
+        Row: {
+          created_at: string
+          id: string
+          metode_pembayaran: string
+          nama_pembeli: string | null
+          produk: Json
+          total: number
+          user_id: string
+          waktu_transaksi: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metode_pembayaran: string
+          nama_pembeli?: string | null
+          produk?: Json
+          total: number
+          user_id: string
+          waktu_transaksi?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metode_pembayaran?: string
+          nama_pembeli?: string | null
+          produk?: Json
+          total?: number
+          user_id?: string
+          waktu_transaksi?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string

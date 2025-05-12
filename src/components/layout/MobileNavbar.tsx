@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -135,6 +134,19 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             >
               <Calculator className="h-5 w-5 mb-1" />
               HPP
+            </Link>
+            
+            <Link 
+              to="/pos" 
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center text-xs", 
+                isActive('/pos') 
+                  ? "text-amber-500" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <Package className="h-5 w-5 mb-1" />
+              POS
             </Link>
           </>
         ) : (

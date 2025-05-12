@@ -31,6 +31,7 @@ import Orders from './pages/Orders';
 import ProfitLoss from './pages/entrepreneur/ProfitLoss';
 import Invoices from './pages/entrepreneur/Invoices';
 import FinanceReports from './pages/entrepreneur/FinanceReports';
+import Pos from './pages/entrepreneur/Pos';  // Import the new POS page
 
 // App component to handle page routing
 const App = () => {
@@ -70,6 +71,7 @@ const App = () => {
           <Route path="/calculator" element={<ProtectedRoute premium><Calculator /></ProtectedRoute>} />
           <Route path="/invoices" element={<ProtectedRoute premium><Invoices /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute premium><FinanceReports /></ProtectedRoute>} />
+          <Route path="/pos" element={<ProtectedRoute premium><Pos /></ProtectedRoute>} />  {/* Add the POS route */}
           
           {/* Admin Routes */}
           <Route path="/admin" element={

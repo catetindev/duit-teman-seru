@@ -10,7 +10,7 @@ import MobileNavbar from '@/components/layout/MobileNavbar';
 import { 
   BarChart2, LayoutDashboard, PieChart, ArrowDownUp, Target, Settings, 
   Bell, ShieldAlert, MessageSquare, Package, ShoppingCart, Users, 
-  Calculator, FileText, FileBarChart 
+  Calculator, FileText, FileBarChart, CreditCard
 } from 'lucide-react';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
@@ -64,37 +64,40 @@ const DashboardLayout = ({
       return (
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Business</SidebarGroupLabel>
+            <SidebarGroupLabel>Bisnis</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
                 Dashboard
               </SidebarNavLink>
               <SidebarNavLink to="/products" icon={<Package className="h-5 w-5" />}>
-                Products & Services
+                Produk & Layanan
+              </SidebarNavLink>
+              <SidebarNavLink to="/pos" icon={<CreditCard className="h-5 w-5" />}>
+                POS / Kasir
               </SidebarNavLink>
               <SidebarNavLink to="/orders" icon={<ShoppingCart className="h-5 w-5" />}>
-                Orders & Transactions
+                Pesanan & Transaksi
               </SidebarNavLink>
               <SidebarNavLink to="/customers" icon={<Users className="h-5 w-5" />}>
-                Customers
+                Pelanggan
               </SidebarNavLink>
             </SidebarGroupContent>
           </SidebarGroup>
           
           <SidebarGroup>
-            <SidebarGroupLabel>Finance</SidebarGroupLabel>
+            <SidebarGroupLabel>Keuangan</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarNavLink to="/profit-loss" icon={<PieChart className="h-5 w-5" />}>
-                Profit & Loss Report
+                Laporan Untung Rugi
               </SidebarNavLink>
               <SidebarNavLink to="/calculator" icon={<Calculator className="h-5 w-5" />}>
-                HPP Calculator
+                Kalkulator HPP
               </SidebarNavLink>
               <SidebarNavLink to="/invoices" icon={<FileText className="h-5 w-5" />}>
                 Invoice Generator
               </SidebarNavLink>
               <SidebarNavLink to="/reports" icon={<FileBarChart className="h-5 w-5" />}>
-                Finance & Reports
+                Laporan Keuangan
               </SidebarNavLink>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -103,7 +106,7 @@ const DashboardLayout = ({
             <SidebarGroupLabel>User</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
-                Notifications
+                Notifikasi
               </SidebarNavLink>
               <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />}>
                 Feedback
