@@ -1,30 +1,21 @@
 
-import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-/**
- * Component that preserves route after page refresh
- * Checks localStorage for the last path visited and navigates there
- */
 export function RoutePreserver() {
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    // On initial mount, check if we need to restore a path
-    if (location.pathname === '/') {
-      const lastPath = localStorage.getItem('lastPath');
-      
-      // If we have a saved path and it's not the root, navigate to it
-      if (lastPath && lastPath !== '/' && lastPath !== location.pathname) {
-        navigate(lastPath, { replace: true });
-      }
-    } else {
-      // Save the current path for potential future restores
-      localStorage.setItem('lastPath', location.pathname);
+    // Check if we should restore a path from local storage
+    const savedPath = localStorage.getItem('lastPath');
+    
+    if (savedPath && location.pathname === '/') {
+      // Remove the saved path to prevent repeated redirects
+      localStorage.removeItem('lastPath');
+      navigate(savedPath);
     }
-  }, [location.pathname, navigate]);
+  }, [navigate, location.pathname]);
 
-  // This is a utility component with no UI
   return null;
 }

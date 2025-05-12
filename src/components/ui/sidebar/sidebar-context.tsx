@@ -1,48 +1,48 @@
 
-import * as React from "react";
+import React, { createContext, useState, useContext, useCallback } from 'react';
 
-type SidebarContextType = {
-  collapsed: boolean;
-  toggleSidebar: () => void;
-};
+interface SidebarContextValue {
+  expanded: boolean;
+  setExpanded: (value: boolean) => void;
+  toggleExpanded: () => void;
+}
 
-const SidebarContext = React.createContext<SidebarContextType | undefined>(undefined);
+const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
 
-export const useSidebar = () => {
-  // Simple sidebar state management
-  const [collapsed, setCollapsed] = React.useState(false);
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
-  return {
-    collapsed,
-    toggleSidebar
-  };
-};
-
-export const SidebarProvider = ({
-  children
-}: {
+interface SidebarProviderProps {
   children: React.ReactNode;
-}) => {
-  const {
-    collapsed,
-    toggleSidebar
-  } = useSidebar();
-  return <div className="min-h-screen flex w-full">
-      <SidebarContext.Provider value={{
-      collapsed,
-      toggleSidebar
-    }}>
-        {children}
-      </SidebarContext.Provider>
-    </div>;
-};
+  defaultExpanded?: boolean;
+}
 
-export const useSidebarContext = () => {
-  const context = React.useContext(SidebarContext);
-  if (!context) {
-    throw new Error("useSidebarContext must be used within a SidebarProvider");
+export function SidebarProvider({
+  children,
+  defaultExpanded = true,
+}: SidebarProviderProps) {
+  const [expanded, setExpanded] = useState<boolean>(defaultExpanded);
+
+  const toggleExpanded = useCallback(() => {
+    setExpanded((prev) => !prev);
+  }, []);
+
+  return (
+    <SidebarContext.Provider
+      value={{
+        expanded,
+        setExpanded,
+        toggleExpanded,
+      }}
+    >
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
+export function useSidebarContext() {
+  const context = useContext(SidebarContext);
+
+  if (context === undefined) {
+    throw new Error('useSidebarContext must be used within a SidebarProvider');
   }
+
   return context;
-};
+}

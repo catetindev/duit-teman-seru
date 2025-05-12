@@ -1,145 +1,115 @@
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
-import { useSidebarContext } from "./sidebar-context";
+import React, { forwardRef, ElementRef, ComponentPropsWithoutRef } from 'react';
+import { NavLink, To } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
-interface SidebarGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
-export const SidebarGroup = ({
-  className,
-  children,
-  ...props
-}: SidebarGroupProps) => {
-  return <div className={cn("py-2", className)} {...props}>
-      {children}
-    </div>;
-};
-
-interface SidebarGroupLabelProps extends React.HTMLAttributes<HTMLParagraphElement> {}
-export const SidebarGroupLabel = ({
-  className,
-  ...props
-}: SidebarGroupLabelProps) => {
-  const {
-    collapsed
-  } = useSidebarContext();
-  if (collapsed) return null;
-  return <p className={cn("ml-4 text-xs font-medium text-muted-foreground pb-1", className)} {...props} />;
-};
-
-interface SidebarGroupContentProps extends React.HTMLAttributes<HTMLDivElement> {}
-export const SidebarGroupContent = ({
-  className,
-  children,
-  ...props
-}: SidebarGroupContentProps) => {
-  return <div className={cn("space-y-1", className)} {...props}>
-      {children}
-    </div>;
-};
-
-interface SidebarMenuProps extends React.HTMLAttributes<HTMLDivElement> {
-  defaultOpen?: boolean;
-}
-export const SidebarMenu = ({
-  className,
-  ...props
-}: SidebarMenuProps) => {
-  return <div className={cn("flex flex-col space-y-0.5", className)} {...props} />;
-};
-
-interface SidebarMenuItemProps extends React.HTMLAttributes<HTMLLIElement> {
-  active?: boolean;
-  disabled?: boolean;
-}
-export const SidebarMenuItem = ({
-  className,
-  children,
-  active,
-  disabled,
-  ...props
-}: SidebarMenuItemProps) => {
-  return <li className={cn("flex flex-1 list-none", disabled && "cursor-not-allowed opacity-70", className)} {...props}>
-      {children}
-    </li>;
-};
-
-interface SidebarMenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  asChild?: boolean;
-  active?: boolean;
-}
-export const SidebarMenuButton = React.forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(({
-  className,
-  asChild = false,
-  active,
-  ...props
-}, ref) => {
-  const {
-    collapsed
-  } = useSidebarContext();
-  const Comp = asChild ? React.Fragment : "button";
-  return <Comp>
-      <button ref={ref} className={cn("flex items-center text-muted-foreground w-full", collapsed ? "px-2" : "px-4", "py-2 hover:bg-muted/50 rounded-md transition-colors", active && "bg-muted", className)} {...props} />
-    </Comp>;
-});
-SidebarMenuButton.displayName = "SidebarMenuButton";
-
-interface SidebarNavLinkProps {
-  to: string;
-  icon: React.ReactNode;
+// SidebarGroup Component
+export interface SidebarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  end?: boolean;
 }
-export const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
-  to,
-  icon,
-  children,
-  end = false
-}) => {
-  const {
-    collapsed
-  } = useSidebarContext();
-  const location = useLocation();
-  const isActive = end ? location.pathname === to : location.pathname.startsWith(to);
-  return <SidebarMenuItem active={isActive}>
-      <SidebarMenuButton asChild active={isActive}>
-        <Link to={to} className={cn("flex w-full items-center", isActive ? "text-foreground font-medium" : "text-muted-foreground", collapsed ? "justify-center" : "justify-start")}>
-          <div className={cn("mr-2", collapsed && "mr-0")}>{icon}</div>
-          {!collapsed && <span>{children}</span>}
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>;
-};
 
-interface SidebarSubMenuProps extends React.HTMLAttributes<HTMLDivElement> {
-  label: string;
-  icon: React.ReactNode;
-  defaultOpen?: boolean;
+export const SidebarGroup = ({ className, children, ...props }: SidebarGroupProps) => (
+  <div className={cn("pb-4", className)} {...props}>
+    {children}
+  </div>
+);
+
+// SidebarGroupLabel Component
+export interface SidebarGroupLabelProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
 }
-export const SidebarSubMenu = ({
-  className,
-  label,
-  icon,
-  defaultOpen = false,
-  children,
-  ...props
-}: SidebarSubMenuProps) => {
-  const {
-    collapsed
-  } = useSidebarContext();
-  const [open, setOpen] = React.useState(defaultOpen);
-  return <div className={cn("", className)} {...props}>
-      <button className={cn("flex items-center w-full text-muted-foreground", collapsed ? "px-2 justify-center" : "px-4 justify-between", "py-2 hover:bg-muted/50 rounded-md transition-colors")} onClick={() => !collapsed && setOpen(!open)}>
-        <div className={cn("flex items-center", collapsed && "justify-center w-full")}>
-          <div className={cn("mr-2", collapsed && "mr-0")}>{icon}</div>
-          {!collapsed && <span>{label}</span>}
-        </div>
-        {!collapsed && <ChevronDown className={cn("h-4 w-4 transition-transform", open && "transform rotate-180")} />}
-      </button>
-      
-      {!collapsed && open && <div className="ml-6 mt-1 space-y-1">
-          {children}
-        </div>}
-    </div>;
-};
+
+export const SidebarGroupLabel = ({ className, children, ...props }: SidebarGroupLabelProps) => (
+  <div className={cn("px-3 mb-2 text-xs font-semibold text-muted-foreground", className)} {...props}>
+    {children}
+  </div>
+);
+
+// SidebarGroupContent Component
+export interface SidebarGroupContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export const SidebarGroupContent = ({ className, children, ...props }: SidebarGroupContentProps) => (
+  <div className={cn("space-y-1", className)} {...props}>
+    {children}
+  </div>
+);
+
+// SidebarMenuItemLink Component
+export interface SidebarMenuItemLinkProps extends React.HTMLAttributes<HTMLLIElement> {
+  href: To;
+  icon?: React.ReactNode;
+  end?: boolean;
+  children: React.ReactNode;
+}
+
+export const SidebarMenuItemLink = forwardRef<HTMLLIElement, SidebarMenuItemLinkProps>(
+  ({ children, className, href, icon, end, ...props }, ref) => (
+    <li ref={ref} className={cn("block", className)} {...props}>
+      <NavLink
+        to={href}
+        end={end}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-2 rounded-md px-3 py-2 w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+            isActive 
+              ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50" 
+              : "text-gray-600 dark:text-gray-300"
+          )
+        }
+      >
+        {icon && <span className="inline-flex">{icon}</span>}
+        <span>{children}</span>
+      </NavLink>
+    </li>
+  )
+);
+SidebarMenuItemLink.displayName = "SidebarMenuItemLink";
+
+// SidebarMenuItem Component
+export interface SidebarMenuItemProps extends React.HTMLAttributes<HTMLLIElement> {
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+export const SidebarMenuItem = forwardRef<HTMLLIElement, SidebarMenuItemProps>(
+  ({ children, className, icon, ...props }, ref) => (
+    <li ref={ref} className={cn("block", className)} {...props}>
+      <div className="flex items-center gap-2 rounded-md px-3 py-2 text-gray-600 dark:text-gray-300">
+        {icon && <span className="inline-flex">{icon}</span>}
+        <span>{children}</span>
+      </div>
+    </li>
+  )
+);
+SidebarMenuItem.displayName = "SidebarMenuItem";
+
+// SidebarNavLink Component
+export interface SidebarNavLinkProps extends Omit<ComponentPropsWithoutRef<typeof NavLink>, "className"> {
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+export const SidebarNavLink = forwardRef<ElementRef<typeof NavLink>, SidebarNavLinkProps>(
+  ({ to, icon, children, end, ...props }, ref) => (
+    <NavLink
+      ref={ref}
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        cn(
+          "flex items-center gap-2 rounded-md px-3 py-2 w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+          isActive 
+            ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50" 
+            : "text-gray-600 dark:text-gray-300"
+        )
+      }
+      {...props}
+    >
+      {icon && <span className="inline-flex">{icon}</span>}
+      <span>{children}</span>
+    </NavLink>
+  )
+);
+SidebarNavLink.displayName = "SidebarNavLink";
