@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,12 +11,6 @@ interface InvoiceCustomization {
   removeLogo: () => Promise<void>;
   toggleShowLogo: () => void;
   setBusinessName: (name: string) => void;
-}
-
-interface InvoiceSettings {
-  logoUrl: string | null;
-  showLogo: boolean;
-  businessName: string;
 }
 
 // Define an interface for the user_settings table including our custom_settings column
@@ -64,13 +57,14 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
           .from('user_settings')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle() to handle cases where no row is found
 
-        if (error) throw error;
+        if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is fine here
+          console.error('Error loading user settings:', error);
+          throw error;
+        }
         
-        // Using a custom JSON field for invoice settings
         if (data && data.custom_settings) {
-          // Parse custom_settings JSON
           const customSettings = JSON.parse(data.custom_settings as string);
           const settings = customSettings?.invoice_settings;
             
@@ -79,6 +73,9 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
             setShowLogo(settings.showLogo !== undefined ? settings.showLogo : true);
             setBusinessName(settings.businessName || 'Nama Bisnis Anda');
           }
+        } else {
+          // No settings found, use defaults or initialize if needed
+          console.log('No user_settings found for user, using default invoice preferences.');
         }
       } catch (error) {
         console.error('Error loading invoice preferences:', error);
@@ -93,16 +90,17 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
     if (!user?.id) return;
 
     try {
-      // First, get existing settings
-      const { data: existingSettings } = await supabase
+      const { data: existingSettings, error: checkError } = await supabase
         .from('user_settings')
         .select('custom_settings')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      // Prepare the updated custom_settings object
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
       let customSettings: Record<string, any> = {};
-      
       if (existingSettings?.custom_settings) {
         try {
           customSettings = JSON.parse(existingSettings.custom_settings as string);
@@ -111,7 +109,6 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
         }
       }
 
-      // Update the invoice_settings part
       customSettings = {
         ...customSettings,
         invoice_settings: {
@@ -120,39 +117,39 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
           businessName
         }
       };
-
-      // Update the user_settings table with the new JSON
-      const { error } = await supabase
+      
+      // Upsert user_settings: update if exists, insert if not
+      const { error: upsertError } = await supabase
         .from('user_settings')
-        .update({
-          custom_settings: JSON.stringify(customSettings)
-        })
-        .eq('user_id', user.id);
+        .upsert({ 
+          user_id: user.id, 
+          custom_settings: JSON.stringify(customSettings),
+          // Provide default values for other required fields if inserting
+          preferred_currency: existingSettings?.preferred_currency || 'IDR', 
+          preferred_language: existingSettings?.preferred_language || 'id',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
 
-      if (error) throw error;
+
+      if (upsertError) throw upsertError;
     } catch (error) {
       console.error('Error saving invoice preferences:', error);
     }
   };
 
-  // Save preferences whenever they change
   useEffect(() => {
     if (user?.id) {
       savePreferences();
     }
   }, [logoUrl, showLogo, businessName, user?.id]);
 
-  // Upload logo to storage
   const uploadLogo = async (file: File) => {
     if (!user?.id || !file) return;
-
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `invoice-logos/${fileName}`;
-
-      // Upload to storage
       const { error: uploadError } = await supabase
         .storage
         .from('logos')
@@ -160,15 +157,11 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
           cacheControl: '3600',
           upsert: true
         });
-
       if (uploadError) throw uploadError;
-
-      // Get public URL
       const { data } = supabase
         .storage
         .from('logos')
         .getPublicUrl(filePath);
-
       setLogoUrl(data.publicUrl);
     } catch (error) {
       console.error('Error uploading logo:', error);
@@ -177,28 +170,21 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
     }
   };
 
-  // Remove logo
   const removeLogo = async () => {
     if (!logoUrl || !user?.id) return;
-
     try {
-      // Extract file path from URL
       const urlParts = logoUrl.split('/');
-      const filePath = urlParts.slice(-2).join('/'); // Get "logos/filename" part
-
-      // Delete from storage
+      const filePath = urlParts.slice(-2).join('/');
       await supabase
         .storage
         .from('logos')
         .remove([filePath]);
-
       setLogoUrl(null);
     } catch (error) {
       console.error('Error removing logo:', error);
     }
   };
 
-  // Toggle logo visibility
   const toggleShowLogo = () => {
     setShowLogo(!showLogo);
   };

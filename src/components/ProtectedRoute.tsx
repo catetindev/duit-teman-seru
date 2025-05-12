@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,7 +7,7 @@ interface ProtectedRouteProps {
   requiredRole?: 'free' | 'premium' | 'admin';
   premium?: boolean;
   admin?: boolean;
-  adminOnly?: boolean; // Add this prop
+  adminOnly?: boolean;
 }
 
 const ProtectedRoute = ({ 
@@ -16,13 +15,19 @@ const ProtectedRoute = ({
   requiredRole = 'free', 
   premium = false,
   admin = false,
-  adminOnly = false // Add default value
+  adminOnly = false
 }: ProtectedRouteProps) => {
   const { user, userRole, isLoading } = useAuth();
   const location = useLocation();
 
-  // If still loading auth state, show a loading indicator
+  console.log(`[ProtectedRoute] Path: ${location.pathname}`);
+  console.log(`[ProtectedRoute] isLoading: ${isLoading}`);
+  console.log(`[ProtectedRoute] User:`, user ? user.id : 'null');
+  console.log(`[ProtectedRoute] User Role: ${userRole}`);
+  console.log(`[ProtectedRoute] Required Role (effective): ${premium ? 'premium' : (admin || adminOnly) ? 'admin' : requiredRole}`);
+
   if (isLoading) {
+    console.log('[ProtectedRoute] Rendering loading indicator.');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
@@ -30,29 +35,26 @@ const ProtectedRoute = ({
     );
   }
 
-  // If not logged in, redirect to login page
   if (!user) {
-    console.log('User not authenticated, redirecting to login');
+    console.log('[ProtectedRoute] User not authenticated, redirecting to /login.');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Set the required role based on premium or admin props
   let effectiveRole = requiredRole;
   if (premium) effectiveRole = 'premium';
-  if (admin || adminOnly) effectiveRole = 'admin'; // Handle both admin and adminOnly props
+  if (admin || adminOnly) effectiveRole = 'admin';
 
-  // Check role-based permissions
   if (effectiveRole === 'admin' && userRole !== 'admin') {
-    // Admin-only route but user is not admin
+    console.log('[ProtectedRoute] Admin role required, user is not admin. Redirecting to /dashboard.');
     return <Navigate to="/dashboard" replace />;
   }
 
   if (effectiveRole === 'premium' && userRole !== 'premium' && userRole !== 'admin') {
-    // Premium route but user is not premium or admin
+    console.log('[ProtectedRoute] Premium role required, user is not premium/admin. Redirecting to /pricing.');
     return <Navigate to="/pricing" replace />;
   }
 
-  // User is authenticated and has required permission
+  console.log('[ProtectedRoute] User authenticated and has permission. Rendering children.');
   return <>{children || <Outlet />}</>;
 };
 

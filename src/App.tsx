@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
@@ -29,6 +28,7 @@ import FinanceReports from '@/pages/entrepreneur/FinanceReports';
 import InvoicesRefactored from '@/pages/entrepreneur/InvoicesRefactored';
 import ProfitLoss from '@/pages/entrepreneur/ProfitLoss';
 import Calculator from '@/pages/entrepreneur/Calculator';
+import Feedback from '@/pages/Feedback'; // Pastikan import ini ada
 
 function App() {
   return (
@@ -56,6 +56,9 @@ function App() {
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute admin={true}><AdminDashboard /></ProtectedRoute>} />
+        
+        {/* Feedback route - NOW PROTECTED AGAIN */}
+        <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} /> 
         
         {/* Entrepreneur Routes */}
         <Route path="/pos" element={<ProtectedRoute><PosRefactored /></ProtectedRoute>} />

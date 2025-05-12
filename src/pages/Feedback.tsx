@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,56 +5,38 @@ import { useAuth } from '@/contexts/AuthContext';
 const Feedback = () => {
   const { isPremium, isAdmin } = useAuth();
 
-  // Initialize or reload Tally script after component mounts
   useEffect(() => {
-    const loadTallyScript = () => {
-      if (typeof window !== "undefined") {
-        if (typeof (window as any).Tally !== "undefined") {
-          (window as any).Tally.loadEmbeds();
-        } else {
-          const iframes = document.querySelectorAll("iframe[data-tally-src]:not([src])");
-          iframes.forEach((iframe: HTMLIFrameElement) => {
-            if (iframe.dataset.tallySrc) {
-              iframe.src = iframe.dataset.tallySrc;
-            }
-          });
-        }
-      }
-    };
-
-    // Load the script if not already loaded
-    if (typeof (window as any).Tally === "undefined") {
-      const script = document.createElement("script");
-      script.src = "https://tally.so/widgets/embed.js";
-      script.onload = loadTallyScript;
-      script.onerror = loadTallyScript;
+    // Load Tally widgets script if not already loaded
+    if (!(window as any).Tally) {
+      const script = document.createElement('script');
+      script.src = 'https://tally.so/widgets/embed.js';
+      script.async = true;
       document.body.appendChild(script);
-    } else {
-      loadTallyScript();
+      
+      // Cleanup script when component unmounts
+      return () => {
+        document.body.removeChild(script);
+      };
     }
-
-    return () => {
-      // Cleanup if needed
-    };
   }, []);
 
   return (
     <DashboardLayout isPremium={isPremium} isAdmin={isAdmin}>
-      <div className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold mb-6">We'd Love Your Feedback</h1>
-        <p className="text-muted-foreground mb-6">
-          Your feedback helps us improve Catatyo. Please share your thoughts and suggestions below.
+      <div className="flex flex-col h-[calc(100vh-var(--header-height,4rem)-var(--footer-height,4rem)-2rem)] md:h-[calc(100vh-var(--header-height,4rem)-2rem)]"> {/* Adjust height based on layout */}
+        <h1 className="text-2xl font-bold mb-4 px-4 md:px-0">Feedback</h1>
+        <p className="text-muted-foreground mb-6 px-4 md:px-0">
+          Kami sangat menghargai masukan Anda untuk membuat aplikasi ini lebih baik!
         </p>
-        
-        <div className="bg-card rounded-lg border shadow-sm p-4">
-          <iframe 
-            data-tally-src="https://tally.so/embed/3xozjr?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" 
-            loading="lazy" 
-            width="100%" 
-            height="751" 
-            frameBorder="0" 
+        <div className="flex-grow relative">
+          <iframe
+            data-tally-src="https://tally.so/r/3xozjr?transparentBackground=1"
+            width="100%"
+            height="100%"
+            frameBorder="0"
+            marginHeight={0}
+            marginWidth={0}
             title="Form Feedback🙏"
-            className="w-full"
+            className="absolute top-0 left-0 w-full h-full border-0"
           ></iframe>
         </div>
       </div>
