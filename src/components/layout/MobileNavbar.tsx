@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   BarChart2, Bell, LayoutDashboard, MessageSquare, PieChart, 
   Settings, ShieldAlert, Target, Package, ShoppingCart, 
-  Users, Calculator, FileText, FileBarChart, CreditCard 
+  Users, Calculator, FileText, FileBarChart, CreditCard, ArrowDownUp // Added ArrowDownUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
@@ -17,7 +17,7 @@ interface MobileNavbarProps {
 
 const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
   const location = useLocation();
-  const { unreadCount } = useNotifications('current');
+  const { unreadCount } = useNotifications('current'); // Assuming 'current' is a valid user ID or placeholder
   const { isEntrepreneurMode } = useEntrepreneurMode();
   
   const isActive = (path: string) => {

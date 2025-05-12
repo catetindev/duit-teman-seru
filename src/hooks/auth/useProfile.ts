@@ -1,9 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export const useProfile = (userId: string | undefined) => {
+export const useProfile = () => { // Removed userId from parameters, will be passed to fetchUserProfile
   const [profile, setProfile] = useState<any>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -11,7 +10,13 @@ export const useProfile = (userId: string | undefined) => {
 
   // Helper function to update user state based on profile
   const updateUserState = useCallback((profileData: any) => {
-    if (!profileData) return;
+    if (!profileData) {
+      setProfile(null);
+      setUserRole(null);
+      setIsAdmin(false);
+      setIsPremium(false);
+      return;
+    }
     
     setProfile(profileData);
     setUserRole(profileData.role || 'free');
@@ -19,42 +24,60 @@ export const useProfile = (userId: string | undefined) => {
     setIsPremium(profileData.role === 'premium' || profileData.role === 'admin');
   }, []);
 
+  const clearProfileData = useCallback(() => {
+    setProfile(null);
+    setIsPremium(false);
+    setIsAdmin(false);
+    setUserRole(null);
+  }, []);
+
   // Fetch user profile from Supabase
-  const fetchUserProfile = useCallback(async (userId: string) => {
+  const fetchUserProfile = useCallback(async (userIdToFetch: string) => { // Renamed userId to userIdToFetch
+    if (!userIdToFetch) {
+      console.warn("fetchUserProfile called without userId.");
+      clearProfileData();
+      return null;
+    }
     try {
-      console.log('Fetching user profile for:', userId);
-      const { data: profile, error: profileError } = await supabase
+      console.log('Fetching user profile for:', userIdToFetch);
+      const { data: profileData, error: profileError } = await supabase // Renamed profile to profileData
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', userIdToFetch)
         .single();
 
       if (profileError) {
         console.error('Error fetching user profile:', profileError);
-        return null;
+        // If profile not found (e.g., new user before profile auto-creation), don't throw, just clear.
+        if (profileError.code === 'PGRST116') { // "PGRST116" is "Not Found"
+            console.warn('Profile not found for user:', userIdToFetch);
+            clearProfileData();
+            return null;
+        }
+        throw profileError; // For other errors, re-throw
       }
 
-      console.log('User profile data:', profile);
-      updateUserState(profile);
+      console.log('User profile data:', profileData);
+      updateUserState(profileData);
       
       // Set up real-time subscription to profile changes
+      // Ensure channel is properly managed (e.g., unsubscribed on component unmount or user change)
+      // This part might be better handled in AuthContext to manage channel lifecycle
       const channel = supabase
-        .channel(`profile-${userId}`)
+        .channel(`profile-${userIdToFetch}`)
         .on(
           'postgres_changes',
           {
             event: 'UPDATE',
             schema: 'public',
             table: 'profiles',
-            filter: `id=eq.${userId}`,
+            filter: `id=eq.${userIdToFetch}`,
           },
           (payload) => {
             console.log('Profile updated in real-time:', payload);
             const updatedProfile = payload.new;
             
-            // Check if role has changed
             if (updatedProfile.role !== profile?.role) {
-              // Show toast notification with role-specific message
               if (updatedProfile.role === 'premium') {
                 toast.success('Congratulations! Your account has been upgraded to Premium!', {
                   duration: 6000,
@@ -71,19 +94,18 @@ export const useProfile = (userId: string | undefined) => {
                 });
               }
             }
-            
-            // Update state with new profile data
             updateUserState(updatedProfile);
           }
         )
         .subscribe();
 
-      return { profile, channel };
+      return { profile: profileData, channel }; // Return profileData instead of profile
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      clearProfileData(); // Clear profile on error
       return null;
     }
-  }, [updateUserState]);
+  }, [updateUserState, clearProfileData, profile?.role]); // Added profile?.role to dependencies
 
   return {
     profile,
@@ -91,6 +113,7 @@ export const useProfile = (userId: string | undefined) => {
     isAdmin,
     userRole,
     updateUserState,
-    fetchUserProfile
+    fetchUserProfile,
+    clearProfileData // Export clearProfileData
   };
 };
