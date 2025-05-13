@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,8 +14,9 @@ import {
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { cn } from '@/lib/utils'; // Import cn utility
-import { useNavigate, useToast } from 'react-router-dom';
-import Badge from '@/components/ui/Badge';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast'; // Fixed import for useToast
+import { Badge } from '@/components/ui/badge'; // Fixed import for Badge (lowercase)
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
