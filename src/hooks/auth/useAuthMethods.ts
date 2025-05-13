@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -49,25 +50,24 @@ export const useAuthMethods = () => {
 
   const logout = async () => {
     try {
-      // Attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      console.log('Logging out: Calling supabase.auth.signOut()');
+      // Attempt to sign out from Supabase with explicit scope
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
         console.error('Supabase signOut error:', error);
-        // Even if Supabase signout fails, we should proceed to clear local state
-        // The AuthContext listener for onAuthStateChange should handle clearing user/session.
-        // We throw the error so the UI can potentially inform the user of a partial failure.
         throw error; 
       }
       
-      toast.success("Logged out successfully");
-      // The onAuthStateChange listener in AuthContext will handle clearing user/session state.
+      // Clear any cached data or local state
+      localStorage.removeItem('entrepreneurMode');
+      
+      // We don't need to manually redirect, as the onAuthStateChange event
+      // in AuthContext will handle updating the UI after logout
       return Promise.resolve();
     } catch (error: any) {
       console.error('Logout error:', error);
-      toast.error(error.message || "Failed to sign out. Please try again.");
-      // Propagate the error so the calling component knows the logout wasn't fully successful.
-      // The AuthContext listener should still clear local state upon detecting no session.
+      // Propagate the error so the calling component knows the logout wasn't successful
       return Promise.reject(error);
     }
   };
