@@ -29,11 +29,11 @@ import FinanceReports from '@/pages/entrepreneur/FinanceReports';
 import InvoicesRefactored from '@/pages/entrepreneur/InvoicesRefactored';
 import ProfitLoss from '@/pages/entrepreneur/ProfitLoss';
 import Calculator from '@/pages/entrepreneur/Calculator';
-import Feedback from '@/pages/Feedback'; // Pastikan import ini ada
+import Feedback from '@/pages/Feedback';
 
 function App() {
   return (
-    <InvoiceCustomizationProvider>
+    <>
       <ScrollToTop />
       <RoutePreserver />
       <Routes>
@@ -75,7 +75,7 @@ function App() {
       {/* Toast notifications */}
       <Toaster />
       <Sonner />
-    </InvoiceCustomizationProvider>
+    </>
   );
 }
 
