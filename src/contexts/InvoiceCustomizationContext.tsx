@@ -93,7 +93,7 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
     try {
       const { data: existingSettings, error: checkError } = await supabase
         .from('user_settings')
-        .select('custom_settings')
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -126,8 +126,8 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
           user_id: user.id, 
           custom_settings: JSON.stringify(customSettings),
           // Safely provide default values for other required fields if inserting
-          preferred_currency: existingSettings?.preferred_currency || 'IDR',
-          preferred_language: existingSettings?.preferred_language || 'id',
+          preferred_currency: existingSettings ? (existingSettings as UserSettings).preferred_currency || 'IDR' : 'IDR',
+          preferred_language: existingSettings ? (existingSettings as UserSettings).preferred_language || 'id' : 'id',
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' });
 
