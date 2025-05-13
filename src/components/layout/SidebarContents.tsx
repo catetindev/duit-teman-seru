@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { SidebarContent } from "@/components/ui/sidebar";
 import EntrepreneurModeSidebar from './sidebar/EntrepreneurModeSidebar';
 import PersonalModeSidebar from './sidebar/PersonalModeSidebar';
 
@@ -15,6 +14,7 @@ const SidebarContents = ({
   isPremium, 
   isAdmin 
 }: SidebarContentsProps) => {
+  // Show entrepreneur sidebar only if both entrepreneur mode is active AND user is premium
   if (isEntrepreneurMode && isPremium) {
     return <EntrepreneurModeSidebar isAdmin={isAdmin} />;
   } else {

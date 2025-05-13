@@ -9,7 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { 
   LayoutDashboard, ArrowDownUp, Target, BarChart2, PieChart, 
-  Package, Calculator, FileText, Bell, MessageSquare, Settings, ShieldAlert 
+  Bell, MessageSquare, Settings, ShieldAlert 
 } from 'lucide-react';
 
 interface PersonalModeSidebarProps {
@@ -67,26 +67,8 @@ const PersonalModeSidebar = ({ isPremium, isAdmin }: PersonalModeSidebarProps) =
         </SidebarGroupContent>
       </SidebarGroup>
       
-      <SidebarGroup>
-        <SidebarGroupLabel>Bisnis <Badge variant="outline" className="ml-1 text-xs bg-amber-500/10 text-amber-500 border-amber-500/20">Premium</Badge></SidebarGroupLabel>
-        <SidebarGroupContent>
-          <div onClick={(e) => handlePremiumFeatureClick(e, '/products')}>
-            <SidebarNavLink to={isPremium ? "/products" : "#"} icon={<Package className="h-5 w-5" />}>
-              Produk & Layanan
-            </SidebarNavLink>
-          </div>
-          <div onClick={(e) => handlePremiumFeatureClick(e, '/calculator')}>
-            <SidebarNavLink to={isPremium ? "/calculator" : "#"} icon={<Calculator className="h-5 w-5" />}>
-              Kalkulator HPP
-            </SidebarNavLink>
-          </div>
-          <div onClick={(e) => handlePremiumFeatureClick(e, '/invoices')}>
-            <SidebarNavLink to={isPremium ? "/invoices" : "#"} icon={<FileText className="h-5 w-5" />}>
-              Invoice Generator
-            </SidebarNavLink>
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
+      {/* Removed the Business/Premium section entirely from PersonalModeSidebar since these items 
+          should only appear in EntrepreneurModeSidebar */}
       
       <SidebarGroup>
         <SidebarGroupLabel>User</SidebarGroupLabel>
