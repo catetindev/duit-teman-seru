@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import {
@@ -191,7 +192,7 @@ export function InvoicesList({
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" position="popper"> {/* Added position="popper" */}
+                    <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onViewInvoice(invoice)}>
                         <FileText className="h-4 w-4 mr-2" />
                         View
