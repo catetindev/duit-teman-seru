@@ -1,53 +1,57 @@
-
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner'; // Import toast from sonner
 
-interface LogoutButtonProps {
+interface LogoutButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
 }
 
-const LogoutButton: React.FC<LogoutButtonProps> = ({ 
-  variant = 'ghost',
-  size = 'default',
-  className = ''
-}) => {
+const LogoutButton: React.FC<LogoutButtonProps> = ({ variant = 'default', className, ...props }) => {
   const { logout } = useAuth();
-  const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
+    // Show a loading toast and keep its ID
+    const loadingToastId = toast.loading("Logging out..."); 
+
     try {
-      // Display toast to indicate logout is in progress
-      toast.loading("Logging out...");
-      
-      // Call the logout function from AuthContext
       await logout();
-      
-      // Show success toast
-      toast.success("Logged out successfully");
-      
-      // Navigate to home page
-      navigate('/', { replace: true });
+      // If logout is successful (promise resolves), update the toast to success
+      toast.success("Logged out successfully", { id: loadingToastId }); 
     } catch (error: any) {
-      console.error('Error signing out:', error);
-      toast.error("Failed to sign out. Please try again.");
+      console.error('Logout failed:', error);
+      // If logout fails (promise rejects), update the toast to error
+      toast.error(error.message || 'Failed to logout', { id: loadingToastId }); 
+    } finally {
+      // Always set loading state back to false
+      setIsLoggingOut(false);
     }
   };
 
   return (
     <Button
-      onClick={handleLogout}
       variant={variant}
-      size={size}
-      className={`flex items-center gap-2 ${className}`}
+      onClick={handleLogout}
+      disabled={isLoggingOut}
+      className={cn("flex items-center gap-2", className)}
+      {...props}
     >
-      <LogOut className="h-4 w-4" />
-      <span>Logout</span>
+      {isLoggingOut ? (
+        <>
+          <span className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></span>
+          Logging out...
+        </>
+      ) : (
+        <>
+          <LogOut className="h-4 w-4" />
+          Logout
+        </>
+      )}
     </Button>
   );
 };
