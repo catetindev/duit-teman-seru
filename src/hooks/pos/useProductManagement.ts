@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react'; // Added useCallback
+
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PosProduct } from '@/hooks/usePos';
@@ -8,7 +9,7 @@ export function useProductManagement() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Fetch products from database
+  // Fetch products from database - properly memoized with useCallback
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -38,7 +39,7 @@ export function useProductManagement() {
     } finally {
       setLoading(false);
     }
-  }, [toast]); // Added toast to dependency array
+  }, [toast]);
 
   return {
     products,
