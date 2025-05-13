@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { BarChart } from 'lucide-react';
@@ -14,6 +13,7 @@ import {
   Tooltip
 } from 'recharts';
 import { Transaction } from '@/hooks/useDashboardData';
+import { useLanguage } from '@/hooks/useLanguage'; // Import useLanguage
 
 interface MonthlyData {
   name: string;
@@ -32,6 +32,8 @@ export const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
   timeframe,
   isLoading 
 }) => {
+  const { t } = useLanguage(); // Use the hook
+
   // Monthly data for bar chart
   const monthlyData = useMemo(() => {
     if (!transactions.length) return [];
@@ -75,7 +77,7 @@ export const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
           </div>
         ) : monthlyData.length === 0 ? (
           <div className="h-[300px] flex items-center justify-center">
-            <p>No transaction data available for this period</p>
+            <p>{t('transactions.noData')}</p> {/* Use translation key */}
           </div>
         ) : (
           <div className="h-[300px]">

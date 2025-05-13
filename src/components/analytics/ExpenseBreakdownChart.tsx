@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { PieChart } from 'lucide-react';
@@ -12,6 +11,7 @@ import {
   Legend 
 } from 'recharts';
 import { Transaction } from '@/hooks/useDashboardData';
+import { useLanguage } from '@/hooks/useLanguage'; // Import useLanguage
 
 const COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#ff8042', '#ff5252'];
 
@@ -30,6 +30,8 @@ export const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
   transactions,
   isLoading
 }) => {
+  const { t } = useLanguage(); // Use the hook
+
   // Expense breakdown for pie chart
   const pieData = useMemo(() => {
     if (!transactions.length) return [];
@@ -69,7 +71,7 @@ export const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
           </div>
         ) : pieData.length === 0 ? (
           <div className="h-[300px] flex items-center justify-center">
-            <p>No expense data available for this period</p>
+            <p>{t('transactions.noData')}</p> {/* Use translation key */}
           </div>
         ) : (
           <div className="h-[300px]">
