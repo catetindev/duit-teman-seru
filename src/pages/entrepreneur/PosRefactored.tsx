@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -244,7 +245,7 @@ const PosRefactored = () => {
             onPaymentMethodChange={updatePaymentMethod}
             onCashReceivedChange={updateCashReceived}
             onCustomerNameChange={updateCustomerName}
-            onSaveTransaction={() => saveTransaction(transaction)} 
+            onSaveTransaction={saveTransaction}
             onResetTransaction={resetTransaction}
             loading={loading}
           />

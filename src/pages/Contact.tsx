@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -7,10 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
-import { useLanguage } from '@/hooks/useLanguage'; // Import useLanguage
 
 const Contact = () => {
-  const { t } = useLanguage(); // Use the language hook
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -20,7 +19,7 @@ const Contact = () => {
     e.preventDefault();
     
     if (!name || !email || !message) {
-      toast.error(t('contact.toast.fillFields'));
+      toast.error("Please fill all fields");
       return;
     }
     
@@ -28,7 +27,7 @@ const Contact = () => {
     
     // Simulate form submission
     setTimeout(() => {
-      toast.success(t('contact.toast.sentSuccess'));
+      toast.success("Message sent successfully!");
       setName('');
       setEmail('');
       setMessage('');
@@ -49,7 +48,7 @@ const Contact = () => {
               transition={{ duration: 0.5 }}
               className="text-4xl md:text-5xl font-bold mb-4"
             >
-              {t('contact.title')}
+              Got something to say?
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
@@ -57,7 +56,8 @@ const Contact = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-gray-600 max-w-2xl mx-auto"
             >
-              {t('contact.subtitle')}
+              Feedback, ideas, or just wanna say "hi"?
+              Drop us a DM via email or this form below — we're quick to respond 😎
             </motion.p>
           </div>
           
@@ -69,14 +69,14 @@ const Contact = () => {
               viewport={{ once: true }}
             >
               <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-2">{t('contact.emailUs')}</h2>
+                <h2 className="text-2xl font-bold mb-2">Email us directly:</h2>
                 <a href="mailto:hello@catatyo.com" className="text-[#28e57d] text-lg hover:underline">
                   hello@catatyo.com
                 </a>
               </div>
               
               <div className="bg-gray-200 rounded-xl h-64 md:h-80 flex items-center justify-center text-gray-500">
-                {t('contact.illustrationAlt')}
+                [ Illustration of someone sending a message or chatting ]
               </div>
             </motion.div>
             
@@ -90,40 +90,40 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('contact.form.name')}
+                      Name
                     </label>
                     <Input
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder={t('contact.form.namePlaceholder')}
+                      placeholder="Your name"
                       className="h-12 rounded-lg"
                     />
                   </div>
                   
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('contact.form.email')}
+                      Email
                     </label>
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t('contact.form.emailPlaceholder')}
+                      placeholder="your.email@example.com"
                       className="h-12 rounded-lg"
                     />
                   </div>
                   
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('contact.form.message')}
+                      Message
                     </label>
                     <Textarea
                       id="message"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder={t('contact.form.messagePlaceholder')}
+                      placeholder="What's on your mind?"
                       className="min-h-32 rounded-lg"
                     />
                   </div>
@@ -140,10 +140,10 @@ const Contact = () => {
                       {isSubmitting ? (
                         <span className="flex items-center gap-2">
                           <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-r-transparent"></span>
-                          {t('contact.form.sending')}
+                          Sending...
                         </span>
                       ) : (
-                        t('contact.form.send')
+                        "Send 💌"
                       )}
                     </Button>
                   </motion.div>

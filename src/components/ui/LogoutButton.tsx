@@ -22,12 +22,18 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
 
   const handleLogout = async () => {
     try {
+      // Display toast to indicate logout is in progress
+      toast.loading("Logging out...");
+      
       // Call the logout function from AuthContext
       await logout();
       
-      // Force a complete page reload to ensure all state is cleared
-      window.location.href = '/';
-    } catch (error) {
+      // Show success toast
+      toast.success("Logged out successfully");
+      
+      // Navigate to home page
+      navigate('/', { replace: true });
+    } catch (error: any) {
       console.error('Error signing out:', error);
       toast.error("Failed to sign out. Please try again.");
     }

@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/auth/useProfile';
 import { useAuthMethods } from '@/hooks/auth/useAuthMethods';
+import { toast } from 'sonner';
 
 interface AuthContextProps {
   user: User | null;
@@ -37,21 +39,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleAuthStateChange = useCallback(async (event: string, currentSession: Session | null) => {
     console.log('Auth state changed:', event, currentSession?.user?.id);
-    setSession(currentSession);
-    const currentUser = currentSession?.user ?? null;
-    setUser(currentUser);
-
-    if (currentUser) {
-      await fetchUserProfile(currentUser.id);
+    
+    if (event === 'SIGNED_OUT') {
+      console.log('User signed out. Clearing auth state.');
+      setSession(null);
+      setUser(null);
+      clearProfileData();
     } else {
-      clearProfileData(); // Clear profile data on logout or no session
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+  
+      if (currentSession?.user) {
+        await fetchUserProfile(currentSession.user.id);
+      } else {
+        clearProfileData();
+      }
     }
-    setIsLoading(false); // Set loading to false after session and profile are processed
+    
+    // Always set loading to false after processing
+    setIsLoading(false);
   }, [fetchUserProfile, clearProfileData]);
 
   useEffect(() => {
+    console.log('Setting up auth state management');
     setIsLoading(true); // Set loading true when effect runs
-    // Get initial session
+    
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, sessionUpdate) => {
+        // When onAuthStateChange triggers, it might be due to token refresh, sign in, sign out etc.
+        console.log('Auth state change detected:', event);
+        // We always want to re-evaluate the session and profile.
+        setIsLoading(true); // Set loading true before processing new auth state
+        handleAuthStateChange(event, sessionUpdate);
+      }
+    );
+
+    // THEN get initial session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       if (initialSession) {
         console.log('Initial session found:', initialSession.user?.id);
@@ -63,19 +87,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }).catch(error => {
       console.error("Error getting initial session:", error);
       handleAuthStateChange('SESSION_ERROR', null); // Handle error case
+      toast.error("Error initializing auth session");
     });
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, sessionUpdate) => {
-        // When onAuthStateChange triggers, it might be due to token refresh, sign in, sign out etc.
-        // We always want to re-evaluate the session and profile.
-        setIsLoading(true); // Set loading true before processing new auth state
-        handleAuthStateChange(event, sessionUpdate);
-      }
-    );
-
     return () => {
+      console.log('Cleaning up auth state listener');
       subscription.unsubscribe();
     };
   }, [handleAuthStateChange]);

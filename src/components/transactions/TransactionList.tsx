@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { formatCurrency } from '@/utils/formatUtils';
@@ -47,7 +48,7 @@ const TransactionList = ({ transactions, isLoading = false, onUpdate = () => {} 
   return (
     <div className="space-y-4">
       {transactions.map((transaction) => (
-        <Card key={transaction.id} className="p-4 transition-shadow card-hover">
+        <Card key={transaction.id} className="p-4 hover:shadow-md transition-shadow card-hover">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={cn(

@@ -49,8 +49,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { toast as sonnerToast } from '@/components/ui/sonner'; // Renamed to avoid conflict
-import { useLanguage } from '@/hooks/useLanguage'; // Import useLanguage
+import { toast } from '@/components/ui/sonner';
 
 // Form schema
 const profileFormSchema = z.object({
@@ -78,8 +77,7 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 const SettingsPage = () => {
   const { user, profile, logout, isPremium, isAdmin } = useAuth();
-  const { toast: uiToast } = useToast(); // Shadcn toast
-  const { t } = useLanguage(); // Language hook
+  const { toast: uiToast } = useToast();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   const profileForm = useForm<ProfileFormValues>({
@@ -95,7 +93,7 @@ const SettingsPage = () => {
     resolver: zodResolver(currencyFormSchema),
     defaultValues: {
       currency: 'IDR',
-      language: 'id', // Default to Indonesian
+      language: 'en',
     },
   });
 
@@ -108,12 +106,14 @@ const SettingsPage = () => {
     },
   });
 
+  // Load user data when component mounts
   useEffect(() => {
     if (user && profile) {
       profileForm.setValue('full_name', profile.full_name || '');
       profileForm.setValue('email', user.email || '');
     }
     
+    // Load user settings
     const loadUserSettings = async () => {
       if (!user) return;
       
@@ -124,7 +124,7 @@ const SettingsPage = () => {
           .eq('user_id', user.id)
           .single();
           
-        if (error && error.code !== 'PGRST116') throw error; // Ignore "No rows found"
+        if (error) throw error;
         
         if (data) {
           currencyForm.setValue('currency', data.preferred_currency);
@@ -136,12 +136,13 @@ const SettingsPage = () => {
     };
     
     loadUserSettings();
-  }, [user, profile, profileForm, currencyForm]);
+  }, [user, profile]);
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
     if (!user) return;
     
     try {
+      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -152,12 +153,12 @@ const SettingsPage = () => {
       if (profileError) throw profileError;
       
       uiToast({
-        title: t('settings.toast.profileUpdatedTitle'),
-        description: t('settings.toast.profileUpdatedDesc'),
+        title: "Settings updated",
+        description: "Your profile has been updated successfully",
       });
     } catch (error: any) {
       uiToast({
-        title: t('settings.toast.profileErrorTitle'),
+        title: "Error updating profile",
         description: error.message,
         variant: "destructive"
       });
@@ -168,15 +169,16 @@ const SettingsPage = () => {
     if (!user) return;
     
     try {
+      // Check if settings exist
       const { data: existingSettings, error: checkError } = await supabase
         .from('user_settings')
         .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('user_id', user.id);
         
-      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+      if (checkError) throw checkError;
       
-      if (existingSettings) {
+      if (existingSettings && existingSettings.length > 0) {
+        // Update existing settings
         const { error } = await supabase
           .from('user_settings')
           .update({
@@ -188,6 +190,7 @@ const SettingsPage = () => {
           
         if (error) throw error;
       } else {
+        // Insert new settings
         const { error } = await supabase
           .from('user_settings')
           .insert({
@@ -200,10 +203,11 @@ const SettingsPage = () => {
       }
       
       uiToast({
-        title: t('settings.toast.prefsUpdatedTitle'),
-        description: t('settings.toast.prefsUpdatedDesc'),
+        title: "Settings updated",
+        description: "Your preferences have been updated successfully",
       });
       
+      // Force reload to apply language change
       if (data.language !== currencyForm.getValues().language) {
         setTimeout(() => {
           window.location.reload();
@@ -211,7 +215,7 @@ const SettingsPage = () => {
       }
     } catch (error: any) {
       uiToast({
-        title: t('settings.toast.prefsErrorTitle'),
+        title: "Error updating preferences",
         description: error.message,
         variant: "destructive"
       });
@@ -229,14 +233,14 @@ const SettingsPage = () => {
       if (error) throw error;
       
       uiToast({
-        title: t('settings.toast.passwordUpdatedTitle'),
-        description: t('settings.toast.passwordUpdatedDesc'),
+        title: "Password updated",
+        description: "Your password has been changed successfully",
       });
       
       passwordForm.reset();
     } catch (error: any) {
       uiToast({
-        title: t('settings.toast.passwordErrorTitle'),
+        title: "Error updating password",
         description: error.message,
         variant: "destructive"
       });
@@ -247,13 +251,16 @@ const SettingsPage = () => {
     if (!user) return;
     
     try {
+      // For this example, we'll sign out the user
+      // In a production app, you would implement proper account deletion
       await logout();
-      sonnerToast(t('settings.toast.accountDeletedTitle'), {
-        description: t('settings.toast.accountDeletedDesc')
+      
+      toast("Account deleted", {
+        description: "Your account has been deleted successfully"
       });
     } catch (error: any) {
       uiToast({
-        title: t('settings.toast.accountDeleteErrorTitle'),
+        title: "Error deleting account",
         description: error.message,
         variant: "destructive"
       });
@@ -265,29 +272,29 @@ const SettingsPage = () => {
   return (
     <DashboardLayout isPremium={isPremium} isAdmin={isAdmin}>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">{t('settings.pageTitle')}</h1>
-        <p className="text-muted-foreground">{t('settings.pageSubtitle')}</p>
+        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">Settings</h1>
+        <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
       
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="bg-muted/60 rounded-full p-1 mb-2">
           <TabsTrigger value="profile" className="rounded-full">
-            {t('settings.tab.profile')}
+            Profile
           </TabsTrigger>
           <TabsTrigger value="preferences" className="rounded-full">
-            {t('settings.tab.preferences')}
+            Preferences
           </TabsTrigger>
           <TabsTrigger value="password" className="rounded-full">
-            {t('settings.tab.password')}
+            Password
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
           <Card className="border-none shadow-md rounded-xl">
             <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-              <CardTitle>{t('settings.profile.title')}</CardTitle>
+              <CardTitle>Profile</CardTitle>
               <CardDescription>
-                {t('settings.profile.description')}
+                Manage your personal information
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
@@ -298,7 +305,7 @@ const SettingsPage = () => {
                     name="full_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.fullName')}</FormLabel>
+                        <FormLabel>Full Name</FormLabel>
                         <FormControl>
                           <Input {...field} className="rounded-full" />
                         </FormControl>
@@ -312,12 +319,12 @@ const SettingsPage = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('auth.email')}</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input {...field} readOnly className="rounded-full bg-muted" />
                         </FormControl>
                         <FormDescription>
-                          {t('settings.profile.emailDesc')}
+                          Email address cannot be changed
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -328,7 +335,7 @@ const SettingsPage = () => {
                     type="submit" 
                     className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600"
                   >
-                    {t('settings.profile.saveButton')}
+                    Save Changes
                   </Button>
                 </form>
               </Form>
@@ -339,9 +346,9 @@ const SettingsPage = () => {
         <TabsContent value="preferences">
           <Card className="border-none shadow-md rounded-xl">
             <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-              <CardTitle>{t('settings.preferences.title')}</CardTitle>
+              <CardTitle>Preferences</CardTitle>
               <CardDescription>
-                {t('settings.preferences.description')}
+                Manage your app preferences and settings
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
@@ -352,22 +359,22 @@ const SettingsPage = () => {
                     name="currency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('settings.preferences.currency')}</FormLabel>
+                        <FormLabel>Currency</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="rounded-full">
-                              <SelectValue placeholder={t('settings.preferences.selectCurrency')} />
+                              <SelectValue placeholder="Select currency" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="IDR">IDR - Rupiah Indonesia</SelectItem>
-                            <SelectItem value="USD">USD - Dolar Amerika Serikat</SelectItem>
+                            <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
+                            <SelectItem value="USD">USD - US Dollar</SelectItem>
                             <SelectItem value="EUR">EUR - Euro</SelectItem>
-                            <SelectItem value="GBP">GBP - Pound Inggris</SelectItem>
-                            <SelectItem value="SGD">SGD - Dolar Singapura</SelectItem>
+                            <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                            <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -380,19 +387,19 @@ const SettingsPage = () => {
                     name="language"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('settings.preferences.language')}</FormLabel>
+                        <FormLabel>Language</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="rounded-full">
-                              <SelectValue placeholder={t('settings.preferences.selectLanguage')} />
+                              <SelectValue placeholder="Select language" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="id">Bahasa Indonesia</SelectItem>
+                            <SelectItem value="id">Indonesian</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -404,7 +411,7 @@ const SettingsPage = () => {
                     type="submit"
                     className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600"
                   >
-                    {t('settings.preferences.saveButton')}
+                    Save Preferences
                   </Button>
                 </form>
               </Form>
@@ -415,9 +422,9 @@ const SettingsPage = () => {
         <TabsContent value="password">
           <Card className="border-none shadow-md rounded-xl">
             <CardHeader className="bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700">
-              <CardTitle>{t('settings.security.title')}</CardTitle>
+              <CardTitle>Security</CardTitle>
               <CardDescription>
-                {t('settings.security.description')}
+                Change your password and security settings
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
@@ -428,7 +435,7 @@ const SettingsPage = () => {
                     name="currentPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('settings.security.currentPassword')}</FormLabel>
+                        <FormLabel>Current Password</FormLabel>
                         <FormControl>
                           <Input 
                             type="password" 
@@ -446,7 +453,7 @@ const SettingsPage = () => {
                     name="newPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('settings.security.newPassword')}</FormLabel>
+                        <FormLabel>New Password</FormLabel>
                         <FormControl>
                           <Input 
                             type="password" 
@@ -464,7 +471,7 @@ const SettingsPage = () => {
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('settings.security.confirmNewPassword')}</FormLabel>
+                        <FormLabel>Confirm New Password</FormLabel>
                         <FormControl>
                           <Input 
                             type="password" 
@@ -481,36 +488,37 @@ const SettingsPage = () => {
                     type="submit"
                     className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600"
                   >
-                    {t('settings.security.changePasswordButton')}
+                    Change Password
                   </Button>
                 </form>
               </Form>
             </CardContent>
             
             <CardFooter className="flex flex-col items-start border-t pt-6">
-              <h3 className="text-lg font-semibold text-red-600 mb-2">{t('settings.dangerZone.title')}</h3>
+              <h3 className="text-lg font-semibold text-red-600 mb-2">Danger Zone</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {t('settings.dangerZone.desc')}
+                Once you delete your account, there is no going back. Please be certain.
               </p>
               
               <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="rounded-full">{t('settings.dangerZone.deleteButton')}</Button>
+                  <Button variant="destructive" className="rounded-full">Delete Account</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="rounded-xl">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{t('settings.deleteDialog.title')}</AlertDialogTitle>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {t('settings.deleteDialog.desc')}
+                      This action cannot be undone. This will permanently delete your
+                      account and remove your data from our servers.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-full">{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-red-500 hover:bg-red-600 rounded-full"
                       onClick={handleDeleteAccount}
                     >
-                      {t('common.delete')}
+                      Delete
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

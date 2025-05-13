@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -50,26 +51,24 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="mb-6"> {/* This div now controls the bottom margin for the header area */}
+      <div className="mb-6"> {/* This div controls the bottom margin for the header area */}
         {isMobile ? (
           <>
             <DashboardHeader isPremium={isPremium} />
-            {isPremium && (
-              <div className="mt-3"> {/* Spacing for the toggle on mobile */}
-                <EntrepreneurModeToggle />
-              </div>
-            )}
+            <div className="mt-3"> {/* Spacing for the toggle on mobile */}
+              <EntrepreneurModeToggle />
+            </div>
           </>
         ) : (
           <div className="flex items-center gap-4"> {/* Desktop: toggle and header side-by-side */}
-            {isPremium && <EntrepreneurModeToggle />}
+            <EntrepreneurModeToggle />
             <DashboardHeader isPremium={isPremium} />
           </div>
         )}
       </div>
       
-      {isEntrepreneurMode ? (
-        // Entrepreneur Mode Dashboard
+      {isEntrepreneurMode && isPremium ? (
+        // Entrepreneur Mode Dashboard (premium only)
         <EntrepreneurDashboard 
           onAddIncome={handleAddBusinessIncome}
           onAddExpense={handleAddBusinessExpense}

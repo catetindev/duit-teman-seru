@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,7 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
   );
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-5">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{t('transactions.title')}</h2>
         <Button 
@@ -39,7 +40,7 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
           onClick={() => setIsAddDialogOpen(true)}
         >
           <PlusCircle size={16} />
-          <span>Add Transaction</span>
+          <span>{t('transactions.add')}</span>
         </Button>
       </div>
       
@@ -53,7 +54,7 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
         {loading ? (
           <div className="py-10 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-sm text-muted-foreground">Loading your transactions...</p>
+            <p className="text-sm text-muted-foreground">{t('transactions.loading')}</p>
           </div>
         ) : (
           <>
@@ -76,7 +77,7 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
           asChild
         >
           <a href="/transactions">
-            View all transactions
+            {t('order.viewAll')}
             <ChevronRight size={16} className="ml-1" />
           </a>
         </Button>

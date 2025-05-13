@@ -1,42 +1,53 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Lock } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 
-interface BadgeCardProps {
+import { cn } from "@/lib/utils";
+
+interface BadgeProps {
   name: string;
   description: string;
   icon: string;
   isLocked?: boolean;
   isNew?: boolean;
+  className?: string;
 }
 
-const BadgeCard: React.FC<BadgeCardProps> = ({
-  name,
-  description,
-  icon,
+const Badge = ({ 
+  name, 
+  description, 
+  icon, 
   isLocked = false,
   isNew = false,
-}) => {
+  className 
+}: BadgeProps) => {
   return (
-    <Card className={`p-4 relative overflow-hidden transition-shadow card-hover ${isLocked ? 'opacity-60 grayscale' : ''}`}>
+    <div className={cn(
+      "flex flex-col items-center p-4 rounded-lg transition-all relative",
+      isLocked 
+        ? "bg-gray-100 dark:bg-gray-800 opacity-60" 
+        : "bg-white dark:bg-gray-800 shadow-sm hover:shadow-md card-hover",
+      className
+    )}>
       {isNew && (
-        <Badge className="absolute top-2 right-2 bg-green-500 text-white text-xs">New!</Badge>
+        <span className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">
+          New!
+        </span>
       )}
-      <CardContent className="p-0 flex items-center space-x-4">
-        <div className="text-4xl flex-shrink-0">{icon}</div>
-        <div>
-          <h3 className="text-md font-semibold">{name}</h3>
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        </div>
-      </CardContent>
-      {isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <Lock className="h-8 w-8 text-white" />
-        </div>
-      )}
-    </Card>
+      
+      <div className={cn(
+        "w-16 h-16 flex items-center justify-center rounded-full mb-3",
+        isLocked ? "bg-gray-200 dark:bg-gray-700" : "gradient-bg-purple"
+      )}>
+        <span className="text-2xl">
+          {isLocked ? '🔒' : icon}
+        </span>
+      </div>
+      
+      <h4 className="font-medium text-center">{name}</h4>
+      
+      <p className="text-xs text-muted-foreground text-center mt-1">
+        {isLocked ? "Locked" : description}
+      </p>
+    </div>
   );
 };
 
-export default BadgeCard;
+export default Badge;

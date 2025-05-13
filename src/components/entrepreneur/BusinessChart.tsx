@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, CalendarDays } from 'lucide-react'; // Changed BarChart to BarChart3 for a different look
+import { BarChart, Calendar } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { 
   BarChart as RechartsBarChart,
@@ -14,157 +15,66 @@ import {
 } from 'recharts';
 import { formatCurrency } from '@/utils/formatUtils';
 import { ChartContainer } from '@/components/ui/chart';
-import { MonthlyData } from '@/hooks/useEntrepreneurData'; // Import MonthlyData
-import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile hook
 
-interface BusinessChartProps {
-  data: MonthlyData[]; // Accept dynamic data
-  loading: boolean;
-}
+// Sample data - in a real app, this would come from the database
+const sampleData = [
+  { month: 'Jan', income: 5500000, expense: 3200000 },
+  { month: 'Feb', income: 7200000, expense: 3800000 },
+  { month: 'Mar', income: 6800000, expense: 4100000 },
+  { month: 'Apr', income: 9100000, expense: 5200000 },
+  { month: 'May', income: 8600000, expense: 4900000 },
+  { month: 'Jun', income: 10200000, expense: 5500000 },
+];
 
-export function BusinessChart({ data, loading }: BusinessChartProps) {
-  const [timeframe, setTimeframe] = useState<string>('6months'); // Timeframe state can be kept for UI if needed
-  const isMobile = useIsMobile(); // Use the hook to detect mobile
+export function BusinessChart() {
+  const [timeframe, setTimeframe] = useState<string>('6months');
 
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-amber-500" />
-            Business Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="h-[350px] flex items-center justify-center">
-          <div className="animate-pulse flex space-x-4">
-            <div className="rounded-full bg-slate-200 h-10 w-10"></div>
-            <div className="flex-1 space-y-6 py-1">
-              <div className="h-2 bg-slate-200 rounded"></div>
-              <div className="space-y-3">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="h-2 bg-slate-200 rounded col-span-2"></div>
-                  <div className="h-2 bg-slate-200 rounded col-span-1"></div>
-                </div>
-                <div className="h-2 bg-slate-200 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  if (data.length === 0 && !loading) {
-     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-amber-500" />
-            Business Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="h-[350px] flex items-center justify-center">
-          <p className="text-muted-foreground">No data available for the chart.</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  // In a real app, you would filter data based on the selected timeframe
+  const chartData = sampleData;
 
   return (
     <Card>
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4">
-        <CardTitle className="text-lg font-medium flex items-center gap-2 mb-2 sm:mb-0">
-          <BarChart3 className="h-5 w-5 text-amber-500" />
-          Business Performance
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-lg font-medium flex items-center gap-2">
+          <BarChart className="h-5 w-5" />
+          Business Income vs. Expenses
         </CardTitle>
-        {/* Timeframe select can be re-added if dynamic timeframe filtering is implemented in useEntrepreneurData */}
-        {/* <Select value={timeframe} onValueChange={setTimeframe}>
-          <SelectTrigger className="w-full sm:w-[180px] h-9">
-            <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
+        <Select value={timeframe} onValueChange={setTimeframe}>
+          <SelectTrigger className="w-[180px]">
+            <Calendar className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Select timeframe" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="3months">Last 3 months</SelectItem>
             <SelectItem value="6months">Last 6 months</SelectItem>
-            <SelectItem value="year">This year</SelectItem>
+            <SelectItem value="year">Last year</SelectItem>
           </SelectContent>
-        </Select> */}
+        </Select>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px]">
+        <div className="h-[300px]">
           <ChartContainer 
             config={{ 
-              income: { label: 'Income', color: 'hsl(var(--chart-1))' }, // Using Tailwind CSS variables for colors
-              expense: { label: 'Expense', color: 'hsl(var(--chart-2))' }  
+              income: { label: 'Income', color: '#f59e0b' },
+              expense: { label: 'Expense', color: '#0ea5e9' }  
             }}
-            className="[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <RechartsBarChart 
-                data={data}
-                margin={{
-                  top: 5,
-                  right: 10,
-                  left: -10, // Adjust for YAxis labels
-                  bottom: 5,
-                }}
-              >
+              <RechartsBarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis 
-                  dataKey="month" 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tickMargin={8}
-                />
+                <XAxis dataKey="month" />
                 <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
                   tickFormatter={(value) => {
                     if (value >= 1000000) return `${value / 1000000}M`;
-                    if (value >= 1000) return `${value / 1000}K`;
-                    return value.toString();
+                    return `${value / 1000}K`;
                   }}
                 />
                 <Tooltip
-                  cursorClassName="fill-muted/50"
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="rounded-lg border bg-background p-2.5 shadow-sm">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Income
-                              </span>
-                              <span className="font-bold text-foreground">
-                                {formatCurrency(payload[0].value as number, 'IDR')}
-                              </span>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                Expense
-                              </span>
-                              <span className="font-bold text-foreground">
-                                {formatCurrency(payload[1].value as number, 'IDR')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    }
-                    return null
-                  }}
+                  formatter={(value: any) => [formatCurrency(value, 'IDR'), '']}
                 />
-                {/* Adjust Legend layout based on screen size */}
-                <Legend 
-                  layout={isMobile ? 'vertical' : 'horizontal'} 
-                  verticalAlign={isMobile ? 'middle' : 'top'} 
-                  align={isMobile ? 'right' : 'center'} 
-                  wrapperStyle={isMobile ? { right: 0, top: 0, transform: 'translate(20px, 0)' } : {}} // Adjust position slightly on mobile
-                />
-                <Bar dataKey="income" fill="var(--color-income)" radius={4} />
-                <Bar dataKey="expense" fill="var(--color-expense)" radius={4} />
+                <Legend />
+                <Bar dataKey="income" name="Income" fill="var(--color-income)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="expense" name="Expense" fill="var(--color-expense)" radius={[4, 4, 0, 0]} />
               </RechartsBarChart>
             </ResponsiveContainer>
           </ChartContainer>

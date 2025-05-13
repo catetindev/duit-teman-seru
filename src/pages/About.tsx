@@ -1,11 +1,7 @@
 import { motion } from 'framer-motion';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
-import { useLanguage } from '@/hooks/useLanguage'; // Import useLanguage
-
 const About = () => {
-  const { t } = useLanguage(); // Use the language hook
-
   return <div className="min-h-screen flex flex-col">
       <Navbar />
       
@@ -26,19 +22,21 @@ const About = () => {
             once: true
           }} className="space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                {t('about.title')}
+                Who are we?
               </h1>
               
               <p className="text-lg text-gray-700 mb-4">
-                {t('about.subtitle')}
+                We make finance uncomplicated.
               </p>
               
               <p className="text-lg text-gray-600">
-                {t('about.p1')}
+                Catatyo was born for those who want to manage money without the stress 
+                – everything is simple, fun, and relatable.
               </p>
               
               <p className="text-lg text-gray-600">
-                {t('about.p2')}
+                From budgeting to saving, you're in full control. Because we believe 
+                money management should feel as easy as scrolling TikTok ✨
               </p>
               
               <motion.div whileHover={{
@@ -49,7 +47,7 @@ const About = () => {
               damping: 10
             }} className="inline-block">
                 <a href="/pricing" className="inline-block px-8 py-3 mt-4 bg-[#28e57d] hover:bg-[#28e57d]/90 text-white rounded-lg font-medium transition-all">
-                  {t('about.getStarted')}
+                  Get Started
                 </a>
               </motion.div>
             </motion.div>
@@ -68,7 +66,7 @@ const About = () => {
             once: true
           }} className="rounded-xl overflow-hidden shadow-lg">
               <div className="bg-gray-200 h-80 md:h-96 flex items-center justify-center text-gray-500">
-                {t('about.illustrationAlt')}
+                [ Illustration of young people managing their money ]
               </div>
             </motion.div>
           </div>

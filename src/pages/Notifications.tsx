@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   CircleCheck,
@@ -16,7 +16,6 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import GoalInvitationNotification from '@/components/notifications/GoalInvitationNotification';
-import { useLanguage } from '@/hooks/useLanguage'; // Import useLanguage
 
 interface Notification {
   id: string;
@@ -25,13 +24,12 @@ interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
-  action_data?: string;
+  action_data?: string; // Make action_data optional to match the database
 }
 
 const NotificationsPage = () => {
   const { user, isPremium } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage(); // Use the language hook
   
   const {
     data: notifications = [],
@@ -56,6 +54,7 @@ const NotificationsPage = () => {
     enabled: !!user?.id,
   });
 
+  // Set up real-time subscription
   useEffect(() => {
     if (!user?.id) return;
     
@@ -70,6 +69,7 @@ const NotificationsPage = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          console.log('Notification change detected:', payload);
           refetch();
         }
       )
@@ -107,7 +107,7 @@ const NotificationsPage = () => {
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { 
+    return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
       hour: '2-digit',
@@ -204,6 +204,7 @@ const NotificationsPage = () => {
     }
   };
 
+  // Check if a notification is a goal invitation
   const isGoalInvitation = (notification: Notification): boolean => {
     if (!notification.action_data) return false;
     try {
@@ -215,14 +216,13 @@ const NotificationsPage = () => {
   };
 
   const hasUnread = notifications.some(n => !n.is_read);
-  const { language } = useLanguage(); // Get current language
 
   return (
     <DashboardLayout isPremium={isPremium}>
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{t('notifications.pageTitle')}</h1>
-          <p className="text-muted-foreground mt-1">{t('notifications.pageSubtitle')}</p>
+          <h1 className="text-2xl font-bold">Notifications</h1>
+          <p className="text-muted-foreground mt-1">Stay updated on important events</p>
         </div>
         {notifications.length > 0 && (
           <div className="flex space-x-2">
@@ -234,7 +234,7 @@ const NotificationsPage = () => {
                 className="flex items-center gap-1"
               >
                 <CheckCheck className="h-4 w-4" />
-                {t('notifications.markAllAsRead')}
+                Mark all read
               </Button>
             )}
             <Button 
@@ -244,7 +244,7 @@ const NotificationsPage = () => {
               className="flex items-center gap-1"
             >
               <Trash2 className="h-4 w-4" />
-              {t('notifications.clearAll')}
+              Clear all
             </Button>
           </div>
         )}
@@ -258,9 +258,9 @@ const NotificationsPage = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-10">
             <CircleX className="h-10 w-10 text-red-500 mb-2" />
-            <p>{t('notifications.loadFailed')}</p>
+            <p>Failed to load notifications</p>
             <Button onClick={() => refetch()} className="mt-4">
-              {t('notifications.tryAgain')}
+              Try Again
             </Button>
           </CardContent>
         </Card>
@@ -268,33 +268,38 @@ const NotificationsPage = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="text-5xl mb-4">🔔</div>
-            <h3 className="text-xl font-medium mb-2">{t('notifications.emptyTitle')}</h3>
+            <h3 className="text-xl font-medium mb-2">No Notifications</h3>
             <p className="text-muted-foreground text-center max-w-md">
-              {t('notifications.emptyDescription')}
+              You don't have any notifications yet. When you receive updates about your budgets, goals, 
+              or other important events, they'll appear here.
             </p>
             <Button 
               variant="outline"
               className="mt-4" 
-              onClick={async () => {
-                if (!user?.id) return;
-                try {
-                  await supabase.from('notifications').insert({
-                    user_id: user.id,
-                    title: t('notifications.sampleCreatedTitle'),
-                    message: t('notifications.sampleCreatedDesc'),
-                    type: 'success'
-                  });
-                  refetch();
-                  toast({
-                    title: t('notifications.sampleCreatedTitle'),
-                    description: t('notifications.sampleCreatedDesc'),
-                  });
-                } catch (error) {
-                  console.error('Error creating sample notification:', error);
-                }
+              onClick={() => {
+                // Add a sample notification for demo
+                const createNotification = async () => {
+                  if (!user?.id) return;
+                  try {
+                    await supabase.from('notifications').insert({
+                      user_id: user.id,
+                      title: 'Welcome to Notifications!',
+                      message: 'This is a sample notification to show you how they work.',
+                      type: 'success'
+                    });
+                    refetch();
+                    toast({
+                      title: "Sample notification created",
+                      description: "Check it out below",
+                    });
+                  } catch (error) {
+                    console.error('Error creating sample notification:', error);
+                  }
+                };
+                createNotification();
               }}
             >
-              {t('notifications.createSample')}
+              Create Sample Notification
             </Button>
           </CardContent>
         </Card>
@@ -342,7 +347,7 @@ const NotificationsPage = () => {
                             onClick={() => markAsRead(notification.id)}
                             className="h-8 text-xs"
                           >
-                            {t('notifications.markAsRead')}
+                            Mark as read
                           </Button>
                         )}
                         <Button 
@@ -351,7 +356,7 @@ const NotificationsPage = () => {
                           onClick={() => deleteNotification(notification.id)}
                           className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
                         >
-                          {t('action.delete')}
+                          Delete
                         </Button>
                       </div>
                     </div>

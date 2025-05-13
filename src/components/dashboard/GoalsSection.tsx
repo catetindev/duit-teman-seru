@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
@@ -94,7 +95,7 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
   const commonEmojis = ['🎯', '💰', '🏠', '🚗', '✈️', '💻', '📱', '👕', '🏝️', '🎓', '💍', '🚨'];
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-5">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{t('goals.title')}</h2>
         <Button 
@@ -233,4 +234,4 @@ const GoalsSection = ({ goals, isPremium, onGoalAdded, loading = false }: GoalsS
   );
 };
 
-export default React.memo(GoalsSection);
+export default GoalsSection;
