@@ -1,14 +1,15 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, Users, ShoppingBag, Package, ArrowRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, ShoppingBag, Package, ArrowRight, FileText, CalculatorIcon, LineChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BusinessSummary } from './BusinessSummary';
 import { BusinessTransactionButtons } from './BusinessTransactionButtons';
 import { BusinessChart } from './BusinessChart';
-import { ClientTracker } from './ClientTracker';
+import { ClientTracker } from './CustomerData'; // Changed CustomerData to ClientTracker
 import { InvoiceReminder } from './InvoiceReminder';
+import { useEntrepreneurData } from '@/hooks/useEntrepreneurData'; // Import the new hook
+import { formatCurrency } from '@/utils/formatUtils';
 
 interface EntrepreneurDashboardProps {
   onAddIncome: () => void;
@@ -19,21 +20,27 @@ export function EntrepreneurDashboard({
   onAddIncome,
   onAddExpense
 }: EntrepreneurDashboardProps) {
-  // This would come from real data in a production app
-  const businessData = {
-    totalIncome: 10200000,
-    totalExpenses: 5500000,
-    totalCustomers: 18,
-    totalProducts: 24,
-    totalOrders: 32
-  };
+  const { stats, chartData, loading, refreshData } = useEntrepreneurData();
+
+  const statCards = [
+    { title: "Total Customers", value: stats.totalCustomers, icon: <Users className="h-6 w-6 text-blue-500" />, color: "blue", link: "/customers" },
+    { title: "Products", value: stats.totalProducts, icon: <Package className="h-6 w-6 text-purple-500" />, color: "purple", link: "/products" },
+    { title: "Orders", value: stats.totalOrders, icon: <ShoppingBag className="h-6 w-6 text-green-500" />, color: "green", link: "/orders" },
+  ];
+
+  const quickAccessModules = [
+    { title: "Pricing Calculator", description: "Calculate product prices based on costs and desired profit margin", icon: <CalculatorIcon className="h-5 w-5 text-indigo-500" />, link: "/calculator", buttonText: "Open Calculator", color: "indigo" },
+    { title: "Invoice Generator", description: "Create professional invoices for your customers quickly", icon: <FileText className="h-5 w-5 text-teal-500" />, link: "/invoices", buttonText: "Create Invoice", color: "teal" },
+    { title: "Financial Reports", description: "View detailed financial statements and analytics", icon: <LineChart className="h-5 w-5 text-pink-500" />, link: "/finance-reports", buttonText: "View Reports", color: "pink" },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Business Summary */}
       <BusinessSummary 
-        totalIncome={businessData.totalIncome} 
-        totalExpenses={businessData.totalExpenses} 
+        totalIncome={stats.totalIncome} 
+        totalExpenses={stats.totalExpenses}
+        netProfit={stats.netProfit} 
         currency="IDR"
       />
       
@@ -44,88 +51,64 @@ export function EntrepreneurDashboard({
       />
       
       {/* Business Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex flex-col">
-              <p className="text-sm text-muted-foreground">Total Customers</p>
-              <h4 className="text-2xl font-bold">{businessData.totalCustomers}</h4>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <Users className="h-5 w-5 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex flex-col">
-              <p className="text-sm text-muted-foreground">Products</p>
-              <h4 className="text-2xl font-bold">{businessData.totalProducts}</h4>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-              <Package className="h-5 w-5 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex flex-col">
-              <p className="text-sm text-muted-foreground">Orders</p>
-              <h4 className="text-2xl font-bold">{businessData.totalOrders}</h4>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
-              <ShoppingBag className="h-5 w-5 text-amber-600" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {statCards.map(card => (
+          <Card key={card.title} className={`hover:shadow-md transition-shadow duration-300 border-l-4 border-${card.color}-500`}>
+            <CardContent className="p-5 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">{card.title}</p>
+                <h4 className="text-3xl font-bold text-gray-800 dark:text-white">
+                  {loading ? <span className="animate-pulse">...</span> : card.value}
+                </h4>
+              </div>
+              <div className={`h-12 w-12 rounded-full bg-${card.color}-100 dark:bg-${card.color}-900/30 flex items-center justify-center`}>
+                {card.icon}
+              </div>
+            </CardContent>
+            <Button asChild variant="ghost" size="sm" className={`w-full justify-start text-xs text-${card.color}-600 dark:text-${card.color}-400 rounded-t-none`}>
+              <Link to={card.link}>
+                View Details <ArrowRight className="ml-1 h-3 w-3" />
+              </Link>
+            </Button>
+          </Card>
+        ))}
       </div>
       
       {/* Quick Access Modules */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 dark:border-blue-900">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Pricing Calculator</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">Calculate your product prices based on costs and desired profit margin</p>
-            <Button asChild variant="default" className="bg-blue-600 hover:bg-blue-700">
-              <Link to="/calculator">
-                Open Calculator <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 dark:border-purple-900">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Invoice Generator</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">Create professional invoices for your customers quickly</p>
-            <Button asChild variant="default" className="bg-purple-600 hover:bg-purple-700">
-              <Link to="/invoices">
-                Create Invoice <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {quickAccessModules.map(module => (
+          <Card key={module.title} className={`bg-gradient-to-br from-${module.color}-50 to-${module.color}-100 border-${module.color}-200 dark:from-${module.color}-900/30 dark:to-${module.color}-800/30 dark:border-${module.color}-700 hover:shadow-md transition-shadow duration-300`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2 mb-1">
+                {module.icon}
+                <CardTitle className="text-lg font-semibold">{module.title}</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4 h-16">{module.description}</p> {/* Fixed height for description */}
+              <Button asChild variant="outline" className={`w-full bg-white/70 dark:bg-black/30 border-${module.color}-300 dark:border-${module.color}-600 text-${module.color}-700 dark:text-${module.color}-300 hover:bg-${module.color}-100 dark:hover:bg-${module.color}-700/50`}>
+                <Link to={module.link}>
+                  {module.buttonText} <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
       </div>
       
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {/* Business Chart */}
-          <BusinessChart />
+          <BusinessChart data={chartData} loading={loading} />
         </div>
         
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-8">
+          {/* Customer Data */}
+          <ClientTracker /> {/* Changed CustomerData to ClientTracker */}
+          
           {/* Invoice Reminder */}
           <InvoiceReminder />
-          
-          {/* Client Tracker */}
-          <ClientTracker />
         </div>
       </div>
     </div>

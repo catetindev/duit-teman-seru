@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -93,7 +92,7 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
     try {
       const { data: existingSettings, error: checkError } = await supabase
         .from('user_settings')
-        .select('*')
+        .select('custom_settings')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -119,17 +118,18 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
         }
       };
       
-      // Fix: Use the single object version of upsert instead of an array
+      // Upsert user_settings: update if exists, insert if not
       const { error: upsertError } = await supabase
         .from('user_settings')
         .upsert({ 
           user_id: user.id, 
           custom_settings: JSON.stringify(customSettings),
-          // Safely provide default values for other required fields if inserting
-          preferred_currency: existingSettings ? (existingSettings as UserSettings).preferred_currency || 'IDR' : 'IDR',
-          preferred_language: existingSettings ? (existingSettings as UserSettings).preferred_language || 'id' : 'id',
+          // Provide default values for other required fields if inserting
+          preferred_currency: existingSettings?.preferred_currency || 'IDR', 
+          preferred_language: existingSettings?.preferred_language || 'id',
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' });
+
 
       if (upsertError) throw upsertError;
     } catch (error) {

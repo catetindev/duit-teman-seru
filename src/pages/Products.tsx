@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -23,8 +22,11 @@ export default function Products() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
 
-  // Memoize fetchProducts to prevent it from being recreated on every render
-  const fetchProducts = useCallback(async () => {
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  async function fetchProducts() {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -54,11 +56,7 @@ export default function Products() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]); // Include fetchProducts in the dependency array
+  }
 
   const handleAddNew = () => {
     setSelectedProduct(null);

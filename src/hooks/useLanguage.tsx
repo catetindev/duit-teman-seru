@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 type Language = 'id' | 'en';
@@ -6,7 +5,7 @@ type Language = 'id' | 'en';
 interface LanguageContextType {
   language: Language;
   setLanguage: (language: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string>) => string;
 }
 
 const translations = {
@@ -48,8 +47,8 @@ const translations = {
   
   // Dashboard
   'dashboard.welcome': {
-    en: 'Hi there, money master!',
-    id: 'Hai, master duit!'
+    en: 'Hi there, {userName}!', // Added placeholder
+    id: 'Hai, {userName}!' // Added placeholder
   },
   'dashboard.balance': {
     en: 'Current Balance',
@@ -119,6 +118,10 @@ const translations = {
     en: 'Transaction updated',
     id: 'Transaksi diperbarui'
   },
+  'transactions.noData': {
+    en: 'No transaction data available',
+    id: 'Belum ada data transaksi'
+  },
   
   // Budget
   'budget.title': {
@@ -137,14 +140,29 @@ const translations = {
     en: 'You\'re on track! Keep it up! ✨',
     id: 'Kamu on track! Pertahankan! ✨'
   },
-  // Adding missing budget keys
+  'budget.spent': {
+    en: 'Spent',
+    id: 'Terpakai'
+  },
+  'budget.periodLabel': {
+    en: 'Period',
+    id: 'Periode'
+  },
   'budget.empty': {
     en: 'No budgets created yet',
-    id: 'Belum ada anggaran'
+    id: 'Belum ada anggaran dibuat'
   },
   'budget.create': {
     en: 'Create Budget',
     id: 'Buat Anggaran'
+  },
+  'budget.deleteConfirmTitle': {
+    en: 'Delete Budget',
+    id: 'Hapus Anggaran'
+  },
+  'budget.deleteConfirmMessage': {
+    en: 'Are you sure you want to delete this budget? This action cannot be undone.',
+    id: 'Apakah Anda yakin ingin menghapus anggaran ini? Tindakan ini tidak dapat dibatalkan.'
   },
   
   // Admin
@@ -177,6 +195,10 @@ const translations = {
   'auth.logout': {
     en: 'Log Out',
     id: 'Keluar'
+  },
+  'auth.logoutFailed': {
+    en: 'Failed to log out. Please try again.',
+    id: 'Gagal keluar. Silakan coba lagi.'
   },
   'auth.email': {
     en: 'Email',
@@ -242,6 +264,14 @@ const translations = {
     en: 'Creating account...',
     id: 'Membuat akun...'
   },
+  'auth.signupSuccess': {
+    en: 'Sign up successful! Redirecting to dashboard...',
+    id: 'Pendaftaran berhasil! Mengalihkan ke dasbor...'
+  },
+  'auth.signupFailed': {
+    en: 'Sign up failed',
+    id: 'Pendaftaran gagal'
+  },
   
   // Landing Page
   'landing.hero.title': {
@@ -300,6 +330,16 @@ const translations = {
     en: 'All rights reserved.',
     id: 'Semua hak dilindungi.'
   },
+  'footer.pages': { en: 'Pages', id: 'Halaman' },
+  'footer.legal': { en: 'Legal', id: 'Legal' },
+  'footer.home': { en: 'Home', id: 'Beranda' },
+  'footer.aboutUs': { en: 'About Us', id: 'Tentang Kami' },
+  'footer.pricing': { en: 'Pricing', id: 'Harga' },
+  'footer.contact': { en: 'Contact', id: 'Kontak' },
+  'footer.terms': { en: 'Terms of Service', id: 'Ketentuan Layanan' },
+  'footer.privacy': { en: 'Privacy Policy', id: 'Kebijakan Privasi' },
+  'footer.madeWith': { en: 'Made with 💚 for You', id: 'Dibuat dengan 💚 untuk Kamu' },
+  'footer.copyright': { en: '© {year} Catatyo. All rights reserved.', id: '© {year} Catatyo. Semua hak dilindungi.' },
   
   // Features section
   'features.expense.title': {
@@ -485,14 +525,29 @@ const translations = {
     en: 'Notifications',
     id: 'Notifikasi'
   },
+  'notifications.pageTitle': { en: 'Notifications', id: 'Notifikasi' },
+  'notifications.pageSubtitle': { en: 'Stay updated on important events', id: 'Tetap terupdate tentang kejadian penting' },
   'notifications.markAllAsRead': {
     en: 'Mark all as read',
     id: 'Tandai semua sudah dibaca'
   },
+  'notifications.clearAll': { en: 'Clear all', id: 'Bersihkan semua' },
+  'notifications.loadFailed': { en: 'Failed to load notifications', id: 'Gagal memuat notifikasi' },
+  'notifications.tryAgain': { en: 'Try Again', id: 'Coba Lagi' },
   'notifications.empty': {
     en: 'No notifications yet',
     id: 'Belum ada notifikasi'
   },
+  'notifications.emptyTitle': { en: 'No Notifications', id: 'Tidak Ada Notifikasi' },
+  'notifications.emptyDescription': { en: "You don't have any notifications yet. When you receive updates about your budgets, goals, or other important events, they'll appear here.", id: "Anda belum memiliki notifikasi. Ketika Anda menerima pembaruan tentang anggaran, target, atau kejadian penting lainnya, notifikasi akan muncul di sini." },
+  'notifications.createSample': { en: 'Create Sample Notification', id: 'Buat Contoh Notifikasi' },
+  'notifications.sampleCreatedTitle': { en: 'Sample notification created', id: 'Contoh notifikasi dibuat' },
+  'notifications.sampleCreatedDesc': { en: 'Check it out below', id: 'Lihat di bawah ini' },
+  'notifications.goalInviteTitle': { en: 'Goal Collaboration Invitation', id: 'Undangan Kolaborasi Target' },
+  'notifications.goalInviteMessage': { en: "You've been invited to collaborate on the goal \"{goalTitle}\"", id: "Anda diundang untuk berkolaborasi pada target \"{goalTitle}\"" },
+  'notifications.decline': { en: 'Decline', id: 'Tolak' },
+  'notifications.accept': { en: 'Accept', id: 'Terima' },
+  'notifications.markAsRead': { en: 'Mark as read', id: 'Tandai sudah dibaca' },
   'notifications.newAnnouncement': {
     en: 'New announcement from admin',
     id: 'Pengumuman baru dari admin'
@@ -527,8 +582,18 @@ const translations = {
     en: 'Upgrade to Premium',
     id: 'Tingkatkan ke Premium'
   },
+
+  // Common
+  'common.cancel': {
+    en: 'Cancel',
+    id: 'Batal'
+  },
+  'common.delete': {
+    en: 'Delete',
+    id: 'Hapus'
+  },
   
-  // Orders - Added missing order status translations
+  // Orders
   'order.status.paid': {
     en: 'Paid',
     id: 'Sudah Dibayar'
@@ -586,7 +651,110 @@ const translations = {
   'product.title': {
     en: 'Products & Services',
     id: 'Produk & Layanan'
-  }
+  },
+
+  // About Page
+  'about.title': { en: 'Who are we?', id: 'Siapa Kami?' },
+  'about.subtitle': { en: 'We make finance uncomplicated.', id: 'Kami membuat keuangan jadi mudah.' },
+  'about.p1': { en: "Catatyo was born for those who want to manage money without the stress – everything is simple, fun, and relatable.", id: "Catatyo lahir untuk kamu yang ingin mengatur uang tanpa stres – semuanya simpel, seru, dan nyambung." },
+  'about.p2': { en: "From budgeting to saving, you're in full control. Because we believe money management should feel as easy as scrolling TikTok ✨", id: "Mulai dari anggaran hingga menabung, kamu pegang kendali penuh. Karena kami percaya mengatur uang seharusnya semudah scroll TikTok ✨" },
+  'about.getStarted': { en: 'Get Started', id: 'Mulai Sekarang' },
+  'about.illustrationAlt': { en: '[ Illustration of young people managing their money ]', id: '[ Ilustrasi anak muda mengatur keuangan ]' },
+
+  // Contact Page
+  'contact.title': { en: 'Got something to say?', id: 'Ada yang mau disampaikan?' },
+  'contact.subtitle': { en: "Feedback, ideas, or just wanna say \"hi\"? Drop us a DM via email or this form below — we're quick to respond 😎", id: "Masukan, ide, atau cuma mau say \"hai\"? Kirim pesan lewat email atau formulir di bawah ini — kami cepat balasnya 😎" },
+  'contact.emailUs': { en: 'Email us directly:', id: 'Email kami langsung:' },
+  'contact.form.name': { en: 'Name', id: 'Nama' },
+  'contact.form.namePlaceholder': { en: 'Your name', id: 'Nama kamu' },
+  'contact.form.email': { en: 'Email', id: 'Email' },
+  'contact.form.emailPlaceholder': { en: 'your.email@example.com', id: 'email.kamu@contoh.com' },
+  'contact.form.message': { en: 'Message', id: 'Pesan' },
+  'contact.form.messagePlaceholder': { en: "What's on your mind?", id: 'Apa yang ada di pikiranmu?' },
+  'contact.form.send': { en: 'Send 💌', id: 'Kirim 💌' },
+  'contact.form.sending': { en: 'Sending...', id: 'Mengirim...' },
+  'contact.toast.fillFields': { en: 'Please fill all fields', id: 'Mohon isi semua kolom' },
+  'contact.toast.sentSuccess': { en: 'Message sent successfully!', id: 'Pesan berhasil terkirim!' },
+  'contact.illustrationAlt': { en: '[ Illustration of someone sending a message or chatting ]', id: '[ Ilustrasi seseorang mengirim pesan atau mengobrol ]' },
+
+  // Privacy Page
+  'privacy.title': { en: 'Privacy Policy', id: 'Kebijakan Privasi' },
+  'privacy.p1': { en: 'We value your privacy and are committed to protecting your personal information.', id: 'Kami menghargai privasi Anda dan berkomitmen untuk melindungi informasi pribadi Anda.' },
+  'privacy.dataCollection.title': { en: 'Data Collection', id: 'Pengumpulan Data' },
+  'privacy.dataCollection.p1': { en: 'We collect basic information such as name, email, and usage behavior for the purpose of improving our app.', id: 'Kami mengumpulkan informasi dasar seperti nama, email, dan perilaku penggunaan untuk tujuan meningkatkan aplikasi kami.' },
+  'privacy.useOfData.title': { en: 'Use of Data', id: 'Penggunaan Data' },
+  'privacy.useOfData.p1': { en: 'Your data is used only for service improvements and is never sold to third parties.', id: 'Data Anda hanya digunakan untuk peningkatan layanan dan tidak pernah dijual kepada pihak ketiga.' },
+  'privacy.thirdParty.title': { en: 'Third-Party Services', id: 'Layanan Pihak Ketiga' },
+  'privacy.thirdParty.p1': { en: 'We may use tools like Google Analytics or authentication, which follow their own privacy policies.', id: 'Kami mungkin menggunakan alat seperti Google Analytics atau otentikasi, yang mengikuti kebijakan privasi mereka sendiri.' },
+  'privacy.yourRights.title': { en: 'Your Rights', id: 'Hak Anda' },
+  'privacy.yourRights.p1': { en: 'You can request to access, update, or delete your data at any time.', id: 'Anda dapat meminta untuk mengakses, memperbarui, atau menghapus data Anda kapan saja.' },
+  'privacy.security.title': { en: 'Security', id: 'Keamanan' },
+  'privacy.security.p1': { en: 'We take reasonable measures to secure your data.', id: 'Kami mengambil langkah-langkah yang wajar untuk mengamankan data Anda.' },
+  'privacy.changes.title': { en: 'Changes to Policy', id: 'Perubahan Kebijakan' },
+  'privacy.changes.p1': { en: 'Updates to this policy will be posted on this page.', id: 'Pembaruan kebijakan ini akan diposting di halaman ini.' },
+  'privacy.contactUs.title': { en: 'Contact Us', id: 'Hubungi Kami' },
+  'privacy.contactUs.p1': { en: 'Questions? Contact us at <a href="mailto:halo@catatyo.com" class="text-[#28e57d] hover:underline">halo@catatyo.com</a>.', id: 'Ada pertanyaan? Hubungi kami di <a href="mailto:halo@catatyo.com" class="text-[#28e57d] hover:underline">halo@catatyo.com</a>.' },
+
+  // Terms Page
+  'terms.title': { en: 'Terms of Service', id: 'Ketentuan Layanan' },
+  'terms.p1': { en: 'Welcome to Catatyo! By accessing or using our services, you agree to the following terms:', id: 'Selamat datang di Catatyo! Dengan mengakses atau menggunakan layanan kami, Anda menyetujui ketentuan berikut:' },
+  'terms.eligibility.title': { en: 'Eligibility', id: 'Kelayakan' },
+  'terms.eligibility.p1': { en: 'You must be at least 13 years old to use this app.', id: 'Anda harus berusia minimal 13 tahun untuk menggunakan aplikasi ini.' },
+  'terms.accountSecurity.title': { en: 'Account Security', id: 'Keamanan Akun' },
+  'terms.accountSecurity.p1': { en: 'You are responsible for any activity that occurs under your account.', id: 'Anda bertanggung jawab atas segala aktivitas yang terjadi di bawah akun Anda.' },
+  'terms.useOfApp.title': { en: 'Use of the App', id: 'Penggunaan Aplikasi' },
+  'terms.useOfApp.p1': { en: 'You agree not to misuse the app or use it for any unlawful purpose.', id: 'Anda setuju untuk tidak menyalahgunakan aplikasi atau menggunakannya untuk tujuan yang melanggar hukum.' },
+  'terms.subscription.title': { en: 'Subscription', id: 'Langganan' },
+  'terms.subscription.p1': { en: 'Some features may require a paid subscription. You will be notified of any changes to pricing.', id: 'Beberapa fitur mungkin memerlukan langganan berbayar. Anda akan diberitahu tentang perubahan harga apa pun.' },
+  'terms.termination.title': { en: 'Termination', id: 'Penghentian' },
+  'terms.termination.p1': { en: 'We reserve the right to suspend or terminate your account for violating these terms.', id: 'Kami berhak untuk menangguhkan atau menghentikan akun Anda karena melanggar ketentuan ini.' },
+  'terms.liability.title': { en: 'Limitation of Liability', id: 'Batasan Tanggung Jawab' },
+  'terms.liability.p1': { en: 'We are not liable for any indirect or consequential damages.', id: 'Kami tidak bertanggung jawab atas kerugian tidak langsung atau konsekuensial.' },
+  'terms.changes.title': { en: 'Changes to Terms', id: 'Perubahan Ketentuan' },
+  'terms.changes.p1': { en: 'We may update these terms. Continued use means you accept the new terms.', id: 'Kami dapat memperbarui ketentuan ini. Penggunaan berkelanjutan berarti Anda menerima ketentuan baru.' },
+  'terms.contactUs.title': { en: 'Contact Us', id: 'Hubungi Kami' },
+  'terms.contactUs.p1': { en: 'If you have any questions, please contact us at <a href="mailto:halo@catatyo.com" class="text-[#28e57d] hover:underline">halo@catatyo.com</a>.', id: 'Jika Anda memiliki pertanyaan, silakan hubungi kami di <a href="mailto:halo@catatyo.com" class="text-[#28e57d] hover:underline">halo@catatyo.com</a>.' },
+
+  // Settings Page
+  'settings.pageTitle': { en: 'Settings', id: 'Pengaturan' },
+  'settings.pageSubtitle': { en: 'Manage your account settings and preferences', id: 'Kelola pengaturan akun dan preferensi Anda' },
+  'settings.tab.profile': { en: 'Profile', id: 'Profil' },
+  'settings.tab.preferences': { en: 'Preferences', id: 'Preferensi' },
+  'settings.tab.password': { en: 'Password', id: 'Kata Sandi' },
+  'settings.profile.title': { en: 'Profile', id: 'Profil' },
+  'settings.profile.description': { en: 'Manage your personal information', id: 'Kelola informasi pribadi Anda' },
+  'settings.profile.emailDesc': { en: 'Email address cannot be changed', id: 'Alamat email tidak dapat diubah' },
+  'settings.profile.saveButton': { en: 'Save Changes', id: 'Simpan Perubahan' },
+  'settings.toast.profileUpdatedTitle': { en: 'Settings updated', id: 'Pengaturan diperbarui' },
+  'settings.toast.profileUpdatedDesc': { en: 'Your profile has been updated successfully', id: 'Profil Anda berhasil diperbarui' },
+  'settings.toast.profileErrorTitle': { en: 'Error updating profile', id: 'Gagal memperbarui profil' },
+  'settings.preferences.title': { en: 'Preferences', id: 'Preferensi' },
+  'settings.preferences.description': { en: 'Manage your app preferences and settings', id: 'Kelola preferensi dan pengaturan aplikasi Anda' },
+  'settings.preferences.currency': { en: 'Currency', id: 'Mata Uang' },
+  'settings.preferences.selectCurrency': { en: 'Select currency', id: 'Pilih mata uang' },
+  'settings.preferences.language': { en: 'Language', id: 'Bahasa' },
+  'settings.preferences.selectLanguage': { en: 'Select language', id: 'Pilih bahasa' },
+  'settings.preferences.saveButton': { en: 'Save Preferences', id: 'Simpan Preferensi' },
+  'settings.toast.prefsUpdatedTitle': { en: 'Settings updated', id: 'Pengaturan diperbarui' },
+  'settings.toast.prefsUpdatedDesc': { en: 'Your preferences have been updated successfully', id: 'Preferensi Anda berhasil diperbarui' },
+  'settings.toast.prefsErrorTitle': { en: 'Error updating preferences', id: 'Gagal memperbarui preferensi' },
+  'settings.security.title': { en: 'Security', id: 'Keamanan' },
+  'settings.security.description': { en: 'Change your password and security settings', id: 'Ubah kata sandi dan pengaturan keamanan Anda' },
+  'settings.security.currentPassword': { en: 'Current Password', id: 'Kata Sandi Saat Ini' },
+  'settings.security.newPassword': { en: 'New Password', id: 'Kata Sandi Baru' },
+  'settings.security.confirmNewPassword': { en: 'Confirm New Password', id: 'Konfirmasi Kata Sandi Baru' },
+  'settings.security.changePasswordButton': { en: 'Change Password', id: 'Ubah Kata Sandi' },
+  'settings.toast.passwordUpdatedTitle': { en: 'Password updated', id: 'Kata sandi diperbarui' },
+  'settings.toast.passwordUpdatedDesc': { en: 'Your password has been changed successfully', id: 'Kata sandi Anda berhasil diubah' },
+  'settings.toast.passwordErrorTitle': { en: 'Error updating password', id: 'Gagal memperbarui kata sandi' },
+  'settings.dangerZone.title': { en: 'Danger Zone', id: 'Zona Berbahaya' },
+  'settings.dangerZone.desc': { en: 'Once you delete your account, there is no going back. Please be certain.', id: 'Setelah Anda menghapus akun Anda, tidak ada jalan untuk kembali. Mohon pastikan.' },
+  'settings.dangerZone.deleteButton': { en: 'Delete Account', id: 'Hapus Akun' },
+  'settings.deleteDialog.title': { en: 'Are you absolutely sure?', id: 'Apakah Anda benar-benar yakin?' },
+  'settings.deleteDialog.desc': { en: 'This action cannot be undone. This will permanently delete your account and remove your data from our servers.', id: 'Tindakan ini tidak dapat dibatalkan. Ini akan menghapus akun Anda secara permanen dan menghapus data Anda dari server kami.' },
+  'settings.toast.accountDeletedTitle': { en: 'Account deleted', id: 'Akun dihapus' },
+  'settings.toast.accountDeletedDesc': { en: 'Your account has been deleted successfully', id: 'Akun Anda berhasil dihapus' },
+  'settings.toast.accountDeleteErrorTitle': { en: 'Error deleting account', id: 'Gagal menghapus akun' },
 };
 
 // Create a context with a default undefined value
@@ -609,12 +777,17 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     localStorage.setItem('preferred_language', language);
   }, [language]);
   
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, string>): string => {
+    let translation = translations[key]?.[language] || key;
+    if (params) {
+      Object.keys(params).forEach(paramKey => {
+        translation = translation.replace(`{${paramKey}}`, params[paramKey]);
+      });
+    }
     if (!translations[key]) {
       console.warn(`Translation key not found: ${key}`);
-      return key;
     }
-    return translations[key][language] || key;
+    return translation;
   };
   
   return (

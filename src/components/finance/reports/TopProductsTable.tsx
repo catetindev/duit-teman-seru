@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TopProduct } from '@/types/finance';
 import {
@@ -9,16 +8,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatCurrency } from '@/utils/formatUtils';
-import { useLanguage } from '@/hooks/useLanguage';
+import { formatCurrency } from '@/utils/formatUtils'; // Updated import
 
 interface TopProductsTableProps {
   products: TopProduct[];
 }
 
 export function TopProductsTable({ products }: TopProductsTableProps) {
-  const { t } = useLanguage();
-  
   if (products.length === 0) {
     return (
       <div className="flex items-center justify-center p-8 border rounded-md">
@@ -28,11 +24,11 @@ export function TopProductsTable({ products }: TopProductsTableProps) {
   }
 
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="rounded-md border overflow-x-auto"> {/* Added overflow-x-auto */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('product.title')}</TableHead>
+            <TableHead>Product/Service</TableHead>
             <TableHead className="text-right">Units Sold</TableHead>
             <TableHead className="text-right">Revenue</TableHead>
           </TableRow>

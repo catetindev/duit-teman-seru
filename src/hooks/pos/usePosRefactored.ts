@@ -1,8 +1,7 @@
-
 import { useProductManagement } from './useProductManagement';
 import { useCartManagement } from './useCartManagement';
 import { useTransactionManagement } from './useTransactionManagement';
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 
 export function usePosRefactored() {
   const { 
@@ -26,7 +25,7 @@ export function usePosRefactored() {
     loading: transactionLoading,
     recentTransactions,
     saveTransaction,
-    deleteTransaction,
+    deleteTransaction, // Added deleteTransaction
     fetchRecentTransactions
   } = useTransactionManagement();
 
@@ -34,19 +33,18 @@ export function usePosRefactored() {
   const loading = productsLoading || transactionLoading;
 
   // Wrapper for saving transaction
-  const handleSaveTransaction = useCallback(async () => {
+  const handleSaveTransaction = async () => {
     const success = await saveTransaction(transaction);
     if (success) {
       resetTransaction();
     }
-    return success;
-  }, [saveTransaction, transaction, resetTransaction]);
+  };
 
   // Load initial data
   useEffect(() => {
     fetchProducts();
     fetchRecentTransactions();
-  }, [fetchProducts, fetchRecentTransactions]);
+  }, [fetchProducts, fetchRecentTransactions]); // Added fetchProducts and fetchRecentTransactions to dependency array
 
   return {
     products,
@@ -60,9 +58,9 @@ export function usePosRefactored() {
     updateCashReceived,
     updateCustomerName,
     saveTransaction: handleSaveTransaction,
-    deleteTransaction,
+    deleteTransaction, // Export deleteTransaction
     resetTransaction,
-    fetchProducts,
-    fetchRecentTransactions,
+    fetchProducts, // Still export if needed for manual refresh elsewhere
+    fetchRecentTransactions, // Still export if needed for manual refresh elsewhere
   };
 }

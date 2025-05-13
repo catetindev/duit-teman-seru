@@ -1,78 +1,48 @@
-
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import StatCardBase from '@/components/ui/StatCard';
+import { useQuery } from '@tanstack/react-query';
 
 interface StatCardProps {
   title: string;
-  value: string | number;
-  icon?: React.ReactNode;
+  queryKey: string;
+  filterFn?: (user: any) => boolean;
+  icon: React.ReactNode;
+  variant?: 'default' | 'teal' | 'purple' | 'orange';
   trend?: {
     value: number;
     isPositive: boolean;
   };
-  variant?: 'default' | 'teal' | 'purple' | 'orange';
-  className?: string;
 }
 
-const StatCard = ({ 
+const StatCard: React.FC<StatCardProps> = ({ 
   title, 
-  value, 
+  queryKey, 
+  filterFn = () => true,
   icon, 
-  trend, 
   variant = 'default',
-  className 
-}: StatCardProps) => {
-  const getVariantClasses = () => {
-    switch(variant) {
-      case 'teal':
-        return 'bg-gradient-to-br from-teal-500 to-teal-600 text-white';
-      case 'purple':
-        return 'bg-gradient-to-br from-purple-500 to-purple-600 text-white';
-      case 'orange':
-        return 'bg-gradient-to-br from-orange-500 to-orange-600 text-white';
-      default:
-        return 'bg-white dark:bg-gray-800';
+  trend 
+}) => {
+  const { data: users = [] } = useQuery({
+    queryKey: [queryKey],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('*');
+      if (error) throw error;
+      return data;
     }
-  };
+  });
+
+  const filteredUsers = users.filter(filterFn);
+  const value = filteredUsers.length.toString();
 
   return (
-    <div 
-      className={cn(
-        "rounded-xl p-4 shadow-sm card-hover",
-        getVariantClasses(),
-        className
-      )}
-    >
-      <div className="flex justify-between items-start">
-        <div>
-          <p className={cn(
-            "text-sm font-medium mb-1",
-            variant === 'default' ? 'text-muted-foreground' : 'text-white/80'
-          )}>
-            {title}
-          </p>
-          <h4 className="text-2xl font-bold">{value}</h4>
-          
-          {trend && (
-            <div className={cn(
-              "mt-2 text-xs font-medium inline-flex items-center",
-              trend.isPositive ? 'text-green-500' : 'text-red-500',
-              variant !== 'default' && 'text-white/90'
-            )}>
-              {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
-            </div>
-          )}
-        </div>
-        
-        {icon && (
-          <div className={cn(
-            "p-2 rounded-lg",
-            variant === 'default' ? 'bg-muted' : 'bg-white/10'
-          )}>
-            {icon}
-          </div>
-        )}
-      </div>
-    </div>
+    <StatCardBase
+      title={title}
+      value={value}
+      icon={icon}
+      variant={variant}
+      trend={trend}
+    />
   );
 };
 

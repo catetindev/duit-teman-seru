@@ -1,4 +1,3 @@
-
 import React from 'react';
 import BadgeCard from '@/components/ui/BadgeCard';
 
@@ -18,7 +17,7 @@ const BadgesSection = ({ badges }: BadgesSectionProps) => {
   if (badges.length === 0) return null;
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-5">
       <h2 className="text-xl font-bold mb-4">Your Badges</h2>
       <div className="grid grid-cols-2 gap-3">
         {badges.map((badge, index) => (

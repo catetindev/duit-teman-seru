@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -18,9 +17,9 @@ const BudgetsSection = React.memo(({ isPremium }: BudgetsSectionProps) => {
   if (!isPremium) return null;
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-5">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">{t('nav.budget')}</h2>
+        <h2 className="text-xl font-bold">Budget</h2>
         <Link to="/budget">
           <Button variant="ghost" size="sm" className="text-sm">
             View All <ChevronRight className="ml-1 h-4 w-4" />
@@ -34,10 +33,10 @@ const BudgetsSection = React.memo(({ isPremium }: BudgetsSectionProps) => {
         </div>
       ) : budgets.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground mb-4">{t('budget.empty')}</p>
+          <p className="text-muted-foreground mb-4">No budgets created yet</p>
           <Link to="/budget">
             <Button variant="outline" size="sm" className="gap-1">
-              <Plus className="h-4 w-4" /> {t('budget.create')}
+              <Plus className="h-4 w-4" /> Create Budget
             </Button>
           </Link>
         </div>

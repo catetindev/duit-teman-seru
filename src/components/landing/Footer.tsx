@@ -1,10 +1,12 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useBrandingAssets } from '@/hooks/useBrandingAssets';
+import { useLanguage } from '@/hooks/useLanguage'; // Import useLanguage
 
 const Footer = () => {
   const { logoUrl } = useBrandingAssets();
+  const { t } = useLanguage(); // Use the language hook
+  const currentYear = new Date().getFullYear();
   
   return (
     <footer className="bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800">
@@ -19,48 +21,48 @@ const Footer = () => {
               />
             </Link>
             <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-sm">
-              Manage your money without stress. Simple, fun, and made for you.
+              {t('app.tagline')} {/* Using translation key */}
             </p>
             
           </div>
           
           <div className="md:col-span-1">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Pages</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">{t('footer.pages')}</h3>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link to="/" className="text-gray-600 dark:text-gray-400 hover:text-[#28e57d]">
-                  Home
+                  {t('footer.home')}
                 </Link>
               </li>
               <li>
                 <Link to="/about" className="text-gray-600 dark:text-gray-400 hover:text-[#28e57d]">
-                  About Us
+                  {t('footer.aboutUs')}
                 </Link>
               </li>
               <li>
                 <Link to="/pricing" className="text-gray-600 dark:text-gray-400 hover:text-[#28e57d]">
-                  Pricing
+                  {t('footer.pricing')}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-gray-600 dark:text-gray-400 hover:text-[#28e57d]">
-                  Contact
+                  {t('footer.contact')}
                 </Link>
               </li>
             </ul>
           </div>
           
           <div className="md:col-span-1">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Legal</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">{t('footer.legal')}</h3>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link to="/terms" className="text-gray-600 dark:text-gray-400 hover:text-[#28e57d]">
-                  Terms of Service
+                  {t('footer.terms')}
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="text-gray-600 dark:text-gray-400 hover:text-[#28e57d]">
-                  Privacy Policy
+                  {t('footer.privacy')}
                 </Link>
               </li>
             </ul>
@@ -69,10 +71,10 @@ const Footer = () => {
         
         <div className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            © {new Date().getFullYear()} Catatyo. All rights reserved.
+            {t('footer.copyright', { year: currentYear.toString() })}
           </p>
           <div className="mt-4 md:mt-0">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Made with 💚 for You</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('footer.madeWith')}</p>
           </div>
         </div>
       </div>

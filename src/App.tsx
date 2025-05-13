@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
@@ -29,11 +28,11 @@ import FinanceReports from '@/pages/entrepreneur/FinanceReports';
 import InvoicesRefactored from '@/pages/entrepreneur/InvoicesRefactored';
 import ProfitLoss from '@/pages/entrepreneur/ProfitLoss';
 import Calculator from '@/pages/entrepreneur/Calculator';
-import Feedback from '@/pages/Feedback';
+import Feedback from '@/pages/Feedback'; // Pastikan import ini ada
 
 function App() {
   return (
-    <>
+    <InvoiceCustomizationProvider>
       <ScrollToTop />
       <RoutePreserver />
       <Routes>
@@ -49,24 +48,24 @@ function App() {
         <Route path="/dashboard/:type" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
         <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
-        <Route path="/analytics" element={<ProtectedRoute premium={true}><Analytics /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
         <Route path="/budget" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
+        <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+        <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute admin={true}><AdminDashboard /></ProtectedRoute>} />
         
-        {/* Feedback route */}
+        {/* Feedback route - NOW PROTECTED AGAIN */}
         <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} /> 
         
-        {/* Entrepreneur Routes - Premium Required */}
-        <Route path="/pos" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><PosRefactored /></ProtectedRoute>} />
-        <Route path="/finance-reports" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><FinanceReports /></ProtectedRoute>} />
-        <Route path="/invoices" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><InvoicesRefactored /></ProtectedRoute>} />
-        <Route path="/profit-loss" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><ProfitLoss /></ProtectedRoute>} />
-        <Route path="/calculator" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><Calculator /></ProtectedRoute>} />
-        <Route path="/products" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><Products /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><Orders /></ProtectedRoute>} />
-        <Route path="/customers" element={<ProtectedRoute premium={true} entrepreneurModeOnly={true}><Customers /></ProtectedRoute>} />
+        {/* Entrepreneur Routes */}
+        <Route path="/pos" element={<ProtectedRoute><PosRefactored /></ProtectedRoute>} />
+        <Route path="/finance-reports" element={<ProtectedRoute><FinanceReports /></ProtectedRoute>} />
+        <Route path="/invoices" element={<ProtectedRoute><InvoicesRefactored /></ProtectedRoute>} />
+        <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
+        <Route path="/calculator" element={<ProtectedRoute><Calculator /></ProtectedRoute>} />
         
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
@@ -75,7 +74,7 @@ function App() {
       {/* Toast notifications */}
       <Toaster />
       <Sonner />
-    </>
+    </InvoiceCustomizationProvider>
   );
 }
 

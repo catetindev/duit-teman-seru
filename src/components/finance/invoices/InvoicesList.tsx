@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import {
@@ -32,6 +31,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card'; // Import Card components
 import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile hook
+import { cn } from '@/lib/utils'; // Import cn utility
 
 interface InvoicesListProps {
   invoices: Invoice[];
@@ -95,18 +95,15 @@ export function InvoicesList({
             className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => onViewInvoice(invoice)} // Click card to view
           >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h3 className="font-medium text-base leading-tight flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    Invoice #{invoice.invoice_number}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {(invoice as any).customers?.name || 'Unknown Customer'}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1"> {/* Reduced gap for tighter buttons */}
+            <CardContent className="p-4 space-y-3"> {/* Added space-y for vertical spacing */}
+              
+              {/* Top row: Invoice # and Actions */}
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-base leading-tight flex items-center gap-2 truncate"> {/* Added truncate */}
+                  <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" /> {/* Added flex-shrink-0 */}
+                  Invoice #{invoice.invoice_number}
+                </h3>
+                <div className="flex items-center gap-1 flex-shrink-0"> {/* Added flex-shrink-0 */}
                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onEditInvoice(invoice); }} className="h-7 w-7">
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
@@ -115,22 +112,44 @@ export function InvoicesList({
                   </Button>
                 </div>
               </div>
+              
+              {/* Customer Name */}
+              <p className="text-sm text-muted-foreground">
+                Customer: {(invoice as any).customers?.name || 'Unknown Customer'}
+              </p>
 
-              <div className="flex items-center justify-between text-sm mb-2">
-                 <span className="text-muted-foreground">{format(new Date(invoice.created_at), 'dd MMM yyyy')}</span>
+              {/* Date and Total */}
+              <div className="flex items-center justify-between text-sm">
+                 <span className="text-muted-foreground">Date: {format(new Date(invoice.created_at), 'dd MMM yyyy')}</span>
                  <span className="font-semibold text-lg">{formatCurrency(Number(invoice.total), 'IDR')}</span>
               </div>
 
+              {/* Due Date and Status */}
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1 text-muted-foreground">
                    <CalendarClock className="h-3 w-3" />
-                   {format(new Date(invoice.payment_due_date), 'dd MMM yyyy')}
+                   Due: {format(new Date(invoice.payment_due_date), 'dd MMM yyyy')}
                 </div>
                 {getStatusBadge(invoice.status)}
               </div>
 
+              {/* Payment Proof link */}
+              {invoice.payment_proof_url && (
+                <div className="text-right">
+                  <a
+                    href={invoice.payment_proof_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-500 hover:underline"
+                    onClick={(e) => e.stopPropagation()} // Prevent card click when clicking link
+                  >
+                    View payment proof
+                  </a>
+                </div>
+              )}
+              
               {/* Download button */}
-              <div className="mt-3 pt-3 border-t border-border/50 flex justify-end">
+              <div className="pt-3 border-t border-border/50 flex justify-end">
                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onDownloadPdf(invoice); }} className="h-7 text-xs">
                     <Download className="h-3.5 w-3.5 mr-1" /> Download PDF
                  </Button>
@@ -192,7 +211,7 @@ export function InvoicesList({
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" position="popper"> {/* Added position="popper" */}
                       <DropdownMenuItem onClick={() => onViewInvoice(invoice)}>
                         <FileText className="h-4 w-4 mr-2" />
                         View
