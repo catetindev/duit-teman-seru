@@ -119,17 +119,17 @@ export function InvoiceCustomizationProvider({ children }: { children: ReactNode
         }
       };
       
-      // Fix: Upsert expects an array of objects, not a single object
+      // Fix: Use the single object version of upsert instead of an array
       const { error: upsertError } = await supabase
         .from('user_settings')
-        .upsert([{ 
+        .upsert({ 
           user_id: user.id, 
           custom_settings: JSON.stringify(customSettings),
           // Safely provide default values for other required fields if inserting
-          preferred_currency: existingSettings && 'preferred_currency' in existingSettings ? existingSettings.preferred_currency : 'IDR', 
-          preferred_language: existingSettings && 'preferred_language' in existingSettings ? existingSettings.preferred_language : 'id',
+          preferred_currency: existingSettings?.preferred_currency || 'IDR',
+          preferred_language: existingSettings?.preferred_language || 'id',
           updated_at: new Date().toISOString()
-        }], { onConflict: 'user_id' });
+        }, { onConflict: 'user_id' });
 
       if (upsertError) throw upsertError;
     } catch (error) {
