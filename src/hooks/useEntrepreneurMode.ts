@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Custom hook to manage Entrepreneur Mode state
@@ -13,6 +14,7 @@ export function useEntrepreneurMode() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { user, isPremium } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Load the entrepreneur mode preference from local storage
   useEffect(() => {
@@ -29,10 +31,19 @@ export function useEntrepreneurMode() {
   // Function to toggle entrepreneur mode
   const toggleEntrepreneurMode = () => {
     if (!isPremium) {
+      // Show premium upgrade prompt for free users
       toast({
         title: "Premium Feature",
         description: "Entrepreneur Mode is only available for premium users.",
-        variant: "destructive"
+        variant: "destructive",
+        action: (
+          <div 
+            className="bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded cursor-pointer text-xs font-medium"
+            onClick={() => navigate('/pricing')}
+          >
+            Upgrade
+          </div>
+        ),
       });
       return;
     }

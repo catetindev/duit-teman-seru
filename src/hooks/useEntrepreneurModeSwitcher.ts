@@ -2,7 +2,7 @@
 import { useEntrepreneurMode } from './useEntrepreneurMode';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export function useEntrepreneurModeSwitcher() {
   const { 
@@ -13,6 +13,7 @@ export function useEntrepreneurModeSwitcher() {
   const [shouldRefresh, setShouldRefresh] = useState(false);
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Enhanced toggle that will trigger a page refresh
   const toggleEntrepreneurMode = () => {
@@ -20,7 +21,15 @@ export function useEntrepreneurModeSwitcher() {
       toast({
         title: "Fitur Premium",
         description: "Mode pengusaha hanya tersedia untuk pengguna premium.",
-        variant: "destructive"
+        variant: "destructive",
+        action: (
+          <div 
+            className="bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded cursor-pointer text-xs font-medium"
+            onClick={() => navigate('/pricing')}
+          >
+            Upgrade
+          </div>
+        ),
       });
       return;
     }

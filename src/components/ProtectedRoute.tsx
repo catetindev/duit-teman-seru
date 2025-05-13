@@ -1,6 +1,9 @@
+
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { toast } from '@/hooks/use-toast';
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
@@ -8,6 +11,7 @@ interface ProtectedRouteProps {
   premium?: boolean;
   admin?: boolean;
   adminOnly?: boolean;
+  entrepreneurModeOnly?: boolean;
 }
 
 const ProtectedRoute = ({ 
@@ -15,9 +19,11 @@ const ProtectedRoute = ({
   requiredRole = 'free', 
   premium = false,
   admin = false,
-  adminOnly = false
+  adminOnly = false,
+  entrepreneurModeOnly = false
 }: ProtectedRouteProps) => {
-  const { user, userRole, isLoading } = useAuth();
+  const { user, userRole, isPremium, isLoading } = useAuth();
+  const { isEntrepreneurMode } = useEntrepreneurMode();
   const location = useLocation();
 
   console.log(`[ProtectedRoute] Path: ${location.pathname}`);
@@ -25,6 +31,7 @@ const ProtectedRoute = ({
   console.log(`[ProtectedRoute] User:`, user ? user.id : 'null');
   console.log(`[ProtectedRoute] User Role: ${userRole}`);
   console.log(`[ProtectedRoute] Required Role (effective): ${premium ? 'premium' : (admin || adminOnly) ? 'admin' : requiredRole}`);
+  console.log(`[ProtectedRoute] Entrepreneur Mode Only: ${entrepreneurModeOnly}, Is in Entrepreneur Mode: ${isEntrepreneurMode}`);
 
   if (isLoading) {
     console.log('[ProtectedRoute] Rendering loading indicator.');
@@ -51,6 +58,32 @@ const ProtectedRoute = ({
 
   if (effectiveRole === 'premium' && userRole !== 'premium' && userRole !== 'admin') {
     console.log('[ProtectedRoute] Premium role required, user is not premium/admin. Redirecting to /pricing.');
+    toast({
+      title: "Premium Feature",
+      description: "This feature is only available for premium users.",
+      variant: "destructive"
+    });
+    return <Navigate to="/pricing" replace />;
+  }
+
+  // Check if route requires entrepreneur mode
+  if (entrepreneurModeOnly && !isEntrepreneurMode) {
+    console.log('[ProtectedRoute] Entrepreneur mode required but not active. Redirecting to dashboard.');
+    toast({
+      title: "Entrepreneur Mode Required",
+      description: "Please enable Entrepreneur Mode to access this feature.",
+    });
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Check if route requires both entrepreneur mode and premium
+  if (entrepreneurModeOnly && !isPremium) {
+    console.log('[ProtectedRoute] Entrepreneur mode and premium required. Redirecting to pricing.');
+    toast({ 
+      title: "Premium Feature",
+      description: "Entrepreneur features are only available for premium users.",
+      variant: "destructive"
+    });
     return <Navigate to="/pricing" replace />;
   }
 

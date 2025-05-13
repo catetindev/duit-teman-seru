@@ -14,6 +14,8 @@ import {
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { cn } from '@/lib/utils'; // Import cn utility
+import { useNavigate, useToast } from 'react-router-dom';
+import Badge from '@/components/ui/Badge';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -30,6 +32,30 @@ const DashboardLayout = ({
   const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
   const { isEntrepreneurMode } = useEntrepreneurMode();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Function to handle premium feature clicks for free users
+  const handlePremiumFeatureClick = (e: React.MouseEvent, path: string) => {
+    if (!isPremium) {
+      e.preventDefault();
+      toast({
+        title: "Fitur Premium",
+        description: "Fitur ini hanya tersedia untuk pengguna premium",
+        variant: "destructive",
+        action: (
+          <div 
+            className="bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded cursor-pointer text-xs font-medium"
+            onClick={() => navigate('/pricing')}
+          >
+            Upgrade
+          </div>
+        ),
+      });
+    } else {
+      navigate(path);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -58,7 +84,7 @@ const DashboardLayout = ({
   }
 
   const renderSidebarContent = () => {
-    if (isEntrepreneurMode) {
+    if (isEntrepreneurMode && isPremium) {
       return (
         <SidebarContent>
           <SidebarGroup>
@@ -140,6 +166,27 @@ const DashboardLayout = ({
               {isPremium && <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
                   {t('nav.analytics')}
                 </SidebarNavLink>}
+            </SidebarGroupContent>
+          </SidebarGroup>
+          
+          <SidebarGroup>
+            <SidebarGroupLabel>Bisnis <Badge variant="outline" className="ml-1 text-xs bg-amber-500/10 text-amber-500 border-amber-500/20">Premium</Badge></SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div onClick={(e) => handlePremiumFeatureClick(e, '/products')}>
+                <SidebarNavLink to={isPremium ? "/products" : "#"} icon={<Package className="h-5 w-5" />}>
+                  Produk & Layanan
+                </SidebarNavLink>
+              </div>
+              <div onClick={(e) => handlePremiumFeatureClick(e, '/calculator')}>
+                <SidebarNavLink to={isPremium ? "/calculator" : "#"} icon={<Calculator className="h-5 w-5" />}>
+                  Kalkulator HPP
+                </SidebarNavLink>
+              </div>
+              <div onClick={(e) => handlePremiumFeatureClick(e, '/invoices')}>
+                <SidebarNavLink to={isPremium ? "/invoices" : "#"} icon={<FileText className="h-5 w-5" />}>
+                  Invoice Generator
+                </SidebarNavLink>
+              </div>
             </SidebarGroupContent>
           </SidebarGroup>
           
