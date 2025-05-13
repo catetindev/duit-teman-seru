@@ -1,6 +1,8 @@
+
 import React, { ReactNode } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils'; // Import cn utility
+import { cn } from '@/lib/utils'; 
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface InvoiceStatusFilterProps {
   value: string;
@@ -9,6 +11,8 @@ interface InvoiceStatusFilterProps {
 }
 
 export function InvoiceStatusFilter({ value, onChange, children }: InvoiceStatusFilterProps) {
+  const { t } = useLanguage();
+  
   return (
     <Tabs 
       value={value} 
@@ -20,7 +24,7 @@ export function InvoiceStatusFilter({ value, onChange, children }: InvoiceStatus
         "bg-muted/60 rounded-full p-1 mb-2" // Existing styles
       )}>
         <TabsTrigger value="All" className="rounded-full">All</TabsTrigger>
-        <TabsTrigger value="Paid" className="rounded-full">Paid</TabsTrigger>
+        <TabsTrigger value="Paid" className="rounded-full">{t('order.status.paid')}</TabsTrigger>
         <TabsTrigger value="Unpaid" className="rounded-full">Unpaid</TabsTrigger>
         <TabsTrigger value="Overdue" className="rounded-full">Overdue</TabsTrigger>
       </TabsList>

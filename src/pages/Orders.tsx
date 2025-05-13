@@ -14,9 +14,11 @@ import OrderFormDialog from '@/components/entrepreneur/OrderFormDialog';
 import { DateRange } from 'react-day-picker';
 import { DatePicker } from '@/components/ui/date-picker';
 import { formatDateRange } from '@/utils/formatUtils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function Orders() {
   const { isPremium } = useAuth();
+  const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -137,7 +139,7 @@ export default function Orders() {
       
       toast({
         title: 'Status Updated',
-        description: `Order status changed to ${status}`,
+        description: `Order status changed to ${t(`order.status.${status.toLowerCase()}`)}`,
       });
     } catch (error: any) {
       toast({
@@ -175,9 +177,9 @@ export default function Orders() {
     <DashboardLayout isPremium={isPremium}>
       <div className="p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold mb-4 md:mb-0">Orders & Transactions</h1>
+          <h1 className="text-2xl font-bold mb-4 md:mb-0">{t('order.title')}</h1>
           <Button onClick={handleAddNew} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> New Order
+            <Plus className="h-4 w-4" /> {t('order.new')}
           </Button>
         </div>
         
@@ -186,7 +188,7 @@ export default function Orders() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search orders..."
+              placeholder={t('order.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -198,15 +200,15 @@ export default function Orders() {
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 <span>
-                  {statusFilter === 'all' ? 'All Statuses' : statusFilter}
+                  {statusFilter === 'all' ? t('order.allStatuses') : t(`order.status.${statusFilter.toLowerCase()}`)}
                 </span>
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Paid">Paid</SelectItem>
-              <SelectItem value="Canceled">Canceled</SelectItem>
+              <SelectItem value="all">{t('order.allStatuses')}</SelectItem>
+              <SelectItem value="Pending">{t('order.status.pending')}</SelectItem>
+              <SelectItem value="Paid">{t('order.status.paid')}</SelectItem>
+              <SelectItem value="Canceled">{t('order.status.canceled')}</SelectItem>
             </SelectContent>
           </Select>
           
@@ -215,13 +217,13 @@ export default function Orders() {
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 <span>
-                  {customerFilter === 'all' ? 'All Customers' : 
+                  {customerFilter === 'all' ? t('order.allCustomers') : 
                    customers.find(c => c.id === customerFilter)?.name || 'Customer'}
                 </span>
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Customers</SelectItem>
+              <SelectItem value="all">{t('order.allCustomers')}</SelectItem>
               {customers.map(customer => (
                 <SelectItem key={customer.id} value={customer.id}>
                   {customer.name}
@@ -234,13 +236,13 @@ export default function Orders() {
             date={dateRange}
             onSelect={setDateRange}
             preText="Date: "
-            placeholder="Select dates..."
+            placeholder={t('order.selectDates')}
           />
           
           {dateRange?.from && (
             <div className="md:col-span-4 flex items-center">
               <span className="text-sm">
-                Filtered by date: {formatDateRange(dateRange)}
+                {t('order.filteredByDate')}: {formatDateRange(dateRange)}
               </span>
               <Button 
                 variant="ghost" 
@@ -248,7 +250,7 @@ export default function Orders() {
                 onClick={() => setDateRange(undefined)}
                 className="ml-2 h-6 text-xs"
               >
-                Clear
+                {t('order.clear')}
               </Button>
             </div>
           )}

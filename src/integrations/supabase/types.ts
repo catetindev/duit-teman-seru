@@ -305,6 +305,7 @@ export type Database = {
           order_date: string
           payment_method: string
           payment_proof_url: string | null
+          pos_transaction_id: string | null
           products: Json
           status: string
           total: number
@@ -317,6 +318,7 @@ export type Database = {
           order_date?: string
           payment_method: string
           payment_proof_url?: string | null
+          pos_transaction_id?: string | null
           products?: Json
           status?: string
           total: number
@@ -329,6 +331,7 @@ export type Database = {
           order_date?: string
           payment_method?: string
           payment_proof_url?: string | null
+          pos_transaction_id?: string | null
           products?: Json
           status?: string
           total?: number
@@ -340,6 +343,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_pos_transaction_id_fkey"
+            columns: ["pos_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "pos_transactions"
             referencedColumns: ["id"]
           },
         ]

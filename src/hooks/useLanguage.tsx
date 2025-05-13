@@ -137,6 +137,15 @@ const translations = {
     en: 'You\'re on track! Keep it up! ✨',
     id: 'Kamu on track! Pertahankan! ✨'
   },
+  // Adding missing budget keys
+  'budget.empty': {
+    en: 'No budgets created yet',
+    id: 'Belum ada anggaran'
+  },
+  'budget.create': {
+    en: 'Create Budget',
+    id: 'Buat Anggaran'
+  },
   
   // Admin
   'admin.users': {
@@ -517,6 +526,66 @@ const translations = {
   'action.upgrade': {
     en: 'Upgrade to Premium',
     id: 'Tingkatkan ke Premium'
+  },
+  
+  // Orders - Added missing order status translations
+  'order.status.paid': {
+    en: 'Paid',
+    id: 'Sudah Dibayar'
+  },
+  'order.status.pending': {
+    en: 'Pending',
+    id: 'Menunggu Pembayaran'
+  },
+  'order.status.canceled': {
+    en: 'Canceled',
+    id: 'Dibatalkan'
+  },
+  'order.status.delivered': {
+    en: 'Delivered',
+    id: 'Terkirim'
+  },
+  'order.title': {
+    en: 'Orders & Transactions',
+    id: 'Pesanan & Transaksi'
+  },
+  'order.new': {
+    en: 'New Order',
+    id: 'Pesanan Baru'
+  },
+  'order.search': {
+    en: 'Search orders...',
+    id: 'Cari pesanan...'
+  },
+  'order.allStatuses': {
+    en: 'All Statuses',
+    id: 'Semua Status'
+  },
+  'order.allCustomers': {
+    en: 'All Customers',
+    id: 'Semua Pelanggan'
+  },
+  'order.selectDates': {
+    en: 'Select dates...',
+    id: 'Pilih tanggal...'
+  },
+  'order.filteredByDate': {
+    en: 'Filtered by date',
+    id: 'Difilter berdasarkan tanggal'
+  },
+  'order.clear': {
+    en: 'Clear',
+    id: 'Hapus'
+  },
+  'order.viewAll': {
+    en: 'View all transactions',
+    id: 'Lihat semua transaksi'
+  },
+  
+  // Product related
+  'product.title': {
+    en: 'Products & Services',
+    id: 'Produk & Layanan'
   }
 };
 
