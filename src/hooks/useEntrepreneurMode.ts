@@ -36,14 +36,10 @@ export function useEntrepreneurMode() {
         title: "Premium Feature",
         description: "Entrepreneur Mode is only available for premium users.",
         variant: "destructive",
-        action: (
-          <div 
-            className="bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded cursor-pointer text-xs font-medium"
-            onClick={() => navigate('/pricing')}
-          >
-            Upgrade
-          </div>
-        ),
+        action: {
+          label: "Upgrade",
+          onClick: () => navigate('/pricing')
+        }
       });
       return;
     }

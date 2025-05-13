@@ -22,14 +22,10 @@ export function useEntrepreneurModeSwitcher() {
         title: "Fitur Premium",
         description: "Mode pengusaha hanya tersedia untuk pengguna premium.",
         variant: "destructive",
-        action: (
-          <div 
-            className="bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded cursor-pointer text-xs font-medium"
-            onClick={() => navigate('/pricing')}
-          >
-            Upgrade
-          </div>
-        ),
+        action: {
+          label: "Upgrade",
+          onClick: () => navigate('/pricing')
+        }
       });
       return;
     }
