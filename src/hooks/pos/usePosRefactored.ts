@@ -2,7 +2,7 @@
 import { useProductManagement } from './useProductManagement';
 import { useCartManagement } from './useCartManagement';
 import { useTransactionManagement } from './useTransactionManagement';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 export function usePosRefactored() {
   const { 
@@ -34,12 +34,13 @@ export function usePosRefactored() {
   const loading = productsLoading || transactionLoading;
 
   // Wrapper for saving transaction
-  const handleSaveTransaction = async () => {
+  const handleSaveTransaction = useCallback(async () => {
     const success = await saveTransaction(transaction);
     if (success) {
       resetTransaction();
     }
-  };
+    return success;
+  }, [saveTransaction, transaction, resetTransaction]);
 
   // Load initial data
   useEffect(() => {
