@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   LayoutDashboard, ArrowDownUp, Target, BarChart2, PieChart, 
   Package, Calculator, FileText, Bell, MessageSquare, Settings, ShieldAlert,
-  ShoppingBag, Users
+  ShoppingBag, Users, CreditCard, FileBarChart
 } from 'lucide-react';
 
 interface EntrepreneurModeSidebarProps {
@@ -21,45 +20,41 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
   
   return (
     <SidebarContent>
+      {/* Combined Group */}
       <SidebarGroup>
-        <SidebarGroupLabel>Main</SidebarGroupLabel>
+        {/* Removed SidebarGroupLabel */}
         <SidebarGroupContent>
           <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
             Dashboard
           </SidebarNavLink>
-          <SidebarNavLink to="/transactions" icon={<ArrowDownUp className="h-5 w-5" />}>
-            Transaksi
-          </SidebarNavLink>
-          <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
-            Analitik
-          </SidebarNavLink>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      
-      <SidebarGroup>
-        <SidebarGroupLabel>Bisnis <Badge variant="outline" className="ml-1 text-xs bg-amber-500/10 text-amber-500 border-amber-500/20">Premium</Badge></SidebarGroupLabel>
-        <SidebarGroupContent>
+          
+          {/* Business Links (Premium) */}
           <SidebarNavLink to="/products" icon={<Package className="h-5 w-5" />}>
-            Produk & Layanan
+            Produk & Layanan {/* Removed Badge */}
           </SidebarNavLink>
-          <SidebarNavLink to="/calculator" icon={<Calculator className="h-5 w-5" />}>
-            Kalkulator HPP
+          <SidebarNavLink to="/pos" icon={<CreditCard className="h-5 w-5" />}>
+            POS / Kasir {/* Removed Badge */}
           </SidebarNavLink>
-          <SidebarNavLink to="/invoices" icon={<FileText className="h-5 w-5" />}>
-            Invoice Generator
+           <SidebarNavLink to="/orders" icon={<ShoppingBag className="h-5 w-5" />}>
+            Pesanan & Transaksi {/* Removed Badge */}
           </SidebarNavLink>
           <SidebarNavLink to="/customers" icon={<Users className="h-5 w-5" />}>
-            Pelanggan
+            Pelanggan {/* Removed Badge */}
           </SidebarNavLink>
-          <SidebarNavLink to="/orders" icon={<ShoppingBag className="h-5 w-5" />}>
-            Pesanan
+          <SidebarNavLink to="/profit-loss" icon={<PieChart className="h-5 w-5" />}>
+            Laporan Untung Rugi {/* Removed Badge */}
           </SidebarNavLink>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      
-      <SidebarGroup>
-        <SidebarGroupLabel>User</SidebarGroupLabel>
-        <SidebarGroupContent>
+          <SidebarNavLink to="/calculator" icon={<Calculator className="h-5 w-5" />}>
+            Kalkulator HPP {/* Removed Badge */}
+          </SidebarNavLink>
+          <SidebarNavLink to="/invoices" icon={<FileText className="h-5 w-5" />}>
+            Invoice Generator {/* Removed Badge */}
+          </SidebarNavLink>
+           <SidebarNavLink to="/finance-reports" icon={<FileBarChart className="h-5 w-5" />}>
+            Laporan Keuangan {/* Removed Badge */}
+          </SidebarNavLink>
+
+          {/* User Links */}
           <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
             Notifications
           </SidebarNavLink>

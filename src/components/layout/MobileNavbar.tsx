@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { SidebarNavLink } from '@/components/ui/sidebar';
 import LogoutButton from '@/components/ui/LogoutButton';
+import { Badge } from '@/components/ui/badge'; // Import Badge
 
 interface MobileNavbarProps {
   isPremium?: boolean;
@@ -63,6 +64,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
       <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} onClick={handleLinkClick} end>
         Dashboard
       </SidebarNavLink>
+      {/* Removed Transaction and Analytics links */}
       <SidebarNavLink to="/products" icon={<Package className="h-5 w-5" />} onClick={handleLinkClick}>
         Produk & Layanan
       </SidebarNavLink>
@@ -183,7 +185,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
       
       {/* Bottom navbar - display different navigation based on mode */}
       <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t flex items-center justify-around px-2 z-50">
-        {isEntrepreneurMode ? (
+        {isEntrepreneurMode && isPremium ? ( // Only show entrepreneur bottom nav if premium
           <>
             <Link 
               to="/dashboard" 
@@ -250,7 +252,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
               POS
             </Link>
           </>
-        ) : (
+        ) : ( // Show personal mode bottom nav for free or premium users in personal mode
           <>
             <Link 
               to="/dashboard" 

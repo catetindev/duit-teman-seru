@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { 
   SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink 
 } from "@/components/ui/sidebar";
@@ -19,35 +17,12 @@ interface PersonalModeSidebarProps {
 
 const PersonalModeSidebar = ({ isPremium, isAdmin }: PersonalModeSidebarProps) => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  // Function to handle premium feature clicks for free users
-  const handlePremiumFeatureClick = (e: React.MouseEvent, path: string) => {
-    if (!isPremium) {
-      e.preventDefault();
-      toast({
-        title: "Fitur Premium",
-        description: "Fitur ini hanya tersedia untuk pengguna premium",
-        variant: "destructive",
-        action: (
-          <div 
-            className="bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded cursor-pointer text-xs font-medium"
-            onClick={() => navigate('/pricing')}
-          >
-            Upgrade
-          </div>
-        ),
-      });
-    } else {
-      navigate(path);
-    }
-  };
   
   return (
     <SidebarContent>
+      {/* Combined Group */}
       <SidebarGroup>
-        <SidebarGroupLabel>Main</SidebarGroupLabel>
+        {/* Removed SidebarGroupLabel */}
         <SidebarGroupContent>
           <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} end>
             {t('nav.dashboard')}
@@ -62,17 +37,10 @@ const PersonalModeSidebar = ({ isPremium, isAdmin }: PersonalModeSidebarProps) =
             {t('nav.budget')}
           </SidebarNavLink>
           {isPremium && <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />}>
-              {t('nav.analytics')}
+              {t('nav.analytics')} {/* Removed Badge */}
             </SidebarNavLink>}
-        </SidebarGroupContent>
-      </SidebarGroup>
-      
-      {/* Removed the Business/Premium section entirely from PersonalModeSidebar since these items 
-          should only appear in EntrepreneurModeSidebar */}
-      
-      <SidebarGroup>
-        <SidebarGroupLabel>User</SidebarGroupLabel>
-        <SidebarGroupContent>
+
+          {/* User Links */}
           <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
             Notifications
           </SidebarNavLink>
