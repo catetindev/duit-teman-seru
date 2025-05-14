@@ -1,41 +1,87 @@
 
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import { format } from 'date-fns';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { format, formatDistanceToNow } from "date-fns";
+import { id } from "date-fns/locale";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
- * Format a numeric value as currency
+ * Formats a date for display
+ * @param date Date to format
+ * @param formatString Optional format string
+ * @returns Formatted date string
  */
-export const formatCurrency = (value: number, currency = 'IDR'): string => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(value);
-};
+export function formatDate(date: Date | string, formatString: string = "dd MMM yyyy"): string {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return format(dateObj, formatString);
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid date";
+  }
+}
 
 /**
- * Format a date range for display
+ * Formats a date range for display
+ * @param startDate Start date
+ * @param endDate End date
+ * @returns Formatted date range string
  */
-export const formatDateRange = (from: Date, to: Date): string => {
-  return `${format(from, 'dd MMM yyyy')} - ${format(to, 'dd MMM yyyy')}`;
-};
+export function formatDateRange(startDate: Date, endDate: Date): string {
+  try {
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+  } catch (error) {
+    console.error("Error formatting date range:", error);
+    return "Invalid date range";
+  }
+}
 
 /**
- * Format a single date for display
+ * Calculates progress percentage
+ * @param current Current amount
+ * @param target Target amount
+ * @returns Progress as a percentage (0-100)
  */
-export const formatDate = (date: Date): string => {
-  return format(date, 'dd MMM yyyy');
-};
+export function calculateProgress(current: number, target: number): number {
+  if (target <= 0) return 0;
+  const progress = (current / target) * 100;
+  return Math.min(100, Math.max(0, progress)); // Clamp between 0 and 100
+}
 
 /**
- * Calculate progress percentage
+ * Format currency for display
+ * @param amount Amount to format
+ * @param currency Currency code (default: 'IDR')
+ * @returns Formatted currency string
  */
-export const calculateProgress = (saved: number, target: number): number => {
-  return Math.min(Math.round((saved / target) * 100), 100);
-};
+export function formatCurrency(amount: number, currency: string = 'IDR'): string {
+  try {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch (error) {
+    console.error("Error formatting currency:", error);
+    return `${amount}`;
+  }
+}
+
+/**
+ * Format relative time (e.g., "2 hours ago")
+ * @param date Date to format
+ * @returns Relative time string
+ */
+export function formatRelativeTime(date: Date | string): string {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return formatDistanceToNow(dateObj, { addSuffix: true, locale: id });
+  } catch (error) {
+    console.error("Error formatting relative time:", error);
+    return "Unknown time";
+  }
+}

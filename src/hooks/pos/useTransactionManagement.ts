@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PosTransaction, PosProduct } from '@/hooks/usePos'; 
 import { Json } from '@/integrations/supabase/types';
 import { v4 as uuidv4 } from 'uuid'; 
+import { updateProductStock } from '@/utils/inventoryUtils';
 
 export function useTransactionManagement() {
   const [loading, setLoading] = useState(false);
@@ -118,6 +120,9 @@ export function useTransactionManagement() {
         } else {
           toast({ title: "Sip! ✨", description: "Transaksi berhasil disimpan dan disinkronkan." });
         }
+
+        // Update product stock after successful transaction
+        await updateProductStock(orderProducts, true);
       }
       await fetchRecentTransactions(); 
       return true;
@@ -137,6 +142,29 @@ export function useTransactionManagement() {
     }
     setLoading(true);
     try {
+      // Get the transaction data first to access the products for stock restoration
+      const { data: transaction, error: fetchError } = await supabase
+        .from('pos_transactions')
+        .select('produk')
+        .eq('id', txId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      
+      // Restore stock for deleted transaction's products
+      if (transaction && transaction.produk) {
+        const productsToRestore = (transaction.produk as unknown as PosProduct[]).map(
+          (p: PosProduct) => ({
+            product_id: p.id,
+            quantity: p.qty
+          })
+        );
+        
+        // Restore stock (false = adding back to inventory)
+        await updateProductStock(productsToRestore, false);
+      }
+
       const { error: posDeleteError } = await supabase
         .from('pos_transactions')
         .delete()

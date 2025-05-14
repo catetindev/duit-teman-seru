@@ -26,95 +26,58 @@ const formatCurrencyForReport = (amount: number): string => {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
   }).format(amount);
 };
 
-// Format date range for report titles
-export const formatDateRange = (from: Date, to: Date): string => {
-  return `${format(from, 'dd MMM yyyy')} - ${format(to, 'dd MMM yyyy')}`;
-};
-
-// Export finance report as Excel
-export const exportFinanceReportAsExcel = (
-  summary: FinanceSummary,
-  expenseCategories: ExpenseCategory[],
-  topProducts: TopProduct[],
-  dateRange: { from: Date; to: Date }
-) => {
+// Export data to Excel (.xlsx) format
+export const exportToExcel = (data: any[], fileName: string) => {
+  const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
   
-  // Summary sheet
-  const summaryData = [
-    ['💰 Finance Report', ''],
-    ['Period', formatDateRange(dateRange.from, dateRange.to)],
-    [''],
-    ['Revenue', formatCurrencyForReport(summary.totalIncome)],
-    ['Expenses', formatCurrencyForReport(summary.totalExpenses)],
-    ['Profit', formatCurrencyForReport(summary.netProfit)],
-    ['Profit Margin', `${summary.profitMargin.toFixed(2)}%`],
-  ];
-  
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
-  
-  // Expense Categories sheet
-  const expenseHeaders = [['Category', 'Amount', 'Percentage']];
-  const expenseData = expenseCategories.map(cat => [
-    cat.category,
-    formatCurrencyForReport(cat.amount),
-    `${cat.percentage.toFixed(2)}%`
-  ]);
-  
-  const expenseSheet = XLSX.utils.aoa_to_sheet([...expenseHeaders, ...expenseData]);
-  XLSX.utils.book_append_sheet(workbook, expenseSheet, "Expenses");
-  
-  // Top Products sheet if available
-  if (topProducts.length > 0) {
-    const productHeaders = [['Product', 'Revenue', 'Units Sold']];
-    const productData = topProducts.map(product => [
-      product.name,
-      formatCurrencyForReport(product.revenue),
-      product.count.toString()
-    ]);
-    
-    const productSheet = XLSX.utils.aoa_to_sheet([...productHeaders, ...productData]);
-    XLSX.utils.book_append_sheet(workbook, productSheet, "Top Products");
-  }
-  
-  // Generate file and trigger download
-  const fileName = `finance-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
+  // Generate Excel file and trigger download
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `${fileName}.xlsx`);
 };
 
-// Export finance report as PDF
-export const exportFinanceReportAsPdf = (
+// Export financial data to PDF format
+export const exportFinancialReportToPdf = (
   summary: FinanceSummary,
+  dateRange: { from: string; to: string },
   expenseCategories: ExpenseCategory[],
-  topProducts: TopProduct[],
-  dateRange: { from: Date; to: Date }
+  topProducts: TopProduct[]
 ) => {
-  const doc = new jsPDF();
+  // Create PDF document
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
   
   // Add title
   doc.setFontSize(20);
-  doc.setTextColor(83, 56, 158); // Purple shade
-  doc.text('Finance Report 💰', 14, 22);
+  doc.setTextColor(50, 50, 50);
+  doc.text('Financial Report', 14, 20);
   
-  // Add period
+  // Add date range
   doc.setFontSize(12);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Period: ${formatDateRange(dateRange.from, dateRange.to)}`, 14, 30);
+  doc.text(`Period: ${format(new Date(dateRange.from), 'yyyy-MM-dd')} to ${format(new Date(dateRange.to), 'yyyy-MM-dd')}`, 14, 30);
   
-  // Add summary
+  // Add generated date
+  doc.setFontSize(10);
+  doc.text(`Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`, 14, 40);
+  
+  // Add summary data
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  doc.text('Financial Summary', 14, 45);
+  doc.text('Financial Summary', 14, 46);
   
   const summaryData = [
-    ['Revenue', formatCurrencyForReport(summary.totalIncome)],
-    ['Expenses', formatCurrencyForReport(summary.totalExpenses)],
-    ['Profit', formatCurrencyForReport(summary.netProfit)],
+    ['Total Income', formatCurrencyForReport(summary.totalIncome)],
+    ['Total Expenses', formatCurrencyForReport(summary.totalExpenses)],
+    ['Net Profit', formatCurrencyForReport(summary.netProfit)],
     ['Profit Margin', `${summary.profitMargin.toFixed(2)}%`],
   ];
   
@@ -124,7 +87,8 @@ export const exportFinanceReportAsPdf = (
     head: [['Item', 'Value']],
     body: summaryData,
     theme: 'grid',
-    headStyles: { fillColor: [155, 135, 245], textColor: [255, 255, 255] }
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [80, 80, 80], textColor: [255, 255, 255] },
   });
   
   // Add expenses breakdown
@@ -144,7 +108,8 @@ export const exportFinanceReportAsPdf = (
     head: [['Category', 'Amount', 'Percentage']],
     body: expenseData,
     theme: 'grid',
-    headStyles: { fillColor: [155, 135, 245], textColor: [255, 255, 255] }
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [80, 80, 80], textColor: [255, 255, 255] },
   });
   
   // Add top products if available
@@ -165,110 +130,103 @@ export const exportFinanceReportAsPdf = (
       head: [['Product', 'Revenue', 'Units Sold']],
       body: productData,
       theme: 'grid',
-      headStyles: { fillColor: [155, 135, 245], textColor: [255, 255, 255] }
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [80, 80, 80], textColor: [255, 255, 255] },
     });
   }
   
-  // Add footer
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(10);
-    doc.setTextColor(150, 150, 150);
-    doc.text(
-      `Generated on ${format(new Date(), 'dd MMM yyyy')} • Page ${i} of ${pageCount}`, 
-      doc.internal.pageSize.getWidth() / 2, 
-      doc.internal.pageSize.getHeight() - 10, 
-      { align: 'center' }
-    );
-  }
-  
   // Save the PDF
-  doc.save(`finance-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+  doc.save('financial-report.pdf');
 };
 
-// Export profit loss report as Excel
-export const exportProfitLossAsExcel = (
+// Export financial data to Excel format
+export const exportFinancialReportToExcel = (
   summary: FinanceSummary,
+  dateRange: { from: string; to: string },
   expenseCategories: ExpenseCategory[],
-  expenses: any[],
-  dateRange: { from: Date; to: Date }
+  topProducts: TopProduct[]
 ) => {
   const workbook = XLSX.utils.book_new();
   
   // Summary sheet
   const summaryData = [
-    ['💸 Profit & Loss Report', ''],
-    ['Period', formatDateRange(dateRange.from, dateRange.to)],
-    [''],
-    ['Revenue', formatCurrencyForReport(summary.totalIncome)],
-    ['Expenses', formatCurrencyForReport(summary.totalExpenses)],
-    ['Profit/Loss', formatCurrencyForReport(summary.netProfit)],
+    ['Financial Report', ''],
+    ['', ''],
+    [`Period: ${format(new Date(dateRange.from), 'yyyy-MM-dd')} to ${format(new Date(dateRange.to), 'yyyy-MM-dd')}`, ''],
+    [`Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`, ''],
+    ['', ''],
+    ['Financial Summary', ''],
+    ['Total Income', summary.totalIncome],
+    ['Total Expenses', summary.totalExpenses],
+    ['Net Profit', summary.netProfit],
     ['Profit Margin', `${summary.profitMargin.toFixed(2)}%`],
+    ['', ''],
+    ['Expense Breakdown', ''],
+    ['Category', 'Amount', 'Percentage'],
   ];
   
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+  // Add expense categories
+  expenseCategories.forEach(cat => {
+    summaryData.push([cat.category, cat.amount, `${cat.percentage.toFixed(2)}%`]);
+  });
   
-  // Expense Categories sheet
-  const expenseHeaders = [['Category', 'Amount', 'Percentage']];
-  const expenseData = expenseCategories.map(cat => [
-    cat.category,
-    formatCurrencyForReport(cat.amount),
-    `${cat.percentage.toFixed(2)}%`
-  ]);
+  // Add a gap then top products
+  summaryData.push(['', ''], ['Top Products', '', ''], ['Product', 'Revenue', 'Units Sold']);
   
-  const expenseSheet = XLSX.utils.aoa_to_sheet([...expenseHeaders, ...expenseData]);
-  XLSX.utils.book_append_sheet(workbook, expenseSheet, "Expense Categories");
+  // Add product data
+  topProducts.forEach(product => {
+    summaryData.push([product.name, product.revenue, product.count]);
+  });
   
-  // Detailed expenses sheet
-  if (expenses.length > 0) {
-    const expensesHeaders = [['Date', 'Title', 'Category', 'Amount', 'Notes']];
-    const expensesData = expenses.map(exp => [
-      format(new Date(exp.date), 'yyyy-MM-dd'),
-      exp.title,
-      exp.category,
-      formatCurrencyForReport(exp.amount),
-      exp.notes || ''
-    ]);
-    
-    const detailedSheet = XLSX.utils.aoa_to_sheet([...expensesHeaders, ...expensesData]);
-    XLSX.utils.book_append_sheet(workbook, detailedSheet, "Detailed Expenses");
-  }
+  // Create summary worksheet
+  const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
   
-  // Generate file and trigger download
-  const fileName = `profit-loss-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(workbook, summaryWS, 'Financial Summary');
+  
+  // Generate and save Excel file
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, 'financial-report.xlsx');
 };
 
-// Export profit loss report as PDF
-export const exportProfitLossAsPdf = (
-  summary: FinanceSummary,
-  expenseCategories: ExpenseCategory[],
+// Export expense data to PDF
+export const exportExpensesToPdf = (
   expenses: any[],
-  dateRange: { from: Date; to: Date }
+  summary: FinanceSummary,
+  dateRange: { from: string; to: string },
+  expenseCategories: ExpenseCategory[]
 ) => {
-  const doc = new jsPDF();
+  // Create PDF document
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
   
   // Add title
   doc.setFontSize(20);
-  doc.setTextColor(83, 56, 158); // Purple shade
-  doc.text('Profit & Loss Report 💸', 14, 22);
+  doc.setTextColor(50, 50, 50);
+  doc.text('Expense Report', 14, 20);
   
-  // Add period
+  // Add date range
   doc.setFontSize(12);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Period: ${formatDateRange(dateRange.from, dateRange.to)}`, 14, 30);
+  doc.text(`Period: ${format(new Date(dateRange.from), 'yyyy-MM-dd')} to ${format(new Date(dateRange.to), 'yyyy-MM-dd')}`, 14, 30);
   
-  // Add summary
+  // Add generated date
+  doc.setFontSize(10);
+  doc.text(`Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`, 14, 40);
+  
+  // Add summary data
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  doc.text('Financial Summary', 14, 45);
+  doc.text('Financial Summary', 14, 46);
   
   const summaryData = [
-    ['Revenue', formatCurrencyForReport(summary.totalIncome)],
-    ['Expenses', formatCurrencyForReport(summary.totalExpenses)],
-    ['Profit/Loss', formatCurrencyForReport(summary.netProfit)],
+    ['Total Income', formatCurrencyForReport(summary.totalIncome)],
+    ['Total Expenses', formatCurrencyForReport(summary.totalExpenses)],
+    ['Net Profit', formatCurrencyForReport(summary.netProfit)],
     ['Profit Margin', `${summary.profitMargin.toFixed(2)}%`],
   ];
   
@@ -277,7 +235,8 @@ export const exportProfitLossAsPdf = (
     head: [['Item', 'Value']],
     body: summaryData,
     theme: 'grid',
-    headStyles: { fillColor: [155, 135, 245], textColor: [255, 255, 255] }
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [80, 80, 80], textColor: [255, 255, 255] },
   });
   
   // Add expenses breakdown
@@ -296,10 +255,11 @@ export const exportProfitLossAsPdf = (
     head: [['Category', 'Amount', 'Percentage']],
     body: expenseData,
     theme: 'grid',
-    headStyles: { fillColor: [155, 135, 245], textColor: [255, 255, 255] }
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [80, 80, 80], textColor: [255, 255, 255] },
   });
   
-  // Add detailed expenses if available - limit to top 20 for PDF readability
+  // Add expenses list
   if (expenses.length > 0) {
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);
@@ -317,7 +277,8 @@ export const exportProfitLossAsPdf = (
       head: [['Date', 'Title', 'Category', 'Amount']],
       body: expensesData,
       theme: 'grid',
-      headStyles: { fillColor: [155, 135, 245], textColor: [255, 255, 255] }
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [80, 80, 80], textColor: [255, 255, 255] },
     });
     
     if (expenses.length > 20) {
@@ -331,20 +292,65 @@ export const exportProfitLossAsPdf = (
     }
   }
   
-  // Add footer
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(10);
-    doc.setTextColor(150, 150, 150);
-    doc.text(
-      `Generated on ${format(new Date(), 'dd MMM yyyy')} • Page ${i} of ${pageCount}`, 
-      doc.internal.pageSize.getWidth() / 2, 
-      doc.internal.pageSize.getHeight() - 10, 
-      { align: 'center' }
-    );
-  }
-  
   // Save the PDF
-  doc.save(`profit-loss-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+  doc.save('expense-report.pdf');
+};
+
+// Export expenses to Excel format
+export const exportExpensesToExcel = (
+  expenses: any[],
+  summary: FinanceSummary,
+  dateRange: { from: string; to: string },
+  expenseCategories: ExpenseCategory[]
+) => {
+  const workbook = XLSX.utils.book_new();
+  
+  // Summary sheet
+  const summaryData = [
+    ['Expense Report', ''],
+    ['', ''],
+    [`Period: ${format(new Date(dateRange.from), 'yyyy-MM-dd')} to ${format(new Date(dateRange.to), 'yyyy-MM-dd')}`, ''],
+    [`Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`, ''],
+    ['', ''],
+    ['Financial Summary', ''],
+    ['Total Income', summary.totalIncome],
+    ['Total Expenses', summary.totalExpenses],
+    ['Net Profit', summary.netProfit],
+    ['Profit Margin', `${summary.profitMargin.toFixed(2)}%`],
+    ['', ''],
+    ['Expense Breakdown', ''],
+    ['Category', 'Amount', 'Percentage'],
+  ];
+  
+  // Add expense categories
+  expenseCategories.forEach(cat => {
+    summaryData.push([cat.category, cat.amount, `${cat.percentage.toFixed(2)}%`]);
+  });
+  
+  // Create summary worksheet
+  const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
+  
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(workbook, summaryWS, 'Summary');
+  
+  // Create expenses worksheet
+  const expenseHeaders = ['Date', 'Title', 'Category', 'Amount', 'Notes'];
+  const expenseRows = expenses.map(exp => [
+    format(new Date(exp.date), 'yyyy-MM-dd'),
+    exp.title,
+    exp.category,
+    exp.amount,
+    exp.notes || ''
+  ]);
+  
+  const expensesData = [expenseHeaders, ...expenseRows];
+  const expensesWS = XLSX.utils.aoa_to_sheet(expensesData);
+  
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(workbook, expensesWS, 'Expenses');
+  
+  // Generate and save Excel file
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, 'expense-report.xlsx');
 };

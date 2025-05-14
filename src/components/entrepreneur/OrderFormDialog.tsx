@@ -13,6 +13,7 @@ import { PaymentMethodSelection } from './order/PaymentMethodSelection';
 import { OrderProductsTable } from './order/OrderProductsTable';
 import { OrderStatusSelection } from './order/OrderStatusSelection';
 import { PaymentProofUploader } from './order/PaymentProofUploader';
+import { updateProductStock } from '@/utils/inventoryUtils';
 
 interface OrderFormDialogProps {
   open: boolean;
@@ -259,6 +260,13 @@ export default function OrderFormDialog({
       };
       
       if (isEditMode) {
+        // Get original order to check status change
+        const { data: originalOrder } = await supabase
+          .from('orders')
+          .select('status, products')
+          .eq('id', order!.id)
+          .single();
+        
         // Update existing order
         const { error } = await supabase
           .from('orders')
@@ -266,15 +274,36 @@ export default function OrderFormDialog({
           .eq('id', order!.id);
           
         if (error) throw error;
+
+        // Handle stock changes based on status change
+        if (originalOrder) {
+          const previousStatus = originalOrder.status;
+          const newStatus = formData.status;
+          
+          // If order was canceled and is now marked as paid, reduce stock
+          if (previousStatus === 'Canceled' && newStatus === 'Paid') {
+            await updateProductStock(productsData, true);
+          }
+          // If order was paid and is now canceled, restore stock
+          else if (previousStatus === 'Paid' && newStatus === 'Canceled') {
+            await updateProductStock(productsData, false);
+          }
+        }
         
         toast({ title: 'Success', description: 'Order updated successfully' });
       } else {
         // Add new order
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('orders')
-          .insert(orderData);
+          .insert(orderData)
+          .select();
           
         if (error) throw error;
+
+        // Only reduce stock if order status is Paid
+        if (formData.status === 'Paid') {
+          await updateProductStock(productsData, true);
+        }
         
         toast({ title: 'Success', description: 'Order added successfully' });
       }
