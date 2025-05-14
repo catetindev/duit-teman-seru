@@ -29,7 +29,7 @@ export function useCustomerOverview(limit = 5) {
         .from('customers')
         .select('id, name, last_order_date, tags')
         .eq('user_id', user.id)
-        .order('last_order_date', { ascending: false, nullsLast: true })
+        .order('last_order_date', { ascending: false })
         .limit(limit);
 
       if (customersError) throw customersError;

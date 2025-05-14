@@ -1,5 +1,6 @@
 
 import { format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
 
 export const formatCurrency = (amount: number, currency = 'IDR') => {
   return new Intl.NumberFormat('id-ID', {
@@ -18,4 +19,14 @@ export const calculateProgress = (current: number, target: number): number => {
 
 export const formatDate = (date: Date): string => {
   return format(date, 'dd MMM yyyy');
+};
+
+export const formatDateRange = (dateRange: DateRange): string => {
+  if (!dateRange.from) return '';
+  
+  if (!dateRange.to) {
+    return formatDate(dateRange.from);
+  }
+  
+  return `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}`;
 };
