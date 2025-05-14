@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { format, subDays, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { Download, FileText, Plus, FileSpreadsheet, FilePdf } from 'lucide-react';
+import { Download, FileText, Plus, FileSpreadsheet } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -234,7 +233,7 @@ const ProfitLoss = () => {
                   <span>Export as Excel</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleExportPdf} className="cursor-pointer">
-                  <FilePdf className="mr-2 h-4 w-4" />
+                  <FileText className="mr-2 h-4 w-4" />
                   <span>Export as PDF</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

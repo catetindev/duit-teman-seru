@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +13,7 @@ import { IncomeExpenseChart } from '@/components/finance/reports/IncomeExpenseCh
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { DateRange } from 'react-day-picker';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
-import { ArrowDownToLine, ArrowUpRight, Download, File, FileSpreadsheet, FilePdf, FileText, LineChart, Wallet } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpRight, Download, File, FileSpreadsheet, FileText, LineChart, Wallet } from 'lucide-react';
 import { formatCurrency } from '@/utils/formatUtils';
 import { exportFinanceReportAsExcel, exportFinanceReportAsPdf } from '@/utils/exportUtils';
 import { Link } from 'react-router-dom';
@@ -219,7 +218,7 @@ const FinanceReports = () => {
                   <span>Export as Excel</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleExportPdf} className="cursor-pointer">
-                  <FilePdf className="mr-2 h-4 w-4" />
+                  <FileText className="mr-2 h-4 w-4" />
                   <span>Export as PDF</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
