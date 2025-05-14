@@ -7,8 +7,10 @@ import { Link } from 'react-router-dom';
 import { BusinessSummary } from './BusinessSummary';
 import { BusinessTransactionButtons } from './BusinessTransactionButtons';
 import { BusinessChart } from './BusinessChart';
-import { ClientTracker } from './ClientTracker';
+import { CustomerOverview } from './CustomerOverview';
 import { InvoiceReminder } from './InvoiceReminder';
+import { useBusinessStats } from '@/hooks/entrepreneur/useBusinessStats';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface EntrepreneurDashboardProps {
   onAddIncome: () => void;
@@ -19,23 +21,12 @@ export function EntrepreneurDashboard({
   onAddIncome,
   onAddExpense
 }: EntrepreneurDashboardProps) {
-  // This would come from real data in a production app
-  const businessData = {
-    totalIncome: 10200000,
-    totalExpenses: 5500000,
-    totalCustomers: 18,
-    totalProducts: 24,
-    totalOrders: 32
-  };
+  const { totalCustomers, totalProducts, totalOrders, loading } = useBusinessStats();
 
   return (
     <div className="space-y-6">
       {/* Business Summary */}
-      <BusinessSummary 
-        totalIncome={businessData.totalIncome} 
-        totalExpenses={businessData.totalExpenses} 
-        currency="IDR"
-      />
+      <BusinessSummary />
       
       {/* Quick Actions */}
       <BusinessTransactionButtons 
@@ -49,7 +40,11 @@ export function EntrepreneurDashboard({
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex flex-col">
               <p className="text-sm text-muted-foreground">Total Customers</p>
-              <h4 className="text-2xl font-bold">{businessData.totalCustomers}</h4>
+              {loading ? (
+                <Skeleton className="h-8 w-16 mt-1" />
+              ) : (
+                <h4 className="text-2xl font-bold">{totalCustomers}</h4>
+              )}
             </div>
             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
               <Users className="h-5 w-5 text-blue-600" />
@@ -61,7 +56,11 @@ export function EntrepreneurDashboard({
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex flex-col">
               <p className="text-sm text-muted-foreground">Products</p>
-              <h4 className="text-2xl font-bold">{businessData.totalProducts}</h4>
+              {loading ? (
+                <Skeleton className="h-8 w-16 mt-1" />
+              ) : (
+                <h4 className="text-2xl font-bold">{totalProducts}</h4>
+              )}
             </div>
             <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
               <Package className="h-5 w-5 text-purple-600" />
@@ -73,7 +72,11 @@ export function EntrepreneurDashboard({
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex flex-col">
               <p className="text-sm text-muted-foreground">Orders</p>
-              <h4 className="text-2xl font-bold">{businessData.totalOrders}</h4>
+              {loading ? (
+                <Skeleton className="h-8 w-16 mt-1" />
+              ) : (
+                <h4 className="text-2xl font-bold">{totalOrders}</h4>
+              )}
             </div>
             <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
               <ShoppingBag className="h-5 w-5 text-amber-600" />
@@ -124,8 +127,8 @@ export function EntrepreneurDashboard({
           {/* Invoice Reminder */}
           <InvoiceReminder />
           
-          {/* Client Tracker */}
-          <ClientTracker />
+          {/* Customer Overview (Replacing ClientTracker) */}
+          <CustomerOverview />
         </div>
       </div>
     </div>

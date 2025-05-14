@@ -2,17 +2,32 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/formatUtils';
-import { ArrowDownRight, ArrowUpRight, PiggyBank } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { useBusinessSummary } from '@/hooks/entrepreneur/useBusinessSummary';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface BusinessSummaryProps {
-  totalIncome: number;
-  totalExpenses: number;
   currency?: 'IDR' | 'USD';
 }
 
-export function BusinessSummary({ totalIncome, totalExpenses, currency = 'IDR' }: BusinessSummaryProps) {
-  const profit = totalIncome - totalExpenses;
-  const profitMargin = totalIncome > 0 ? (profit / totalIncome) * 100 : 0;
+export function BusinessSummary({ currency = 'IDR' }: BusinessSummaryProps) {
+  const { totalIncome, totalExpenses, netProfit, profitMargin, loading } = useBusinessSummary();
+  
+  if (loading) {
+    return (
+      <Card className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4 justify-between">
+            <Skeleton className="h-16 w-[200px]" />
+            <div className="flex gap-4">
+              <Skeleton className="h-12 w-[100px]" />
+              <Skeleton className="h-12 w-[100px]" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700">
@@ -21,10 +36,10 @@ export function BusinessSummary({ totalIncome, totalExpenses, currency = 'IDR' }
           <div className="flex flex-col">
             <p className="text-sm text-muted-foreground font-medium">Net Profit</p>
             <div className="flex items-center gap-2">
-              <h3 className={`text-2xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(profit, currency)}
+              <h3 className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(netProfit, currency)}
               </h3>
-              {profit >= 0 ? (
+              {netProfit >= 0 ? (
                 <ArrowUpRight className="h-5 w-5 text-green-600" />
               ) : (
                 <ArrowDownRight className="h-5 w-5 text-red-600" />
