@@ -1,8 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
+import { format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
+import { startOfMonth, endOfMonth } from 'date-fns';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFinancialData } from '@/hooks/finance/useFinancialData';
 import { FinancialSummaryCards } from '@/components/finance/reports/FinancialSummaryCards';
@@ -10,20 +13,13 @@ import { ComparisonCards } from '@/components/finance/reports/ComparisonCards';
 import { ExpenseCategoryChart } from '@/components/finance/reports/ExpenseCategoryChart';
 import { TopProductsTable } from '@/components/finance/reports/TopProductsTable';
 import { IncomeExpenseChart } from '@/components/finance/reports/IncomeExpenseChart';
-import { DatePickerWithRange } from '@/components/ui/date-range-picker';
-import { DateRange } from 'react-day-picker';
-import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
-import { ArrowDownToLine, ArrowUpRight, Download, File, FileSpreadsheet, FileText, LineChart, Wallet } from 'lucide-react';
-import { formatCurrency } from '@/utils/formatUtils';
-import { exportFinanceReportAsExcel, exportFinanceReportAsPdf } from '@/utils/exportUtils';
-import { Link } from 'react-router-dom';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks/use-toast';
+import { exportFinanceReportAsExcel, exportFinanceReportAsPdf } from '@/utils/exportUtils';
+import { BusinessHealthCard } from '@/components/finance/reports/BusinessHealthCard';
+import { FinanceHeader } from '@/components/finance/reports/FinanceHeader';
+import { QuickAccessCards } from '@/components/finance/reports/QuickAccessCards';
+import { BusinessInsights } from '@/components/finance/reports/BusinessInsights';
+import { TrendingChart } from '@/components/finance/reports/TrendingChart';
 
 const FinanceReports = () => {
   const { isPremium } = useAuth();
@@ -44,10 +40,9 @@ const FinanceReports = () => {
   // Generate chart data for the income vs expenses over time
   const [timeSeriesData, setTimeSeriesData] = useState<any[]>([]);
 
-  // Generate sample chart data (in a real app, this would come from the API)
+  // Generate sample chart data
   const generateChartData = () => {
-    // This would normally be generated from real data
-    // For now we'll create dummy data to illustrate the concept
+    // For demo purposes - in a real app, this would come from API
     const currentMonth = new Date().getMonth();
     const data = [];
     
@@ -151,101 +146,21 @@ const FinanceReports = () => {
     generateChartData();
   }, [dateRange]);
 
-  // Generate business health indicator
-  const getBusinessHealthStatus = () => {
-    if (!comparison) return { text: 'Calculating...', color: 'text-gray-500' };
-    
-    if (comparison.profitChange >= 10) {
-      return {
-        emoji: '🔥',
-        text: 'On Fire!',
-        subtext: 'Your business is thriving with outstanding growth.',
-        color: 'text-emerald-500'
-      };
-    } else if (comparison.profitChange > 0) {
-      return {
-        emoji: '📈',
-        text: 'Growing',
-        subtext: 'Your business is showing positive trends.',
-        color: 'text-blue-500'
-      };
-    } else if (comparison.profitChange > -10) {
-      return {
-        emoji: '⚠️',
-        text: 'Needs Attention',
-        subtext: 'Your profits are declining slightly.',
-        color: 'text-amber-500'
-      };
-    } else {
-      return {
-        emoji: '🚨',
-        text: 'Action Required',
-        subtext: 'Your business is facing significant challenges.',
-        color: 'text-red-500'
-      };
-    }
-  };
-
-  const healthStatus = getBusinessHealthStatus();
-
   return (
     <DashboardLayout isPremium={isPremium}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Laporan Keuangan</h1>
-            <p className="text-muted-foreground">
-              Comprehensive financial insights and reports for your business
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <DatePickerWithRange 
-              date={dateRange} 
-              onDateChange={handleDateRangeChange} 
-            />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1">
-                  <Download className="h-4 w-4 mr-1" /> Export
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
-                  <FileSpreadsheet className="mr-2 h-4 w-4" />
-                  <span>Export as Excel</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportPdf} className="cursor-pointer">
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span>Export as PDF</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+        <FinanceHeader
+          title="Laporan Keuangan"
+          subtitle="Comprehensive financial insights and reports for your business"
+          dateRange={dateRange}
+          onDateRangeChange={handleDateRangeChange}
+          onExportExcel={handleExportExcel}
+          onExportPdf={handleExportPdf}
+        />
 
         {/* Business Health Card */}
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <span className="text-3xl">{healthStatus.emoji}</span>
-                  <span>Business Health:</span>
-                  <span className={healthStatus.color}>{healthStatus.text}</span>
-                </h2>
-                <p className="text-muted-foreground mt-1">{healthStatus.subtext}</p>
-              </div>
-              <div className="mt-4 md:mt-0 flex items-center">
-                <span className="text-sm text-muted-foreground">
-                  Based on your last month's performance
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <BusinessHealthCard comparison={comparison} />
 
         {/* Summary */}
         {comparison ? (
@@ -297,79 +212,12 @@ const FinanceReports = () => {
             </div>
             
             {/* Quick Access Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Link to="/profit-loss">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <LineChart className="h-5 w-5 text-primary mb-1" />
-                    <CardTitle>Laporan Untung Rugi</CardTitle>
-                    <CardDescription>
-                      Detailed income and expense analysis
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <ArrowUpRight className="mr-2 h-4 w-4" /> View Report
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </Link>
-              
-              <Link to="/invoices">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <FileText className="h-5 w-5 text-primary mb-1" />
-                    <CardTitle>Invoice Manager</CardTitle>
-                    <CardDescription>
-                      Create and manage customer invoices
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <ArrowUpRight className="mr-2 h-4 w-4" /> Manage Invoices
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </Link>
-              
-              <Link to="/calculator">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <Wallet className="h-5 w-5 text-primary mb-1" />
-                    <CardTitle>HPP Calculator</CardTitle>
-                    <CardDescription>
-                      Calculate product costs and pricing
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <ArrowUpRight className="mr-2 h-4 w-4" /> Open Calculator
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </Link>
-            </div>
+            <QuickAccessCards />
           </TabsContent>
           
           {/* Trends Tab */}
           <TabsContent value="trends" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financial Performance Trends</CardTitle>
-                <CardDescription>
-                  See how your business has performed over the last 6 months
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <IncomeExpenseChart 
-                  data={timeSeriesData} 
-                  title="6-Month Financial Trend"
-                  height={400}
-                />
-              </CardContent>
-            </Card>
-            
-            {/* Additional trend analysis could go here */}
+            <TrendingChart data={timeSeriesData} />
           </TabsContent>
           
           {/* Insights Tab */}
@@ -389,51 +237,11 @@ const FinanceReports = () => {
               </Card>
               
               {/* Business Tips */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Business Insights</CardTitle>
-                  <CardDescription>
-                    Personalized recommendations for your business
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* This would typically be generated based on the actual business data */}
-                    <div className="p-4 border rounded-lg bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900">
-                      <h3 className="font-medium flex items-center gap-2">
-                        <ArrowDownToLine className="h-4 w-4" />
-                        Expense Optimization
-                      </h3>
-                      <p className="text-sm mt-1">
-                        Your "{expenseCategories[0]?.category || 'Marketing'}" expenses are higher than average. 
-                        Consider reviewing your spending in this category to improve profitability.
-                      </p>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900">
-                      <h3 className="font-medium flex items-center gap-2">
-                        <LineChart className="h-4 w-4" />
-                        Growth Opportunity
-                      </h3>
-                      <p className="text-sm mt-1">
-                        Your top product "{topProducts[0]?.name || 'Product A'}" contributes 
-                        significantly to your revenue. Consider expanding this product line.
-                      </p>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
-                      <h3 className="font-medium flex items-center gap-2">
-                        <File className="h-4 w-4" />
-                        Tax Planning
-                      </h3>
-                      <p className="text-sm mt-1">
-                        Based on your current income of {formatCurrency(summary.totalIncome)}, 
-                        consider scheduling a tax planning session before the quarter ends.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <BusinessInsights 
+                expenseCategories={expenseCategories}
+                topProducts={topProducts}
+                summary={summary}
+              />
             </div>
           </TabsContent>
         </Tabs>
