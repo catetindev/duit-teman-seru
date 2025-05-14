@@ -14,9 +14,17 @@ import { IncomeExpenseChart } from '@/components/finance/reports/IncomeExpenseCh
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { DateRange } from 'react-day-picker';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
-import { ArrowDownToLine, ArrowUpRight, Download, File, FileText, LineChart, Wallet } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpRight, Download, File, FileSpreadsheet, FilePdf, FileText, LineChart, Wallet } from 'lucide-react';
 import { formatCurrency } from '@/utils/formatUtils';
+import { exportFinanceReportAsExcel, exportFinanceReportAsPdf } from '@/utils/exportUtils';
 import { Link } from 'react-router-dom';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { toast } from '@/hooks/use-toast';
 
 const FinanceReports = () => {
   const { isPremium } = useAuth();
@@ -68,6 +76,67 @@ const FinanceReports = () => {
   const handleDateRangeChange = (range: DateRange | undefined) => {
     if (range?.from) {
       setDateRange(range);
+    }
+  };
+
+  // Handle export actions
+  const handleExportExcel = () => {
+    try {
+      if (!dateRange.from || !dateRange.to) {
+        toast({
+          title: 'Date range required',
+          description: 'Please select a date range before exporting',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      exportFinanceReportAsExcel(summary, expenseCategories, topProducts, {
+        from: dateRange.from,
+        to: dateRange.to || dateRange.from
+      });
+
+      toast({
+        title: 'Report downloaded! 🎉',
+        description: 'Your finance report has been exported as Excel',
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: 'Export failed',
+        description: 'There was a problem generating your Excel report',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleExportPdf = () => {
+    try {
+      if (!dateRange.from || !dateRange.to) {
+        toast({
+          title: 'Date range required',
+          description: 'Please select a date range before exporting',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      exportFinanceReportAsPdf(summary, expenseCategories, topProducts, {
+        from: dateRange.from,
+        to: dateRange.to || dateRange.from
+      });
+
+      toast({
+        title: 'Report downloaded! 🎉',
+        description: 'Your finance report has been exported as PDF',
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: 'Export failed',
+        description: 'There was a problem generating your PDF report',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -126,7 +195,7 @@ const FinanceReports = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Finance & Reports</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Laporan Keuangan</h1>
             <p className="text-muted-foreground">
               Comprehensive financial insights and reports for your business
             </p>
@@ -137,9 +206,24 @@ const FinanceReports = () => {
               date={dateRange} 
               onDateChange={handleDateRangeChange} 
             />
-            <Button variant="outline" className="gap-1">
-              <Download className="h-4 w-4 mr-1" /> Export
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-1">
+                  <Download className="h-4 w-4 mr-1" /> Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  <span>Export as Excel</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportPdf} className="cursor-pointer">
+                  <FilePdf className="mr-2 h-4 w-4" />
+                  <span>Export as PDF</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -219,7 +303,7 @@ const FinanceReports = () => {
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader>
                     <LineChart className="h-5 w-5 text-primary mb-1" />
-                    <CardTitle>Profit & Loss</CardTitle>
+                    <CardTitle>Laporan Untung Rugi</CardTitle>
                     <CardDescription>
                       Detailed income and expense analysis
                     </CardDescription>

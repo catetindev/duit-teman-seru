@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { format, subDays, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { Download, FileText, Plus } from 'lucide-react';
+import { Download, FileText, Plus, FileSpreadsheet, FilePdf } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,14 @@ import { BusinessExpense } from '@/types/finance';
 import { useBusinessExpenses } from '@/hooks/finance/useBusinessExpenses';
 import { useFinancialData } from '@/hooks/finance/useFinancialData';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { exportProfitLossAsExcel, exportProfitLossAsPdf } from '@/utils/exportUtils';
+import { toast } from '@/hooks/use-toast';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 const ProfitLoss = () => {
   const { isPremium } = useAuth();
@@ -49,6 +58,67 @@ const ProfitLoss = () => {
   const handleDateRangeChange = (range: DateRange | undefined) => {
     if (range?.from) {
       setDateRange(range);
+    }
+  };
+
+  // Handle export actions
+  const handleExportExcel = () => {
+    try {
+      if (!dateRange.from || !dateRange.to) {
+        toast({
+          title: 'Date range required',
+          description: 'Please select a date range before exporting',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      exportProfitLossAsExcel(summary, expenseCategories, expenses, {
+        from: dateRange.from,
+        to: dateRange.to || dateRange.from
+      });
+
+      toast({
+        title: 'Report downloaded! 🎉',
+        description: 'Your profit & loss report has been exported as Excel',
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: 'Export failed',
+        description: 'There was a problem generating your Excel report',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleExportPdf = () => {
+    try {
+      if (!dateRange.from || !dateRange.to) {
+        toast({
+          title: 'Date range required',
+          description: 'Please select a date range before exporting',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      exportProfitLossAsPdf(summary, expenseCategories, expenses, {
+        from: dateRange.from,
+        to: dateRange.to || dateRange.from
+      });
+
+      toast({
+        title: 'Report downloaded! 🎉',
+        description: 'Your profit & loss report has been exported as PDF',
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: 'Export failed',
+        description: 'There was a problem generating your PDF report',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -140,7 +210,7 @@ const ProfitLoss = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Profit & Loss Report</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Laporan Untung Rugi</h1>
             <p className="text-muted-foreground">
               Track your income, expenses, and profitability over time
             </p>
@@ -151,9 +221,24 @@ const ProfitLoss = () => {
               date={dateRange} 
               onDateChange={handleDateRangeChange} 
             />
-            <Button variant="outline" className="gap-1">
-              <Download className="h-4 w-4 mr-1" /> Export
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-1">
+                  <Download className="h-4 w-4 mr-1" /> Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  <span>Export as Excel</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportPdf} className="cursor-pointer">
+                  <FilePdf className="mr-2 h-4 w-4" />
+                  <span>Export as PDF</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

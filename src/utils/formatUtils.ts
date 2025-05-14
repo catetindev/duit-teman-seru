@@ -1,32 +1,27 @@
 
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 import { format } from 'date-fns';
-import { DateRange } from 'react-day-picker';
 
-export const formatCurrency = (amount: number, currency = 'IDR') => {
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+/**
+ * Format a numeric value as currency
+ */
+export const formatCurrency = (value: number, currency = 'IDR'): string => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(amount);
+  }).format(value);
 };
 
-export const calculateProgress = (current: number, target: number): number => {
-  if (target <= 0) return 0;
-  const progress = (current / target) * 100;
-  return progress > 100 ? 100 : progress;
-};
-
-export const formatDate = (date: Date): string => {
-  return format(date, 'dd MMM yyyy');
-};
-
-export const formatDateRange = (dateRange: DateRange): string => {
-  if (!dateRange.from) return '';
-  
-  if (!dateRange.to) {
-    return formatDate(dateRange.from);
-  }
-  
-  return `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}`;
+/**
+ * Format a date range for display
+ */
+export const formatDateRange = (from: Date, to: Date): string => {
+  return `${format(from, 'dd MMM yyyy')} - ${format(to, 'dd MMM yyyy')}`;
 };
