@@ -55,12 +55,13 @@ export function CustomerOverview() {
                   <div>
                     <p className="font-medium text-sm">{customer.name}</p>
                     <div className="flex items-center gap-1 mt-1">
-                      <p className="text-xs text-muted-foreground flex items-center">
-                        <ShoppingBag className="h-3 w-3 mr-1" /> 
-                        {customer.orderCount} order{customer.orderCount !== 1 ? 's' : ''}
+                      <p className="text-xs text-muted-foreground">
+                        <ShoppingBag className="h-3 w-3 mr-1 inline" /> 
+                        {/* Remove orderCount reference since it's not available */}
+                        Customer
                       </p>
                       {customer.tags && customer.tags.length > 0 && (
-                        <Badge variant="outline" className="text-[10px] h-4 px-1">
+                        <Badge variant="outline" className="text-xs h-4 px-1">
                           {customer.tags[0]}
                         </Badge>
                       )}
@@ -68,9 +69,9 @@ export function CustomerOverview() {
                   </div>
                 </div>
                 <div className="text-xs text-right">
-                  {customer.lastOrderDate ? (
+                  {customer.last_order_date ? (
                     <p className="text-muted-foreground">
-                      Last order: {formatDate(new Date(customer.lastOrderDate))}
+                      Last order: {formatDate(new Date(customer.last_order_date))}
                     </p>
                   ) : (
                     <Badge variant="outline" className="text-[10px]">No orders</Badge>
