@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -107,6 +106,32 @@ export default function Notifications() {
     }
   };
 
+  const handleMarkAsRead = async (id: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setNotifications(
+        notifications.map((notif) => notif.id === id ? { ...notif, is_read: true } : notif)
+      );
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to mark notification as read',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const filteredNotifications = notifications.filter((notification) => {
     if (unreadOnly && notification.is_read) return false;
     if (activeTab !== 'all' && notification.type !== activeTab) return false;
@@ -163,6 +188,7 @@ export default function Notifications() {
         <NotificationList
           notifications={filteredNotifications}
           loading={loading}
+          onMarkAsRead={handleMarkAsRead}
           onRefresh={fetchNotifications}
         />
       </div>

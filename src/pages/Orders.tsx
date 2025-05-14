@@ -107,6 +107,7 @@ export default function Orders() {
       if (orderToDelete && orderToDelete.status === 'Paid') {
         const productsData = orderToDelete.products;
         if (Array.isArray(productsData)) {
+          // Pass the products data as-is, the inventoryUtils will handle the parsing
           await updateProductStock(productsData, false); // false = restore stock
         }
       }
@@ -165,10 +166,12 @@ export default function Orders() {
         
         // If order was canceled and is now marked as paid, reduce stock
         if (previousStatus === 'Canceled' && newStatus === 'Paid') {
+          // Pass the products data as-is, the inventoryUtils will handle the parsing
           await updateProductStock(currentOrder.products, true);
         }
         // If order was paid and is now canceled, restore stock
         else if (previousStatus === 'Paid' && newStatus === 'Canceled') {
+          // Pass the products data as-is, the inventoryUtils will handle the parsing
           await updateProductStock(currentOrder.products, false);
         }
       }

@@ -2,60 +2,86 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+type ProductItem = {
+  product_id: string;
+  quantity: number;
+  name?: string;
+  price?: number;
+};
+
 /**
- * Updates product stock after a successful transaction
- * @param products Array of products with their quantities
- * @param isReducing Whether to reduce stock (true) or restore stock (false)
- * @returns Promise<boolean> indicating success or failure
+ * Updates product stock based on order items
+ * @param productsData - Array of product items from an order
+ * @param reduce - If true, reduces stock; if false, increases stock (for cancellations)
  */
-export async function updateProductStock(
-  products: Array<{ product_id: string; quantity: number }>,
-  isReducing: boolean = true
-): Promise<boolean> {
+export const updateProductStock = async (productsData: any, reduce: boolean = true) => {
   try {
-    // Process each product in the transaction
-    for (const item of products) {
-      // Skip if product_id is not valid
-      if (!item.product_id) continue;
+    if (!productsData || !Array.isArray(productsData)) {
+      console.error('Invalid products data:', productsData);
+      return;
+    }
+
+    // Process each product in the order
+    for (const item of productsData) {
+      // Handle different product data formats
+      let productId: string;
+      let quantity: number;
       
-      // Get current product data
+      if (typeof item === 'object' && item !== null) {
+        // Handle standard object format
+        productId = item.product_id || item.id;
+        quantity = item.quantity || 1;
+      } else {
+        // Skip invalid items
+        console.error('Invalid product item format:', item);
+        continue;
+      }
+
+      if (!productId) {
+        console.error('Product ID missing in item:', item);
+        continue;
+      }
+
+      // First get current stock
       const { data: product, error: fetchError } = await supabase
         .from('products')
-        .select('stock, name')
-        .eq('id', item.product_id)
+        .select('stock')
+        .eq('id', productId)
         .single();
       
       if (fetchError) {
-        console.error(`Error fetching product ${item.product_id}:`, fetchError);
+        console.error('Error fetching product stock:', fetchError);
         continue;
       }
       
       if (!product) {
-        console.error(`Product ${item.product_id} not found`);
+        console.error(`Product not found with ID: ${productId}`);
         continue;
       }
+
+      const currentStock = product.stock || 0;
+      const newStock = reduce 
+        ? Math.max(0, currentStock - quantity) // Don't allow negative stock
+        : currentStock + quantity;
       
-      // Calculate new stock level
-      const changeAmount = item.quantity || 0;
-      const newStock = isReducing 
-        ? Math.max(0, product.stock - changeAmount) // Don't go below 0 when reducing
-        : product.stock + changeAmount;
-      
-      // Update the stock in the database
+      // Update the product stock
       const { error: updateError } = await supabase
         .from('products')
         .update({ stock: newStock })
-        .eq('id', item.product_id);
+        .eq('id', productId);
       
       if (updateError) {
-        console.error(`Error updating stock for ${product.name}:`, updateError);
-        // Continue with other products even if one fails
+        console.error('Error updating product stock:', updateError);
+      } else {
+        console.log(`Updated stock for product ${productId}: ${currentStock} → ${newStock}`);
       }
     }
-    
-    return true;
   } catch (error) {
     console.error('Error updating product stock:', error);
-    return false;
+    toast({
+      title: 'Error',
+      description: 'Failed to update product inventory',
+      variant: 'destructive',
+    });
   }
-}
+};
