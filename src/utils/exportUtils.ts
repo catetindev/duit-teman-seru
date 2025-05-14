@@ -1,10 +1,24 @@
 
 import { saveAs } from 'file-saver';
 import { jsPDF } from 'jspdf';
+// Import autotable explicitly - this extends the jsPDF prototype
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { FinanceSummary, ExpenseCategory, TopProduct } from '@/types/finance';
+
+// This adds the autoTable method to the jsPDF instance
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => any;
+    lastAutoTable: {
+      finalY: number;
+    };
+    previousAutoTable: {
+      finalY: number;
+    };
+  }
+}
 
 // Helper to format currency for reports
 const formatCurrencyForReport = (amount: number): string => {
@@ -105,7 +119,6 @@ export const exportFinanceReportAsPdf = (
   ];
   
   // Using jspdf-autotable
-  // @ts-ignore - jspdf-autotable types are not fully compatible
   doc.autoTable({
     startY: 50,
     head: [['Item', 'Value']],
@@ -117,8 +130,7 @@ export const exportFinanceReportAsPdf = (
   // Add expenses breakdown
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  // @ts-ignore
-  doc.text('Expense Breakdown', 14, doc.autoTable.previous.finalY + 15);
+  doc.text('Expense Breakdown', 14, doc.previousAutoTable.finalY + 15);
   
   const expenseData = expenseCategories.map(cat => [
     cat.category,
@@ -127,10 +139,8 @@ export const exportFinanceReportAsPdf = (
   ]);
   
   // Using jspdf-autotable
-  // @ts-ignore
   doc.autoTable({
-    // @ts-ignore
-    startY: doc.autoTable.previous.finalY + 20,
+    startY: doc.previousAutoTable.finalY + 20,
     head: [['Category', 'Amount', 'Percentage']],
     body: expenseData,
     theme: 'grid',
@@ -141,8 +151,7 @@ export const exportFinanceReportAsPdf = (
   if (topProducts.length > 0) {
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);
-    // @ts-ignore
-    doc.text('Top Products', 14, doc.autoTable.previous.finalY + 15);
+    doc.text('Top Products', 14, doc.previousAutoTable.finalY + 15);
     
     const productData = topProducts.map(product => [
       product.name,
@@ -151,10 +160,8 @@ export const exportFinanceReportAsPdf = (
     ]);
     
     // Using jspdf-autotable
-    // @ts-ignore
     doc.autoTable({
-      // @ts-ignore
-      startY: doc.autoTable.previous.finalY + 20,
+      startY: doc.previousAutoTable.finalY + 20,
       head: [['Product', 'Revenue', 'Units Sold']],
       body: productData,
       theme: 'grid',
@@ -265,7 +272,6 @@ export const exportProfitLossAsPdf = (
     ['Profit Margin', `${summary.profitMargin.toFixed(2)}%`],
   ];
   
-  // @ts-ignore - jspdf-autotable types are not fully compatible
   doc.autoTable({
     startY: 50,
     head: [['Item', 'Value']],
@@ -277,8 +283,7 @@ export const exportProfitLossAsPdf = (
   // Add expenses breakdown
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  // @ts-ignore
-  doc.text('Expense Breakdown', 14, doc.autoTable.previous.finalY + 15);
+  doc.text('Expense Breakdown', 14, doc.previousAutoTable.finalY + 15);
   
   const expenseData = expenseCategories.map(cat => [
     cat.category,
@@ -286,10 +291,8 @@ export const exportProfitLossAsPdf = (
     `${cat.percentage.toFixed(2)}%`
   ]);
   
-  // @ts-ignore - jspdf-autotable types are not fully compatible
   doc.autoTable({
-    // @ts-ignore
-    startY: doc.autoTable.previous.finalY + 20,
+    startY: doc.previousAutoTable.finalY + 20,
     head: [['Category', 'Amount', 'Percentage']],
     body: expenseData,
     theme: 'grid',
@@ -300,8 +303,7 @@ export const exportProfitLossAsPdf = (
   if (expenses.length > 0) {
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);
-    // @ts-ignore
-    doc.text('Recent Expenses', 14, doc.autoTable.previous.finalY + 15);
+    doc.text('Recent Expenses', 14, doc.previousAutoTable.finalY + 15);
     
     const expensesData = expenses.slice(0, 20).map(exp => [
       format(new Date(exp.date), 'yyyy-MM-dd'),
@@ -310,10 +312,8 @@ export const exportProfitLossAsPdf = (
       formatCurrencyForReport(exp.amount)
     ]);
     
-    // @ts-ignore - jspdf-autotable types are not fully compatible
     doc.autoTable({
-      // @ts-ignore
-      startY: doc.autoTable.previous.finalY + 20,
+      startY: doc.previousAutoTable.finalY + 20,
       head: [['Date', 'Title', 'Category', 'Amount']],
       body: expensesData,
       theme: 'grid',
@@ -323,11 +323,10 @@ export const exportProfitLossAsPdf = (
     if (expenses.length > 20) {
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      // @ts-ignore
       doc.text(
         `Showing 20 of ${expenses.length} expenses. Full list available in Excel report.`,
         14,
-        doc.autoTable.previous.finalY + 10
+        doc.previousAutoTable.finalY + 10
       );
     }
   }
