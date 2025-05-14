@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -242,7 +241,7 @@ export default function Orders() {
           {dateRange?.from && (
             <div className="md:col-span-4 flex items-center">
               <span className="text-sm">
-                {t('order.filteredByDate')}: {formatDateRange(dateRange)}
+                {t('order.filteredByDate')}: {formatDateRange(dateRange.from, dateRange.to || dateRange.from)}
               </span>
               <Button 
                 variant="ghost" 
