@@ -21,7 +21,7 @@ const Footer = () => {
               />
             </Link>
             <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm">
-              Aplikasi pencatat keuangan yang simpel dan menyenangkan untuk Gen Z. Catat, kelola, dan raih mimpimu!
+              Aplikasi pencatat keuangan yang simpel dan menyenangkan. Catat, kelola, dan raih mimpimu!
             </p>
             
             <div className="flex space-x-4">
