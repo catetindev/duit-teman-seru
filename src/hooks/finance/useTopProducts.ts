@@ -17,14 +17,22 @@ export function useTopProducts() {
       if (!user) return [];
       setLoading(true);
 
-      // Fetch orders for the date range
-      const { data: ordersData, error } = await supabase
+      let query = supabase
         .from('orders')
         .select('id, total, products, created_at')
         .eq('user_id', user.id)
-        .eq('status', 'Paid')
-        .gte('created_at', dateRange?.from?.toISOString() || '')
-        .lte('created_at', dateRange?.to?.toISOString() || '');
+        .eq('status', 'Paid');
+      
+      // Only add date filters if valid dates are provided
+      if (dateRange?.from) {
+        query = query.gte('created_at', dateRange.from.toISOString());
+      }
+      
+      if (dateRange?.to) {
+        query = query.lte('created_at', dateRange.to.toISOString());
+      }
+      
+      const { data: ordersData, error } = await query;
 
       if (error) throw error;
 
