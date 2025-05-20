@@ -5,6 +5,7 @@ import {
   SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink 
 } from "@/components/ui/sidebar";
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, PieChart, Package, Calculator, FileText, Bell, MessageSquare, 
   Settings, ShieldAlert, ShoppingBag, Users, CreditCard, FileBarChart
@@ -17,6 +18,9 @@ interface EntrepreneurModeSidebarProps {
 const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
   const { t } = useLanguage();
   
+  // Define common styles for nav links
+  const navLinkStyles = "font-medium";
+  
   return (
     <SidebarContent>
       {/* Core Navigation */}
@@ -27,41 +31,36 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
             to="/dashboard" 
             icon={<LayoutDashboard className="h-5 w-5" />} 
             end
-            className="font-medium"
           >
-            Dashboard
+            <span className={navLinkStyles}>Dashboard</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/products" 
             icon={<Package className="h-5 w-5" />}
-            className="font-medium"
           >
-            Products & Services
+            <span className={navLinkStyles}>Products & Services</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/pos" 
             icon={<CreditCard className="h-5 w-5" />}
-            className="font-medium"
           >
-            POS / Cashier
+            <span className={navLinkStyles}>POS / Cashier</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/orders" 
             icon={<ShoppingBag className="h-5 w-5" />}
-            className="font-medium"
           >
-            Orders & Transactions
+            <span className={navLinkStyles}>Orders & Transactions</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/customers" 
             icon={<Users className="h-5 w-5" />}
-            className="font-medium"
           >
-            Customers
+            <span className={navLinkStyles}>Customers</span>
           </SidebarNavLink>
         </SidebarGroupContent>
       </SidebarGroup>
@@ -73,33 +72,29 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
           <SidebarNavLink 
             to="/profit-loss" 
             icon={<PieChart className="h-5 w-5" />}
-            className="font-medium"
           >
-            Profit & Loss Report
+            <span className={navLinkStyles}>Profit & Loss Report</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/calculator" 
             icon={<Calculator className="h-5 w-5" />}
-            className="font-medium"
           >
-            Pricing Calculator
+            <span className={navLinkStyles}>Pricing Calculator</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/invoices" 
             icon={<FileText className="h-5 w-5" />}
-            className="font-medium"
           >
-            Invoice Generator
+            <span className={navLinkStyles}>Invoice Generator</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/finance-reports" 
             icon={<FileBarChart className="h-5 w-5" />}
-            className="font-medium"
           >
-            Financial Reports
+            <span className={navLinkStyles}>Financial Reports</span>
           </SidebarNavLink>
         </SidebarGroupContent>
       </SidebarGroup>
@@ -111,35 +106,31 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
           <SidebarNavLink 
             to="/notifications" 
             icon={<Bell className="h-5 w-5" />}
-            className="font-medium"
           >
-            Notifications
+            <span className={navLinkStyles}>Notifications</span>
             <Badge variant="outline" className="ml-auto bg-primary/10 text-xs py-0 h-5">2</Badge>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/feedback" 
             icon={<MessageSquare className="h-5 w-5" />}
-            className="font-medium"
           >
-            Feedback
+            <span className={navLinkStyles}>Feedback</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/settings" 
             icon={<Settings className="h-5 w-5" />}
-            className="font-medium"
           >
-            {t('nav.settings')}
+            <span className={navLinkStyles}>{t('nav.settings')}</span>
           </SidebarNavLink>
           
           {isAdmin && (
             <SidebarNavLink 
               to="/admin" 
               icon={<ShieldAlert className="h-5 w-5" />}
-              className="font-medium"
             >
-              Admin
+              <span className={navLinkStyles}>Admin</span>
             </SidebarNavLink>
           )}
         </SidebarGroupContent>
