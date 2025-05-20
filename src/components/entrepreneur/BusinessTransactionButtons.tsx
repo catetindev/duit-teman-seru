@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface BusinessTransactionButtonsProps {
   onAddIncome: () => void;
@@ -14,20 +15,35 @@ export function BusinessTransactionButtons({
 }: BusinessTransactionButtonsProps) {
   return (
     <div className="flex flex-wrap gap-3">
-      <Button 
-        onClick={onAddIncome} 
-        className="bg-amber-500 hover:bg-amber-600 text-white flex-1"
+      <motion.div 
+        whileHover={{ scale: 1.02 }} 
+        whileTap={{ scale: 0.98 }}
+        className="flex-1"
       >
-        <TrendingUp className="mr-1 h-4 w-4" />
-        + Business Income
-      </Button>
-      <Button 
-        onClick={onAddExpense} 
-        className="bg-blue-500 hover:bg-blue-600 text-white flex-1"
+        <Button 
+          onClick={onAddIncome} 
+          className="bg-green-500 hover:bg-green-600 text-white w-full py-6 h-auto"
+          size="lg"
+        >
+          <TrendingUp className="mr-2 h-5 w-5" />
+          <span className="text-base">Record Business Income</span>
+        </Button>
+      </motion.div>
+      
+      <motion.div 
+        whileHover={{ scale: 1.02 }} 
+        whileTap={{ scale: 0.98 }}
+        className="flex-1"
       >
-        <TrendingDown className="mr-1 h-4 w-4" />
-        + Business Expense
-      </Button>
+        <Button 
+          onClick={onAddExpense} 
+          className="bg-blue-500 hover:bg-blue-600 text-white w-full py-6 h-auto"
+          size="lg"
+        >
+          <TrendingDown className="mr-2 h-5 w-5" />
+          <span className="text-base">Record Business Expense</span>
+        </Button>
+      </motion.div>
     </div>
   );
 }
