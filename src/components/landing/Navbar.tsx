@@ -3,14 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useBrandingAssets } from '@/hooks/useBrandingAssets';
 import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const { t } = useLanguage();
   const { logoUrl } = useBrandingAssets();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,14 +39,19 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-2">
             <img 
               src={logoUrl || "/lovable-uploads/ebe4aa03-3f9e-4e7e-82f6-bb40de4a50b4.png"} 
-              alt="App Logo" 
+              alt="Catatyo Logo" 
               className="h-8 md:h-10 w-auto object-contain" 
             />
           </Link>
           
-          {/* Navigation Links - Hidden on mobile */}
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-6">
-            {/* Add navigation links here if needed */}
+            <Link to="/pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              Harga
+            </Link>
+            <Link to="/about" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              Tentang Kami
+            </Link>
           </div>
         </div>
         
@@ -60,7 +63,7 @@ const Navbar = () => {
           </Button>
           <Button 
             onClick={goToSignup} 
-            className="bg-[#28e57d] hover:bg-[#28e57d]/90 text-white hover:scale-[1.03] transition-all font-medium"
+            className="bg-[#28e57d] hover:bg-[#28e57d]/90 text-white hover:scale-[1.03] transition-all font-medium rounded-xl"
           >
             {t('auth.signup')}
           </Button>
@@ -82,8 +85,15 @@ const Navbar = () => {
       
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg p-4">
+        <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg p-4 animate-fade-in">
           <div className="flex flex-col gap-3">
+            <Link to="/pricing" className="flex w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+              Harga
+            </Link>
+            <Link to="/about" className="flex w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+              Tentang Kami
+            </Link>
+            <hr className="my-2 border-gray-200 dark:border-gray-700" />
             <Button 
               onClick={goToLogin} 
               variant="outline" 
@@ -96,13 +106,6 @@ const Navbar = () => {
               className="bg-[#28e57d] hover:bg-[#28e57d]/90 text-white w-full justify-start"
             >
               {t('auth.signup')}
-            </Button>
-            <Button 
-              onClick={goToPricing}
-              variant="ghost"
-              className="w-full justify-start"
-            >
-              Lihat Harga
             </Button>
           </div>
         </div>
