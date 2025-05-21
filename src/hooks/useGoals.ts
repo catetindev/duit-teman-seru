@@ -1,3 +1,4 @@
 
-// This file should simply re-export from the goals directory
+// Re-export from the goals directory
 export { useGoals } from './goals/useGoals';
+export type { Goal } from './goals/types';

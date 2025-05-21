@@ -18,6 +18,7 @@ import { useState } from 'react';
 import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PricingModal from '@/components/pricing/PricingModal';
+import { useDashboardData } from '@/hooks/useDashboardData'; // Fix the import
 
 const Dashboard = () => {
   const { type } = useParams();
@@ -126,6 +127,22 @@ const Dashboard = () => {
       />
     </DashboardLayout>
   );
+  
+  function handleAddBusinessIncome() {
+    setTransactionType('income');
+    setTransactionCategory('Business');
+    setIsAddDialogOpen(true);
+  }
+
+  function handleAddBusinessExpense() {
+    setTransactionType('expense');
+    setTransactionCategory('Business');
+    setIsAddDialogOpen(true);
+  }
+
+  function handleUpgradeClick() {
+    setIsPricingModalOpen(true);
+  }
 };
 
 export default Dashboard;

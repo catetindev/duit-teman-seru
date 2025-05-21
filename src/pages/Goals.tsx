@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +12,7 @@ import GoalsFilters from '@/components/goals/GoalsFilters';
 import GoalsHeader from '@/components/goals/GoalsHeader';
 import GoalsLoading from '@/components/goals/GoalsLoading';
 import PendingInvitations from '@/components/goals/PendingInvitations';
+import { GoalFormData } from '@/components/goals/AddGoalDialog';
 
 // Import context provider
 import { GoalsProvider, useGoalsContext } from '@/contexts/goals';
@@ -96,7 +96,7 @@ const GoalsContent = ({ isPremium, userId }: { isPremium: boolean; userId?: stri
   }, [setIsDeleteDialogOpen]);
 
   // Handle adding a goal with the current user ID
-  const handleAddGoalWithUser = useCallback(async (goalData: any) => {
+  const handleAddGoalWithUser = useCallback(async (goalData: GoalFormData) => {
     console.log('handleAddGoalWithUser called with:', goalData);
     if (userId) {
       await handleAddGoal({ ...goalData, user_id: userId });
@@ -157,6 +157,7 @@ const GoalsContent = ({ isPremium, userId }: { isPremium: boolean; userId?: stri
       <AddGoalDialog
         isOpen={isAddDialogOpen}
         onClose={handleAddDialogClose}
+        onGoalAdded={fetchGoals}
         onSubmit={handleAddGoalWithUser}
         isSubmitting={isSubmitting}
       />

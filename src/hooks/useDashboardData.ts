@@ -7,7 +7,7 @@ import { DashboardStats } from '@/hooks/goals/types';
 import { useTransactions } from './dashboard/useTransactions';
 import { useGoals } from './dashboard/useGoals';
 import { useBudgets } from './dashboard/useBudgets';
-import { DashboardHookReturn, Transaction, Budget } from './dashboard/types';
+import { DashboardHookReturn } from './dashboard/types';
 
 // Main hook
 export function useDashboardData(): DashboardHookReturn {
@@ -83,7 +83,3 @@ export function useDashboardData(): DashboardHookReturn {
     deleteBudget,
   };
 }
-
-// Export utility functions and types
-export { formatCurrency, calculateProgress };
-export type { Transaction, Budget };

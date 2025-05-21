@@ -6,8 +6,8 @@ import { PlusCircle, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GoalCard from '@/components/ui/GoalCard';
 import AddGoalDialog from '@/components/goals/AddGoalDialog';
-import { Goal } from '@/hooks/useGoals';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Goal } from '@/hooks/goals/types'; // Import from the correct location
 
 interface GoalsSectionProps {
   goals: Goal[];
@@ -57,7 +57,18 @@ const GoalsSection = ({
         ) : goals.length > 0 ? (
           <div className="space-y-4">
             {goals.map((goal) => (
-              <GoalCard key={goal.id} goal={goal} />
+              <GoalCard 
+                key={goal.id} 
+                id={goal.id}
+                title={goal.title}
+                targetAmount={goal.target_amount}
+                currentAmount={goal.saved_amount}
+                targetDate={goal.target_date}
+                currency={goal.currency}
+                isPremium={isPremium}
+                emoji={goal.emoji}
+                onUpdate={onGoalAdded}
+              />
             ))}
             
             {!isPremium && goals.length === 1 && (

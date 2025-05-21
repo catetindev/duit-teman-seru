@@ -8,18 +8,32 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
+// Define the GoalFormData interface for use across components
+export interface GoalFormData {
+  title: string;
+  target_amount: string;
+  saved_amount: string;
+  target_date?: string;
+  emoji?: string;
+  currency?: 'IDR' | 'USD';
+}
+
 interface AddGoalDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onGoalAdded: () => void;
   onUpgradeNeeded?: () => void;
+  onSubmit?: (goalData: GoalFormData) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
 const AddGoalDialog = ({ 
   isOpen, 
   onClose, 
   onGoalAdded,
-  onUpgradeNeeded
+  onUpgradeNeeded,
+  onSubmit,
+  isSubmitting: externalIsSubmitting = false
 }: AddGoalDialogProps) => {
   const [name, setName] = useState('');
   const [target, setTarget] = useState('');
@@ -49,6 +63,18 @@ const AddGoalDialog = ({
       return;
     }
     
+    // If external submit handler is provided, use it
+    if (onSubmit) {
+      await onSubmit({
+        title: name,
+        target_amount: target,
+        saved_amount: "0",
+      });
+      setName('');
+      setTarget('');
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -64,7 +90,8 @@ const AddGoalDialog = ({
         toast({
           title: "Goal limit reached",
           description: "Free users can only create one savings goal. Upgrade to Premium for unlimited goals.",
-          variant: "warning",
+          // Fix warning variant
+          variant: "destructive",
         });
         
         // Call the upgrade handler
@@ -82,7 +109,7 @@ const AddGoalDialog = ({
       const { error } = await supabase
         .from('savings_goals')
         .insert({
-          name,
+          title: name, // Use 'title' instead of 'name' to match the database schema
           target_amount: targetAmount,
           saved_amount: 0,
           currency: 'IDR',
@@ -130,7 +157,7 @@ const AddGoalDialog = ({
               placeholder="e.g., New Laptop"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={loading}
+              disabled={loading || externalIsSubmitting}
             />
           </div>
           
@@ -142,7 +169,7 @@ const AddGoalDialog = ({
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               type="number"
-              disabled={loading}
+              disabled={loading || externalIsSubmitting}
             />
           </div>
           
@@ -151,12 +178,12 @@ const AddGoalDialog = ({
               type="button" 
               variant="outline" 
               onClick={onClose}
-              disabled={loading}
+              disabled={loading || externalIsSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" disabled={loading || externalIsSubmitting}>
+              {(loading || externalIsSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Goal
             </Button>
           </div>
