@@ -216,6 +216,11 @@ export default function Orders() {
     return matchesSearch && matchesStatus && matchesCustomer && matchesDate;
   });
 
+  // Add wrapper function to handle DateRange type correctly
+  const handleDateChange = (newDateRange: DateRange | undefined) => {
+    setDateRange(newDateRange);
+  };
+
   return (
     <DashboardLayout isPremium={isPremium}>
       <div className="p-4 md:p-6">
@@ -277,7 +282,7 @@ export default function Orders() {
           
           <DatePicker
             date={dateRange}
-            onSelect={setDateRange}
+            onSelect={handleDateChange}
             preText="Date: "
             placeholder={t('order.selectDates')}
           />
