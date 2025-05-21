@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -99,7 +100,10 @@ const GoalsContent = ({ isPremium, userId }: { isPremium: boolean; userId?: stri
   const handleAddGoalWithUser = useCallback(async (goalData: GoalFormData) => {
     console.log('handleAddGoalWithUser called with:', goalData);
     if (userId) {
-      await handleAddGoal({ ...goalData, user_id: userId });
+      await handleAddGoal({ 
+        ...goalData, 
+        user_id: userId 
+      });
     } else {
       console.error('Cannot add goal: No user ID available');
     }

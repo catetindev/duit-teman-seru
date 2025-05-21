@@ -1,190 +1,183 @@
-
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 
-// Define the GoalFormData interface for use across components
+// Export the interface so it can be imported elsewhere
 export interface GoalFormData {
   title: string;
-  target_amount: string;
-  saved_amount: string;
-  target_date?: string;
+  target_amount: string | number;
+  saved_amount?: string | number;
+  target_date?: string | Date;
   emoji?: string;
   currency?: 'IDR' | 'USD';
+  user_id?: string; // Add this line to include user_id as an optional property
 }
 
-interface AddGoalDialogProps {
+export interface AddGoalDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onGoalAdded: () => void;
-  onUpgradeNeeded?: () => void;
-  onSubmit?: (goalData: GoalFormData) => Promise<void>;
-  isSubmitting?: boolean;
+  onSubmit: (goalData: GoalFormData) => Promise<void>;
+  isSubmitting: boolean;
 }
 
-const AddGoalDialog = ({ 
+const AddGoalDialog: React.FC<AddGoalDialogProps> = ({ 
   isOpen, 
   onClose, 
   onGoalAdded,
-  onUpgradeNeeded,
   onSubmit,
-  isSubmitting: externalIsSubmitting = false
-}: AddGoalDialogProps) => {
-  const [name, setName] = useState('');
-  const [target, setTarget] = useState('');
-  const [loading, setLoading] = useState(false);
+  isSubmitting 
+}) => {
   const { toast } = useToast();
-  const { user, isPremium } = useAuth();
+  const [targetDate, setTargetDate] = useState<Date | undefined>(undefined);
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!name || !target) {
-      toast({
-        title: "Please fill all fields",
-        description: "Goal name and target amount are required.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const targetAmount = parseFloat(target);
-    if (isNaN(targetAmount) || targetAmount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid target amount.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // If external submit handler is provided, use it
-    if (onSubmit) {
-      await onSubmit({
-        title: name,
-        target_amount: target,
-        saved_amount: "0",
-      });
-      setName('');
-      setTarget('');
-      return;
-    }
-    
-    setLoading(true);
-    
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<GoalFormData>();
+  
+  const onSubmitForm = async (data: GoalFormData) => {
     try {
-      const { data: existingGoals, error: countError } = await supabase
-        .from('savings_goals')
-        .select('id')
-        .eq('user_id', user?.id);
+      // Convert target_amount and saved_amount to numbers
+      const formattedData: GoalFormData = {
+        ...data,
+        target_amount: parseFloat(String(data.target_amount)),
+        saved_amount: data.saved_amount ? parseFloat(String(data.saved_amount)) : 0,
+        target_date: targetDate,
+      };
       
-      if (countError) throw countError;
-      
-      // Check if user has reached the limit (1 goal for free users)
-      if (!isPremium && existingGoals && existingGoals.length >= 1) {
-        toast({
-          title: "Goal limit reached",
-          description: "Free users can only create one savings goal. Upgrade to Premium for unlimited goals.",
-          // Fix warning variant
-          variant: "destructive",
-        });
-        
-        // Call the upgrade handler
-        if (onUpgradeNeeded) {
-          setTimeout(() => {
-            onClose();
-            onUpgradeNeeded();
-          }, 1000);
-        }
-        
-        setLoading(false);
-        return;
-      }
-      
-      const { error } = await supabase
-        .from('savings_goals')
-        .insert({
-          title: name, // Use 'title' instead of 'name' to match the database schema
-          target_amount: targetAmount,
-          saved_amount: 0,
-          currency: 'IDR',
-          user_id: user?.id,
-        });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Goal created!",
-        description: "Your savings goal has been created successfully.",
-      });
-      
-      setName('');
-      setTarget('');
-      onClose();
+      await onSubmit(formattedData);
       onGoalAdded();
-    } catch (error: any) {
-      console.error('Error creating goal:', error);
+      onClose();
       toast({
-        title: "Error creating goal",
-        description: error.message || "Something went wrong",
+        title: "Success",
+        description: "Goal added successfully!",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add goal.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
-  
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Goal</DialogTitle>
-          <DialogDescription>
-            Create a new savings goal to track your progress
-          </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div className="grid w-full items-center gap-2">
-            <label htmlFor="name">Goal Name</label>
-            <Input
-              id="name"
-              placeholder="e.g., New Laptop"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={loading || externalIsSubmitting}
-            />
+        <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4 py-4">
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Goal Title</Label>
+              <Input
+                id="title"
+                {...register('title', { required: true })}
+                placeholder="e.g., New Laptop"
+              />
+              {errors.title && (
+                <p className="text-sm text-red-500">Title is required</p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="target_amount">Target Amount</Label>
+                <Input
+                  id="target_amount"
+                  type="number"
+                  {...register('target_amount', { 
+                    required: true,
+                    min: { value: 0, message: "Target amount must be positive" }
+                  })}
+                  placeholder="5000000"
+                />
+                {errors.target_amount && (
+                  <p className="text-sm text-red-500">
+                    {errors.target_amount.message || "Target amount is required"}
+                  </p>
+                )}
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="saved_amount">Initial Savings</Label>
+                <Input
+                  id="saved_amount"
+                  type="number"
+                  {...register('saved_amount')}
+                  placeholder="0"
+                  defaultValue="0"
+                />
+              </div>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="currency">Currency</Label>
+              <Select
+                defaultValue="IDR"
+                onValueChange={(value) => setValue('currency', value as 'IDR' | 'USD')}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="IDR">Indonesian Rupiah (IDR)</SelectItem>
+                  <SelectItem value="USD">US Dollar (USD)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="target_date">Target Date (Optional)</Label>
+              <DatePicker 
+                date={targetDate} 
+                setDate={(date) => {
+                  setTargetDate(date);
+                  if (date) {
+                    setValue('target_date', date);
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="emoji">Emoji (Optional)</Label>
+              <Input
+                id="emoji"
+                {...register('emoji')}
+                placeholder="🎯"
+                maxLength={2}
+              />
+              <p className="text-xs text-gray-500">Single emoji to represent your goal</p>
+            </div>
           </div>
           
-          <div className="grid w-full items-center gap-2">
-            <label htmlFor="target">Target Amount (IDR)</label>
-            <Input
-              id="target"
-              placeholder="e.g., 5000000"
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-              type="number"
-              disabled={loading || externalIsSubmitting}
-            />
-          </div>
-          
-          <div className="flex justify-end gap-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onClose}
-              disabled={loading || externalIsSubmitting}
-            >
+          <div className="flex justify-end pt-4">
+            <Button variant="outline" type="button" onClick={onClose} className="mr-2">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || externalIsSubmitting}>
-              {(loading || externalIsSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Goal
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Add Goal'
+              )}
             </Button>
           </div>
         </form>
