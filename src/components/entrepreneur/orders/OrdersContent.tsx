@@ -1,7 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Order, Customer, Product } from '@/types/entrepreneur';
-import OrderList from '@/components/entrepreneur/OrderList';
+import { OrdersTable } from './OrdersTable';
+import { OrdersLoadingState } from './OrdersLoadingState';
+import { OrdersEmptyState } from './OrdersEmptyState';
 import OrderFormDialog from '@/components/entrepreneur/OrderFormDialog';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,16 +18,28 @@ interface OrdersContentProps {
   onDataChange: () => void;
 }
 
-export function OrdersContent({
+export type OrdersContentRef = {
+  handleOpenForm: () => void;
+};
+
+export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(({
   orders,
   customers,
   products,
   loading,
   onDataChange
-}: OrdersContentProps) {
+}, ref) => {
   const { t } = useLanguage();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  
+  // Expose handleOpenForm method via ref
+  useImperativeHandle(ref, () => ({
+    handleOpenForm: () => {
+      setSelectedOrder(null);
+      setIsFormOpen(true);
+    }
+  }));
   
   const handleEdit = (order: Order) => {
     setSelectedOrder(order);
@@ -143,14 +157,18 @@ export function OrdersContent({
 
   return (
     <>
-      {/* Orders List */}
-      <OrderList 
-        orders={orders}
-        loading={loading} 
-        onEdit={handleEdit} 
-        onDelete={handleDelete}
-        onStatusChange={handleStatusChange}
-      />
+      {loading ? (
+        <OrdersLoadingState />
+      ) : orders.length === 0 ? (
+        <OrdersEmptyState onOpenForm={handleOpenForm} />
+      ) : (
+        <OrdersTable
+          orders={orders}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
+        />
+      )}
 
       {/* Order Form Dialog */}
       <OrderFormDialog 
@@ -163,4 +181,6 @@ export function OrdersContent({
       />
     </>
   );
-}
+});
+
+OrdersContent.displayName = 'OrdersContent';

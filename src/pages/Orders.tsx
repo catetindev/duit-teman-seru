@@ -26,8 +26,12 @@ export default function Orders() {
     fetchData
   } = useOrders();
 
+  // Create a reference to the OrdersContent component to call the handleOpenForm method
+  const contentRef = React.useRef<{ handleOpenForm: () => void } | null>(null);
+
   const handleAddNew = () => {
-    // This function is passed to the header component
+    // Call the handleOpenForm method of OrdersContent
+    contentRef.current?.handleOpenForm();
   };
 
   return (
@@ -48,6 +52,7 @@ export default function Orders() {
         />
         
         <OrdersContent
+          ref={contentRef}
           orders={filteredOrders}
           customers={customers}
           products={products}
