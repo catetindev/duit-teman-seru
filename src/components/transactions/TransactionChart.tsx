@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -70,7 +71,7 @@ const TransactionChart: React.FC<TransactionChartProps> = ({ transactions }) => 
         <CardContent className="flex flex-col items-center justify-center py-10">
           <div className="text-4xl mb-3">📊</div>
           <p className="text-muted-foreground text-center">
-            {t('transactions.noData')}
+            Belum ada data transaksi untuk ditampilkan.
           </p>
         </CardContent>
       </Card>

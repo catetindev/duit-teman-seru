@@ -1,245 +1,165 @@
 
-import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
 
-interface AddGoalProps {
+interface AddGoalDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (goalData: GoalFormData) => Promise<void>;
-  isSubmitting: boolean;
+  onGoalAdded: () => void;
+  onUpgradeNeeded?: () => void;
 }
 
-export interface GoalFormData {
-  title: string;
-  target_amount: string;
-  saved_amount: string;
-  target_date: string;
-  emoji: string;
-  currency: 'IDR' | 'USD';  // Add currency property with default IDR
-}
-
-const initialFormState: GoalFormData = {
-  title: '',
-  target_amount: '',
-  saved_amount: '',
-  target_date: '',
-  emoji: '🎯',
-  currency: 'IDR'
-};
-
-const AddGoalDialog: React.FC<AddGoalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  isSubmitting
-}) => {
-  const [goalData, setGoalData] = useState<GoalFormData>(initialFormState);
-  const [validationErrors, setValidationErrors] = useState<Partial<Record<keyof GoalFormData, string>>>({});
-
-  // Reset form when dialog opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      setGoalData(initialFormState);
-      setValidationErrors({});
-    }
-  }, [isOpen]);
-
-  const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof GoalFormData, string>> = {};
-    
-    if (!goalData.title.trim()) {
-      errors.title = 'Title is required';
-    }
-    
-    if (!goalData.target_amount) {
-      errors.target_amount = 'Target amount is required';
-    } else if (isNaN(Number(goalData.target_amount)) || Number(goalData.target_amount) <= 0) {
-      errors.target_amount = 'Target amount must be a positive number';
-    }
-    
-    if (goalData.saved_amount && (isNaN(Number(goalData.saved_amount)) || Number(goalData.saved_amount) < 0)) {
-      errors.saved_amount = 'Saved amount must be a non-negative number';
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
+const AddGoalDialog = ({ 
+  isOpen, 
+  onClose, 
+  onGoalAdded,
+  onUpgradeNeeded
+}: AddGoalDialogProps) => {
+  const [name, setName] = useState('');
+  const [target, setTarget] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const { user, isPremium } = useAuth();
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate before submitting
-    if (!validateForm()) {
-      toast("Please fix the form errors before submitting");
+    if (!name || !target) {
+      toast({
+        title: "Please fill all fields",
+        description: "Goal name and target amount are required.",
+        variant: "destructive",
+      });
       return;
     }
     
+    const targetAmount = parseFloat(target);
+    if (isNaN(targetAmount) || targetAmount <= 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid target amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setLoading(true);
+    
     try {
-      await onSubmit(goalData);
-      // Form will be reset by the useEffect when isOpen changes
-    } catch (error) {
-      console.error("Error submitting goal:", error);
-      // Error handling is done in the parent component
+      const { data: existingGoals, error: countError } = await supabase
+        .from('savings_goals')
+        .select('id')
+        .eq('user_id', user?.id);
+      
+      if (countError) throw countError;
+      
+      // Check if user has reached the limit (1 goal for free users)
+      if (!isPremium && existingGoals && existingGoals.length >= 1) {
+        toast({
+          title: "Goal limit reached",
+          description: "Free users can only create one savings goal. Upgrade to Premium for unlimited goals.",
+          variant: "warning",
+        });
+        
+        // Call the upgrade handler
+        if (onUpgradeNeeded) {
+          setTimeout(() => {
+            onClose();
+            onUpgradeNeeded();
+          }, 1000);
+        }
+        
+        setLoading(false);
+        return;
+      }
+      
+      const { error } = await supabase
+        .from('savings_goals')
+        .insert({
+          name,
+          target_amount: targetAmount,
+          saved_amount: 0,
+          currency: 'IDR',
+          user_id: user?.id,
+        });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Goal created!",
+        description: "Your savings goal has been created successfully.",
+      });
+      
+      setName('');
+      setTarget('');
+      onClose();
+      onGoalAdded();
+    } catch (error: any) {
+      console.error('Error creating goal:', error);
+      toast({
+        title: "Error creating goal",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
-
-  const commonEmojis = ['🎯', '💰', '🏠', '🚗', '✈️', '💻', '📱', '👕', '🏝️', '🎓', '💍', '🚨'];
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Savings Goal</DialogTitle>
+          <DialogTitle>Add New Goal</DialogTitle>
           <DialogDescription>
-            Create a new savings goal to track your progress towards financial targets.
+            Create a new savings goal to track your progress
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="goal-emoji">Choose an emoji</Label>
-            <div className="grid grid-cols-6 gap-2">
-              {commonEmojis.map(emoji => (
-                <button
-                  key={emoji}
-                  type="button"
-                  className={`h-10 text-xl flex items-center justify-center rounded-md border ${goalData.emoji === emoji ? 'border-primary bg-primary/10' : 'border-input'}`}
-                  onClick={() => setGoalData(prev => ({ ...prev, emoji }))}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="goal-name" className={validationErrors.title ? "text-destructive" : ""}>
-              Goal Name *
-            </Label>
-            <Input 
-              id="goal-name" 
-              value={goalData.title}
-              onChange={(e) => setGoalData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="e.g., New Laptop, Emergency Fund"
-              required
-              className={validationErrors.title ? "border-destructive" : ""}
-            />
-            {validationErrors.title && (
-              <p className="text-sm text-destructive">{validationErrors.title}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
-            <Select 
-              value={goalData.currency} 
-              onValueChange={(value: 'IDR' | 'USD') => 
-                setGoalData(prev => ({ ...prev, currency: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select currency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
-                <SelectItem value="USD">USD - US Dollar</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="goal-amount" className={validationErrors.target_amount ? "text-destructive" : ""}>
-              Target Amount ({goalData.currency}) *
-            </Label>
-            <Input 
-              id="goal-amount" 
-              value={goalData.target_amount}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, '');
-                setGoalData(prev => ({ ...prev, target_amount: value }));
-              }}
-              placeholder="1000000"
-              required
-              className={validationErrors.target_amount ? "border-destructive" : ""}
-            />
-            {validationErrors.target_amount ? (
-              <p className="text-sm text-destructive">{validationErrors.target_amount}</p>
-            ) : goalData.target_amount && goalData.currency === 'IDR' ? (
-              <p className="text-sm text-muted-foreground">
-                Rp {parseInt(goalData.target_amount).toLocaleString('id-ID')}
-              </p>
-            ) : goalData.target_amount && goalData.currency === 'USD' ? (
-              <p className="text-sm text-muted-foreground">
-                $ {parseInt(goalData.target_amount).toLocaleString('en-US')}
-              </p>
-            ) : null}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="goal-saved" className={validationErrors.saved_amount ? "text-destructive" : ""}>
-              Current Savings ({goalData.currency})
-            </Label>
-            <Input 
-              id="goal-saved" 
-              value={goalData.saved_amount}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, '');
-                setGoalData(prev => ({ ...prev, saved_amount: value }));
-              }}
-              placeholder="0"
-              className={validationErrors.saved_amount ? "border-destructive" : ""}
-            />
-            {validationErrors.saved_amount ? (
-              <p className="text-sm text-destructive">{validationErrors.saved_amount}</p>
-            ) : goalData.saved_amount && goalData.currency === 'IDR' ? (
-              <p className="text-sm text-muted-foreground">
-                Rp {parseInt(goalData.saved_amount).toLocaleString('id-ID')}
-              </p>
-            ) : goalData.saved_amount && goalData.currency === 'USD' ? (
-              <p className="text-sm text-muted-foreground">
-                $ {parseInt(goalData.saved_amount).toLocaleString('en-US')}
-              </p>
-            ) : null}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="goal-date">Target Date</Label>
-            <Input 
-              id="goal-date" 
-              type="date" 
-              value={goalData.target_date}
-              onChange={(e) => setGoalData(prev => ({ ...prev, target_date: e.target.value }))}
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="grid w-full items-center gap-2">
+            <label htmlFor="name">Goal Name</label>
+            <Input
+              id="name"
+              placeholder="e.g., New Laptop"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
             />
           </div>
           
-          <DialogFooter>
+          <div className="grid w-full items-center gap-2">
+            <label htmlFor="target">Target Amount (IDR)</label>
+            <Input
+              id="target"
+              placeholder="e.g., 5000000"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              type="number"
+              disabled={loading}
+            />
+          </div>
+          
+          <div className="flex justify-end gap-2">
             <Button 
-              variant="outline" 
               type="button" 
+              variant="outline" 
               onClick={onClose}
+              disabled={loading}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="gradient-bg-purple"
-            >
-              {isSubmitting ? 'Adding...' : 'Add Goal'}
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Goal
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

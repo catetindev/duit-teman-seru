@@ -10,14 +10,14 @@ import TransactionsSection from '@/components/dashboard/TransactionsSection';
 import BudgetsSection from '@/components/dashboard/BudgetsSection';
 import GoalsSection from '@/components/dashboard/GoalsSection';
 import BadgesSection from '@/components/dashboard/BadgesSection';
-import { useDashboardData } from '@/hooks/useDashboardData';
 import { mockBadges } from '@/components/dashboard/DashboardData';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { EntrepreneurDashboard } from '@/components/entrepreneur/EntrepreneurDashboard';
 import { useState } from 'react';
 import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
-import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile
+import { useIsMobile } from '@/hooks/use-mobile';
+import PricingModal from '@/components/pricing/PricingModal';
 
 const Dashboard = () => {
   const { type } = useParams();
@@ -25,9 +25,10 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const { isEntrepreneurMode } = useEntrepreneurMode();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [transactionCategory, setTransactionCategory] = useState('');
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
-  const isMobile = useIsMobile(); // Use the hook
+  const isMobile = useIsMobile();
   
   const { 
     transactions, 
@@ -49,20 +50,24 @@ const Dashboard = () => {
     setIsAddDialogOpen(true);
   };
 
+  const handleUpgradeClick = () => {
+    setIsPricingModalOpen(true);
+  };
+
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="mb-6"> {/* This div controls the bottom margin for the header area */}
+      <div className="mb-6">
         {isMobile ? (
           <>
-            <DashboardHeader isPremium={isPremium} />
-            <div className="mt-3"> {/* Spacing for the toggle on mobile */}
+            <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+            <div className="mt-3">
               <EntrepreneurModeToggle />
             </div>
           </>
         ) : (
-          <div className="flex items-center gap-4"> {/* Desktop: toggle and header side-by-side */}
+          <div className="flex items-center gap-4">
             <EntrepreneurModeToggle />
-            <DashboardHeader isPremium={isPremium} />
+            <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
           </div>
         )}
       </div>
@@ -93,12 +98,12 @@ const Dashboard = () => {
             </div>
             
             <div className="space-y-8">
-              {/* Only render GoalsSection when goals are available or loading */}
               <GoalsSection 
                 goals={goals}
                 isPremium={isPremium}
                 onGoalAdded={refreshData}
                 loading={loading.goals}
+                onUpgradeClick={handleUpgradeClick}
               />
               
               {isPremium && <BadgesSection badges={mockBadges} />}
@@ -113,6 +118,11 @@ const Dashboard = () => {
         onTransactionAdded={refreshData}
         initialCategory={transactionCategory}
         initialType={transactionType}
+      />
+      
+      <PricingModal 
+        open={isPricingModalOpen}
+        onOpenChange={setIsPricingModalOpen}
       />
     </DashboardLayout>
   );

@@ -1,43 +1,39 @@
+
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
 
 interface DashboardHeaderProps {
-  isPremium: boolean;
+  isPremium?: boolean;
+  onUpgradeClick?: () => void;
 }
 
-// Helper function to get the time-based greeting
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 11) {
-    return 'Selamat pagi';
-  } else if (hour >= 11 && hour < 15) {
-    return 'Selamat siang';
-  } else if (hour >= 15 && hour < 18) {
-    return 'Selamat sore';
-  } else {
-    return 'Selamat malam';
-  }
-};
-
-const DashboardHeader = ({ isPremium }: DashboardHeaderProps) => {
+const DashboardHeader = ({ isPremium, onUpgradeClick }: DashboardHeaderProps) => {
   const { t } = useLanguage();
-  const { profile } = useAuth(); // Get profile from useAuth
-
-  // Get the user's full name, fallback to a default if not available
-  const userName = profile?.full_name || 'Master Duit';
-
-  // Construct the dynamic greeting
-  const dynamicGreeting = `${getGreeting()}, ${userName}!`;
-
+  
   return (
-    <div> {/* Removed mb-8 from here */}
-      <h1 className="text-3xl font-bold mb-2">{dynamicGreeting}</h1> {/* Use the dynamic greeting */}
-      <p className="text-muted-foreground">
-        {isPremium
-          ? 'Your money is looking great today! 💎'
-          : 'How are we spending today? 💸'}
-      </p>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {t('dashboard.welcome')}
+        </h1>
+        <p className="text-gray-500 text-sm md:text-base">
+          {t('dashboard.subHeading')}
+        </p>
+      </div>
+
+      {!isPremium && (
+        <Button 
+          onClick={onUpgradeClick}
+          className="bg-[#28e57d] hover:bg-[#28e57d]/90 text-white flex items-center gap-2 whitespace-nowrap"
+          size="sm"
+        >
+          <span className="text-xs md:text-sm">Upgrade Now</span>
+          <span className="bg-white text-[#28e57d] text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+            ⭐
+          </span>
+        </Button>
+      )}
     </div>
   );
 };
