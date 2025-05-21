@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GoalCard from '@/components/ui/GoalCard';
 import AddGoalDialog from '@/components/goals/AddGoalDialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Goal } from '@/hooks/goals/types'; // Import from the correct location
+import { Goal } from '@/hooks/goals/types';
 
 interface GoalsSectionProps {
   goals: Goal[];

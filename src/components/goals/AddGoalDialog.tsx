@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -18,15 +19,16 @@ export interface GoalFormData {
   target_date?: string | Date;
   emoji?: string;
   currency?: 'IDR' | 'USD';
-  user_id?: string; // Add this line to include user_id as an optional property
+  user_id?: string; // Optional user_id property
 }
 
 export interface AddGoalDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onGoalAdded: () => void;
-  onSubmit: (goalData: GoalFormData) => Promise<void>;
-  isSubmitting: boolean;
+  onSubmit?: (goalData: GoalFormData) => Promise<void>;
+  isSubmitting?: boolean;
+  onUpgradeNeeded?: () => void; // Add this property
 }
 
 const AddGoalDialog: React.FC<AddGoalDialogProps> = ({ 
@@ -34,7 +36,8 @@ const AddGoalDialog: React.FC<AddGoalDialogProps> = ({
   onClose, 
   onGoalAdded,
   onSubmit,
-  isSubmitting 
+  isSubmitting = false,
+  onUpgradeNeeded
 }) => {
   const { toast } = useToast();
   const [targetDate, setTargetDate] = useState<Date | undefined>(undefined);
@@ -55,6 +58,13 @@ const AddGoalDialog: React.FC<AddGoalDialogProps> = ({
         saved_amount: data.saved_amount ? parseFloat(String(data.saved_amount)) : 0,
         target_date: targetDate,
       };
+      
+      if (!onSubmit) {
+        if (onUpgradeNeeded) {
+          onUpgradeNeeded();
+        }
+        return;
+      }
       
       await onSubmit(formattedData);
       onGoalAdded();
@@ -142,12 +152,15 @@ const AddGoalDialog: React.FC<AddGoalDialogProps> = ({
             
             <div className="grid gap-2">
               <Label htmlFor="target_date">Target Date (Optional)</Label>
-              <DatePicker 
-                date={targetDate} 
-                setDate={(date) => {
-                  setTargetDate(date);
-                  if (date) {
-                    setValue('target_date', date);
+              <Input
+                id="target_date"
+                type="date"
+                {...register('target_date')}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setTargetDate(new Date(e.target.value));
+                  } else {
+                    setTargetDate(undefined);
                   }
                 }}
               />

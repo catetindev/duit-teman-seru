@@ -75,9 +75,11 @@ export const useGoalOperations = (dependencies: GoalOperationsDependencies): Goa
       // Ensure all values are properly converted to their expected types
       const updatedGoalData = {
         title: goalData.title,
-        target_amount: parseFloat(goalData.target_amount),
-        saved_amount: goalData.saved_amount ? parseFloat(goalData.saved_amount) : 0,
-        target_date: goalData.target_date || null,
+        target_amount: parseFloat(String(goalData.target_amount)),
+        saved_amount: goalData.saved_amount ? parseFloat(String(goalData.saved_amount)) : 0,
+        target_date: goalData.target_date ? (goalData.target_date instanceof Date ? 
+          goalData.target_date.toISOString().split('T')[0] : 
+          String(goalData.target_date)) : null,
         emoji: goalData.emoji || '🎯'
       };
       

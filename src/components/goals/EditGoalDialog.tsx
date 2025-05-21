@@ -52,8 +52,8 @@ const EditGoalDialog: React.FC<EditGoalProps> = ({
     if (selectedGoal) {
       setGoalData({
         title: selectedGoal.title,
-        target_amount: selectedGoal.target_amount.toString(),
-        saved_amount: selectedGoal.saved_amount.toString(),
+        target_amount: String(selectedGoal.target_amount),
+        saved_amount: String(selectedGoal.saved_amount),
         target_date: selectedGoal.target_date || '',
         emoji: selectedGoal.emoji || '🎯',
         currency: selectedGoal.currency || 'IDR'
@@ -120,7 +120,7 @@ const EditGoalDialog: React.FC<EditGoalProps> = ({
             />
             {goalData.target_amount && (
               <p className="text-sm text-muted-foreground">
-                Rp {parseInt(goalData.target_amount).toLocaleString('id-ID')}
+                Rp {parseInt(String(goalData.target_amount)).toLocaleString('id-ID')}
               </p>
             )}
           </div>
@@ -139,7 +139,7 @@ const EditGoalDialog: React.FC<EditGoalProps> = ({
             />
             {goalData.saved_amount && (
               <p className="text-sm text-muted-foreground">
-                Rp {parseInt(goalData.saved_amount).toLocaleString('id-ID')}
+                Rp {parseInt(String(goalData.saved_amount)).toLocaleString('id-ID')}
               </p>
             )}
           </div>
@@ -149,7 +149,7 @@ const EditGoalDialog: React.FC<EditGoalProps> = ({
             <Input 
               id="edit-goal-date" 
               type="date" 
-              value={goalData.target_date}
+              value={typeof goalData.target_date === 'string' ? goalData.target_date : ''}
               onChange={(e) => setGoalData(prev => ({ ...prev, target_date: e.target.value }))}
             />
           </div>

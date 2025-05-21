@@ -33,9 +33,11 @@ export function useGoalOperations() {
       const goalData = {
         id: uuidv4(),
         title: values.title,
-        target_amount: parseFloat(values.target_amount),
-        saved_amount: values.saved_amount ? parseFloat(values.saved_amount) : 0,
-        target_date: values.target_date || null,
+        target_amount: parseFloat(String(values.target_amount)),
+        saved_amount: values.saved_amount ? parseFloat(String(values.saved_amount)) : 0,
+        target_date: values.target_date ? (values.target_date instanceof Date ? 
+          values.target_date.toISOString().split('T')[0] : 
+          String(values.target_date)) : null,
         currency: values.currency || 'IDR',
         emoji: values.emoji || '🎯',
         user_id: values.user_id
@@ -87,16 +89,20 @@ export function useGoalOperations() {
       setIsSubmitting(true);
       console.log('Updating goal with ID:', goalId, 'Values:', values);
       
+      const updateData = {
+        title: values.title,
+        target_amount: parseFloat(String(values.target_amount)),
+        saved_amount: values.saved_amount ? parseFloat(String(values.saved_amount)) : 0,
+        target_date: values.target_date ? (values.target_date instanceof Date ? 
+          values.target_date.toISOString().split('T')[0] : 
+          String(values.target_date)) : null,
+        currency: values.currency || 'IDR',
+        emoji: values.emoji || '🎯'
+      };
+      
       const { data, error } = await supabase
         .from('savings_goals')
-        .update({
-          title: values.title,
-          target_amount: parseFloat(values.target_amount),
-          saved_amount: values.saved_amount ? parseFloat(values.saved_amount) : 0,
-          target_date: values.target_date || null,
-          currency: values.currency || 'IDR',
-          emoji: values.emoji
-        })
+        .update(updateData)
         .eq('id', goalId)
         .select();
 
