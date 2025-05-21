@@ -1,24 +1,24 @@
-
 import { motion } from 'framer-motion';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
 import { ArrowRight } from 'lucide-react';
-
 const About = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-1 bg-white">
         <div className="container mx-auto px-4 py-16 md:py-20 max-w-4xl">
           {/* Hero Section */}
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-20"
-          >
+          <motion.section initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.6
+        }} className="mb-20">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-tight">
               Catatyo: It's Time to Stop Guessing Your Finances
             </h1>
@@ -37,13 +37,15 @@ const About = () => {
           </motion.section>
           
           {/* Movement Statement */}
-          <motion.section 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="mb-20"
-          >
+          <motion.section initial={{
+          opacity: 0
+        }} whileInView={{
+          opacity: 1
+        }} transition={{
+          duration: 0.6
+        }} viewport={{
+          once: true
+        }} className="mb-20">
             <div className="border-l-4 border-[#28e57d] pl-6 mb-8">
               <h2 className="text-2xl md:text-3xl font-bold mb-4">Catatyo bukan sekadar aplikasi.<br />Ini gerakan.</h2>
             </div>
@@ -60,13 +62,15 @@ const About = () => {
           </motion.section>
           
           {/* Real Case Insight */}
-          <motion.section 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="mb-20"
-          >
+          <motion.section initial={{
+          opacity: 0
+        }} whileInView={{
+          opacity: 1
+        }} transition={{
+          duration: 0.6
+        }} viewport={{
+          once: true
+        }} className="mb-20">
             <div className="bg-gray-50 p-8 rounded-lg mb-8">
               <h2 className="text-2xl md:text-3xl font-semibold mb-6">
                 Banyak bisnis kecil keren yang tumbang,
@@ -77,10 +81,7 @@ const About = () => {
                 Mereka sibuk jualan, sibuk kerja, tapi pas dicek…
                 "Loh, kok segini doang?"
               </p>
-              <p className="text-lg text-gray-700">
-                Catat itu penting—dan harusnya gak ngebosenin.
-                Di situlah Catatyo berdiri.
-              </p>
+              <p className="text-lg text-gray-700">Catat itu penting dan harusnya gak ngebosenin. Di situlah Catatyo berdiri.</p>
             </div>
             
             {/* Testimonial */}
@@ -94,13 +95,15 @@ const About = () => {
           </motion.section>
           
           {/* Call to Action */}
-          <motion.section 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center py-12"
-          >
+          <motion.section initial={{
+          opacity: 0
+        }} whileInView={{
+          opacity: 1
+        }} transition={{
+          duration: 0.6
+        }} viewport={{
+          once: true
+        }} className="text-center py-12">
             <h2 className="text-2xl md:text-3xl font-bold mb-8">
               Track smarter. Feel lighter. Grow stronger.
             </h2>
@@ -110,15 +113,14 @@ const About = () => {
               Bareng Catatyo.
             </p>
             
-            <motion.div 
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              className="inline-block"
-            >
-              <a 
-                href="/signup" 
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#28e57d] hover:bg-[#28e57d]/90 text-white rounded-lg font-medium text-lg transition-all"
-              >
+            <motion.div whileHover={{
+            scale: 1.02
+          }} transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 10
+          }} className="inline-block">
+              <a href="/signup" className="inline-flex items-center gap-2 px-8 py-4 bg-[#28e57d] hover:bg-[#28e57d]/90 text-white rounded-lg font-medium text-lg transition-all">
                 Mulai sekarang
                 <ArrowRight className="h-5 w-5" />
               </a>
@@ -166,8 +168,6 @@ const About = () => {
       </main>
       
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default About;
