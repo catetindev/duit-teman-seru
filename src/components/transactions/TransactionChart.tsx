@@ -1,19 +1,10 @@
+
 import React, { useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '@/utils/formatUtils';
-
-interface Transaction {
-  id: string;
-  type: 'income' | 'expense';
-  amount: number;
-  currency: 'IDR' | 'USD';
-  category: string;
-  description: string;
-  date: string;
-  icon?: string;
-}
+import { Transaction } from '@/hooks/useDashboardData';
 
 interface ChartData {
   name: string;

@@ -9,6 +9,18 @@ import { useGoals } from './dashboard/useGoals';
 import { useBudgets } from './dashboard/useBudgets';
 import { DashboardHookReturn } from './dashboard/types';
 
+// Define and export the Transaction type
+export interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  currency: string;
+  category: string;
+  description: string;
+  date: string;
+  icon?: string;
+}
+
 // Main hook
 export function useDashboardData(): DashboardHookReturn {
   const { user } = useAuth();
