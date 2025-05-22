@@ -33,7 +33,7 @@ const GoalsSection = ({
     <Card className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
       <CardHeader className="p-0 pb-4">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-bold">{t('goals.title')}</CardTitle>
+          <CardTitle className="text-xl font-bold">{t('goals.title') || 'Savings Goals'}</CardTitle>
           {canAddMoreGoals && (
             <Button 
               onClick={() => setIsAddGoalOpen(true)} 
@@ -42,7 +42,7 @@ const GoalsSection = ({
               className="gap-1"
             >
               <PlusCircle size={16} />
-              <span>{t('goals.add')}</span>
+              <span>{t('goals.add') || 'Add Goal'}</span>
             </Button>
           )}
         </div>
@@ -95,15 +95,15 @@ const GoalsSection = ({
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4">
               <TrendingUp size={24} className="text-purple-500" />
             </div>
-            <h3 className="font-medium mb-2">{t('goals.empty.title')}</h3>
+            <h3 className="font-medium mb-2">Create your first savings goal</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {t('goals.empty.description')}
+              Start tracking your financial goals and see your progress
             </p>
             <Button 
               onClick={() => setIsAddGoalOpen(true)}
               variant="outline"
             >
-              {t('goals.empty.cta')}
+              Create a goal
             </Button>
           </div>
         )}

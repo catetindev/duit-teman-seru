@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardHeaderProps {
   isPremium?: boolean;
@@ -10,15 +11,19 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ isPremium, onUpgradeClick }: DashboardHeaderProps) => {
   const { t } = useLanguage();
+  const { profile } = useAuth();
+  
+  // Get user's name for greeting
+  const userName = profile?.full_name || 'User';
   
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">
-          {t('dashboard.welcome')}
+          {`Hi, ${userName}!`}
         </h1>
         <p className="text-gray-500 text-sm md:text-base">
-          {t('dashboard.subHeading')}
+          Welcome to your financial dashboard
         </p>
       </div>
 

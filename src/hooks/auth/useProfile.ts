@@ -1,8 +1,9 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export const useProfile = () => { // Removed userId from parameters, will be passed to fetchUserProfile
+export const useProfile = () => {
   const [profile, setProfile] = useState<any>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -32,7 +33,7 @@ export const useProfile = () => { // Removed userId from parameters, will be pas
   }, []);
 
   // Fetch user profile from Supabase
-  const fetchUserProfile = useCallback(async (userIdToFetch: string) => { // Renamed userId to userIdToFetch
+  const fetchUserProfile = useCallback(async (userIdToFetch: string) => {
     if (!userIdToFetch) {
       console.warn("fetchUserProfile called without userId.");
       clearProfileData();
@@ -40,7 +41,7 @@ export const useProfile = () => { // Removed userId from parameters, will be pas
     }
     try {
       console.log('Fetching user profile for:', userIdToFetch);
-      const { data: profileData, error: profileError } = await supabase // Renamed profile to profileData
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userIdToFetch)
@@ -61,8 +62,6 @@ export const useProfile = () => { // Removed userId from parameters, will be pas
       updateUserState(profileData);
       
       // Set up real-time subscription to profile changes
-      // Ensure channel is properly managed (e.g., unsubscribed on component unmount or user change)
-      // This part might be better handled in AuthContext to manage channel lifecycle
       const channel = supabase
         .channel(`profile-${userIdToFetch}`)
         .on(
@@ -99,13 +98,38 @@ export const useProfile = () => { // Removed userId from parameters, will be pas
         )
         .subscribe();
 
-      return { profile: profileData, channel }; // Return profileData instead of profile
+      return { profile: profileData, channel };
     } catch (error) {
       console.error('Error fetching user profile:', error);
       clearProfileData(); // Clear profile on error
       return null;
     }
-  }, [updateUserState, clearProfileData, profile?.role]); // Added profile?.role to dependencies
+  }, [updateUserState, clearProfileData, profile?.role]);
+
+  // Update user profile
+  const updateUserProfile = useCallback(async (userId: string, updates: any) => {
+    try {
+      // Use service role for operations that might be blocked by RLS
+      const { data: profileData, error: profileError } = await supabase
+        .rpc('update_user_profile', {
+          user_id: userId,
+          profile_updates: updates
+        });
+
+      if (profileError) {
+        console.error('Error updating user profile:', profileError);
+        toast.error('Failed to update profile: ' + profileError.message);
+        return null;
+      }
+
+      toast.success('Profile updated successfully!');
+      return profileData;
+    } catch (error: any) {
+      console.error('Error in updateUserProfile:', error);
+      toast.error('An error occurred while updating your profile');
+      return null;
+    }
+  }, []);
 
   return {
     profile,
@@ -114,6 +138,7 @@ export const useProfile = () => { // Removed userId from parameters, will be pas
     userRole,
     updateUserState,
     fetchUserProfile,
-    clearProfileData // Export clearProfileData
+    updateUserProfile, // Export the new update function
+    clearProfileData
   };
 };
