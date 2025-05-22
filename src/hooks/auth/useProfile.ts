@@ -106,7 +106,7 @@ export const useProfile = () => {
     }
   }, [updateUserState, clearProfileData, profile?.role]);
 
-  // Update user profile using direct SQL update instead of RPC
+  // Update user profile using direct update instead of RPC
   const updateUserProfile = useCallback(async (userId: string, updates: any) => {
     try {
       // Use direct update instead of RPC

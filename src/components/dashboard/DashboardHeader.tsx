@@ -20,7 +20,7 @@ const DashboardHeader = ({ isPremium, onUpgradeClick }: DashboardHeaderProps) =>
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">
-          {t('dashboard.greeting', { name: userName }) || `Hi, ${userName}!`}
+          {t('dashboard.greeting', { name: userName })}
         </h1>
         <p className="text-gray-500 text-sm md:text-base">
           {t('dashboard.subHeading') || 'Welcome to your financial dashboard'}
