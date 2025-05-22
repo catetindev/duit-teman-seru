@@ -14,7 +14,7 @@ const DashboardHeader = ({ isPremium, onUpgradeClick }: DashboardHeaderProps) =>
   const { profile } = useAuth();
   
   // Get user's name for greeting
-  const userName = profile?.full_name || t('user') || 'User';
+  const userName = profile?.full_name || t('user');
   
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -23,7 +23,7 @@ const DashboardHeader = ({ isPremium, onUpgradeClick }: DashboardHeaderProps) =>
           {t('dashboard.greeting', { name: userName })}
         </h1>
         <p className="text-gray-500 text-sm md:text-base">
-          {t('dashboard.subHeading') || 'Welcome to your financial dashboard'}
+          {t('dashboard.subHeading')}
         </p>
       </div>
 
@@ -33,7 +33,7 @@ const DashboardHeader = ({ isPremium, onUpgradeClick }: DashboardHeaderProps) =>
           className="bg-[#28e57d] hover:bg-[#28e57d]/90 text-white flex items-center gap-2 whitespace-nowrap"
           size="sm"
         >
-          <span className="text-xs md:text-sm">{t('upgrade.cta') || 'Upgrade Now'}</span>
+          <span className="text-xs md:text-sm">{t('upgrade.cta')}</span>
           <span className="bg-white text-[#28e57d] text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
             ⭐
           </span>
