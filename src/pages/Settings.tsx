@@ -142,13 +142,16 @@ const SettingsPage = () => {
     if (!user) return;
     
     try {
-      // Use the updateUserProfile method from the useAuth context
-      const updatedProfile = await updateUserProfile(user.id, { 
-        full_name: data.full_name 
-      });
-      
-      if (!updatedProfile) {
-        throw new Error("Failed to update profile");
+      // Use direct update since updateUserProfile isn't available
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .update({ full_name: data.full_name })
+        .eq('id', user.id)
+        .select()
+        .single();
+        
+      if (profileError) {
+        throw profileError;
       }
       
       uiToast({
