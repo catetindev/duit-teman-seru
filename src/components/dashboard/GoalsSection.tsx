@@ -95,15 +95,15 @@ const GoalsSection = ({
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30 mb-4">
               <TrendingUp size={24} className="text-purple-500" />
             </div>
-            <h3 className="font-medium mb-2">Create your first savings goal</h3>
+            <h3 className="font-medium mb-2">{t('goals.empty.title') || 'Create your first savings goal'}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Start tracking your financial goals and see your progress
+              {t('goals.empty.description') || 'Start tracking your financial goals and see your progress'}
             </p>
             <Button 
               onClick={() => setIsAddGoalOpen(true)}
               variant="outline"
             >
-              Create a goal
+              {t('goals.empty.cta') || 'Create a goal'}
             </Button>
           </div>
         )}

@@ -106,15 +106,16 @@ export const useProfile = () => {
     }
   }, [updateUserState, clearProfileData, profile?.role]);
 
-  // Update user profile
+  // Update user profile using direct SQL update instead of RPC
   const updateUserProfile = useCallback(async (userId: string, updates: any) => {
     try {
-      // Use service role for operations that might be blocked by RLS
+      // Use direct update instead of RPC
       const { data: profileData, error: profileError } = await supabase
-        .rpc('update_user_profile', {
-          user_id: userId,
-          profile_updates: updates
-        });
+        .from('profiles')
+        .update(updates)
+        .eq('id', userId)
+        .select()
+        .single();
 
       if (profileError) {
         console.error('Error updating user profile:', profileError);
@@ -138,7 +139,7 @@ export const useProfile = () => {
     userRole,
     updateUserState,
     fetchUserProfile,
-    updateUserProfile, // Export the new update function
+    updateUserProfile,
     clearProfileData
   };
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -143,12 +142,11 @@ const SettingsPage = () => {
     if (!user) return;
     
     try {
-      // Update profile using RPC function instead of direct update
+      // Direct update of profile
       const { error } = await supabase
-        .rpc('update_user_profile', {
-          user_id: user.id,
-          profile_updates: { full_name: data.full_name }
-        });
+        .from('profiles')
+        .update({ full_name: data.full_name })
+        .eq('id', user.id);
         
       if (error) throw error;
       
