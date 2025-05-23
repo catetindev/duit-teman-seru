@@ -109,7 +109,7 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Mark all as read
+  // Mark all as read - Simplified to avoid deep type instantiation
   const markAllAsRead = async () => {
     if (!userId || notifications.length === 0) return;
     
@@ -124,14 +124,15 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Update local state
-      setNotifications(prevNotifications =>
-        prevNotifications.map(n => 
-          n.category === currentMode ? { ...n, is_read: true } : n
-        )
-      );
+      // Simplified update approach to avoid excessive type instantiation
+      const updatedNotifications = notifications.map(notification => {
+        if (notification.category === currentMode) {
+          return { ...notification, is_read: true };
+        }
+        return notification;
+      });
       
-      // Reset unread count for current mode
+      setNotifications(updatedNotifications);
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
     } catch (error: any) {
