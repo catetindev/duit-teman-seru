@@ -2,23 +2,25 @@
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import NotificationItem from './NotificationItem';
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: string;
-  created_at: string;
-  is_read: boolean;
-}
+import { Notification } from '@/hooks/notifications/useNotifications';
+import { Button } from '../ui/button';
+import { RefreshCcw } from 'lucide-react';
 
 interface NotificationsListProps {
   notifications: Notification[];
   loading: boolean;
   onMarkAsRead: (id: string) => void;
+  onRefresh?: () => void;
+  showRefresh?: boolean;
 }
 
-const NotificationsList = ({ notifications, loading, onMarkAsRead }: NotificationsListProps) => {
+const NotificationsList = ({ 
+  notifications, 
+  loading, 
+  onMarkAsRead,
+  onRefresh,
+  showRefresh = true
+}: NotificationsListProps) => {
   const { t } = useLanguage();
   
   if (loading) {
@@ -33,21 +35,48 @@ const NotificationsList = ({ notifications, loading, onMarkAsRead }: Notificatio
   if (notifications.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-sm text-muted-foreground">{t('notifications.empty')}</p>
+        <p className="text-sm text-muted-foreground mb-2">{t('notifications.empty')}</p>
+        {showRefresh && onRefresh && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onRefresh}
+            className="flex items-center text-xs gap-1"
+          >
+            <RefreshCcw className="h-3 w-3" />
+            {t('notifications.refresh')}
+          </Button>
+        )}
       </div>
     );
   }
   
   return (
-    <ul>
-      {notifications.map((notification) => (
-        <NotificationItem 
-          key={notification.id} 
-          notification={notification}
-          onMarkAsRead={onMarkAsRead}
-        />
-      ))}
-    </ul>
+    <div>
+      <ul>
+        {notifications.map((notification) => (
+          <NotificationItem 
+            key={notification.id} 
+            notification={notification}
+            onMarkAsRead={onMarkAsRead}
+          />
+        ))}
+      </ul>
+      
+      {showRefresh && onRefresh && notifications.length > 0 && (
+        <div className="py-2 text-center border-t">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onRefresh}
+            className="flex items-center text-xs gap-1"
+          >
+            <RefreshCcw className="h-3 w-3" />
+            {t('notifications.refresh')}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

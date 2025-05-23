@@ -1,7 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/hooks/useLanguage';
+import React from 'react';
+import { useSafeLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import all the section components
@@ -14,18 +13,8 @@ import CallToActionSection from '@/components/landing/CallToActionSection';
 import Footer from '@/components/landing/Footer';
 
 const Index = () => {
-  // Using try-catch to make sure the component doesn't crash if the provider isn't available
-  // This should help to debug what's happening
-  let translationFunction;
-  try {
-    const { t } = useLanguage();
-    translationFunction = t;
-  } catch (error) {
-    console.error("Language provider error:", error);
-    // Provide a fallback translation function
-    translationFunction = (key: string) => key;
-  }
-  
+  // Use the safe language hook that doesn't throw errors
+  const { t } = useSafeLanguage();
   const isMobile = useIsMobile();
 
   return (

@@ -1,21 +1,28 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useEntrepreneurMode } from '../useEntrepreneurMode';
 
-interface Notification {
+export interface Notification {
   id: string;
   title: string;
   message: string;
   type: string;
   created_at: string;
   is_read: boolean;
-  action_data?: string; // Make action_data optional
+  action_data?: string;
+  category: string; // 'personal' or 'business'
 }
 
 export const useNotifications = (userId: string | undefined) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { isEntrepreneurMode } = useEntrepreneurMode();
+  
+  // Current mode
+  const currentMode = isEntrepreneurMode ? 'business' : 'personal';
 
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
@@ -31,7 +38,7 @@ export const useNotifications = (userId: string | undefined) => {
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', userId) // Corrected: Use actual userId
+        .eq('user_id', userId) // Use actual userId
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -41,8 +48,16 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (data) {
         console.log('useNotifications: Notifications fetched successfully:', data.length);
-        setNotifications(data);
-        setUnreadCount(data.filter(n => !n.is_read).length);
+        const typedData = data.map(notification => ({
+          ...notification,
+          category: notification.category || 'personal' // Default to personal if category is not set
+        })) as Notification[];
+        
+        setNotifications(typedData);
+        
+        // Filter unread count by current mode
+        const modeFilteredNotifications = typedData.filter(n => n.category === currentMode);
+        setUnreadCount(modeFilteredNotifications.filter(n => !n.is_read).length);
       }
     } catch (error: any) {
       console.error('Error fetching notifications:', error);
@@ -50,7 +65,7 @@ export const useNotifications = (userId: string | undefined) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, currentMode]);
 
   // Mark notification as read
   const markAsRead = async (id: string) => {
@@ -71,7 +86,12 @@ export const useNotifications = (userId: string | undefined) => {
           n.id === id ? { ...n, is_read: true } : n
         )
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      
+      // Only decrease unread count if the notification belongs to the current mode
+      const notification = notifications.find(n => n.id === id);
+      if (notification && notification.category === currentMode) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error: any) {
       console.error('Error marking notification as read:', error);
       toast.error("Failed to mark notification as read.");
@@ -83,18 +103,24 @@ export const useNotifications = (userId: string | undefined) => {
     if (!userId || notifications.length === 0) return;
     
     try {
+      // Only mark notifications of current mode as read
       const { error } = await supabase
         .from('notifications')
         .update({ is_read: true })
         .eq('user_id', userId)
-        .eq('is_read', false);
+        .eq('is_read', false)
+        .eq('category', currentMode);
 
       if (error) throw error;
 
       // Update local state
       setNotifications(prevNotifications =>
-        prevNotifications.map(n => ({ ...n, is_read: true }))
+        prevNotifications.map(n => 
+          n.category === currentMode ? { ...n, is_read: true } : n
+        )
       );
+      
+      // Reset unread count for current mode
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
     } catch (error: any) {
@@ -102,6 +128,16 @@ export const useNotifications = (userId: string | undefined) => {
       toast.error("Failed to mark all notifications as read.");
     }
   };
+
+  // Get current mode notifications
+  const getCurrentModeNotifications = useCallback(() => {
+    return notifications.filter(n => n.category === currentMode);
+  }, [notifications, currentMode]);
+  
+  // Get unread current mode notifications
+  const getUnreadCurrentModeNotifications = useCallback(() => {
+    return notifications.filter(n => n.category === currentMode && !n.is_read);
+  }, [notifications, currentMode]);
 
   // Subscribe to new notifications
   useEffect(() => {
@@ -128,16 +164,24 @@ export const useNotifications = (userId: string | undefined) => {
         },
         (payload) => {
           console.log('New notification received via realtime:', payload);
-          const newNotification = payload.new as Notification;
+          const newNotification = payload.new as Notification & { category: string };
           
-          setNotifications(prev => [newNotification, ...prev.filter(n => n.id !== newNotification.id)]);
-          if (!newNotification.is_read) {
+          // Ensure category exists
+          const processedNotification = {
+            ...newNotification,
+            category: newNotification.category || 'personal'
+          };
+          
+          setNotifications(prev => [processedNotification, ...prev.filter(n => n.id !== processedNotification.id)]);
+          
+          // Only increment unread count if notification is for the current mode
+          if (!processedNotification.is_read && processedNotification.category === currentMode) {
             setUnreadCount(prev => prev + 1);
           }
           
           toast.info(
-            newNotification.title,
-            { description: newNotification.message }
+            processedNotification.title,
+            { description: processedNotification.message }
           );
         }
       )
@@ -180,10 +224,20 @@ export const useNotifications = (userId: string | undefined) => {
       console.log(`useNotifications: Removing realtime channel subscription for user ${userId}`);
       supabase.removeChannel(channel);
     };
-  }, [userId, fetchNotifications]);
+  }, [userId, fetchNotifications, currentMode]);
+
+  // When entrepreneur mode changes, update unread count
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const modeFilteredNotifications = notifications.filter(n => n.category === currentMode);
+      setUnreadCount(modeFilteredNotifications.filter(n => !n.is_read).length);
+    }
+  }, [currentMode, notifications]);
 
   return {
     notifications,
+    currentModeNotifications: getCurrentModeNotifications(),
+    unreadNotifications: getUnreadCurrentModeNotifications(),
     loading,
     unreadCount,
     markAsRead,

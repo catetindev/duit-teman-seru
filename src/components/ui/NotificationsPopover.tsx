@@ -11,18 +11,27 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import NotificationsList from '@/components/notifications/NotificationsList';
+import { Badge } from '@/components/ui/badge';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { Link } from 'react-router-dom';
 
 const NotificationsPopover = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { isEntrepreneurMode } = useEntrepreneurMode();
   
   const { 
-    notifications, 
+    currentModeNotifications, 
     loading, 
     unreadCount, 
     markAsRead, 
-    markAllAsRead 
+    markAllAsRead,
+    fetchNotifications
   } = useNotifications(user?.id);
+
+  const handleRefresh = () => {
+    fetchNotifications();
+  };
 
   return (
     <Popover>
@@ -30,8 +39,13 @@ const NotificationsPopover = () => {
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] text-white flex items-center justify-center">
-              {unreadCount}
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
+              <Badge 
+                variant={isEntrepreneurMode ? "default" : "success"}
+                className="px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center"
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Badge>
             </span>
           )}
         </Button>
@@ -53,10 +67,20 @@ const NotificationsPopover = () => {
         
         <div className="max-h-[300px] overflow-y-auto">
           <NotificationsList 
-            notifications={notifications} 
+            notifications={currentModeNotifications}
             loading={loading}
             onMarkAsRead={markAsRead}
+            onRefresh={handleRefresh}
           />
+        </div>
+        
+        <div className="p-2 border-t text-center">
+          <Link 
+            to="/notifications"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {t('notifications.preview')}
+          </Link>
         </div>
       </PopoverContent>
     </Popover>
