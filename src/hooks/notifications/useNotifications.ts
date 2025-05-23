@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -109,7 +108,7 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Mark all as read - simplified implementation to avoid deep type instantiation
+  // Mark all as read - simplified implementation that avoids deep type instantiation
   const markAllAsRead = async () => {
     if (!userId || notifications.length === 0) return;
     
@@ -124,20 +123,24 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Create a new array and update it manually to avoid complex type instantiation
+      // Create a new array with explicit typing instead of modifying the existing one
       const updatedNotifications: Notification[] = [];
       
+      // Use a simple loop to avoid complex type operations
       for (let i = 0; i < notifications.length; i++) {
         if (notifications[i].category === currentMode) {
+          // Create a new object for modified notifications
           updatedNotifications.push({
             ...notifications[i],
             is_read: true
           });
         } else {
-          updatedNotifications.push(notifications[i]);
+          // Add unchanged notifications as is
+          updatedNotifications.push({...notifications[i]});
         }
       }
       
+      // Replace the state with the new array
       setNotifications(updatedNotifications);
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
@@ -244,22 +247,29 @@ export const useNotifications = (userId: string | undefined) => {
   // When entrepreneur mode changes, update unread count
   useEffect(() => {
     if (notifications.length > 0) {
-      const modeFilteredNotifications = notifications.filter(n => n.category === currentMode);
-      setUnreadCount(modeFilteredNotifications.filter(n => !n.is_read).length);
+      // Use basic loop to prevent complex type operations
+      let count = 0;
+      for (let i = 0; i < notifications.length; i++) {
+        if (notifications[i].category === currentMode && !notifications[i].is_read) {
+          count++;
+        }
+      }
+      setUnreadCount(count);
     }
   }, [currentMode, notifications]);
 
-  // Pre-calculate filtered notifications to avoid complex type instantiation
+  // Pre-calculate filtered notifications with basic loops to avoid type issues
   const currentModeNotifications: Notification[] = [];
   const unreadNotifications: Notification[] = [];
   
   // Simple loop-based filtering instead of array methods to avoid deep type instantiation
   for (let i = 0; i < notifications.length; i++) {
-    if (notifications[i].category === currentMode) {
-      currentModeNotifications.push(notifications[i]);
+    const notif = notifications[i];
+    if (notif.category === currentMode) {
+      currentModeNotifications.push(notif);
       
-      if (!notifications[i].is_read) {
-        unreadNotifications.push(notifications[i]);
+      if (!notif.is_read) {
+        unreadNotifications.push(notif);
       }
     }
   }
