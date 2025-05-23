@@ -14,6 +14,7 @@ import NotificationsList from '@/components/notifications/NotificationsList';
 import { Badge } from '@/components/ui/badge';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const NotificationsPopover = () => {
   const { user } = useAuth();
@@ -42,7 +43,10 @@ const NotificationsPopover = () => {
             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
               <Badge 
                 variant={isEntrepreneurMode ? "default" : "success"}
-                className="px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center"
+                className={cn(
+                  "px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center",
+                  isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+                )}
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </Badge>
@@ -52,7 +56,20 @@ const NotificationsPopover = () => {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0">
         <div className="flex items-center justify-between py-2 px-4 border-b">
-          <h3 className="font-medium">{t('notifications.title')}</h3>
+          <h3 className="font-medium flex items-center gap-2">
+            {t('notifications.title')}
+            {unreadCount > 0 && (
+              <Badge 
+                variant={isEntrepreneurMode ? "default" : "success"}
+                className={cn(
+                  "px-1.5 py-0.5 text-xs font-bold rounded-full",
+                  isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+                )}
+              >
+                {unreadCount}
+              </Badge>
+            )}
+          </h3>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
@@ -77,9 +94,17 @@ const NotificationsPopover = () => {
         <div className="p-2 border-t text-center">
           <Link 
             to="/notifications"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
           >
             {t('notifications.preview')}
+            {unreadCount > 0 && (
+              <Badge 
+                variant={isEntrepreneurMode ? "default" : "success"}
+                className="px-1 py-0.5 text-xs"
+              >
+                {unreadCount}
+              </Badge>
+            )}
           </Link>
         </div>
       </PopoverContent>

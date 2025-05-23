@@ -10,6 +10,9 @@ import NotificationList from '@/components/notifications/NotificationList';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Bell } from 'lucide-react';
 
 export default function Notifications() {
   const { user, isPremium } = useAuth();
@@ -21,6 +24,7 @@ export default function Notifications() {
   const {
     currentModeNotifications: notifications,
     loading,
+    unreadCount,
     markAsRead: handleMarkAsRead,
     markAllAsRead,
     fetchNotifications
@@ -64,7 +68,21 @@ export default function Notifications() {
     <DashboardLayout isPremium={isPremium}>
       <div className="p-4 md:p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-2xl font-bold mb-4 md:mb-0">Notifications</h1>
+          <h1 className="text-2xl font-bold mb-4 md:mb-0 flex items-center gap-2">
+            <Bell className="h-6 w-6" />
+            Notifications
+            {unreadCount > 0 && (
+              <Badge 
+                variant="default" 
+                className={cn(
+                  "ml-2 px-2 py-0.5 rounded-full text-xs font-semibold",
+                  "bg-purple-500 text-white"
+                )}
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Badge>
+            )}
+          </h1>
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex items-center space-x-2">
               <Switch

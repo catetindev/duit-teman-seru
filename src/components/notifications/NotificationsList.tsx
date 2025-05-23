@@ -5,6 +5,9 @@ import NotificationItem from './NotificationItem';
 import { Notification } from '@/hooks/notifications/types';
 import { Button } from '../ui/button';
 import { RefreshCcw } from 'lucide-react';
+import { Badge } from '../ui/badge';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { cn } from '@/lib/utils';
 
 interface NotificationsListProps {
   notifications: Notification[];
@@ -12,6 +15,7 @@ interface NotificationsListProps {
   onMarkAsRead: (id: string) => void;
   onRefresh?: () => void;
   showRefresh?: boolean;
+  showUnreadCount?: boolean;
 }
 
 const NotificationsList = ({ 
@@ -19,9 +23,14 @@ const NotificationsList = ({
   loading, 
   onMarkAsRead,
   onRefresh,
-  showRefresh = true
+  showRefresh = true,
+  showUnreadCount = false
 }: NotificationsListProps) => {
   const { t } = useLanguage();
+  const { isEntrepreneurMode } = useEntrepreneurMode();
+  
+  // Count unread notifications
+  const unreadCount = notifications.filter(n => !n.is_read).length;
   
   if (loading) {
     return (
@@ -53,6 +62,23 @@ const NotificationsList = ({
   
   return (
     <div>
+      {showUnreadCount && unreadCount > 0 && (
+        <div className="px-4 py-2 flex justify-between items-center">
+          <span className="text-sm font-medium flex items-center">
+            {t('notifications.unread')}
+            <Badge 
+              variant={isEntrepreneurMode ? "default" : "success"}
+              className={cn(
+                "ml-2 px-1.5 py-0.5 text-xs font-bold rounded-full",
+                isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+              )}
+            >
+              {unreadCount}
+            </Badge>
+          </span>
+        </div>
+      )}
+
       <ul>
         {notifications.map((notification) => (
           <NotificationItem 
