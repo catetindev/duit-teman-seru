@@ -124,15 +124,21 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Use a simpler approach to update notifications
-      const updatedNotifications = [...notifications];
-      for (let i = 0; i < updatedNotifications.length; i++) {
-        if (updatedNotifications[i].category === currentMode) {
-          updatedNotifications[i] = { ...updatedNotifications[i], is_read: true };
+      // Create a new array and update it manually to avoid complex type instantiation
+      const updatedNotifications: Notification[] = [];
+      
+      for (let i = 0; i < notifications.length; i++) {
+        if (notifications[i].category === currentMode) {
+          updatedNotifications.push({
+            ...notifications[i],
+            is_read: true
+          });
+        } else {
+          updatedNotifications.push(notifications[i]);
         }
       }
-      setNotifications(updatedNotifications);
       
+      setNotifications(updatedNotifications);
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
     } catch (error: any) {
@@ -243,14 +249,20 @@ export const useNotifications = (userId: string | undefined) => {
     }
   }, [currentMode, notifications]);
 
-  // Calculate filtered notifications directly
-  const currentModeNotifications = notifications.filter(notification => 
-    notification.category === currentMode
-  );
+  // Pre-calculate filtered notifications to avoid complex type instantiation
+  const currentModeNotifications: Notification[] = [];
+  const unreadNotifications: Notification[] = [];
   
-  const unreadNotifications = notifications.filter(notification => 
-    notification.category === currentMode && !notification.is_read
-  );
+  // Simple loop-based filtering instead of array methods to avoid deep type instantiation
+  for (let i = 0; i < notifications.length; i++) {
+    if (notifications[i].category === currentMode) {
+      currentModeNotifications.push(notifications[i]);
+      
+      if (!notifications[i].is_read) {
+        unreadNotifications.push(notifications[i]);
+      }
+    }
+  }
 
   return {
     notifications,
