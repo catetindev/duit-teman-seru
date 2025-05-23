@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,77 +6,24 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NotificationList from '@/components/notifications/NotificationList';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNotifications } from '@/hooks/notifications/useNotifications';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Notifications() {
   const { user, isPremium } = useAuth();
   const { toast } = useToast();
-  const [notifications, setNotifications] = useState([]);
   const [unreadOnly, setUnreadOnly] = useState(true);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const isAdmin = user?.role === 'admin';
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [user]);
-
-  const fetchNotifications = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNotifications(data || []);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load notifications',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', user.id)
-        .eq('is_read', false);
-
-      if (error) throw error;
-
-      // Update local state
-      setNotifications(
-        notifications.map((notif) => ({ ...notif, is_read: true }))
-      );
-
-      toast({
-        title: 'Success',
-        description: 'All notifications marked as read',
-      });
-    } catch (error) {
-      console.error('Error marking notifications as read:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to mark notifications as read',
-        variant: 'destructive',
-      });
-    }
-  };
+  const {
+    currentModeNotifications: notifications,
+    loading,
+    markAsRead: handleMarkAsRead,
+    markAllAsRead,
+    fetchNotifications
+  } = useNotifications(user?.id);
 
   const createSampleNotification = async () => {
     if (!user) return;
@@ -101,32 +48,6 @@ export default function Notifications() {
       toast({
         title: 'Error',
         description: 'Failed to create sample notification',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleMarkAsRead = async (id: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      // Update local state
-      setNotifications(
-        notifications.map((notif) => notif.id === id ? { ...notif, is_read: true } : notif)
-      );
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to mark notification as read',
         variant: 'destructive',
       });
     }

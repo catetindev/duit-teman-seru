@@ -1,32 +1,25 @@
-
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import NotificationItem from './NotificationItem';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { Notification } from '@/hooks/notifications/types';
+import { Button } from '../ui/button';
+import { RefreshCcw } from 'lucide-react';
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: string;
-  created_at: string;
-  is_read: boolean;
-}
-
-interface NotificationListProps {
+interface NotificationsListProps {
   notifications: Notification[];
   loading: boolean;
   onMarkAsRead: (id: string) => void;
   onRefresh?: () => void;
+  showRefresh?: boolean;
 }
 
-const NotificationList = ({ 
+const NotificationsList = ({ 
   notifications, 
   loading, 
   onMarkAsRead,
-  onRefresh
-}: NotificationListProps) => {
+  onRefresh,
+  showRefresh = true
+}: NotificationsListProps) => {
   const { t } = useLanguage();
   
   if (loading) {
@@ -49,7 +42,7 @@ const NotificationList = ({
             onClick={onRefresh}
             className="mt-2"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCcw className="h-4 w-4 mr-2" />
             {t('notifications.refresh')}
           </Button>
         )}
@@ -66,7 +59,7 @@ const NotificationList = ({
             size="sm" 
             onClick={onRefresh}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCcw className="h-4 w-4 mr-2" />
             {t('notifications.refresh')}
           </Button>
         </div>
@@ -84,4 +77,4 @@ const NotificationList = ({
   );
 };
 
-export default NotificationList;
+export default NotificationsList;
