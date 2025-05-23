@@ -124,15 +124,14 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Simplified update approach to avoid excessive type instantiation
-      const updatedNotifications = notifications.map(notification => {
+      // Direct simple update approach without complex type handling
+      setNotifications(notifications.map(notification => {
         if (notification.category === currentMode) {
           return { ...notification, is_read: true };
         }
         return notification;
-      });
+      }));
       
-      setNotifications(updatedNotifications);
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
     } catch (error: any) {
@@ -255,7 +254,7 @@ export const useNotifications = (userId: string | undefined) => {
     }
   }, [currentMode, notifications]);
 
-  // Use the results of the functions directly in the return
+  // Pre-compute these values to avoid complex type instantiation
   const currentModeNotifications = getCurrentModeNotifications();
   const unreadNotifications = getUnreadCurrentModeNotifications();
 
