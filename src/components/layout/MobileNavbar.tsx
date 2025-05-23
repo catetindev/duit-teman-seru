@@ -17,6 +17,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose 
 import { SidebarNavLink } from '@/components/ui/sidebar';
 import LogoutButton from '@/components/ui/LogoutButton';
 import { Badge } from '@/components/ui/badge'; // Import Badge
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MobileNavbarProps {
   isPremium?: boolean;
@@ -42,9 +43,31 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
   
   const commonUserLinks = (
     <>
-      <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />} onClick={handleLinkClick}>
-        Notifikasi
-      </SidebarNavLink>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />} onClick={handleLinkClick}>
+              Notifikasi
+              {unreadCount > 0 && (
+                <Badge 
+                  variant={isEntrepreneurMode ? "default" : "success"}
+                  className={cn(
+                    "ml-auto text-xs py-0 px-1.5 min-w-5 h-5 flex items-center justify-center rounded-full",
+                    isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+                  )}
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Badge>
+              )}
+            </SidebarNavLink>
+          </TooltipTrigger>
+          {unreadCount > 0 && (
+            <TooltipContent>
+              You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
       <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />} onClick={handleLinkClick}>
         Feedback
       </SidebarNavLink>
@@ -140,25 +163,39 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
         
         {/* Right Items: Notifications and Menu */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Link 
-            to="/notifications" 
-            className={cn(
-              "relative p-2 rounded-full hover:bg-accent", 
-              isActive('/notifications') && "bg-accent"
-            )}
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
-                <Badge 
-                  variant={isEntrepreneurMode ? "default" : "success"}
-                  className="px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center"
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link 
+                  to="/notifications" 
+                  className={cn(
+                    "relative p-2 rounded-full hover:bg-accent", 
+                    isActive('/notifications') && "bg-accent"
+                  )}
                 >
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </Badge>
-              </span>
-            )}
-          </Link>
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
+                      <Badge 
+                        variant={isEntrepreneurMode ? "default" : "success"}
+                        className={cn(
+                          "px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center",
+                          isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+                        )}
+                      >
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    </span>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              {unreadCount > 0 && (
+                <TooltipContent>
+                  You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
           
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>

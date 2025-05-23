@@ -10,6 +10,10 @@ import {
   LayoutDashboard, PieChart, Package, Calculator, FileText, Bell, MessageSquare, 
   Settings, ShieldAlert, ShoppingBag, Users, CreditCard, FileBarChart
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/hooks/notifications/useNotifications';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EntrepreneurModeSidebarProps {
   isAdmin?: boolean;
@@ -17,6 +21,9 @@ interface EntrepreneurModeSidebarProps {
 
 const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const { unreadCount } = useNotifications(user?.id);
+  const { isEntrepreneurMode } = useEntrepreneurMode();
   
   // Define common styles for nav links
   const navLinkStyles = "font-medium";
@@ -103,13 +110,33 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
       <SidebarGroup>
         <SidebarGroupLabel>Account</SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarNavLink 
-            to="/notifications" 
-            icon={<Bell className="h-5 w-5" />}
-          >
-            <span className={navLinkStyles}>Notifications</span>
-            <Badge variant="outline" className="ml-auto bg-primary/10 text-xs py-0 h-5">2</Badge>
-          </SidebarNavLink>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SidebarNavLink 
+                  to="/notifications" 
+                  icon={<Bell className="h-5 w-5" />}
+                >
+                  <span className={navLinkStyles}>Notifications</span>
+                  {unreadCount > 0 && (
+                    <Badge 
+                      variant="default" 
+                      className={cn(
+                        "ml-auto bg-amber-500 text-xs py-0 px-1.5 min-w-5 h-5 flex items-center justify-center rounded-full"
+                      )}
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
+                </SidebarNavLink>
+              </TooltipTrigger>
+              {unreadCount > 0 && (
+                <TooltipContent>
+                  You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
           
           <SidebarNavLink 
             to="/feedback" 

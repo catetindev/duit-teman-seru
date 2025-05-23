@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const NotificationsPopover = () => {
   const { user } = useAuth();
@@ -37,22 +38,33 @@ const NotificationsPopover = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
-              <Badge 
-                variant={isEntrepreneurMode ? "default" : "success"}
-                className={cn(
-                  "px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center",
-                  isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
+                    <Badge 
+                      variant={isEntrepreneurMode ? "default" : "success"}
+                      className={cn(
+                        "px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center",
+                        isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+                      )}
+                    >
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  </span>
                 )}
-              >
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Badge>
-            </span>
-          )}
-        </Button>
+              </Button>
+            </TooltipTrigger>
+            {unreadCount > 0 && (
+              <TooltipContent>
+                You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0">
         <div className="flex items-center justify-between py-2 px-4 border-b">
