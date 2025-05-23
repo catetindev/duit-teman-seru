@@ -108,7 +108,7 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Mark all as read - simplified implementation that avoids deep type instantiation
+  // Mark all as read - using direct approach to avoid type instantiation issues
   const markAllAsRead = async () => {
     if (!userId || notifications.length === 0) return;
     
@@ -123,25 +123,41 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Create a new array with explicit typing instead of modifying the existing one
-      const updatedNotifications: Notification[] = [];
+      // Instead of complex map/filter operations, create a new array directly
+      // This avoids TypeScript having to infer complex nested types
+      const newNotifications: Notification[] = [];
       
-      // Use a simple loop to avoid complex type operations
-      for (let i = 0; i < notifications.length; i++) {
-        if (notifications[i].category === currentMode) {
-          // Create a new object for modified notifications
-          updatedNotifications.push({
-            ...notifications[i],
-            is_read: true
+      // Manually build the new array with explicit types
+      for (const notif of notifications) {
+        if (notif.category === currentMode) {
+          // For current mode notifications, mark as read
+          newNotifications.push({
+            id: notif.id,
+            title: notif.title,
+            message: notif.message,
+            type: notif.type,
+            created_at: notif.created_at,
+            is_read: true,
+            action_data: notif.action_data,
+            category: notif.category
           });
         } else {
-          // Add unchanged notifications as is
-          updatedNotifications.push({...notifications[i]});
+          // For other notifications, keep as is
+          newNotifications.push({
+            id: notif.id,
+            title: notif.title,
+            message: notif.message,
+            type: notif.type,
+            created_at: notif.created_at,
+            is_read: notif.is_read,
+            action_data: notif.action_data,
+            category: notif.category
+          });
         }
       }
       
-      // Replace the state with the new array
-      setNotifications(updatedNotifications);
+      // Replace state with new array
+      setNotifications(newNotifications);
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
     } catch (error: any) {
@@ -247,10 +263,10 @@ export const useNotifications = (userId: string | undefined) => {
   // When entrepreneur mode changes, update unread count
   useEffect(() => {
     if (notifications.length > 0) {
-      // Use basic loop to prevent complex type operations
+      // Use basic variable instead of array method chaining
       let count = 0;
-      for (let i = 0; i < notifications.length; i++) {
-        if (notifications[i].category === currentMode && !notifications[i].is_read) {
+      for (const notif of notifications) {
+        if (notif.category === currentMode && !notif.is_read) {
           count++;
         }
       }
@@ -258,18 +274,29 @@ export const useNotifications = (userId: string | undefined) => {
     }
   }, [currentMode, notifications]);
 
-  // Pre-calculate filtered notifications with basic loops to avoid type issues
+  // Pre-calculate filtered notifications manually to avoid type issues
   const currentModeNotifications: Notification[] = [];
   const unreadNotifications: Notification[] = [];
   
-  // Simple loop-based filtering instead of array methods to avoid deep type instantiation
-  for (let i = 0; i < notifications.length; i++) {
-    const notif = notifications[i];
+  // Simple iteration without complex chaining
+  for (const notif of notifications) {
     if (notif.category === currentMode) {
-      currentModeNotifications.push(notif);
+      // Explicitly create new notification objects to avoid reference issues
+      const modeNotif: Notification = {
+        id: notif.id,
+        title: notif.title,
+        message: notif.message,
+        type: notif.type,
+        created_at: notif.created_at,
+        is_read: notif.is_read,
+        action_data: notif.action_data,
+        category: notif.category
+      };
+      
+      currentModeNotifications.push(modeNotif);
       
       if (!notif.is_read) {
-        unreadNotifications.push(notif);
+        unreadNotifications.push(modeNotif);
       }
     }
   }
