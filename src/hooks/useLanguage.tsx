@@ -46,9 +46,13 @@ const translations = {
   },
   
   // Dashboard
-  'dashboard.welcome': {
-    en: 'Hi there, money master!',
-    id: 'Hai, master duit!'
+  'dashboard.greeting': { // Added this key
+    en: 'Hi {name}!',
+    id: 'Hai {name}!'
+  },
+  'dashboard.subHeading': { // Added this key
+    en: 'Here is your financial overview',
+    id: 'Ini ringkasan keuanganmu'
   },
   'dashboard.balance': {
     en: 'Current Balance',
@@ -76,9 +80,17 @@ const translations = {
     en: 'Add Goal',
     id: 'Tambah Target'
   },
-  'goals.empty': {
-    en: 'No goals yet! Add one to start saving.',
-    id: 'Belum ada target! Yuk tambahkan untuk mulai menabung.'
+  'goals.empty.title': { // This key already exists
+    en: 'Create your first savings goal',
+    id: 'Buat target menabung pertamamu'
+  },
+  'goals.empty.description': { // This key already exists
+    en: 'Start tracking your financial goals and see your progress',
+    id: 'Mulai lacak target keuanganmu dan lihat kemajuanmu'
+  },
+  'goals.empty.cta': { // This key already exists
+    en: 'Create a goal',
+    id: 'Buat target'
   },
   
   // Transactions
@@ -118,6 +130,10 @@ const translations = {
     en: 'Transaction updated',
     id: 'Transaksi diperbarui'
   },
+  'transactions.noData': { // Added this key for charts
+    en: 'No data available',
+    id: 'Tidak ada data'
+  },
   
   // Budget
   'budget.title': {
@@ -136,7 +152,6 @@ const translations = {
     en: 'You\'re on track! Keep it up! ✨',
     id: 'Kamu on track! Pertahankan! ✨'
   },
-  // Adding missing budget keys
   'budget.empty': {
     en: 'No budgets created yet',
     id: 'Belum ada anggaran'
@@ -144,6 +159,22 @@ const translations = {
   'budget.create': {
     en: 'Create Budget',
     id: 'Buat Anggaran'
+  },
+  'budget.spent': { // Added this key
+    en: 'Spent',
+    id: 'Terpakai'
+  },
+  'budget.periodLabel': { // Added this key
+    en: 'Period',
+    id: 'Periode'
+  },
+  'budget.deleteConfirmTitle': { // Added this key
+    en: 'Confirm Delete Budget',
+    id: 'Konfirmasi Hapus Anggaran'
+  },
+  'budget.deleteConfirmMessage': { // Added this key
+    en: 'Are you sure you want to delete this budget? This action cannot be undone.',
+    id: 'Apakah Anda yakin ingin menghapus anggaran ini? Tindakan ini tidak dapat dibatalkan.'
   },
   
   // Admin
@@ -240,6 +271,14 @@ const translations = {
   'auth.creating': {
     en: 'Creating account...',
     id: 'Membuat akun...'
+  },
+  'auth.signupSuccess': { // Added this key
+    en: 'Sign up successful!',
+    id: 'Pendaftaran berhasil!'
+  },
+  'auth.signupFailed': { // Added this key
+    en: 'Sign up failed',
+    id: 'Pendaftaran gagal'
   },
   
   // Landing Page
@@ -500,6 +539,10 @@ const translations = {
     en: 'Loading notifications...',
     id: 'Memuat notifikasi...'
   },
+  'notifications.refresh': { // Added this key
+    en: 'Refresh',
+    id: 'Segarkan'
+  },
   
   // Actions
   'action.save': {
@@ -527,7 +570,7 @@ const translations = {
     id: 'Tingkatkan ke Premium'
   },
   
-  // Orders - Added missing order status translations
+  // Orders
   'order.status.paid': {
     en: 'Paid',
     id: 'Sudah Dibayar'
