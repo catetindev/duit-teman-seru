@@ -48,16 +48,26 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (data) {
         console.log('useNotifications: Notifications fetched successfully:', data.length);
-        // Map and ensure all notifications have a category property with default value
-        const typedData = data.map(notification => ({
-          ...notification,
-          category: notification.category || 'personal' // Default to personal if category is not set
-        })) as Notification[];
+        // Process fetched data with explicit typing and default values
+        const processedData = data.map(notification => {
+          const typedNotification: Notification = {
+            id: notification.id,
+            title: notification.title,
+            message: notification.message,
+            type: notification.type,
+            created_at: notification.created_at,
+            is_read: notification.is_read,
+            action_data: notification.action_data,
+            // Default to 'personal' if category is not set
+            category: (notification as any).category || 'personal'
+          };
+          return typedNotification;
+        });
         
-        setNotifications(typedData);
+        setNotifications(processedData);
         
         // Filter unread count by current mode
-        const modeFilteredNotifications = typedData.filter(n => n.category === currentMode);
+        const modeFilteredNotifications = processedData.filter(n => n.category === currentMode);
         setUnreadCount(modeFilteredNotifications.filter(n => !n.is_read).length);
       }
     } catch (error: any) {
@@ -81,7 +91,7 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Update local state without causing type recursion
+      // Update local state
       setNotifications(prevNotifications =>
         prevNotifications.map(n =>
           n.id === id ? { ...n, is_read: true } : n
@@ -114,7 +124,7 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Update local state without causing type recursion
+      // Update local state
       setNotifications(prevNotifications =>
         prevNotifications.map(n => 
           n.category === currentMode ? { ...n, is_read: true } : n
@@ -130,12 +140,12 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Get current mode notifications - simplify to avoid deep type instantiation
+  // Current mode notifications - avoid direct references in state to prevent deep type instantiation
   const getCurrentModeNotifications = useCallback(() => {
     return notifications.filter(n => n.category === currentMode);
   }, [notifications, currentMode]);
   
-  // Get unread current mode notifications - simplify to avoid deep type instantiation
+  // Unread current mode notifications - avoid direct references in state to prevent deep type instantiation
   const getUnreadCurrentModeNotifications = useCallback(() => {
     return notifications.filter(n => n.category === currentMode && !n.is_read);
   }, [notifications, currentMode]);
@@ -165,12 +175,19 @@ export const useNotifications = (userId: string | undefined) => {
         },
         (payload) => {
           console.log('New notification received via realtime:', payload);
-          const newNotification = payload.new as Notification;
+          // Use type assertion with appropriate handling
+          const newNotificationData = payload.new as any;
           
-          // Ensure category exists
-          const processedNotification = {
-            ...newNotification,
-            category: newNotification.category || 'personal'
+          // Create processed notification with proper typing
+          const processedNotification: Notification = {
+            id: newNotificationData.id,
+            title: newNotificationData.title,
+            message: newNotificationData.message,
+            type: newNotificationData.type,
+            created_at: newNotificationData.created_at,
+            is_read: newNotificationData.is_read,
+            action_data: newNotificationData.action_data,
+            category: newNotificationData.category || 'personal'
           };
           
           setNotifications(prev => [processedNotification, ...prev.filter(n => n.id !== processedNotification.id)]);
