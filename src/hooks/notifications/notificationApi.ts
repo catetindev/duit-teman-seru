@@ -126,7 +126,7 @@ export const subscribeToNotifications = (
           is_read: payload.new.is_read,
           action_data: payload.new.action_data,
           // Default to personal since category doesn't exist yet
-          category: 'personal'
+          category: payload.new.type === 'business' ? 'business' : 'personal'
         } as Notification;
         
         onNewNotification(newNotification);
