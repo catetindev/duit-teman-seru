@@ -55,6 +55,7 @@ export const markNotificationAsRead = async (userId: string | undefined, id: str
   if (!userId) return false;
   
   try {
+    // Simplified version to avoid deep type instantiation
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -116,7 +117,7 @@ export const subscribeToNotifications = (
       (payload) => {
         console.log('New notification received via realtime:', payload);
         // Create processed notification with proper typing
-        const newNotificationData = payload.new;
+        const newNotificationData: any = payload.new;
         
         const processedNotification: Notification = {
           id: newNotificationData.id,
