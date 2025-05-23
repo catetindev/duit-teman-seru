@@ -1,7 +1,10 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Notification } from './types';
 import { toast } from 'sonner';
+import { RealtimeChannel } from '@supabase/supabase-js'; // Import RealtimeChannel type
+
+// Explicitly define the columns to select for notifications
+const NOTIFICATION_SELECT_COLUMNS = 'id, title, message, type, created_at, is_read, action_data, category';
 
 export const fetchNotificationsFromApi = async (userId: string | undefined): Promise<Notification[]> => {
   if (!userId) {
@@ -13,7 +16,7 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
     console.log(`notificationApi: Fetching notifications for user ${userId}`);
     const { data, error } = await supabase
       .from('notifications')
-      .select('*')
+      .select(NOTIFICATION_SELECT_COLUMNS) // Explicitly select columns
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -24,12 +27,8 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
 
     if (data) {
       console.log('notificationApi: Notifications fetched successfully:', data.length);
-      // Process fetched data with explicit typing and default values
-      const processedData: Notification[] = [];
-      
-      for (let i = 0; i < data.length; i++) {
-        const notification = data[i];
-        processedData.push({
+      // Process fetched data with explicit typing
+      const processedData: Notification[] = data.map(notification => ({
           id: notification.id,
           title: notification.title,
           message: notification.message,
@@ -37,10 +36,8 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
           created_at: notification.created_at,
           is_read: notification.is_read,
           action_data: notification.action_data,
-          // Default to 'personal' if category is not set
-          category: notification.category || 'personal'
-        });
-      }
+          category: notification.category || 'personal' // Ensure category is always a string
+      }));
       
       return processedData;
     }
@@ -55,7 +52,6 @@ export const markNotificationAsRead = async (userId: string | undefined, id: str
   if (!userId) return false;
   
   try {
-    // Simplified version to avoid deep type instantiation
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -98,7 +94,7 @@ export const subscribeToNotifications = (
   onNewNotification: (notification: Notification) => void,
   onUpdateNotification: () => void,
   onDeleteNotification: () => void
-) => {
+): RealtimeChannel | null => { // Specify return type
   if (!userId) {
     return null;
   }
@@ -116,17 +112,12 @@ export const subscribeToNotifications = (
       },
       (payload) => {
         console.log('New notification received via realtime:', payload);
-        // Create processed notification with proper typing
-        const newNotificationData: any = payload.new;
+        // Explicitly cast payload.new to Notification type
+        const newNotificationData = payload.new as Notification;
         
+        // Ensure category is a string, default if null/undefined
         const processedNotification: Notification = {
-          id: newNotificationData.id,
-          title: newNotificationData.title,
-          message: newNotificationData.message,
-          type: newNotificationData.type,
-          created_at: newNotificationData.created_at,
-          is_read: newNotificationData.is_read,
-          action_data: newNotificationData.action_data,
+          ...newNotificationData,
           category: newNotificationData.category || 'personal'
         };
         
