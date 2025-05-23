@@ -109,7 +109,7 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Mark all as read - Simplified to avoid deep type instantiation
+  // Mark all as read - simplified implementation to avoid deep type instantiation
   const markAllAsRead = async () => {
     if (!userId || notifications.length === 0) return;
     
@@ -124,13 +124,14 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Direct simple update approach without complex type handling
-      setNotifications(notifications.map(notification => {
-        if (notification.category === currentMode) {
-          return { ...notification, is_read: true };
+      // Use a simpler approach to update notifications
+      const updatedNotifications = [...notifications];
+      for (let i = 0; i < updatedNotifications.length; i++) {
+        if (updatedNotifications[i].category === currentMode) {
+          updatedNotifications[i] = { ...updatedNotifications[i], is_read: true };
         }
-        return notification;
-      }));
+      }
+      setNotifications(updatedNotifications);
       
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
@@ -139,18 +140,6 @@ export const useNotifications = (userId: string | undefined) => {
       toast.error("Failed to mark all notifications as read.");
     }
   };
-
-  // Current mode notifications - create array instead of complex filter function
-  const getCurrentModeNotifications = useCallback(() => {
-    // Simple implementation that returns an array directly instead of a complex filter function
-    return notifications.filter(notification => notification.category === currentMode);
-  }, [notifications, currentMode]);
-  
-  // Unread current mode notifications - create array instead of complex filter function
-  const getUnreadCurrentModeNotifications = useCallback(() => {
-    // Simple implementation that returns an array directly
-    return notifications.filter(notification => notification.category === currentMode && !notification.is_read);
-  }, [notifications, currentMode]);
 
   // Subscribe to new notifications
   useEffect(() => {
@@ -254,9 +243,14 @@ export const useNotifications = (userId: string | undefined) => {
     }
   }, [currentMode, notifications]);
 
-  // Pre-compute these values to avoid complex type instantiation
-  const currentModeNotifications = getCurrentModeNotifications();
-  const unreadNotifications = getUnreadCurrentModeNotifications();
+  // Calculate filtered notifications directly
+  const currentModeNotifications = notifications.filter(notification => 
+    notification.category === currentMode
+  );
+  
+  const unreadNotifications = notifications.filter(notification => 
+    notification.category === currentMode && !notification.is_read
+  );
 
   return {
     notifications,
