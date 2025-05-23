@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import NotificationItem from './NotificationItem';
-import { Notification } from '@/hooks/notifications/useNotifications';
+import { Notification } from '@/hooks/notifications/types';
 import { Button } from '../ui/button';
 import { RefreshCcw } from 'lucide-react';
 

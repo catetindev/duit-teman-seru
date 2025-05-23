@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 // Explicitly define the columns to select for notifications
-const NOTIFICATION_SELECT_COLUMNS = 'id, title, message, type, created_at, is_read, action_data, category';
+const NOTIFICATION_SELECT_COLUMNS = 'id, title, message, type, created_at, is_read, action_data';
 
 export const fetchNotificationsFromApi = async (userId: string | undefined): Promise<Notification[]> => {
   if (!userId) {
@@ -28,7 +28,7 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
 
     if (data) {
       console.log('notificationApi: Notifications fetched successfully:', data.length);
-      // Process fetched data with explicit typing
+      // Process fetched data with explicit typing and assign a default category
       const processedData: Notification[] = data.map(item => ({
           id: item.id,
           title: item.title,
@@ -37,7 +37,8 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
           created_at: item.created_at,
           is_read: item.is_read,
           action_data: item.action_data,
-          category: item.category || 'personal' // Default to 'personal' if category is not set
+          // Since category doesn't exist in the database yet, we'll default it based on type
+          category: item.type === 'business' ? 'business' : 'personal'
       }));
       
       return processedData;
@@ -73,13 +74,13 @@ export const markAllNotificationsAsRead = async (userId: string | undefined, cat
   if (!userId) return false;
   
   try {
-    // Simplify the operation to avoid excessive type instantiation
+    // Since we don't have a category column yet, we'll update all notifications for the user
+    // In the future, when category is added, we can modify this to filter by category
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', userId)
-      .eq('is_read', false)
-      .eq('category', category);
+      .eq('is_read', false);
 
     if (error) throw error;
     
@@ -113,7 +114,7 @@ export const subscribeToNotifications = (
         table: 'notifications',
         filter: `user_id=eq.${userId}`,
       },
-      (payload) => {
+      (payload: any) => {
         console.log('New notification received via realtime:', payload);
         // Explicitly type and process the payload
         const newNotification = {
@@ -124,7 +125,8 @@ export const subscribeToNotifications = (
           created_at: payload.new.created_at,
           is_read: payload.new.is_read,
           action_data: payload.new.action_data,
-          category: (payload.new as any).category || 'personal'
+          // Default to personal since category doesn't exist yet
+          category: 'personal'
         } as Notification;
         
         onNewNotification(newNotification);
