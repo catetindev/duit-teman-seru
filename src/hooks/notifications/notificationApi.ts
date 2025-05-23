@@ -25,8 +25,11 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
     if (data) {
       console.log('notificationApi: Notifications fetched successfully:', data.length);
       // Process fetched data with explicit typing and default values
-      const processedData = data.map(notification => {
-        const typedNotification: Notification = {
+      const processedData: Notification[] = [];
+      
+      for (let i = 0; i < data.length; i++) {
+        const notification = data[i];
+        processedData.push({
           id: notification.id,
           title: notification.title,
           message: notification.message,
@@ -35,10 +38,9 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
           is_read: notification.is_read,
           action_data: notification.action_data,
           // Default to 'personal' if category is not set
-          category: (notification as any).category || 'personal'
-        };
-        return typedNotification;
-      });
+          category: notification.category || 'personal'
+        });
+      }
       
       return processedData;
     }
@@ -113,10 +115,9 @@ export const subscribeToNotifications = (
       },
       (payload) => {
         console.log('New notification received via realtime:', payload);
-        // Use type assertion with appropriate handling
-        const newNotificationData = payload.new as any;
-        
         // Create processed notification with proper typing
+        const newNotificationData = payload.new;
+        
         const processedNotification: Notification = {
           id: newNotificationData.id,
           title: newNotificationData.title,

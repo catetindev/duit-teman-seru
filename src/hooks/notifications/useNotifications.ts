@@ -18,7 +18,8 @@ import {
 } from './notificationUtils';
 import { supabase } from '@/integrations/supabase/client';
 
-export { Notification } from './types';
+// Re-export using export type to comply with isolatedModules
+export type { Notification } from './types';
 
 export const useNotifications = (userId: string | undefined): NotificationsHookReturn => {
   const [notifications, setNotifications] = useState<Notification[]>([]);

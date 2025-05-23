@@ -1,16 +1,10 @@
 
 import React from 'react';
 import { formatDate } from '@/utils/formatUtils';
+import { Notification } from '@/hooks/notifications/types';
 
 interface NotificationItemProps {
-  notification: {
-    id: string;
-    title: string;
-    message: string;
-    type: string;
-    created_at: string;
-    is_read: boolean;
-  };
+  notification: Notification;
   onMarkAsRead: (id: string) => void;
 }
 
