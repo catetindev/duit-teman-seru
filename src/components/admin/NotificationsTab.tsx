@@ -22,7 +22,7 @@ const NotificationsTab = () => {
             <Badge 
               variant="default" 
               className={cn(
-                "ml-2 px-1.5 py-0.5 rounded-full text-xs font-semibold",
+                "ml-2 px-2 py-0.5 rounded-full text-xs font-semibold",
                 "bg-purple-500 text-white"
               )}
             >

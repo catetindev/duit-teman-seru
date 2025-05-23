@@ -88,6 +88,7 @@ const NotificationsPopover = () => {
             loading={loading}
             onMarkAsRead={markAsRead}
             onRefresh={handleRefresh}
+            showUnreadCount={true}
           />
         </div>
         
