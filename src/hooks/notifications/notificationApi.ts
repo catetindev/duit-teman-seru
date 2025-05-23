@@ -1,7 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Notification } from './types';
 import { toast } from 'sonner';
-import { RealtimeChannel } from '@supabase/supabase-js'; // Import RealtimeChannel type
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 // Explicitly define the columns to select for notifications
 const NOTIFICATION_SELECT_COLUMNS = 'id, title, message, type, created_at, is_read, action_data, category';
@@ -16,7 +17,7 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
     console.log(`notificationApi: Fetching notifications for user ${userId}`);
     const { data, error } = await supabase
       .from('notifications')
-      .select(NOTIFICATION_SELECT_COLUMNS) // Explicitly select columns
+      .select(NOTIFICATION_SELECT_COLUMNS)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -28,15 +29,15 @@ export const fetchNotificationsFromApi = async (userId: string | undefined): Pro
     if (data) {
       console.log('notificationApi: Notifications fetched successfully:', data.length);
       // Process fetched data with explicit typing
-      const processedData: Notification[] = data.map(notification => ({
-          id: notification.id,
-          title: notification.title,
-          message: notification.message,
-          type: notification.type,
-          created_at: notification.created_at,
-          is_read: notification.is_read,
-          action_data: notification.action_data,
-          category: notification.category || 'personal' // Ensure category is always a string
+      const processedData: Notification[] = data.map(item => ({
+          id: item.id,
+          title: item.title,
+          message: item.message,
+          type: item.type,
+          created_at: item.created_at,
+          is_read: item.is_read,
+          action_data: item.action_data,
+          category: item.category || 'personal' // Default to 'personal' if category is not set
       }));
       
       return processedData;
@@ -52,6 +53,7 @@ export const markNotificationAsRead = async (userId: string | undefined, id: str
   if (!userId) return false;
   
   try {
+    // Simplify the operation to avoid excessive type instantiation
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -71,6 +73,7 @@ export const markAllNotificationsAsRead = async (userId: string | undefined, cat
   if (!userId) return false;
   
   try {
+    // Simplify the operation to avoid excessive type instantiation
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
@@ -94,14 +97,14 @@ export const subscribeToNotifications = (
   onNewNotification: (notification: Notification) => void,
   onUpdateNotification: () => void,
   onDeleteNotification: () => void
-): RealtimeChannel | null => { // Specify return type
+): RealtimeChannel | null => {
   if (!userId) {
     return null;
   }
   
   console.log(`notificationApi: Setting up realtime subscription for user ${userId}`);
   const channel = supabase
-    .channel(`notifications-changes-${userId}`) // Unique channel name per user
+    .channel(`notifications-changes-${userId}`)
     .on(
       'postgres_changes',
       {
@@ -112,24 +115,27 @@ export const subscribeToNotifications = (
       },
       (payload) => {
         console.log('New notification received via realtime:', payload);
-        // Explicitly cast payload.new to Notification type
-        const newNotificationData = payload.new as Notification;
+        // Explicitly type and process the payload
+        const newNotification = {
+          id: payload.new.id,
+          title: payload.new.title,
+          message: payload.new.message,
+          type: payload.new.type,
+          created_at: payload.new.created_at,
+          is_read: payload.new.is_read,
+          action_data: payload.new.action_data,
+          category: (payload.new as any).category || 'personal'
+        } as Notification;
         
-        // Ensure category is a string, default if null/undefined
-        const processedNotification: Notification = {
-          ...newNotificationData,
-          category: newNotificationData.category || 'personal'
-        };
-        
-        onNewNotification(processedNotification);
+        onNewNotification(newNotification);
         
         toast.info(
-          processedNotification.title,
-          { description: processedNotification.message }
+          newNotification.title,
+          { description: newNotification.message }
         );
       }
     )
-    .on( // Also listen for updates (e.g., if a notification is marked as read elsewhere)
+    .on(
       'postgres_changes',
       {
         event: 'UPDATE',
@@ -142,7 +148,7 @@ export const subscribeToNotifications = (
         onUpdateNotification();
       }
     )
-    .on( // Listen for deletes
+    .on(
       'postgres_changes',
       {
         event: 'DELETE',
