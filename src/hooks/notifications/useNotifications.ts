@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -108,7 +109,7 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Mark all as read - using direct approach to avoid type instantiation issues
+  // Completely simplified markAllAsRead implementation without complex transformations
   const markAllAsRead = async () => {
     if (!userId || notifications.length === 0) return;
     
@@ -123,41 +124,46 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Instead of complex map/filter operations, create a new array directly
-      // This avoids TypeScript having to infer complex nested types
-      const newNotifications: Notification[] = [];
-      
-      // Manually build the new array with explicit types
-      for (const notif of notifications) {
-        if (notif.category === currentMode) {
-          // For current mode notifications, mark as read
-          newNotifications.push({
-            id: notif.id,
-            title: notif.title,
-            message: notif.message,
-            type: notif.type,
-            created_at: notif.created_at,
-            is_read: true,
-            action_data: notif.action_data,
-            category: notif.category
-          });
-        } else {
-          // For other notifications, keep as is
-          newNotifications.push({
-            id: notif.id,
-            title: notif.title,
-            message: notif.message,
-            type: notif.type,
-            created_at: notif.created_at,
-            is_read: notif.is_read,
-            action_data: notif.action_data,
-            category: notif.category
-          });
+      // The simplest possible approach: just set is_read=true for all matching notifications
+      // This avoids any complex type operations completely
+      setNotifications(notifications => {
+        // Create a brand new array to avoid mutation
+        const result: Notification[] = [];
+        
+        // Loop through each notification and modify only those in current mode
+        for (let i = 0; i < notifications.length; i++) {
+          const n = notifications[i];
+          
+          if (n.category === currentMode) {
+            // Copy the notification and set is_read to true
+            result.push({
+              id: n.id,
+              title: n.title,
+              message: n.message,
+              type: n.type,
+              created_at: n.created_at,
+              is_read: true, // Mark as read
+              action_data: n.action_data,
+              category: n.category
+            });
+          } else {
+            // For other categories, just copy as is
+            result.push({
+              id: n.id,
+              title: n.title,
+              message: n.message,
+              type: n.type,
+              created_at: n.created_at,
+              is_read: n.is_read,
+              action_data: n.action_data,
+              category: n.category
+            });
+          }
         }
-      }
+        
+        return result;
+      });
       
-      // Replace state with new array
-      setNotifications(newNotifications);
       setUnreadCount(0);
       toast.success("All notifications marked as read.");
     } catch (error: any) {
@@ -260,43 +266,50 @@ export const useNotifications = (userId: string | undefined) => {
     };
   }, [userId, fetchNotifications, currentMode]);
 
-  // When entrepreneur mode changes, update unread count
+  // Use an extremely simplified approach for recalculating unread count
   useEffect(() => {
     if (notifications.length > 0) {
-      // Use basic variable instead of array method chaining
       let count = 0;
-      for (const notif of notifications) {
-        if (notif.category === currentMode && !notif.is_read) {
+      
+      // Simple loop to count unread notifications for current mode
+      for (let i = 0; i < notifications.length; i++) {
+        const n = notifications[i];
+        if (n.category === currentMode && !n.is_read) {
           count++;
         }
       }
+      
       setUnreadCount(count);
     }
   }, [currentMode, notifications]);
 
-  // Pre-calculate filtered notifications manually to avoid type issues
+  // Use the simplest possible approach to filter notifications
+  // Create these variables directly with explicit type definitions
   const currentModeNotifications: Notification[] = [];
   const unreadNotifications: Notification[] = [];
   
-  // Simple iteration without complex chaining
-  for (const notif of notifications) {
-    if (notif.category === currentMode) {
-      // Explicitly create new notification objects to avoid reference issues
-      const modeNotif: Notification = {
-        id: notif.id,
-        title: notif.title,
-        message: notif.message,
-        type: notif.type,
-        created_at: notif.created_at,
-        is_read: notif.is_read,
-        action_data: notif.action_data,
-        category: notif.category
+  // Simple loop with no complex operations
+  for (let i = 0; i < notifications.length; i++) {
+    const n = notifications[i];
+    
+    if (n.category === currentMode) {
+      // Create a new object to avoid reference issues
+      const notification: Notification = {
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        type: n.type,
+        created_at: n.created_at,
+        is_read: n.is_read,
+        action_data: n.action_data,
+        category: n.category
       };
       
-      currentModeNotifications.push(modeNotif);
+      currentModeNotifications.push(notification);
       
-      if (!notif.is_read) {
-        unreadNotifications.push(modeNotif);
+      // Also track unread notifications
+      if (!n.is_read) {
+        unreadNotifications.push(notification);
       }
     }
   }
