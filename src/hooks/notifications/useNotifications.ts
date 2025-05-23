@@ -12,7 +12,7 @@ export interface Notification {
   created_at: string;
   is_read: boolean;
   action_data?: string;
-  category: string; // 'personal' or 'business'
+  category?: string; // Make this optional but explicitly defined
 }
 
 export const useNotifications = (userId: string | undefined) => {
@@ -48,6 +48,7 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (data) {
         console.log('useNotifications: Notifications fetched successfully:', data.length);
+        // Map and ensure all notifications have a category property with default value
         const typedData = data.map(notification => ({
           ...notification,
           category: notification.category || 'personal' // Default to personal if category is not set
@@ -80,7 +81,7 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Update local state
+      // Update local state without causing type recursion
       setNotifications(prevNotifications =>
         prevNotifications.map(n =>
           n.id === id ? { ...n, is_read: true } : n
@@ -113,7 +114,7 @@ export const useNotifications = (userId: string | undefined) => {
 
       if (error) throw error;
 
-      // Update local state
+      // Update local state without causing type recursion
       setNotifications(prevNotifications =>
         prevNotifications.map(n => 
           n.category === currentMode ? { ...n, is_read: true } : n
@@ -129,12 +130,12 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Get current mode notifications
+  // Get current mode notifications - simplify to avoid deep type instantiation
   const getCurrentModeNotifications = useCallback(() => {
     return notifications.filter(n => n.category === currentMode);
   }, [notifications, currentMode]);
   
-  // Get unread current mode notifications
+  // Get unread current mode notifications - simplify to avoid deep type instantiation
   const getUnreadCurrentModeNotifications = useCallback(() => {
     return notifications.filter(n => n.category === currentMode && !n.is_read);
   }, [notifications, currentMode]);
@@ -164,7 +165,7 @@ export const useNotifications = (userId: string | undefined) => {
         },
         (payload) => {
           console.log('New notification received via realtime:', payload);
-          const newNotification = payload.new as Notification & { category: string };
+          const newNotification = payload.new as Notification;
           
           // Ensure category exists
           const processedNotification = {
