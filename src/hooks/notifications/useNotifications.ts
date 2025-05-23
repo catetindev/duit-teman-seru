@@ -141,14 +141,16 @@ export const useNotifications = (userId: string | undefined) => {
     }
   };
 
-  // Current mode notifications - avoid direct references in state to prevent deep type instantiation
+  // Current mode notifications - create array instead of complex filter function
   const getCurrentModeNotifications = useCallback(() => {
-    return notifications.filter(n => n.category === currentMode);
+    // Simple implementation that returns an array directly instead of a complex filter function
+    return notifications.filter(notification => notification.category === currentMode);
   }, [notifications, currentMode]);
   
-  // Unread current mode notifications - avoid direct references in state to prevent deep type instantiation
+  // Unread current mode notifications - create array instead of complex filter function
   const getUnreadCurrentModeNotifications = useCallback(() => {
-    return notifications.filter(n => n.category === currentMode && !n.is_read);
+    // Simple implementation that returns an array directly
+    return notifications.filter(notification => notification.category === currentMode && !notification.is_read);
   }, [notifications, currentMode]);
 
   // Subscribe to new notifications
@@ -253,10 +255,14 @@ export const useNotifications = (userId: string | undefined) => {
     }
   }, [currentMode, notifications]);
 
+  // Use the results of the functions directly in the return
+  const currentModeNotifications = getCurrentModeNotifications();
+  const unreadNotifications = getUnreadCurrentModeNotifications();
+
   return {
     notifications,
-    currentModeNotifications: getCurrentModeNotifications(),
-    unreadNotifications: getUnreadCurrentModeNotifications(),
+    currentModeNotifications,
+    unreadNotifications,
     loading,
     unreadCount,
     markAsRead,
