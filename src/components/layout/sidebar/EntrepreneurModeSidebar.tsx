@@ -32,83 +32,83 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
     <SidebarContent>
       {/* Core Navigation */}
       <SidebarGroup>
-        <SidebarGroupLabel>Business</SidebarGroupLabel>
+        <SidebarGroupLabel>{t('entrepreneur.business')}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarNavLink 
             to="/dashboard" 
             icon={<LayoutDashboard className="h-5 w-5" />} 
             end
           >
-            <span className={navLinkStyles}>Dashboard</span>
+            <span className={navLinkStyles}>{t('entrepreneur.dashboard')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/products" 
             icon={<Package className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Products & Services</span>
+            <span className={navLinkStyles}>{t('entrepreneur.products')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/pos" 
             icon={<CreditCard className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>POS / Cashier</span>
+            <span className={navLinkStyles}>{t('entrepreneur.pos')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/orders" 
             icon={<ShoppingBag className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Orders & Transactions</span>
+            <span className={navLinkStyles}>{t('entrepreneur.orders')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/customers" 
             icon={<Users className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Customers</span>
+            <span className={navLinkStyles}>{t('entrepreneur.customers')}</span>
           </SidebarNavLink>
         </SidebarGroupContent>
       </SidebarGroup>
       
       {/* Financial Section */}
       <SidebarGroup>
-        <SidebarGroupLabel>Financial</SidebarGroupLabel>
+        <SidebarGroupLabel>{t('entrepreneur.financial')}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarNavLink 
             to="/profit-loss" 
             icon={<PieChart className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Profit & Loss Report</span>
+            <span className={navLinkStyles}>{t('entrepreneur.profitLoss')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/calculator" 
             icon={<Calculator className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Pricing Calculator</span>
+            <span className={navLinkStyles}>{t('entrepreneur.calculator')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/invoices" 
             icon={<FileText className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Invoice Generator</span>
+            <span className={navLinkStyles}>{t('entrepreneur.invoices')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
             to="/finance-reports" 
             icon={<FileBarChart className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Financial Reports</span>
+            <span className={navLinkStyles}>{t('entrepreneur.financeReports')}</span>
           </SidebarNavLink>
         </SidebarGroupContent>
       </SidebarGroup>
 
       {/* User Tools */}
       <SidebarGroup>
-        <SidebarGroupLabel>Account</SidebarGroupLabel>
+        <SidebarGroupLabel>{t('entrepreneur.account')}</SidebarGroupLabel>
         <SidebarGroupContent>
           <TooltipProvider>
             <Tooltip>
@@ -117,7 +117,7 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
                   to="/notifications" 
                   icon={<Bell className="h-5 w-5" />}
                 >
-                  <span className={navLinkStyles}>Notifications</span>
+                  <span className={navLinkStyles}>{t('entrepreneur.notifications')}</span>
                   {unreadCount > 0 && (
                     <Badge 
                       variant="default" 
@@ -142,7 +142,7 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
             to="/feedback" 
             icon={<MessageSquare className="h-5 w-5" />}
           >
-            <span className={navLinkStyles}>Feedback</span>
+            <span className={navLinkStyles}>{t('entrepreneur.feedback')}</span>
           </SidebarNavLink>
           
           <SidebarNavLink 
@@ -157,7 +157,7 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
               to="/admin" 
               icon={<ShieldAlert className="h-5 w-5" />}
             >
-              <span className={navLinkStyles}>Admin</span>
+              <span className={navLinkStyles}>{t('entrepreneur.admin')}</span>
             </SidebarNavLink>
           )}
         </SidebarGroupContent>

@@ -570,6 +570,74 @@ export const translations = {
     id: 'Tingkatkan ke Premium'
   },
   
+  // Upgrade CTA fix
+  'upgrade.cta': {
+    en: 'Upgrade Now',
+    id: 'Upgrade Sekarang'
+  },
+  
+  // Entrepreneur mode translations
+  'entrepreneur.business': {
+    en: 'Business',
+    id: 'Bisnis'
+  },
+  'entrepreneur.financial': {
+    en: 'Financial',
+    id: 'Keuangan'
+  },
+  'entrepreneur.account': {
+    en: 'Account',
+    id: 'Akun'
+  },
+  'entrepreneur.dashboard': {
+    en: 'Dashboard',
+    id: 'Dasbor'
+  },
+  'entrepreneur.products': {
+    en: 'Products & Services',
+    id: 'Produk & Layanan'
+  },
+  'entrepreneur.pos': {
+    en: 'POS / Cashier',
+    id: 'POS / Kasir'
+  },
+  'entrepreneur.orders': {
+    en: 'Orders & Transactions',
+    id: 'Pesanan & Transaksi'
+  },
+  'entrepreneur.customers': {
+    en: 'Customers',
+    id: 'Pelanggan'
+  },
+  'entrepreneur.profitLoss': {
+    en: 'Profit & Loss Report',
+    id: 'Laporan Untung Rugi'
+  },
+  'entrepreneur.calculator': {
+    en: 'Pricing Calculator',
+    id: 'Kalkulator Harga'
+  },
+  'entrepreneur.invoices': {
+    en: 'Invoice Generator',
+    id: 'Generator Faktur'
+  },
+  'entrepreneur.financeReports': {
+    en: 'Financial Reports',
+    id: 'Laporan Keuangan'
+  },
+  'entrepreneur.notifications': {
+    en: 'Notifications',
+    id: 'Notifikasi'
+  },
+  'entrepreneur.feedback': {
+    en: 'Feedback',
+    id: 'Umpan Balik'
+  },
+  'entrepreneur.admin': {
+    en: 'Admin',
+    id: 'Admin'
+  },
+  
   // Orders
   'order.status.paid': {
     en: 'Paid',
