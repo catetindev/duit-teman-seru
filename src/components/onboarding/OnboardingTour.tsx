@@ -12,7 +12,6 @@ interface OnboardingTourProps {
 
 const OnboardingTour = ({ onComplete, forceStart = false }: OnboardingTourProps) => {
   const [runTour, setRunTour] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
 
@@ -108,7 +107,9 @@ const OnboardingTour = ({ onComplete, forceStart = false }: OnboardingTourProps)
   };
 
   const handleJoyrideCallback = async (data: CallBackProps) => {
-    const { status, action, index } = data;
+    const { status } = data;
+    
+    console.log('Joyride callback:', data);
 
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       // Mark onboarding as completed
@@ -133,12 +134,7 @@ const OnboardingTour = ({ onComplete, forceStart = false }: OnboardingTourProps)
       }
 
       setRunTour(false);
-      setStepIndex(0);
       onComplete?.();
-    } else if (action === 'next') {
-      setStepIndex(index + 1);
-    } else if (action === 'prev') {
-      setStepIndex(index - 1);
     }
   };
 
@@ -150,7 +146,6 @@ const OnboardingTour = ({ onComplete, forceStart = false }: OnboardingTourProps)
     <Joyride
       steps={steps}
       run={runTour}
-      stepIndex={stepIndex}
       continuous
       showProgress
       showSkipButton
