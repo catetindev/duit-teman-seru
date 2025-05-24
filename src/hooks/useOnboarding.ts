@@ -23,7 +23,7 @@ export const useOnboarding = () => {
         .from('profiles')
         .select('onboarding_completed')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking onboarding status:', error);
@@ -43,10 +43,15 @@ export const useOnboarding = () => {
     if (!user) return;
 
     try {
-      await supabase
+      const { error } = await supabase
         .from('profiles')
         .update({ onboarding_completed: true })
         .eq('id', user.id);
+
+      if (error) {
+        console.error('Error marking onboarding complete:', error);
+        return;
+      }
 
       setNeedsOnboarding(false);
     } catch (error) {

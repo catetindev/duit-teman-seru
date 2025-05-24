@@ -81,7 +81,7 @@ const OnboardingTour = ({ onComplete }: OnboardingTourProps) => {
         .from('profiles')
         .select('onboarding_completed')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking onboarding status:', error);
@@ -100,19 +100,23 @@ const OnboardingTour = ({ onComplete }: OnboardingTourProps) => {
   const handleJoyrideCallback = async (data: CallBackProps) => {
     const { status, action, index } = data;
 
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       // Mark onboarding as completed
       if (user) {
         try {
-          await supabase
+          const { error } = await supabase
             .from('profiles')
             .update({ onboarding_completed: true })
             .eq('id', user.id);
 
-          toast({
-            title: "Sip, kamu udah siap pake Catatyo! 🎉",
-            description: "Cuanmu, aturanmu. Selamat mengelola keuangan!",
-          });
+          if (error) {
+            console.error('Error updating onboarding status:', error);
+          } else {
+            toast({
+              title: "Sip, kamu udah siap pake Catatyo! 🎉",
+              description: "Cuanmu, aturanmu. Selamat mengelola keuangan!",
+            });
+          }
         } catch (error) {
           console.error('Error updating onboarding status:', error);
         }

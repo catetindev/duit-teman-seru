@@ -512,6 +512,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          onboarding_completed: boolean
           role: Database["public"]["Enums"]["user_role"]
           subscription_expiry: string | null
           subscription_id: string | null
@@ -521,6 +522,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          onboarding_completed?: boolean
           role?: Database["public"]["Enums"]["user_role"]
           subscription_expiry?: string | null
           subscription_id?: string | null
@@ -530,6 +532,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          onboarding_completed?: boolean
           role?: Database["public"]["Enums"]["user_role"]
           subscription_expiry?: string | null
           subscription_id?: string | null
