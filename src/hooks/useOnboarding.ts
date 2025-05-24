@@ -6,14 +6,17 @@ import { supabase } from '@/integrations/supabase/client';
 export const useOnboarding = () => {
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    checkOnboardingStatus();
-  }, [user]);
+    if (!authLoading) {
+      checkOnboardingStatus();
+    }
+  }, [user, authLoading]);
 
   const checkOnboardingStatus = async () => {
     if (!user) {
+      setNeedsOnboarding(false);
       setLoading(false);
       return;
     }
@@ -27,13 +30,17 @@ export const useOnboarding = () => {
 
       if (error) {
         console.error('Error checking onboarding status:', error);
+        setNeedsOnboarding(false);
         setLoading(false);
         return;
       }
 
-      setNeedsOnboarding(!data?.onboarding_completed);
+      // If no profile exists or onboarding not completed, show onboarding
+      const shouldShowOnboarding = !data || !data.onboarding_completed;
+      setNeedsOnboarding(shouldShowOnboarding);
     } catch (error) {
       console.error('Error in checkOnboardingStatus:', error);
+      setNeedsOnboarding(false);
     } finally {
       setLoading(false);
     }
@@ -59,9 +66,30 @@ export const useOnboarding = () => {
     }
   };
 
+  const restartOnboarding = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ onboarding_completed: false })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error restarting onboarding:', error);
+        return;
+      }
+
+      setNeedsOnboarding(true);
+    } catch (error) {
+      console.error('Error restarting onboarding:', error);
+    }
+  };
+
   return {
     needsOnboarding,
     loading,
     markOnboardingComplete,
+    restartOnboarding,
   };
 };

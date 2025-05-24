@@ -7,12 +7,13 @@ import { useToast } from '@/hooks/use-toast';
 
 interface OnboardingTourProps {
   onComplete?: () => void;
+  forceStart?: boolean;
 }
 
-const OnboardingTour = ({ onComplete }: OnboardingTourProps) => {
+const OnboardingTour = ({ onComplete, forceStart = false }: OnboardingTourProps) => {
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { toast } = useToast();
 
   const steps: Step[] = [
@@ -70,8 +71,14 @@ const OnboardingTour = ({ onComplete }: OnboardingTourProps) => {
   ];
 
   useEffect(() => {
-    checkIfFirstTime();
-  }, [user]);
+    if (!isLoading && user) {
+      if (forceStart) {
+        setRunTour(true);
+      } else {
+        checkIfFirstTime();
+      }
+    }
+  }, [user, isLoading, forceStart]);
 
   const checkIfFirstTime = async () => {
     if (!user) return;
@@ -88,9 +95,12 @@ const OnboardingTour = ({ onComplete }: OnboardingTourProps) => {
         return;
       }
 
-      // If onboarding not completed, start the tour
-      if (!data?.onboarding_completed) {
-        setRunTour(true);
+      // If onboarding not completed or no profile exists, start the tour
+      if (!data || !data.onboarding_completed) {
+        // Add a small delay to ensure DOM elements are rendered
+        setTimeout(() => {
+          setRunTour(true);
+        }, 1000);
       }
     } catch (error) {
       console.error('Error in checkIfFirstTime:', error);
@@ -123,6 +133,7 @@ const OnboardingTour = ({ onComplete }: OnboardingTourProps) => {
       }
 
       setRunTour(false);
+      setStepIndex(0);
       onComplete?.();
     } else if (action === 'next') {
       setStepIndex(index + 1);
