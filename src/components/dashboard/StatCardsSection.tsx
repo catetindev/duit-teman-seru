@@ -30,11 +30,13 @@ const StatCardsSection = ({ stats, loading = false }: StatCardsSectionProps) => 
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <StatCard 
-        title={t('dashboard.balance')}
-        value={formatCurrency(stats.balance, stats.currency)}
-        icon={<PiggyBank size={20} className="text-teal-500" />}
-      />
+      <div data-tour="balance-card">
+        <StatCard 
+          title={t('dashboard.balance')}
+          value={formatCurrency(stats.balance, stats.currency)}
+          icon={<PiggyBank size={20} className="text-teal-500" />}
+        />
+      </div>
       <StatCard 
         title={t('dashboard.income')}
         value={formatCurrency(stats.income, stats.currency)}

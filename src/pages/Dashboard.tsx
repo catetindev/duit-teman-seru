@@ -10,6 +10,7 @@ import TransactionsSection from '@/components/dashboard/TransactionsSection';
 import BudgetsSection from '@/components/dashboard/BudgetsSection';
 import GoalsSection from '@/components/dashboard/GoalsSection';
 import BadgesSection from '@/components/dashboard/BadgesSection';
+import OnboardingTour from '@/components/onboarding/OnboardingTour';
 import { mockBadges } from '@/components/dashboard/DashboardData';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
@@ -57,10 +58,14 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
+      <OnboardingTour />
+      
       <div className="mb-6">
         {isMobile ? (
           <>
-            <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+            <div data-tour="dashboard-greeting">
+              <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+            </div>
             <div className="mt-3">
               <EntrepreneurModeToggle />
             </div>
@@ -68,7 +73,9 @@ const Dashboard = () => {
         ) : (
           <div className="flex items-center gap-4">
             <EntrepreneurModeToggle />
-            <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+            <div data-tour="dashboard-greeting">
+              <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+            </div>
           </div>
         )}
       </div>
@@ -82,30 +89,36 @@ const Dashboard = () => {
       ) : (
         // Regular Dashboard
         <>
-          <StatCardsSection 
-            stats={stats} 
-            loading={loading.stats} 
-          />
+          <div data-tour="income-expense-cards">
+            <StatCardsSection 
+              stats={stats} 
+              loading={loading.stats} 
+            />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              <TransactionsSection 
-                transactions={transactions} 
-                onTransactionAdded={refreshData}
-                loading={loading.transactions} 
-              />
+              <div data-tour="add-transaction">
+                <TransactionsSection 
+                  transactions={transactions} 
+                  onTransactionAdded={refreshData}
+                  loading={loading.transactions} 
+                />
+              </div>
               
               {isPremium && <BudgetsSection isPremium={isPremium} />}
             </div>
             
             <div className="space-y-8">
-              <GoalsSection 
-                goals={goals}
-                isPremium={isPremium}
-                onGoalAdded={refreshData}
-                loading={loading.goals}
-                onUpgradeClick={handleUpgradeClick}
-              />
+              <div data-tour="goals-section">
+                <GoalsSection 
+                  goals={goals}
+                  isPremium={isPremium}
+                  onGoalAdded={refreshData}
+                  loading={loading.goals}
+                  onUpgradeClick={handleUpgradeClick}
+                />
+              </div>
               
               {isPremium && <BadgesSection badges={mockBadges} />}
             </div>
