@@ -3,8 +3,8 @@
 export const translations = {
   // Common
   'app.name': {
-    en: 'DuitTemanseru',
-    id: 'DuitTemanseru'
+    en: 'Catatyo',
+    id: 'Catatyo'
   },
   'app.tagline': {
     en: 'Make money management fun!',
@@ -619,7 +619,7 @@ export const translations = {
   },
   'entrepreneur.invoices': {
     en: 'Invoice Generator',
-    id: 'Generator Faktur'
+    id: 'Buat Invoice'
   },
   'entrepreneur.financeReports': {
     en: 'Financial Reports',
@@ -631,7 +631,7 @@ export const translations = {
   },
   'entrepreneur.feedback': {
     en: 'Feedback',
-    id: 'Umpan Balik'
+    id: 'Feedback'
   },
   'entrepreneur.admin': {
     en: 'Admin',
