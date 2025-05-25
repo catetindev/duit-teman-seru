@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,9 +7,47 @@ import { Separator } from '@/components/ui/separator';
 import { User, Bell, Shield, Palette, HelpCircle } from 'lucide-react';
 import OnboardingSection from '@/components/settings/OnboardingSection';
 import EntrepreneurOnboardingSection from '@/components/settings/EntrepreneurOnboardingSection';
+import ProfileSettings from '@/components/settings/ProfileSettings';
+import PrivacySettings from '@/components/settings/PrivacySettings';
+import AppearanceSettings from '@/components/settings/AppearanceSettings';
+
+type SettingsView = 'main' | 'profile' | 'privacy' | 'appearance';
 
 const Settings = () => {
   const { isPremium } = useAuth();
+  const [currentView, setCurrentView] = useState<SettingsView>('main');
+
+  const handleCardClick = (view: SettingsView) => {
+    setCurrentView(view);
+  };
+
+  const handleBack = () => {
+    setCurrentView('main');
+  };
+
+  if (currentView === 'profile') {
+    return (
+      <DashboardLayout isPremium={isPremium}>
+        <ProfileSettings onBack={handleBack} />
+      </DashboardLayout>
+    );
+  }
+
+  if (currentView === 'privacy') {
+    return (
+      <DashboardLayout isPremium={isPremium}>
+        <PrivacySettings onBack={handleBack} />
+      </DashboardLayout>
+    );
+  }
+
+  if (currentView === 'appearance') {
+    return (
+      <DashboardLayout isPremium={isPremium}>
+        <AppearanceSettings onBack={handleBack} />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout isPremium={isPremium}>
@@ -20,8 +58,11 @@ const Settings = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Profile Settings */}
-          <Card>
+          {/* Profile Settings - Active */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleCardClick('profile')}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -35,8 +76,8 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Notification Settings */}
-          <Card>
+          {/* Notification Settings - Disabled */}
+          <Card className="opacity-50 cursor-not-allowed">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
@@ -47,11 +88,17 @@ const Settings = () => {
               <p className="text-sm text-gray-600">
                 Atur preferensi notifikasi dan reminder.
               </p>
+              <p className="text-xs text-gray-400 mt-2">
+                Fitur belum tersedia
+              </p>
             </CardContent>
           </Card>
 
-          {/* Privacy Settings */}
-          <Card>
+          {/* Privacy Settings - Active */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleCardClick('privacy')}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
@@ -65,8 +112,11 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Theme Settings */}
-          <Card>
+          {/* Theme Settings - Active */}
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleCardClick('appearance')}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5" />
@@ -86,8 +136,8 @@ const Settings = () => {
           {/* Entrepreneur Onboarding Section */}
           <EntrepreneurOnboardingSection />
 
-          {/* Help Settings */}
-          <Card>
+          {/* Help Settings - Disabled */}
+          <Card className="opacity-50 cursor-not-allowed">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <HelpCircle className="h-5 w-5" />
@@ -97,6 +147,9 @@ const Settings = () => {
             <CardContent>
               <p className="text-sm text-gray-600">
                 Dapatkan bantuan dan dukungan untuk menggunakan aplikasi.
+              </p>
+              <p className="text-xs text-gray-400 mt-2">
+                Fitur belum tersedia
               </p>
             </CardContent>
           </Card>

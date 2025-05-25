@@ -2,176 +2,100 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
-    --primary: 262 83% 58%;
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
- 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
- 
-    --muted: 210 40% 96.1%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
-    --accent: 262 83% 98%;
-    --accent-foreground: 262 83% 58%;
- 
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 262 83% 58%;
- 
-    --radius: 1rem;
+    --ring: 222.2 84% 4.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
- 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
     --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 262 83% 58%;
- 
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 262 83% 58%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
-    scroll-behavior: smooth;
   }
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
-
-  /* Add custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.5);
-    border-radius: 20px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.7);
+    @apply bg-background text-foreground;
   }
 }
 
-@layer utilities {
-  .gradient-bg-purple {
-    @apply bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white;
-  }
-  
-  .gradient-bg-teal {
-    @apply bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white;
-  }
-  
-  .card-hover {
-    @apply transition-transform hover:scale-[1.01];
-  }
-  
-  .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl;
-  }
-  
-  .card-gradient {
-    @apply bg-gradient-to-br from-card to-secondary/80 backdrop-blur-sm;
-  }
-  
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600;
-  }
-  
-  /* Mobile optimizations */
-  .mobile-container {
-    @apply px-4 md:px-6 lg:px-8;
-  }
-  
-  .mobile-text {
-    @apply text-sm md:text-base;
-  }
-  
-  .mobile-heading {
-    @apply text-xl md:text-2xl lg:text-3xl;
-  }
-  
-  .mobile-card {
-    @apply p-3 md:p-5;
-  }
-  
-  .mobile-grid {
-    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
-  }
-  
-  .mobile-stack {
-    @apply flex-col md:flex-row;
-  }
-  
-  /* Improved tap targets for mobile */
-  .mobile-tap-target {
-    @apply min-h-[44px] min-w-[44px];
-  }
+/* Compact Mode Styles */
+.compact-mode .space-y-6 > * + * {
+  margin-top: 1rem !important;
 }
 
-/* Mobile-specific adjustments */
-@media (max-width: 768px) {
-  .hide-on-mobile {
-    display: none;
-  }
-  
-  .mobile-full-width {
-    width: 100%;
-  }
-  
-  .mobile-text-center {
-    text-align: center;
-  }
-  
-  .mobile-p-4 {
-    padding: 1rem;
-  }
-  
-  .mobile-my-2 {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
+.compact-mode .space-y-4 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+.compact-mode .p-6 {
+  padding: 1rem !important;
+}
+
+.compact-mode .py-6 {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+.compact-mode .px-6 {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+.compact-mode .gap-6 {
+  gap: 1rem !important;
+}
+
+.compact-mode .gap-4 {
+  gap: 0.75rem !important;
 }
