@@ -1,15 +1,51 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlayCircle } from 'lucide-react';
+import { PlayCircle, Loader2 } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const OnboardingSection = () => {
   const { restartOnboarding } = useOnboarding();
+  const [isRestarting, setIsRestarting] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleRestartTour = () => {
-    restartOnboarding();
+  const handleRestartTour = async () => {
+    setIsRestarting(true);
+    
+    try {
+      const success = await restartOnboarding();
+      
+      if (success) {
+        toast({
+          title: "Tur panduan diaktifkan! 🎯",
+          description: "Kembali ke dashboard untuk melihat panduan",
+        });
+        
+        // Navigate to dashboard to trigger the onboarding
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      } else {
+        toast({
+          title: "Gagal mengaktifkan tur",
+          description: "Silakan coba lagi dalam beberapa saat",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error restarting onboarding:', error);
+      toast({
+        title: "Terjadi kesalahan",
+        description: "Silakan coba lagi dalam beberapa saat",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRestarting(false);
+    }
   };
 
   return (
@@ -24,8 +60,20 @@ const OnboardingSection = () => {
         <p className="text-sm text-gray-600">
           Ingin melihat panduan cara menggunakan Catatyo lagi? Klik tombol di bawah untuk memulai tur panduan.
         </p>
-        <Button onClick={handleRestartTour} variant="outline" className="w-full">
-          Mulai Tur Panduan
+        <Button 
+          onClick={handleRestartTour} 
+          variant="outline" 
+          className="w-full"
+          disabled={isRestarting}
+        >
+          {isRestarting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Mengaktifkan...
+            </>
+          ) : (
+            "Mulai Tur Panduan"
+          )}
         </Button>
       </CardContent>
     </Card>

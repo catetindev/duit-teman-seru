@@ -22,6 +22,8 @@ export const useOnboarding = () => {
     }
 
     try {
+      console.log('useOnboarding: Checking status for user:', user.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('onboarding_completed')
@@ -37,6 +39,8 @@ export const useOnboarding = () => {
 
       // If no profile exists or onboarding not completed, show onboarding
       const shouldShowOnboarding = !data || !data.onboarding_completed;
+      console.log('useOnboarding: Should show onboarding:', shouldShowOnboarding);
+      
       setNeedsOnboarding(shouldShowOnboarding);
     } catch (error) {
       console.error('Error in checkOnboardingStatus:', error);
@@ -47,9 +51,11 @@ export const useOnboarding = () => {
   };
 
   const markOnboardingComplete = async () => {
-    if (!user) return;
+    if (!user) return false;
 
     try {
+      console.log('useOnboarding: Marking onboarding complete for user:', user.id);
+      
       const { error } = await supabase
         .from('profiles')
         .update({ onboarding_completed: true })
@@ -57,19 +63,23 @@ export const useOnboarding = () => {
 
       if (error) {
         console.error('Error marking onboarding complete:', error);
-        return;
+        return false;
       }
 
       setNeedsOnboarding(false);
+      return true;
     } catch (error) {
       console.error('Error marking onboarding complete:', error);
+      return false;
     }
   };
 
   const restartOnboarding = async () => {
-    if (!user) return;
+    if (!user) return false;
 
     try {
+      console.log('useOnboarding: Restarting onboarding for user:', user.id);
+      
       const { error } = await supabase
         .from('profiles')
         .update({ onboarding_completed: false })
@@ -77,12 +87,14 @@ export const useOnboarding = () => {
 
       if (error) {
         console.error('Error restarting onboarding:', error);
-        return;
+        return false;
       }
 
       setNeedsOnboarding(true);
+      return true;
     } catch (error) {
       console.error('Error restarting onboarding:', error);
+      return false;
     }
   };
 
@@ -91,5 +103,6 @@ export const useOnboarding = () => {
     loading,
     markOnboardingComplete,
     restartOnboarding,
+    refreshStatus: checkOnboardingStatus,
   };
 };
