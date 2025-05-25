@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { User, Bell, Shield, Palette, HelpCircle } from 'lucide-react';
 import OnboardingSection from '@/components/settings/OnboardingSection';
+import EntrepreneurOnboardingSection from '@/components/settings/EntrepreneurOnboardingSection';
 
 const Settings = () => {
   const { isPremium } = useAuth();
@@ -81,6 +82,9 @@ const Settings = () => {
 
           {/* Onboarding Section */}
           <OnboardingSection />
+
+          {/* Entrepreneur Onboarding Section */}
+          <EntrepreneurOnboardingSection />
 
           {/* Help Settings */}
           <Card>
