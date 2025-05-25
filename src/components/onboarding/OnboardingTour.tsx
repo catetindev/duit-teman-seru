@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 interface OnboardingTourProps {
   onComplete?: () => void;
@@ -11,9 +12,9 @@ interface OnboardingTourProps {
 
 const OnboardingTour = ({ onComplete, forceStart = false }: OnboardingTourProps) => {
   const [runTour, setRunTour] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
+  const { needsOnboarding, loading, markOnboardingComplete } = useOnboarding();
 
   const steps: Step[] = [
     {
@@ -72,104 +73,59 @@ const OnboardingTour = ({ onComplete, forceStart = false }: OnboardingTourProps)
   useEffect(() => {
     if (!isLoading && user) {
       if (forceStart) {
-        console.log('Force starting onboarding tour');
+        console.log('OnboardingTour: Force starting onboarding tour');
         setRunTour(true);
-        setIsChecking(false);
-      } else {
-        checkOnboardingStatus();
+      } else if (!loading) {
+        if (needsOnboarding) {
+          console.log('OnboardingTour: Starting onboarding tour for new user');
+          // Add a delay to ensure DOM elements are rendered
+          setTimeout(() => {
+            setRunTour(true);
+          }, 1500);
+        } else {
+          console.log('OnboardingTour: User has already completed onboarding');
+        }
       }
-    } else if (!isLoading && !user) {
-      setIsChecking(false);
     }
-  }, [user, isLoading, forceStart]);
-
-  const checkOnboardingStatus = async () => {
-    if (!user) {
-      setIsChecking(false);
-      return;
-    }
-
-    try {
-      console.log('Checking onboarding status for user:', user.id);
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('onboarding_completed')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking onboarding status:', error);
-        setIsChecking(false);
-        return;
-      }
-
-      console.log('Onboarding status data:', data);
-
-      // If no profile exists or onboarding not completed, start the tour
-      const shouldStartTour = !data || !data.onboarding_completed;
-      
-      if (shouldStartTour) {
-        console.log('Starting onboarding tour for new user');
-        // Add a delay to ensure DOM elements are rendered
-        setTimeout(() => {
-          setRunTour(true);
-          setIsChecking(false);
-        }, 1500);
-      } else {
-        console.log('User has already completed onboarding');
-        setIsChecking(false);
-      }
-    } catch (error) {
-      console.error('Error in checkOnboardingStatus:', error);
-      setIsChecking(false);
-    }
-  };
-
-  const markOnboardingCompleted = async () => {
-    if (!user) return;
-
-    try {
-      console.log('Marking onboarding as completed for user:', user.id);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ onboarding_completed: true })
-        .eq('id', user.id);
-
-      if (error) {
-        console.error('Error updating onboarding status:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save onboarding progress",
-          variant: "destructive",
-        });
-      } else {
-        console.log('Onboarding marked as completed successfully');
-        toast({
-          title: "Sip, kamu udah siap pake Catatyo! 🎉",
-          description: "Cuanmu, aturanmu. Selamat mengelola keuangan!",
-        });
-      }
-    } catch (error) {
-      console.error('Error updating onboarding status:', error);
-    }
-  };
+  }, [user, isLoading, forceStart, needsOnboarding, loading]);
 
   const handleJoyrideCallback = async (data: CallBackProps) => {
     const { status, action } = data;
     
-    console.log('Joyride callback:', { status, action });
+    console.log('OnboardingTour: Joyride callback:', { status, action });
 
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-      await markOnboardingCompleted();
+      console.log('OnboardingTour: Onboarding completed or skipped, saving progress...');
+      
+      const success = await markOnboardingComplete();
+      
+      if (success) {
+        console.log('OnboardingTour: Successfully saved onboarding completion');
+        toast({
+          title: "Sip, kamu udah siap pake Catatyo! 🎉",
+          description: "Cuanmu, aturanmu. Selamat mengelola keuangan!",
+        });
+      } else {
+        console.error('OnboardingTour: Failed to save onboarding progress');
+        toast({
+          title: "Onboarding selesai! 🎉",
+          description: "Meski ada sedikit masalah teknis, kamu tetap bisa lanjut pakai aplikasi!",
+          variant: "default",
+        });
+      }
+      
       setRunTour(false);
       onComplete?.();
     }
   };
 
-  // Don't render anything while checking or if tour shouldn't run
-  if (isChecking || !runTour) {
+  // Don't render anything while checking auth or onboarding status
+  if (isLoading || loading) {
+    return null;
+  }
+
+  // Don't render if tour shouldn't run
+  if (!runTour) {
     return null;
   }
 

@@ -17,9 +17,11 @@ const OnboardingSection = () => {
     setIsRestarting(true);
     
     try {
+      console.log('OnboardingSection: Restarting onboarding tour...');
       const success = await restartOnboarding();
       
       if (success) {
+        console.log('OnboardingSection: Successfully restarted onboarding');
         toast({
           title: "Tur panduan diaktifkan! 🎯",
           description: "Kembali ke dashboard untuk melihat panduan",
@@ -30,6 +32,7 @@ const OnboardingSection = () => {
           navigate('/dashboard');
         }, 1000);
       } else {
+        console.error('OnboardingSection: Failed to restart onboarding');
         toast({
           title: "Gagal mengaktifkan tur",
           description: "Silakan coba lagi dalam beberapa saat",
@@ -37,7 +40,7 @@ const OnboardingSection = () => {
         });
       }
     } catch (error) {
-      console.error('Error restarting onboarding:', error);
+      console.error('OnboardingSection: Error restarting onboarding:', error);
       toast({
         title: "Terjadi kesalahan",
         description: "Silakan coba lagi dalam beberapa saat",
