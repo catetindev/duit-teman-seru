@@ -11,11 +11,12 @@ export function useEntrepreneurModeSwitcher() {
     isPremiumRequired 
   } = useEntrepreneurMode();
   const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [shouldTriggerOnboarding, setShouldTriggerOnboarding] = useState(false);
   const { toast } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Enhanced toggle that will trigger a page refresh
+  // Enhanced toggle that will trigger a page refresh and onboarding
   const toggleEntrepreneurMode = () => {
     if (isPremiumRequired) {
       toast({
@@ -32,6 +33,12 @@ export function useEntrepreneurModeSwitcher() {
         )
       });
       return;
+    }
+    
+    // If switching TO entrepreneur mode, trigger onboarding
+    if (!isEntrepreneurMode) {
+      localStorage.removeItem('entrepreneurOnboardingCompleted');
+      setShouldTriggerOnboarding(true);
     }
     
     // First toggle the mode
@@ -67,6 +74,7 @@ export function useEntrepreneurModeSwitcher() {
   return {
     isEntrepreneurMode,
     toggleEntrepreneurMode,
-    isPremiumRequired
+    isPremiumRequired,
+    shouldTriggerOnboarding
   };
 }

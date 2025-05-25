@@ -11,6 +11,7 @@ import BudgetsSection from '@/components/dashboard/BudgetsSection';
 import GoalsSection from '@/components/dashboard/GoalsSection';
 import BadgesSection from '@/components/dashboard/BadgesSection';
 import OnboardingTour from '@/components/onboarding/OnboardingTour';
+import EntrepreneurOnboardingTour from '@/components/onboarding/EntrepreneurOnboardingTour';
 import { mockBadges } from '@/components/dashboard/DashboardData';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
@@ -59,6 +60,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout isPremium={isPremium}>
       <OnboardingTour />
+      {isEntrepreneurMode && isPremium && <EntrepreneurOnboardingTour />}
       
       <div className="mb-6">
         {isMobile ? (

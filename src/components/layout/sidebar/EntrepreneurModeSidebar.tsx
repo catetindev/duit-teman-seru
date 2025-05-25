@@ -86,6 +86,7 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
           <SidebarNavLink 
             to="/calculator" 
             icon={<Calculator className="h-5 w-5" />}
+            data-tour="pricing-calculator"
           >
             <span className={navLinkStyles}>{t('entrepreneur.calculator')}</span>
           </SidebarNavLink>
@@ -93,6 +94,7 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
           <SidebarNavLink 
             to="/invoices" 
             icon={<FileText className="h-5 w-5" />}
+            data-tour="invoices-menu"
           >
             <span className={navLinkStyles}>{t('entrepreneur.invoices')}</span>
           </SidebarNavLink>
@@ -100,6 +102,7 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
           <SidebarNavLink 
             to="/finance-reports" 
             icon={<FileBarChart className="h-5 w-5" />}
+            data-tour="finance-reports"
           >
             <span className={navLinkStyles}>{t('entrepreneur.financeReports')}</span>
           </SidebarNavLink>
