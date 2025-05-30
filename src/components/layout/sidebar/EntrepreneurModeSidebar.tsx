@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, PieChart, Package, Calculator, FileText, Bell, MessageSquare, 
-  Settings, ShieldAlert, ShoppingBag, Users, CreditCard, FileBarChart
+  Settings, ShieldAlert, ShoppingBag, Users, CreditCard, FileBarChart,
+  TrendingUp, TrendingDown
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
@@ -68,6 +69,26 @@ const EntrepreneurModeSidebar = ({ isAdmin }: EntrepreneurModeSidebarProps) => {
             icon={<Users className="h-5 w-5" />}
           >
             <span className={navLinkStyles}>{t('entrepreneur.customers')}</span>
+          </SidebarNavLink>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      {/* Business Transactions Section */}
+      <SidebarGroup>
+        <SidebarGroupLabel>Business Transactions</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarNavLink 
+            to="/business-income" 
+            icon={<TrendingUp className="h-5 w-5" />}
+          >
+            <span className={navLinkStyles}>Business Income</span>
+          </SidebarNavLink>
+          
+          <SidebarNavLink 
+            to="/business-expenses" 
+            icon={<TrendingDown className="h-5 w-5" />}
+          >
+            <span className={navLinkStyles}>Business Expenses</span>
           </SidebarNavLink>
         </SidebarGroupContent>
       </SidebarGroup>

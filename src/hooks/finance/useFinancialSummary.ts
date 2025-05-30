@@ -22,7 +22,18 @@ export function useFinancialSummary() {
     try {
       if (!user) return { totalIncome: 0, totalExpenses: 0, netProfit: 0, profitMargin: 0 };
       
-      // Fetch income data
+      // Fetch business transactions (income and expenses)
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('transactions')
+        .select('type, amount')
+        .eq('user_id', user.id)
+        .eq('is_business', true)
+        .gte('date', range.from.toISOString().split('T')[0])
+        .lte('date', range.to.toISOString().split('T')[0]);
+
+      if (transactionsError) throw transactionsError;
+
+      // Fetch income from orders (existing business income)
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select('total')
@@ -33,7 +44,7 @@ export function useFinancialSummary() {
 
       if (ordersError) throw ordersError;
 
-      // Fetch expenses
+      // Fetch expenses from business_expenses table (existing business expenses)
       const { data: expensesData, error: expensesError } = await supabase
         .from('business_expenses')
         .select('amount')
@@ -43,9 +54,22 @@ export function useFinancialSummary() {
 
       if (expensesError) throw expensesError;
 
-      // Calculate summary
-      const totalIncome = ordersData.reduce((sum, order) => sum + Number(order.total), 0);
-      const totalExpenses = expensesData.reduce((sum, expense) => sum + Number(expense.amount), 0);
+      // Calculate totals from transactions
+      const transactionIncome = transactionsData
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      const transactionExpenses = transactionsData
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+      // Calculate totals from orders and business_expenses
+      const orderIncome = ordersData.reduce((sum, order) => sum + Number(order.total), 0);
+      const businessExpenses = expensesData.reduce((sum, expense) => sum + Number(expense.amount), 0);
+
+      // Combine all income and expenses
+      const totalIncome = transactionIncome + orderIncome;
+      const totalExpenses = transactionExpenses + businessExpenses;
       const netProfit = totalIncome - totalExpenses;
       const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
 
