@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTransactions as useTransactionsHook } from './dashboard/useTransactions';
 import { useGoals } from './dashboard/useGoals';
+import { useBudgets } from './dashboard/useBudgets';
 import { useEntrepreneurMode } from './useEntrepreneurMode';
 
 export interface Transaction {
@@ -32,7 +33,7 @@ export interface DashboardStats {
   balance: number;
   income: number;
   expenses: number;
-  currency: string;
+  currency: 'IDR' | 'USD';
   savingsRate: number;
   goalProgress: number;
   recentTransactionDate?: string;
@@ -45,6 +46,7 @@ export function useDashboardData() {
   const [loading, setLoading] = useState({
     transactions: true,
     goals: true,
+    budgets: true,
     stats: true,
   });
 
@@ -61,15 +63,24 @@ export function useDashboardData() {
     loading: goalsLoading
   } = useGoals(user?.id);
 
+  const {
+    budgets,
+    fetchBudgets,
+    addUpdateBudget,
+    deleteBudget,
+    loading: budgetsLoading
+  } = useBudgets(user?.id, transactions);
+
   // Update loading states
   useEffect(() => {
     setLoading(prev => ({
       ...prev,
       transactions: transactionsLoading,
       goals: goalsLoading,
-      stats: transactionsLoading || goalsLoading
+      budgets: budgetsLoading,
+      stats: transactionsLoading || goalsLoading || budgetsLoading
     }));
-  }, [transactionsLoading, goalsLoading]);
+  }, [transactionsLoading, goalsLoading, budgetsLoading]);
 
   // Fetch data and calculate stats
   const refreshData = async () => {
@@ -78,7 +89,8 @@ export function useDashboardData() {
     try {
       const [transactionResult] = await Promise.all([
         fetchTransactions(),
-        fetchGoals()
+        fetchGoals(),
+        fetchBudgets()
       ]);
 
       if (transactionResult?.stats) {
@@ -99,8 +111,11 @@ export function useDashboardData() {
   return {
     transactions,
     goals,
+    budgets,
     stats,
     loading,
-    refreshData
+    refreshData,
+    addUpdateBudget,
+    deleteBudget
   };
 }

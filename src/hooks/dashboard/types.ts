@@ -1,5 +1,5 @@
 
-import { ValidCurrency, DashboardStats } from '@/hooks/goals/types';
+import { ValidCurrency } from '@/hooks/goals/types';
 
 export interface Transaction {
   id: string;
@@ -10,6 +10,7 @@ export interface Transaction {
   description: string;
   date: string;
   icon?: string;
+  is_business?: boolean;
 }
 
 export interface Budget {
@@ -22,9 +23,21 @@ export interface Budget {
   user_id: string;
 }
 
+export interface DashboardStats {
+  totalIncome: number;
+  totalExpenses: number;
+  balance: number;
+  income: number;
+  expenses: number;
+  currency: ValidCurrency;
+  savingsRate: number;
+  goalProgress: number;
+  recentTransactionDate?: string;
+}
+
 export interface DashboardHookReturn {
   transactions: Transaction[];
-  goals: any[]; // Using any[] to match original implementation
+  goals: any[];
   budgets: Budget[];
   stats: DashboardStats;
   loading: {

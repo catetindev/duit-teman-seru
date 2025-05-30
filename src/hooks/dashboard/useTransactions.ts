@@ -2,7 +2,8 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Transaction } from './types';
+import { Transaction, DashboardStats } from './types';
+import { ValidCurrency } from '@/hooks/goals/types';
 
 export function useTransactions(userId: string | undefined, isBusinessMode: boolean = false) {
   const { toast } = useToast();
@@ -32,7 +33,7 @@ export function useTransactions(userId: string | undefined, isBusinessMode: bool
       const formattedData: Transaction[] = (data || []).map(tx => ({
         ...tx,
         type: tx.type === 'income' ? 'income' : 'expense',
-        currency: (tx.currency === 'USD' ? 'USD' : 'IDR') as any
+        currency: (tx.currency === 'USD' ? 'USD' : 'IDR') as ValidCurrency
       }));
       
       setTransactions(formattedData);
@@ -49,9 +50,9 @@ export function useTransactions(userId: string | undefined, isBusinessMode: bool
         }
       });
       
-      const defaultCurrency = formattedData.length > 0 ? formattedData[0].currency : 'IDR';
+      const defaultCurrency: ValidCurrency = formattedData.length > 0 ? formattedData[0].currency : 'IDR';
       
-      const stats = {
+      const stats: DashboardStats = {
         totalIncome,
         totalExpenses,
         balance: totalIncome - totalExpenses,
