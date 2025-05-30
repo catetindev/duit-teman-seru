@@ -13,9 +13,10 @@ export interface TransactionData {
   description: string;
   date: string;
   icon?: string;
+  is_business?: boolean;
 }
 
-export const useTransactions = () => {
+export const useTransactions = (isBusinessMode: boolean = false) => {
   const { user, isPremium } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -32,13 +33,14 @@ export const useTransactions = () => {
     
     setIsLoading(true);
     try {
-      console.log('Fetching transactions for user:', user.id);
+      console.log('Fetching transactions for user:', user.id, 'Business mode:', isBusinessMode);
       
-      // Build query based on filters
+      // Build query based on filters and business mode
       let query = supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user.id)
+        .eq('is_business', isBusinessMode)
         .order('date', { ascending: false });
       
       // Apply time filter if premium user
@@ -79,7 +81,8 @@ export const useTransactions = () => {
         category: item.category,
         description: item.description || '',
         date: new Date(item.date).toISOString().split('T')[0],
-        icon: getCategoryIcon(item.category)
+        icon: getCategoryIcon(item.category),
+        is_business: item.is_business || false
       }));
       
       setTransactions(formattedTransactions);
@@ -93,7 +96,7 @@ export const useTransactions = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, timeFilter, categoryFilter, isPremium, toast]);
+  }, [user, timeFilter, categoryFilter, isPremium, isBusinessMode, toast]);
 
   // Get category icon
   const getCategoryIcon = (category: string): string => {
@@ -106,10 +109,11 @@ export const useTransactions = () => {
       'transport': '🚗',
       'health': '💊',
       'education': '📚',
+      'Business': '💼',
       'other': '💸'
     };
     
-    return categoryIcons[category.toLowerCase()] || '💸';
+    return categoryIcons[category] || '💸';
   };
   
   // Set up real-time transaction subscription
@@ -135,24 +139,27 @@ export const useTransactions = () => {
           
           // Handle different types of changes
           if (payload.eventType === 'INSERT') {
-            // Add new transaction to the list
+            // Add new transaction to the list if it matches current mode
             const newTransaction = payload.new;
-            const formattedTransaction = {
-              id: newTransaction.id,
-              type: newTransaction.type as 'income' | 'expense',
-              amount: Number(newTransaction.amount),
-              currency: newTransaction.currency as 'IDR' | 'USD',
-              category: newTransaction.category,
-              description: newTransaction.description || '',
-              date: new Date(newTransaction.date).toISOString().split('T')[0],
-              icon: getCategoryIcon(newTransaction.category)
-            };
-            
-            setTransactions(prev => [formattedTransaction, ...prev]);
-            toast({
-              title: "Transaction Added",
-              description: "Your transaction has been successfully added.",
-            });
+            if (newTransaction.is_business === isBusinessMode) {
+              const formattedTransaction = {
+                id: newTransaction.id,
+                type: newTransaction.type as 'income' | 'expense',
+                amount: Number(newTransaction.amount),
+                currency: newTransaction.currency as 'IDR' | 'USD',
+                category: newTransaction.category,
+                description: newTransaction.description || '',
+                date: new Date(newTransaction.date).toISOString().split('T')[0],
+                icon: getCategoryIcon(newTransaction.category),
+                is_business: newTransaction.is_business || false
+              };
+              
+              setTransactions(prev => [formattedTransaction, ...prev]);
+              toast({
+                title: "Transaction Added",
+                description: `Your ${isBusinessMode ? 'business' : 'personal'} transaction has been successfully added.`,
+              });
+            }
           } 
           else if (payload.eventType === 'DELETE') {
             // Remove deleted transaction from the list
@@ -163,26 +170,32 @@ export const useTransactions = () => {
             });
           }
           else if (payload.eventType === 'UPDATE') {
-            // Update the modified transaction in the list
+            // Update the modified transaction in the list if it matches current mode
             const updatedTransaction = payload.new;
-            const formattedTransaction = {
-              id: updatedTransaction.id,
-              type: updatedTransaction.type as 'income' | 'expense',
-              amount: Number(updatedTransaction.amount),
-              currency: updatedTransaction.currency as 'IDR' | 'USD',
-              category: updatedTransaction.category,
-              description: updatedTransaction.description || '',
-              date: new Date(updatedTransaction.date).toISOString().split('T')[0],
-              icon: getCategoryIcon(updatedTransaction.category)
-            };
-            
-            setTransactions(prev => 
-              prev.map(t => t.id === updatedTransaction.id ? formattedTransaction : t)
-            );
-            toast({
-              title: "Transaction Updated",
-              description: "Your transaction has been successfully updated.",
-            });
+            if (updatedTransaction.is_business === isBusinessMode) {
+              const formattedTransaction = {
+                id: updatedTransaction.id,
+                type: updatedTransaction.type as 'income' | 'expense',
+                amount: Number(updatedTransaction.amount),
+                currency: updatedTransaction.currency as 'IDR' | 'USD',
+                category: updatedTransaction.category,
+                description: updatedTransaction.description || '',
+                date: new Date(updatedTransaction.date).toISOString().split('T')[0],
+                icon: getCategoryIcon(updatedTransaction.category),
+                is_business: updatedTransaction.is_business || false
+              };
+              
+              setTransactions(prev => 
+                prev.map(t => t.id === updatedTransaction.id ? formattedTransaction : t)
+              );
+              toast({
+                title: "Transaction Updated",
+                description: "Your transaction has been successfully updated.",
+              });
+            } else {
+              // Transaction moved to different mode, remove from current list
+              setTransactions(prev => prev.filter(t => t.id !== updatedTransaction.id));
+            }
           }
         }
       )
@@ -192,7 +205,7 @@ export const useTransactions = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchTransactions]);
+  }, [user, fetchTransactions, isBusinessMode]);
 
   // Filter transactions based on search query
   const filteredTransactions = transactions.filter(transaction => 

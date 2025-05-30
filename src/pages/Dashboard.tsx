@@ -80,6 +80,13 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+        
+        {/* Mode indicator */}
+        <div className="mt-4">
+          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+            {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
+          </div>
+        </div>
       </div>
       
       {isEntrepreneurMode && isPremium ? (
@@ -89,7 +96,7 @@ const Dashboard = () => {
           onAddExpense={handleAddBusinessExpense}
         />
       ) : (
-        // Regular Dashboard
+        // Regular Dashboard (Personal Mode)
         <>
           <div data-tour="income-expense-cards">
             <StatCardsSection 

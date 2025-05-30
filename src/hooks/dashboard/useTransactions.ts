@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Transaction } from './types';
 
-export function useTransactions(userId: string | undefined) {
+export function useTransactions(userId: string | undefined, isBusinessMode: boolean = false) {
   const { toast } = useToast();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,11 +16,15 @@ export function useTransactions(userId: string | undefined) {
     }
     
     try {
-      const { data, error } = await supabase
+      // Build query based on business mode
+      let query = supabase
         .from('transactions')
         .select('*')
         .eq('user_id', userId)
+        .eq('is_business', isBusinessMode)
         .order('date', { ascending: false });
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       
@@ -72,7 +76,7 @@ export function useTransactions(userId: string | undefined) {
       setLoading(false);
       return { transactions: [], stats: null };
     }
-  }, [userId, toast]);
+  }, [userId, isBusinessMode, toast]);
 
   return { transactions, fetchTransactions, setTransactions, loading };
 }

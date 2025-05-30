@@ -1,97 +1,106 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatCurrency } from '@/utils/formatUtils';
-import { calculateProgress } from '@/utils/formatUtils';
-import { DashboardStats } from '@/hooks/goals/types';
-import { useTransactions } from './dashboard/useTransactions';
+import { useTransactions as useTransactionsHook } from './dashboard/useTransactions';
 import { useGoals } from './dashboard/useGoals';
-import { useBudgets } from './dashboard/useBudgets';
-import { DashboardHookReturn } from './dashboard/types';
+import { useEntrepreneurMode } from './useEntrepreneurMode';
 
-// Define and export the Transaction type
 export interface Transaction {
   id: string;
   type: 'income' | 'expense';
   amount: number;
-  currency: string;
+  currency: 'IDR' | 'USD';
   category: string;
   description: string;
   date: string;
-  icon?: string;
+  is_business?: boolean;
 }
 
-// Main hook
-export function useDashboardData(): DashboardHookReturn {
+export interface Goal {
+  id: string;
+  title: string;
+  target_amount: number;
+  saved_amount: number;
+  target_date: string;
+  currency: string;
+  emoji: string;
+}
+
+export interface DashboardStats {
+  totalIncome: number;
+  totalExpenses: number;
+  balance: number;
+  income: number;
+  expenses: number;
+  currency: string;
+  savingsRate: number;
+  goalProgress: number;
+  recentTransactionDate?: string;
+}
+
+export function useDashboardData() {
   const { user } = useAuth();
-  
-  // Set up initial dashboard stats
-  const [stats, setStats] = useState<DashboardStats>({
-    totalIncome: 0,
-    totalExpenses: 0,
-    savingsRate: 0,
-    goalProgress: 0,
-    balance: 0,
-    income: 0,
-    expenses: 0,
-    currency: 'IDR'
+  const { isEntrepreneurMode } = useEntrepreneurMode();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState({
+    transactions: true,
+    goals: true,
+    stats: true,
   });
-  
-  // Initialize sub-hooks
-  const { transactions, fetchTransactions, loading: transactionsLoading } = useTransactions(user?.id);
-  const { goals, fetchGoals, loading: goalsLoading } = useGoals(user?.id);
-  const { budgets, fetchBudgets, addUpdateBudget, deleteBudget, loading: budgetsLoading } = useBudgets(user?.id, transactions);
-  
-  // Combined loading state
-  const loading = {
-    transactions: transactionsLoading,
-    goals: goalsLoading,
-    stats: transactionsLoading, // stats depend on transactions
-    budgets: budgetsLoading
+
+  // Use transactions hook based on current mode (personal vs business)
+  const {
+    transactions,
+    fetchTransactions,
+    loading: transactionsLoading
+  } = useTransactionsHook(user?.id, isEntrepreneurMode);
+
+  const {
+    goals,
+    fetchGoals,
+    loading: goalsLoading
+  } = useGoals(user?.id);
+
+  // Update loading states
+  useEffect(() => {
+    setLoading(prev => ({
+      ...prev,
+      transactions: transactionsLoading,
+      goals: goalsLoading,
+      stats: transactionsLoading || goalsLoading
+    }));
+  }, [transactionsLoading, goalsLoading]);
+
+  // Fetch data and calculate stats
+  const refreshData = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const [transactionResult] = await Promise.all([
+        fetchTransactions(),
+        fetchGoals()
+      ]);
+
+      if (transactionResult?.stats) {
+        setStats(transactionResult.stats);
+      }
+    } catch (error) {
+      console.error('Error refreshing dashboard data:', error);
+    }
   };
 
-  // Fetch all data
-  const refreshData = useCallback(async () => {
-    if (!user) return;
-    
-    const { stats: newStats } = await fetchTransactions();
-    await fetchGoals();
-    
-    if (newStats) {
-      setStats(prev => ({
-        ...prev,
-        ...newStats
-      }));
-    }
-    
-    // fetchBudgets() will be called via the useEffect below
-    // after transactions are loaded
-    
-  }, [user, fetchTransactions, fetchGoals]);
-
-  // Initial data fetch
+  // Fetch data on mount and when user or mode changes
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       refreshData();
     }
-  }, [user, refreshData]);
+  }, [user?.id, isEntrepreneurMode]);
 
-  // After transactions are loaded, fetch budgets
-  useEffect(() => {
-    if (user && !loading.transactions) {
-      fetchBudgets();
-    }
-  }, [user, loading.transactions, fetchBudgets]);
-
-  // Export utility functions for convenience
   return {
     transactions,
     goals,
-    budgets,
     stats,
     loading,
-    refreshData,
-    addUpdateBudget,
-    deleteBudget,
+    refreshData
   };
 }

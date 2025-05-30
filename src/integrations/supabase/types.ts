@@ -586,6 +586,7 @@ export type Database = {
           date: string
           description: string | null
           id: string
+          is_business: boolean
           type: string
           user_id: string
         }
@@ -596,6 +597,7 @@ export type Database = {
           date?: string
           description?: string | null
           id?: string
+          is_business?: boolean
           type: string
           user_id: string
         }
@@ -606,6 +608,7 @@ export type Database = {
           date?: string
           description?: string | null
           id?: string
+          is_business?: boolean
           type?: string
           user_id?: string
         }

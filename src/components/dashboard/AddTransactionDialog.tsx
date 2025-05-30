@@ -83,6 +83,9 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded, initialCate
         setError('Please fill in all required fields');
         return;
       }
+
+      // Determine if this is a business transaction
+      const isBusiness = transaction.category === 'Business' && isEntrepreneurMode;
       
       const { data, error } = await supabase
         .from('transactions')
@@ -93,14 +96,15 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded, initialCate
           category: transaction.category,
           description: transaction.description,
           date: transaction.date,
-          currency: 'IDR'
+          currency: 'IDR',
+          is_business: isBusiness
         });
       
       if (error) throw error;
       
       toast({
         title: "Success!",
-        description: "Your transaction has been added.",
+        description: `Your ${isBusiness ? 'business' : 'personal'} transaction has been added.`,
       });
       
       onClose();
@@ -206,8 +210,8 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded, initialCate
                     <div className="flex items-center gap-2">
                       <span>{category.icon}</span>
                       <span>{category.label}</span>
-                      {category.value === 'Business' && !isEntrepreneurMode && (
-                        <span className="text-xs text-gray-400">(Entrepreneur mode required)</span>
+                      {category.value === 'Business' && (
+                        <span className="text-xs text-blue-500">(Business)</span>
                       )}
                     </div>
                   </SelectItem>
