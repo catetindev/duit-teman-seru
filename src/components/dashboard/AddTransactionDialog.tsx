@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { categoryIcons } from '@/components/dashboard/DashboardData';
 
 interface AddTransactionDialogProps {
@@ -36,6 +38,7 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded, initialCate
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isEntrepreneurMode } = useEntrepreneurMode();
   
   const [transaction, setTransaction] = useState({
     type: initialType,
@@ -60,6 +63,17 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded, initialCate
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    
+    // Check if this is a business transaction and entrepreneur mode is required
+    if (transaction.category === 'Business' && !isEntrepreneurMode) {
+      setError('Business transactions can only be recorded in entrepreneur mode');
+      toast({
+        title: "Entrepreneur Mode Required",
+        description: "Please enable entrepreneur mode to record business transactions.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       setIsSubmitting(true);
@@ -178,15 +192,23 @@ const AddTransactionDialog = ({ isOpen, onClose, onTransactionAdded, initialCate
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.filter(cat => 
-                  transaction.type === 'income' ? 
+                {CATEGORIES.filter(cat => {
+                  // Only show business category in entrepreneur mode
+                  if (cat.value === 'Business' && !isEntrepreneurMode) {
+                    return false;
+                  }
+                  
+                  return transaction.type === 'income' ? 
                     ['salary', 'gift', 'Business', 'other'].includes(cat.value) : 
                     !['salary'].includes(cat.value)
-                ).map(category => (
+                }).map(category => (
                   <SelectItem key={category.value} value={category.value}>
                     <div className="flex items-center gap-2">
                       <span>{category.icon}</span>
                       <span>{category.label}</span>
+                      {category.value === 'Business' && !isEntrepreneurMode && (
+                        <span className="text-xs text-gray-400">(Entrepreneur mode required)</span>
+                      )}
                     </div>
                   </SelectItem>
                 ))}
