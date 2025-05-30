@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/hooks/useLanguage';
-import { EntrepreneurModeProvider } from '@/hooks/useEntrepreneurMode';
+import { EntrepreneurModeProvider } from '@/contexts/EntrepreneurModeContext';
 
 // Page imports
 import Index from '@/pages/Index';
