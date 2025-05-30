@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -44,177 +44,175 @@ function App() {
       <AuthProvider>
         <LanguageProvider>
           <EntrepreneurModeProvider>
-            <Router>
-              <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route 
-                  path="/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/dashboard/:type" 
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/transactions" 
-                  element={
-                    <ProtectedRoute>
-                      <Transactions />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/business-transactions" 
-                  element={
-                    <ProtectedRoute>
-                      <BusinessTransactions />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/business-income" 
-                  element={
-                    <ProtectedRoute>
-                      <BusinessIncome />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/business-expenses" 
-                  element={
-                    <ProtectedRoute>
-                      <BusinessExpenses />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/goals" 
-                  element={
-                    <ProtectedRoute>
-                      <Goals />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/analytics" 
-                  element={
-                    <ProtectedRoute>
-                      <Analytics />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/budget" 
-                  element={
-                    <ProtectedRoute>
-                      <Budget />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/settings" 
-                  element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/pricing" 
-                  element={
-                    <ProtectedRoute>
-                      <Pricing />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/notifications" 
-                  element={
-                    <ProtectedRoute>
-                      <Notifications />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/feedback" 
-                  element={
-                    <ProtectedRoute>
-                      <Feedback />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                {/* Entrepreneur routes */}
-                <Route 
-                  path="/products" 
-                  element={
-                    <ProtectedRoute>
-                      <Products />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/orders" 
-                  element={
-                    <ProtectedRoute>
-                      <Orders />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/customers" 
-                  element={
-                    <ProtectedRoute>
-                      <Customers />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/calculator" 
-                  element={
-                    <ProtectedRoute>
-                      <Calculator />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/invoices" 
-                  element={
-                    <ProtectedRoute>
-                      <Invoices />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/profit-loss" 
-                  element={
-                    <ProtectedRoute>
-                      <ProfitLoss />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/finance-reports" 
-                  element={
-                    <ProtectedRoute>
-                      <FinanceReports />
-                    </ProtectedRoute>
-                  } 
-                />
-              </Routes>
-              <Toaster />
-            </Router>
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/:type" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/transactions" 
+                element={
+                  <ProtectedRoute>
+                    <Transactions />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/business-transactions" 
+                element={
+                  <ProtectedRoute>
+                    <BusinessTransactions />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/business-income" 
+                element={
+                  <ProtectedRoute>
+                    <BusinessIncome />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/business-expenses" 
+                element={
+                  <ProtectedRoute>
+                    <BusinessExpenses />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/goals" 
+                element={
+                  <ProtectedRoute>
+                    <Goals />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/analytics" 
+                element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/budget" 
+                element={
+                  <ProtectedRoute>
+                    <Budget />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/settings" 
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/pricing" 
+                element={
+                  <ProtectedRoute>
+                    <Pricing />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/notifications" 
+                element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/feedback" 
+                element={
+                  <ProtectedRoute>
+                    <Feedback />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Entrepreneur routes */}
+              <Route 
+                path="/products" 
+                element={
+                  <ProtectedRoute>
+                    <Products />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/orders" 
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/customers" 
+                element={
+                  <ProtectedRoute>
+                    <Customers />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/calculator" 
+                element={
+                  <ProtectedRoute>
+                    <Calculator />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/invoices" 
+                element={
+                  <ProtectedRoute>
+                    <Invoices />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profit-loss" 
+                element={
+                  <ProtectedRoute>
+                    <ProfitLoss />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/finance-reports" 
+                element={
+                  <ProtectedRoute>
+                    <FinanceReports />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+            <Toaster />
           </EntrepreneurModeProvider>
         </LanguageProvider>
       </AuthProvider>
