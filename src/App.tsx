@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/toaster";
@@ -29,6 +28,7 @@ import FinanceReports from '@/pages/entrepreneur/FinanceReports';
 import BusinessTransactions from '@/pages/BusinessTransactions';
 import BusinessIncome from '@/pages/BusinessIncome';
 import BusinessExpenses from '@/pages/BusinessExpenses';
+import Pos from '@/pages/entrepreneur/Pos';
 
 // Components
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -208,6 +208,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <FinanceReports />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/pos" 
+                element={
+                  <ProtectedRoute>
+                    <Pos />
                   </ProtectedRoute>
                 } 
               />
