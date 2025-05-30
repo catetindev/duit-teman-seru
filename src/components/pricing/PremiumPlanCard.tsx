@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ChartBar, Target, Rainbow, Loader2, ArrowRight } from 'lucide-react';
@@ -95,7 +94,7 @@ const PremiumPlanCard = ({ billingCycle, delay = 0.6 }: PremiumPlanCardProps) =>
               <div className="h-8 w-8 rounded-full bg-[#28e57d]/10 flex items-center justify-center mr-3">
                 <Rainbow className="h-4 w-4 text-[#28e57d]" />
               </div>
-              <span>Tema lucu biar makin semangat</span>
+              <span>Mode Entrepreneur untuk bisnis</span>
             </li>
           </ul>
         </CardContent>
