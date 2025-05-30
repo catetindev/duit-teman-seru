@@ -1,4 +1,3 @@
-
 import React, { forwardRef, ElementRef, ComponentPropsWithoutRef } from 'react';
 import { NavLink, To } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -20,7 +19,7 @@ export interface SidebarGroupLabelProps extends React.HTMLAttributes<HTMLDivElem
 }
 
 export const SidebarGroupLabel = ({ className, children, ...props }: SidebarGroupLabelProps) => (
-  <div className={cn("px-3 mb-2 text-xs font-semibold text-muted-foreground", className)} {...props}>
+  <div className={cn("pl-4 mb-2 text-xs font-semibold text-muted-foreground text-left w-full", className)} {...props}>
     {children}
   </div>
 );
@@ -99,7 +98,7 @@ export const SidebarNavLink = forwardRef<ElementRef<typeof NavLink>, SidebarNavL
       end={end}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-2 rounded-md px-3 py-2 w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+          "flex items-center gap-3 rounded-md px-4 py-2 w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left", // px-4 for more left padding, gap-3 for spacing
           isActive 
             ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50" 
             : "text-gray-600 dark:text-gray-300"
@@ -108,7 +107,7 @@ export const SidebarNavLink = forwardRef<ElementRef<typeof NavLink>, SidebarNavL
       {...props}
     >
       {icon && <span className="inline-flex">{icon}</span>}
-      <span>{children}</span>
+      <span className="truncate">{children}</span>
     </NavLink>
   )
 );
