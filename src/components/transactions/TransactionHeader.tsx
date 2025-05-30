@@ -19,28 +19,33 @@ export default function TransactionHeader({
   addButtonText = "Add Transaction"
 }: TransactionHeaderProps) {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Search & Add</CardTitle>
+    <Card className="shadow-sm border-border/50">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-medium">Search & Actions</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search transactions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+      <CardContent className="pt-0">
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Search Input */}
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search transactions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-10 focus-visible:ring-2 focus-visible:ring-primary/20"
+              />
+            </div>
           </div>
           
+          {/* Add Button */}
           <Button 
             onClick={onAddTransaction}
-            className="w-full sm:w-auto"
+            className="h-10 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            size="default"
           >
             <Plus className="h-4 w-4 mr-2" />
-            <span className="text-sm">{addButtonText}</span>
+            <span>{addButtonText}</span>
           </Button>
         </div>
       </CardContent>

@@ -38,19 +38,24 @@ export default function BusinessExpenses() {
   if (!isEntrepreneurMode || !isPremium) {
     return (
       <DashboardLayout isPremium={isPremium}>
-        <div className="p-6">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
-              <Lock className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-bold mb-2">Business Expenses</h3>
-              <p className="text-muted-foreground mb-6">
+        <div className="flex items-center justify-center min-h-[60vh] p-6">
+          <Card className="w-full max-w-md">
+            <CardContent className="flex flex-col items-center justify-center py-12 px-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-6">
+                <Lock className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Business Expenses</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
                 {!isPremium 
                   ? "Premium subscription and entrepreneur mode required to access business expenses."
                   : "Entrepreneur mode required to access business expenses."
                 }
               </p>
               {!isPremium && (
-                <Button onClick={() => navigate('/pricing')}>
+                <Button 
+                  onClick={() => navigate('/pricing')}
+                  className="w-full"
+                >
                   Upgrade to Premium
                 </Button>
               )}
@@ -63,36 +68,53 @@ export default function BusinessExpenses() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="p-4 md:p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Business Expenses</h1>
-            <p className="text-muted-foreground">
-              View and manage your business expense transactions
-            </p>
-          </div>
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-            💼 Business Expenses
+      <div className="flex flex-col h-full">
+        {/* Header Section */}
+        <div className="flex-shrink-0 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="p-6 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h1 className="text-3xl font-bold tracking-tight">Business Expenses</h1>
+                <p className="text-muted-foreground">
+                  Track and manage your business expense transactions
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800">
+                  <span className="mr-1.5">💼</span>
+                  Business Expenses
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <TransactionHeader 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onAddTransaction={() => setIsAddDialogOpen(true)}
-          addButtonText="Add Business Expense"
-        />
+        {/* Content Section */}
+        <div className="flex-1 overflow-auto">
+          <div className="p-6 space-y-6">
+            {/* Search and Add Section */}
+            <TransactionHeader 
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onAddTransaction={() => setIsAddDialogOpen(true)}
+              addButtonText="Add Business Expense"
+            />
 
-        <TransactionLayout 
-          transactions={expenseTransactions}
-          isPremium={isPremium}
-          timeFilter={timeFilter}
-          setTimeFilter={setTimeFilter}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          isLoading={isLoading}
-          onUpdate={() => {}} // Real-time updates handle this
-        />
+            {/* Transactions List */}
+            <div className="min-h-0">
+              <TransactionLayout 
+                transactions={expenseTransactions}
+                isPremium={isPremium}
+                timeFilter={timeFilter}
+                setTimeFilter={setTimeFilter}
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                isLoading={isLoading}
+                onUpdate={() => {}} // Real-time updates handle this
+              />
+            </div>
+          </div>
+        </div>
       </div>
       
       <AddTransactionDialog 
