@@ -1,9 +1,8 @@
-
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
@@ -25,6 +24,9 @@ const ProtectedRoute = ({
   const { user, userRole, isPremium, isLoading } = useAuth();
   const { isEntrepreneurMode } = useEntrepreneurMode();
   const location = useLocation();
+  const { toast } = useToast();
+  const [roleTimeout, setRoleTimeout] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   console.log(`[ProtectedRoute] Path: ${location.pathname}`);
   console.log(`[ProtectedRoute] isLoading: ${isLoading}`);
@@ -33,8 +35,40 @@ const ProtectedRoute = ({
   console.log(`[ProtectedRoute] Required Role (effective): ${premium ? 'premium' : (admin || adminOnly) ? 'admin' : requiredRole}`);
   console.log(`[ProtectedRoute] Entrepreneur Mode Only: ${entrepreneurModeOnly}, Is in Entrepreneur Mode: ${isEntrepreneurMode}`);
 
-  if (isLoading) {
-    console.log('[ProtectedRoute] Rendering loading indicator.');
+  // Timeout fallback: jika user sudah ada tapi userRole masih null > 3 detik
+  useEffect(() => {
+    if (user && !userRole && isLoading) {
+      timeoutRef.current = setTimeout(() => {
+        setRoleTimeout(true);
+      }, 3000);
+    } else {
+      setRoleTimeout(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [user, userRole, isLoading]);
+
+  // Tampilkan loading hanya jika user dan userRole sama-sama null dan isLoading true
+  if (isLoading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  // Jika user sudah ada tapi userRole belum didapat setelah timeout
+  if (user && !userRole && (isLoading || roleTimeout)) {
+    if (roleTimeout) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center text-center">
+          <div className="mb-4 text-red-500 font-semibold">Gagal memuat data user, silakan refresh halaman.</div>
+          <button className="px-4 py-2 bg-purple-600 text-white rounded" onClick={() => window.location.reload()}>Refresh</button>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
@@ -53,6 +87,11 @@ const ProtectedRoute = ({
 
   if (effectiveRole === 'admin' && userRole !== 'admin') {
     console.log('[ProtectedRoute] Admin role required, user is not admin. Redirecting to /dashboard.');
+    toast({
+      title: "Admin Access Required",
+      description: "You don't have permission to access this page",
+      variant: "destructive"
+    });
     return <Navigate to="/dashboard" replace />;
   }
 

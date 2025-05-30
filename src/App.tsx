@@ -29,6 +29,7 @@ import BusinessTransactions from '@/pages/BusinessTransactions';
 import BusinessIncome from '@/pages/BusinessIncome';
 import BusinessExpenses from '@/pages/BusinessExpenses';
 import Pos from '@/pages/entrepreneur/Pos';
+import AdminDashboard from '@/pages/AdminDashboard';
 
 // Components
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -202,18 +203,26 @@ function App() {
                 } 
               />
               <Route 
-                path="/finance-reports" 
-                element={
-                  <ProtectedRoute>
-                    <FinanceReports />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
                 path="/pos" 
                 element={
                   <ProtectedRoute>
                     <Pos />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute adminOnly={true}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/finance-reports" 
+                element={
+                  <ProtectedRoute>
+                    <FinanceReports />
                   </ProtectedRoute>
                 } 
               />

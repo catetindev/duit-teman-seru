@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Calendar, Download } from 'lucide-react';
@@ -48,15 +47,15 @@ export function BusinessChart() {
       </CardHeader>
       <CardContent className="pt-6">
         {loading ? (
-          <div className="h-[320px] flex items-center justify-center">
-            <Skeleton className="h-[280px] w-full" />
+          <div className="h-[400px] flex items-center justify-center">
+            <Skeleton className="h-[360px] w-full" />
           </div>
         ) : chartData.length > 0 ? (
-          <div className="h-[320px]">
+          <div className="h-[400px]">
             <ChartContainer 
               config={{ 
-                income: { label: 'Income', color: '#10b981' }, // green-500
-                expense: { label: 'Expense', color: '#3b82f6' }  // blue-500
+                income: { label: 'Income', color: '#10b981' },
+                expense: { label: 'Expense', color: '#3b82f6' }
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
@@ -109,7 +108,7 @@ export function BusinessChart() {
             </ChartContainer>
           </div>
         ) : (
-          <div className="h-[320px] flex items-center justify-center">
+          <div className="h-[400px] flex items-center justify-center">
             <div className="text-center">
               <BarChart className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
               <p className="text-muted-foreground">No data available for the selected timeframe</p>
