@@ -1,25 +1,77 @@
-
 import React from 'react';
 import { Order } from '@/types/entrepreneur';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatDate } from '@/utils/formatUtils';
+import { formatRupiah } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { OrderCard } from './OrderCard';
 
 interface OrderListProps {
   orders: Order[];
   loading: boolean;
   onEdit: (order: Order) => void;
   onDelete: (id: string) => void;
-  onStatusChange: (id: string, status: Order['status']) => void;
+  onStatusChange?: (id: string, status: string) => void;
 }
+
+const getStatusBadgeVariant = (status: string) => {
+  switch (status) {
+    case 'Paid':
+      return 'success';
+    case 'Pending':
+      return 'default';
+    case 'Canceled':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
+};
+
+const formatDate = (date: Date | string) => {
+  return new Date(date).toLocaleDateString('id-ID');
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(amount);
+};
 
 export default function OrderList({ orders, loading, onEdit, onDelete, onStatusChange }: OrderListProps) {
   const isMobile = useIsMobile();
+
+  if (isMobile) {
+    if (loading) {
+      return <div className="flex justify-center p-8">Loading orders...</div>;
+    }
+
+    if (orders.length === 0) {
+      return (
+        <div className="text-center p-8 border rounded-lg bg-muted/20">
+          <p className="mb-4">No orders found</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3 p-2">
+        {orders.map((order) => (
+          <OrderCard
+            key={order.id}
+            order={order}
+            onEdit={() => onEdit(order)}
+            onDelete={() => onDelete(order.id)}
+          />
+        ))}
+      </div>
+    );
+  }
 
   if (loading) {
     return <div className="flex justify-center p-8">Loading orders...</div>;
@@ -29,94 +81,6 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
     return (
       <div className="text-center p-8 border rounded-lg bg-muted/20">
         <p className="mb-4">No orders found. Create your first order!</p>
-      </div>
-    );
-  }
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'Paid':
-        return 'success';
-      case 'Pending':
-        return 'default';
-      case 'Canceled':
-        return 'destructive';
-      default:
-        return 'outline';
-    }
-  };
-
-  // Render mobile card view
-  if (isMobile) {
-    return (
-      <div className="space-y-3">
-        {orders.map((order) => (
-          <Card key={order.id} className="overflow-hidden">
-            <CardContent className="p-3">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-sm leading-tight truncate">
-                    Order #{order.id.substring(0, 8)}...
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {order.customer?.name || 'Unknown Customer'}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 ml-2">
-                  <Button variant="ghost" size="icon" onClick={() => onEdit(order)} className="h-7 w-7">
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => onDelete(order.id)} className="h-7 w-7 text-destructive">
-                    <Trash className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between text-xs mb-3">
-                <span className="text-muted-foreground">
-                  {formatDate(new Date(order.order_date))}
-                </span>
-                <span className="font-semibold text-base">
-                  {formatCurrency(order.total, 'IDR')}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <div className="text-muted-foreground truncate flex-1 mr-2">
-                  {order.payment_method}
-                </div>
-                <Select
-                  value={order.status}
-                  onValueChange={(value: Order['status']) => onStatusChange(order.id, value)}
-                >
-                  <SelectTrigger className="w-[100px] h-6 px-2 text-xs">
-                    <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs px-1 py-0">
-                      {order.status}
-                    </Badge>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Paid">Paid</SelectItem>
-                    <SelectItem value="Canceled">Canceled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {order.payment_proof_url && (
-                <div className="mt-2 text-right">
-                  <a 
-                    href={order.payment_proof_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-500 hover:underline"
-                  >
-                    View proof
-                  </a>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
       </div>
     );
   }
@@ -166,7 +130,7 @@ export default function OrderList({ orders, loading, onEdit, onDelete, onStatusC
                   </div>
                 </TableCell>
                 <TableCell className="text-right font-medium">
-                  {formatCurrency(order.total, 'IDR')}
+                  {formatRupiah(order.total)}
                 </TableCell>
                 <TableCell>
                   <Select

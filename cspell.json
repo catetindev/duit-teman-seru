@@ -119,13 +119,53 @@
     "Expense",
     "tick",
     "Formatter",
-    "formatter"
+    "formatter",
+    "Paid",
+    "Pelanggan",
+    "Tanggal",
+    "Hapus",
+    "proof",
+    "ghost",
+    "jika",
+    "sudah",
+    "tapi",
+    "masih",
+    "detik",
+    "Tampilkan",
+    "hanya",
+    "sama",
+    "Jika",
+    "belum",
+    "didapat",
+    "setelah",
+    "Gagal",
+    "memuat",
+    "silakan"
   ],
   "flagWords": [],
   "ignorePaths": [
     "**/node_modules/**",
     "**/vscode-extension/**",
     "**/.git/**",
-    "**/.DS_Store"
+    "**/.DS_Store",
+    "**/.vscode/**"
+  ],
+  "dictionaries": [
+    "en-gb",
+    "companies",
+    "softwareTerms",
+    "typescript",
+    "node",
+    "html",
+    "css",
+    "bash",
+    "fonts"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "indonesian",
+      "path": "./custom-indonesian.txt",
+      "description": "Indonesian words"
+    }
   ]
 }

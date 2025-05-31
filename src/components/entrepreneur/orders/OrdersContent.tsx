@@ -1,10 +1,9 @@
-
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { Order, Customer, Product } from '@/types/entrepreneur';
 import { OrdersTable } from './OrdersTable';
 import { OrdersEmptyState } from './OrdersEmptyState';
 import { OrdersLoadingState } from './OrdersLoadingState';
-import { OrderFormDialog } from '@/components/entrepreneur/OrderFormDialog';
+import OrderFormDialog from '@/components/entrepreneur/OrderFormDialog';
 
 interface OrdersContentProps {
   orders: Order[];
@@ -66,7 +65,7 @@ export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(
     }
 
     if (orders.length === 0) {
-      return <OrdersEmptyState onCreateFirst={() => setIsFormOpen(true)} />;
+      return <OrdersEmptyState onOpenForm={() => setIsFormOpen(true)} />;
     }
 
     return (
@@ -89,7 +88,7 @@ export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(
           order={selectedOrder}
           customers={customers}
           products={products}
-          onSuccess={handleFormSubmit}
+          onSubmitSuccess={handleFormSubmit}
         />
       </div>
     );
