@@ -26,25 +26,25 @@ export default function Orders() {
     fetchData
   } = useOrders();
 
-  // Create a reference to the OrdersContent component to call the handleOpenForm method
   const contentRef = React.useRef<{ handleOpenForm: () => void } | null>(null);
 
   const handleAddNew = () => {
-    // Call the handleOpenForm method of OrdersContent
     contentRef.current?.handleOpenForm();
   };
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="min-h-screen w-full overflow-x-hidden">
-        {/* Mobile-optimized container with proper spacing */}
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6 space-y-3 sm:space-y-4 lg:space-y-6 pb-20 sm:pb-6">
-          {/* Page Header - Mobile First */}
-          <div className="w-full space-y-3 sm:space-y-4">
+      <div className="min-h-screen w-full">
+        {/* Main container with proper responsive spacing */}
+        <div className="w-full max-w-full mx-auto space-y-4 sm:space-y-6">
+          {/* Header Section - Fixed padding */}
+          <div className="px-3 sm:px-4 lg:px-6 pt-4 sm:pt-6">
             <OrdersHeader onAddNew={handleAddNew} />
-            
-            {/* Filters Section - Responsive */}
-            <div className="w-full bg-white dark:bg-gray-800 rounded-lg border shadow-sm overflow-hidden">
+          </div>
+          
+          {/* Filters Section - Responsive container */}
+          <div className="px-3 sm:px-4 lg:px-6">
+            <div className="w-full bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
               <div className="p-3 sm:p-4">
                 <OrdersFilters
                   searchQuery={searchQuery}
@@ -61,17 +61,22 @@ export default function Orders() {
             </div>
           </div>
           
-          {/* Orders Content - Responsive Container */}
-          <div className="w-full bg-white dark:bg-gray-800 rounded-lg border shadow-sm">
-            <OrdersContent
-              ref={contentRef}
-              orders={filteredOrders}
-              customers={customers}
-              products={products}
-              loading={loading}
-              onDataChange={fetchData}
-            />
+          {/* Content Section - Full width with responsive padding */}
+          <div className="w-full">
+            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 sm:mx-3 sm:border sm:rounded-lg sm:shadow-sm lg:mx-6">
+              <OrdersContent
+                ref={contentRef}
+                orders={filteredOrders}
+                customers={customers}
+                products={products}
+                loading={loading}
+                onDataChange={fetchData}
+              />
+            </div>
           </div>
+          
+          {/* Bottom padding for mobile navigation */}
+          <div className="pb-20 sm:pb-6" />
         </div>
       </div>
     </DashboardLayout>
