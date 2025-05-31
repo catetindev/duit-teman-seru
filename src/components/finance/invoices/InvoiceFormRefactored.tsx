@@ -6,14 +6,12 @@ import { InvoiceFormData } from '@/types/finance';
 import { Customer, Product } from '@/types/entrepreneur';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { InvoiceCustomerForm } from './form/InvoiceCustomerForm';
 import { InvoiceItemsSection } from './form/InvoiceItemsSection';
 import { InvoicePaymentForm } from './form/InvoicePaymentForm';
 import { InvoiceTotalsSection } from './form/InvoiceTotalsSection';
-import { LogoUploader } from './form/LogoUploader';
-import { cn } from '@/lib/utils'; // Import cn utility
+import { cn } from '@/lib/utils';
 
 // Define schema for invoice form
 const invoiceItemSchema = z.object({
@@ -57,7 +55,6 @@ export function InvoiceFormRefactored({
 }: InvoiceFormRefactoredProps) {
   const [taxRate, setTaxRate] = useState(10); // Default 10%
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [activeTab, setActiveTab] = useState('informasi');
 
   // Initialize form with default values
   const form = useForm<z.infer<typeof formSchema>>({
@@ -134,131 +131,68 @@ export function InvoiceFormRefactored({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={cn(
-            "w-full grid grid-cols-3", // Use grid for mobile
-            "bg-muted/60 rounded-full p-1 mb-2" // Existing styles
-          )}>
-            <TabsTrigger value="informasi" className="rounded-full">Informasi Faktur</TabsTrigger>
-            <TabsTrigger value="produk" className="rounded-full">Item & Produk</TabsTrigger>
-            <TabsTrigger value="pembayaran" className="rounded-full">Pembayaran</TabsTrigger>
-          </TabsList>
-          
-          <div className="mt-6">
-            <TabsContent value="informasi" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Informasi Faktur</CardTitle>
-                  <CardDescription>Detail faktur dan informasi pelanggan</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <InvoiceCustomerForm 
-                    form={form} 
-                    customers={customers} 
-                    defaultInvoiceNumber={defaultValues?.invoice_number}
-                    loading={loading}
-                  />
-                </CardContent>
-              </Card>
-              
-              <LogoUploader />
-            </TabsContent>
-            
-            <TabsContent value="produk" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Item & Produk</CardTitle>
-                  <CardDescription>Tambahkan produk atau layanan ke faktur ini</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <InvoiceItemsSection
-                    form={form}
-                    fields={fields}
-                    products={products}
-                    onAddProduct={handleAddProduct}
-                    onAddEmptyItem={() => append({ name: '', description: '', quantity: 1, unit_price: 0, total: 0 })}
-                    onRemove={(index) => {
-                      remove(index);
-                      setTimeout(() => calculateTotals(), 0);
-                    }}
-                    calculateItemTotal={calculateItemTotal}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="pembayaran" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Metode Pembayaran</CardTitle>
-                    <CardDescription>Atur metode dan tenggat waktu pembayaran</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <InvoicePaymentForm form={form} />
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Total Faktur</CardTitle>
-                    <CardDescription>Hitung total, pajak, dan diskon</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <InvoiceTotalsSection 
-                      form={form} 
-                      taxRate={taxRate} 
-                      discountAmount={discountAmount}
-                      setTaxRate={setTaxRate}
-                      setDiscountAmount={setDiscountAmount}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
-        
-        <div className="flex items-center justify-between mt-8">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => {
-              if (activeTab === 'informasi') {
-                onCancel();
-              } else if (activeTab === 'produk') {
-                setActiveTab('informasi');
-              } else if (activeTab === 'pembayaran') {
-                setActiveTab('produk');
-              }
-            }}
-          >
-            {activeTab === 'informasi' ? 'Batal' : 'Kembali'}
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* Customer Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <InvoiceCustomerForm 
+              form={form} 
+              customers={customers} 
+              defaultInvoiceNumber={defaultValues?.invoice_number}
+              loading={loading}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Products */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Products</CardTitle>
+            <CardDescription>Add items to the invoice</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <InvoiceItemsSection
+              form={form}
+              fields={fields}
+              products={products}
+              onAddProduct={handleAddProduct}
+              onAddEmptyItem={() => append({ name: '', description: '', quantity: 1, unit_price: 0, total: 0 })}
+              onRemove={(index) => {
+                remove(index);
+                setTimeout(() => calculateTotals(), 0);
+              }}
+              calculateItemTotal={calculateItemTotal}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Payment & Totals */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment & Totals</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <InvoicePaymentForm form={form} />
+            <InvoiceTotalsSection 
+              form={form} 
+              taxRate={taxRate} 
+              discountAmount={discountAmount}
+              setTaxRate={setTaxRate}
+              setDiscountAmount={setDiscountAmount}
+            />
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
           </Button>
-          
-          <div className="flex gap-2">
-            {activeTab !== 'pembayaran' && (
-              <Button 
-                type="button" 
-                onClick={() => {
-                  if (activeTab === 'informasi') {
-                    setActiveTab('produk');
-                  } else if (activeTab === 'produk') {
-                    setActiveTab('pembayaran');
-                  }
-                }}
-              >
-                Lanjut
-              </Button>
-            )}
-            
-            {activeTab === 'pembayaran' && (
-              <Button type="submit" disabled={loading}>
-                {defaultValues?.id ? 'Perbarui Faktur' : 'Buat Faktur'}
-              </Button>
-            )}
-          </div>
+          <Button type="submit" disabled={loading}>
+            {defaultValues?.id ? 'Update Invoice' : 'Create Invoice'}
+          </Button>
         </div>
       </form>
     </Form>

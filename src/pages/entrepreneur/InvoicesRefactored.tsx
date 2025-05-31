@@ -230,14 +230,14 @@ const InvoicesRefactored = () => {
 
         {/* Invoice Form Dialog */}
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
+          <DialogContent className="!duration-200 !transition-all !data-[state=closed]:slide-out-to-bottom !data-[state=open]:slide-in-from-bottom w-[90vw] sm:max-w-lg lg:max-w-2xl p-0 rounded-lg border shadow-lg">
             <DialogHeader className="p-6 pb-0">
-              <DialogTitle>{selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-xl font-semibold">{selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground mt-1.5">
                 {selectedInvoice ? `Mengedit Faktur #${selectedInvoice.invoice_number}` : 'Masukkan detail faktur baru Anda'}
               </DialogDescription>
             </DialogHeader>
-            <div className="flex-grow overflow-y-auto px-6 pb-6"> {/* Added px-6 pb-6 for padding around form */}
+            <div className="px-6 pb-6 overflow-y-auto scrollbar-thin max-h-[calc(100vh-12rem)]">
               <InvoiceFormRefactored 
                 defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : { invoice_number: invoicesLoading ? 'Loading...' : generateInvoiceNumber() } as Partial<InvoiceFormData>}
                 customers={customers} 
