@@ -36,31 +36,33 @@ export default function Orders() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="flex flex-col h-full">
-        {/* Main content area with proper spacing */}
-        <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
-          {/* Page Header */}
-          <div className="flex flex-col space-y-4">
+      <div className="min-h-screen w-full overflow-x-hidden">
+        {/* Mobile-optimized container with proper spacing */}
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6 space-y-3 sm:space-y-4 lg:space-y-6 pb-20 sm:pb-6">
+          {/* Page Header - Mobile First */}
+          <div className="w-full space-y-3 sm:space-y-4">
             <OrdersHeader onAddNew={handleAddNew} />
             
-            {/* Filters Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 shadow-sm">
-              <OrdersFilters
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-                customerFilter={customerFilter}
-                setCustomerFilter={setCustomerFilter}
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-                customers={customers}
-              />
+            {/* Filters Section - Responsive */}
+            <div className="w-full bg-white dark:bg-gray-800 rounded-lg border shadow-sm overflow-hidden">
+              <div className="p-3 sm:p-4">
+                <OrdersFilters
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  customerFilter={customerFilter}
+                  setCustomerFilter={setCustomerFilter}
+                  dateRange={dateRange}
+                  setDateRange={setDateRange}
+                  customers={customers}
+                />
+              </div>
             </div>
           </div>
           
-          {/* Orders Content */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border shadow-sm overflow-hidden">
+          {/* Orders Content - Responsive Container */}
+          <div className="w-full bg-white dark:bg-gray-800 rounded-lg border shadow-sm">
             <OrdersContent
               ref={contentRef}
               orders={filteredOrders}

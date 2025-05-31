@@ -190,96 +190,105 @@ const ProfitLoss = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-6">
-        {/* Header */}
-        <FinanceHeader
-          title="Laporan Untung Rugi"
-          subtitle="Track your income, expenses, and profitability over time"
-          dateRange={dateRange}
-          onDateRangeChange={handleDateRangeChange}
-          onExportExcel={handleExportExcel}
-          onExportPdf={handleExportPdf}
-        />
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6 space-y-3 sm:space-y-4 lg:space-y-6 pb-20 sm:pb-6">
+          {/* Header */}
+          <FinanceHeader
+            title="Laporan Untung Rugi"
+            subtitle="Track your income, expenses, and profitability over time"
+            dateRange={dateRange}
+            onDateRangeChange={handleDateRangeChange}
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+          />
 
-        <DateRangeOptions onSelect={handleDateRangeChange} />
+          <DateRangeOptions onSelect={handleDateRangeChange} />
 
-        {/* Summary Cards */}
-        <FinancialSummaryCards 
-          data={summary}
-          loading={financialDataLoading} 
-        />
+          {/* Summary Cards */}
+          <FinancialSummaryCards 
+            data={summary}
+            loading={financialDataLoading} 
+          />
 
-        {/* Tabs */}
-        <Tabs 
-          defaultValue="overview" 
-          value={selectedTab}
-          onValueChange={setSelectedTab}
-          className="space-y-4"
-        >
-          <TabsList className="grid grid-cols-3 md:w-[400px]">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="income">Income</TabsTrigger>
-            <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          </TabsList>
-          
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-4">
-            {/* Chart */}
-            <IncomeExpenseChart data={chartData} />
+          {/* Tabs - Mobile Optimized */}
+          <Tabs 
+            defaultValue="overview" 
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+            className="w-full space-y-3 sm:space-y-4"
+          >
+            <div className="w-full overflow-x-auto">
+              <TabsList className="inline-flex min-w-max grid-cols-3 md:w-[400px]">
+                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+                <TabsTrigger value="income" className="text-xs sm:text-sm">Income</TabsTrigger>
+                <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
+              </TabsList>
+            </div>
             
-            {/* Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Expenses by Category */}
-              <ExpenseCategoryChart data={expenseCategories} />
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="w-full space-y-3 sm:space-y-4">
+              {/* Chart */}
+              <div className="w-full overflow-x-auto">
+                <IncomeExpenseChart data={chartData} />
+              </div>
               
-              {/* Recent Expenses */}
-              <RecentExpenses 
-                expenses={expenses} 
-                onViewAll={() => setSelectedTab('expenses')} 
-              />
-            </div>
-          </TabsContent>
-          
-          {/* Income Tab */}
-          <TabsContent value="income" className="space-y-4">
-            {/* Income Overview */}
-            <IncomeOverview summary={summary} />
-          </TabsContent>
-          
-          {/* Expenses Tab */}
-          <TabsContent value="expenses" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Expenses</h3>
-              <Button 
-                onClick={() => {
-                  setSelectedExpense(undefined);
-                  setIsExpenseDialogOpen(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Expense
-              </Button>
-            </div>
+              {/* Stats Grid */}
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
+                {/* Expenses by Category */}
+                <ExpenseCategoryChart data={expenseCategories} />
+                
+                {/* Recent Expenses */}
+                <RecentExpenses 
+                  expenses={expenses} 
+                  onViewAll={() => setSelectedTab('expenses')} 
+                />
+              </div>
+            </TabsContent>
             
-            <ExpensesTable 
-              expenses={expenses}
-              onEdit={handleEditExpense}
-              onDelete={handleDeleteExpense}
-            />
-          </TabsContent>
-        </Tabs>
-        
-        {/* Expense Dialog */}
-        <ExpenseDialog
-          open={isExpenseDialogOpen}
-          onClose={() => {
-            setIsExpenseDialogOpen(false);
-            setSelectedExpense(undefined);
-          }}
-          expense={selectedExpense}
-          categories={categories}
-          onSubmit={handleExpenseSubmit}
-        />
+            {/* Income Tab */}
+            <TabsContent value="income" className="w-full space-y-3 sm:space-y-4">
+              {/* Income Overview */}
+              <IncomeOverview summary={summary} />
+            </TabsContent>
+            
+            {/* Expenses Tab */}
+            <TabsContent value="expenses" className="w-full space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <h3 className="text-base sm:text-lg font-medium">Expenses</h3>
+                <Button 
+                  onClick={() => {
+                    setSelectedExpense(undefined);
+                    setIsExpenseDialogOpen(true);
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                  Add Expense
+                </Button>
+              </div>
+              
+              <div className="w-full overflow-x-auto">
+                <ExpensesTable 
+                  expenses={expenses}
+                  onEdit={handleEditExpense}
+                  onDelete={handleDeleteExpense}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          {/* Expense Dialog */}
+          <ExpenseDialog
+            open={isExpenseDialogOpen}
+            onClose={() => {
+              setIsExpenseDialogOpen(false);
+              setSelectedExpense(undefined);
+            }}
+            expense={selectedExpense}
+            categories={categories}
+            onSubmit={handleExpenseSubmit}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

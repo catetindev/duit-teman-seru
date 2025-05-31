@@ -148,103 +148,113 @@ const FinanceReports = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-6">
-        {/* Header */}
-        <FinanceHeader
-          title="Laporan Keuangan"
-          subtitle="Comprehensive financial insights and reports for your business"
-          dateRange={dateRange}
-          onDateRangeChange={handleDateRangeChange}
-          onExportExcel={handleExportExcel}
-          onExportPdf={handleExportPdf}
-        />
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6 space-y-3 sm:space-y-4 lg:space-y-6 pb-20 sm:pb-6">
+          {/* Header */}
+          <FinanceHeader
+            title="Laporan Keuangan"
+            subtitle="Comprehensive financial insights and reports for your business"
+            dateRange={dateRange}
+            onDateRangeChange={handleDateRangeChange}
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+          />
 
-        {/* Business Health Card */}
-        <BusinessHealthCard comparison={comparison} />
+          {/* Business Health Card */}
+          <BusinessHealthCard comparison={comparison} />
 
-        {/* Summary */}
-        {comparison ? (
-          <ComparisonCards data={comparison} />
-        ) : (
-          <FinancialSummaryCards data={summary} loading={loading} />
-        )}
+          {/* Summary */}
+          {comparison ? (
+            <ComparisonCards data={comparison} />
+          ) : (
+            <FinancialSummaryCards data={summary} loading={loading} />
+          )}
 
-        {/* Tabs */}
-        <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="insights">Insights</TabsTrigger>
-          </TabsList>
-          
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {/* Income & Expenses Chart */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Income vs Expenses</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <IncomeExpenseChart 
-                    data={[
-                      {
-                        name: format(dateRange.from || new Date(), 'MMM yyyy'),
-                        income: summary.totalIncome,
-                        expenses: summary.totalExpenses,
-                        profit: summary.netProfit
-                      }
-                    ]}
-                    height={300}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Expense Categories */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Expense Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ExpenseCategoryChart data={expenseCategories} />
-                </CardContent>
-              </Card>
+          {/* Tabs - Mobile Optimized */}
+          <Tabs defaultValue="overview" className="w-full space-y-3 sm:space-y-4">
+            <div className="w-full overflow-x-auto">
+              <TabsList className="inline-flex min-w-max">
+                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+                <TabsTrigger value="trends" className="text-xs sm:text-sm">Trends</TabsTrigger>
+                <TabsTrigger value="insights" className="text-xs sm:text-sm">Insights</TabsTrigger>
+              </TabsList>
             </div>
             
-            {/* Quick Access Cards */}
-            <QuickAccessCards />
-          </TabsContent>
-          
-          {/* Trends Tab */}
-          <TabsContent value="trends" className="space-y-4">
-            <TrendingChart data={timeSeriesData} />
-          </TabsContent>
-          
-          {/* Insights Tab */}
-          <TabsContent value="insights" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Top Products */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Selling Products</CardTitle>
-                  <CardDescription>
-                    Your best performing products by revenue
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <TopProductsTable products={topProducts} />
-                </CardContent>
-              </Card>
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="w-full space-y-3 sm:space-y-4">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-3">
+                {/* Income & Expenses Chart */}
+                <Card className="lg:col-span-2">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base sm:text-lg">Income vs Expenses</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="w-full overflow-x-auto">
+                      <IncomeExpenseChart 
+                        data={[
+                          {
+                            name: format(dateRange.from || new Date(), 'MMM yyyy'),
+                            income: summary.totalIncome,
+                            expenses: summary.totalExpenses,
+                            profit: summary.netProfit
+                          }
+                        ]}
+                        height={300}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Expense Categories */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base sm:text-lg">Expense Breakdown</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-6">
+                    <ExpenseCategoryChart data={expenseCategories} />
+                  </CardContent>
+                </Card>
+              </div>
               
-              {/* Business Tips */}
-              <BusinessInsights 
-                expenseCategories={expenseCategories}
-                topProducts={topProducts}
-                summary={summary}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
+              {/* Quick Access Cards */}
+              <QuickAccessCards />
+            </TabsContent>
+            
+            {/* Trends Tab */}
+            <TabsContent value="trends" className="w-full space-y-3 sm:space-y-4">
+              <div className="w-full overflow-x-auto">
+                <TrendingChart data={timeSeriesData} />
+              </div>
+            </TabsContent>
+            
+            {/* Insights Tab */}
+            <TabsContent value="insights" className="w-full space-y-3 sm:space-y-4">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
+                {/* Top Products */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base sm:text-lg">Top Selling Products</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      Your best performing products by revenue
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="w-full overflow-x-auto">
+                      <TopProductsTable products={topProducts} />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Business Tips */}
+                <BusinessInsights 
+                  expenseCategories={expenseCategories}
+                  topProducts={topProducts}
+                  summary={summary}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </DashboardLayout>
   );

@@ -42,28 +42,28 @@ export function OrdersTable({
   };
 
   if (isMobile) {
-    // Mobile card layout
+    // Mobile card layout - Optimized for Android
     return (
-      <div className="space-y-3 p-4">
+      <div className="w-full p-3 space-y-3">
         {orders.map((order) => (
-          <Card key={order.id} className="overflow-hidden">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0">
+          <Card key={order.id} className="w-full overflow-hidden">
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 min-w-0 pr-2">
                   <h3 className="font-medium text-sm leading-tight truncate">
                     #{order.id.substring(0, 8)}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
                     {order.customer?.name || 'Unknown Customer'}
                   </p>
                 </div>
-                <Badge className={`text-xs ${getStatusColor(order.status)}`}>
+                <Badge className={`text-xs px-2 py-1 flex-shrink-0 ${getStatusColor(order.status)}`}>
                   {order.status}
                 </Badge>
               </div>
               
               <div className="flex items-center justify-between text-sm mb-3">
-                <span className="text-gray-500 dark:text-gray-400">
+                <span className="text-gray-500 dark:text-gray-400 text-xs">
                   {new Date(order.order_date).toLocaleDateString()}
                 </span>
                 <span className="font-semibold text-gray-900 dark:text-white">
@@ -86,50 +86,56 @@ export function OrdersTable({
     );
   }
 
-  // Desktop table layout
+  // Desktop table layout - Responsive with horizontal scroll
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50 dark:bg-gray-800">
-            <TableHead className="font-medium text-gray-900 dark:text-white">Order ID</TableHead>
-            <TableHead className="font-medium text-gray-900 dark:text-white">Date</TableHead>
-            <TableHead className="font-medium text-gray-900 dark:text-white">Customer</TableHead>
-            <TableHead className="font-medium text-gray-900 dark:text-white text-right">Total</TableHead>
-            <TableHead className="font-medium text-gray-900 dark:text-white">Status</TableHead>
-            <TableHead className="font-medium text-gray-900 dark:text-white">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {orders.map((order) => (
-            <TableRow key={order.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <TableCell className="font-mono text-sm">#{order.id.substring(0, 8)}</TableCell>
-              <TableCell className="text-sm text-gray-600 dark:text-gray-300">
-                {new Date(order.order_date).toLocaleDateString()}
-              </TableCell>
-              <TableCell className="text-sm text-gray-900 dark:text-white max-w-[150px] truncate">
-                {order.customer?.name || "Unknown"}
-              </TableCell>
-              <TableCell className="text-right font-semibold text-gray-900 dark:text-white">
-                {formatRupiah(order.total)}
-              </TableCell>
-              <TableCell>
-                <Badge className={`${getStatusColor(order.status)}`}>
-                  {order.status}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <OrderActions 
-                  order={order} 
-                  onEdit={onEdit} 
-                  onDelete={onDelete}
-                  onStatusChange={onStatusChange}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="w-full">
+      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+        <div className="min-w-full inline-block align-middle">
+          <Table className="min-w-[600px]">
+            <TableHeader>
+              <TableRow className="bg-gray-50 dark:bg-gray-800">
+                <TableHead className="font-medium text-gray-900 dark:text-white w-[120px]">Order ID</TableHead>
+                <TableHead className="font-medium text-gray-900 dark:text-white w-[100px]">Date</TableHead>
+                <TableHead className="font-medium text-gray-900 dark:text-white min-w-[150px]">Customer</TableHead>
+                <TableHead className="font-medium text-gray-900 dark:text-white text-right w-[120px]">Total</TableHead>
+                <TableHead className="font-medium text-gray-900 dark:text-white w-[100px]">Status</TableHead>
+                <TableHead className="font-medium text-gray-900 dark:text-white w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orders.map((order) => (
+                <TableRow key={order.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <TableCell className="font-mono text-sm">{order.id.substring(0, 8)}</TableCell>
+                  <TableCell className="text-sm text-gray-600 dark:text-gray-300">
+                    {new Date(order.order_date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-900 dark:text-white">
+                    <div className="truncate max-w-[150px]">
+                      {order.customer?.name || "Unknown"}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-gray-900 dark:text-white">
+                    {formatRupiah(order.total)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <OrderActions 
+                      order={order} 
+                      onEdit={onEdit} 
+                      onDelete={onDelete}
+                      onStatusChange={onStatusChange}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     </div>
   );
 }
