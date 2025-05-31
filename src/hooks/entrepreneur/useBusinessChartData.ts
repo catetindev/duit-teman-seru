@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,12 +10,25 @@ interface MonthlyData {
   expense: number;
 }
 
-export function useBusinessChartData(months = 6) {
+export function useBusinessChartData() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [chartData, setChartData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<string>('6months');
+
+  const getMonthsCount = (timeframe: string) => {
+    switch (timeframe) {
+      case '3months':
+        return 3;
+      case '6months':
+        return 6;
+      case 'year':
+        return 12;
+      default:
+        return 6;
+    }
+  };
 
   const fetchChartData = useCallback(async () => {
     if (!user) return;
@@ -25,38 +37,73 @@ export function useBusinessChartData(months = 6) {
       setLoading(true);
       const today = new Date();
       const monthsData: MonthlyData[] = [];
+      const monthsToFetch = getMonthsCount(timeframe);
       
       // Fetch data for each month
-      for (let i = 0; i < months; i++) {
+      for (let i = 0; i < monthsToFetch; i++) {
         const currentMonth = subMonths(today, i);
         const startDate = startOfMonth(currentMonth);
         const endDate = endOfMonth(currentMonth);
         const monthLabel = format(currentMonth, 'MMM yyyy');
         
-        // Fetch income for this month
-        const { data: ordersData, error: ordersError } = await supabase
-          .from('orders')
-          .select('total')
-          .eq('user_id', user.id)
-          .eq('status', 'Paid')
-          .gte('order_date', startDate.toISOString())
-          .lte('order_date', endDate.toISOString());
+        // Fetch all data in parallel for better performance
+        const [
+          ordersResult,
+          transactionIncomeResult,
+          businessExpensesResult,
+          transactionExpensesResult
+        ] = await Promise.all([
+          // Fetch income from orders
+          supabase
+            .from('orders')
+            .select('total')
+            .eq('user_id', user.id)
+            .eq('status', 'Paid')
+            .gte('order_date', startDate.toISOString())
+            .lte('order_date', endDate.toISOString()),
+          
+          // Fetch income from business transactions
+          supabase
+            .from('transactions')
+            .select('amount')
+            .eq('user_id', user.id)
+            .eq('is_business', true)
+            .eq('type', 'income')
+            .gte('date', startDate.toISOString())
+            .lte('date', endDate.toISOString()),
+          
+          // Fetch expenses from business_expenses
+          supabase
+            .from('business_expenses')
+            .select('amount')
+            .eq('user_id', user.id)
+            .gte('date', startDate.toISOString())
+            .lte('date', endDate.toISOString()),
+          
+          // Fetch expenses from business transactions
+          supabase
+            .from('transactions')
+            .select('amount')
+            .eq('user_id', user.id)
+            .eq('is_business', true)
+            .eq('type', 'expense')
+            .gte('date', startDate.toISOString())
+            .lte('date', endDate.toISOString())
+        ]);
 
-        if (ordersError) throw ordersError;
+        // Check for errors
+        if (ordersResult.error) throw ordersResult.error;
+        if (transactionIncomeResult.error) throw transactionIncomeResult.error;
+        if (businessExpensesResult.error) throw businessExpensesResult.error;
+        if (transactionExpensesResult.error) throw transactionExpensesResult.error;
 
-        // Fetch expenses for this month
-        const { data: expensesData, error: expensesError } = await supabase
-          .from('business_expenses')
-          .select('amount')
-          .eq('user_id', user.id)
-          .gte('date', startDate.toISOString())
-          .lte('date', endDate.toISOString());
-
-        if (expensesError) throw expensesError;
-
-        // Calculate totals for this month
-        const monthIncome = ordersData.reduce((sum, order) => sum + Number(order.total), 0);
-        const monthExpenses = expensesData.reduce((sum, expense) => sum + Number(expense.amount), 0);
+        // Calculate total income (orders + transaction income)
+        const monthIncome = (ordersResult.data || []).reduce((sum, order) => sum + Number(order.total), 0) +
+                          (transactionIncomeResult.data || []).reduce((sum, tx) => sum + Number(tx.amount), 0);
+        
+        // Calculate total expenses (business expenses + transaction expenses)
+        const monthExpenses = (businessExpensesResult.data || []).reduce((sum, expense) => sum + Number(expense.amount), 0) +
+                            (transactionExpensesResult.data || []).reduce((sum, tx) => sum + Number(tx.amount), 0);
 
         // Add data point for this month
         monthsData.unshift({
@@ -77,11 +124,11 @@ export function useBusinessChartData(months = 6) {
     } finally {
       setLoading(false);
     }
-  }, [user, months, toast]);
+  }, [user, timeframe, toast]);
 
   useEffect(() => {
     fetchChartData();
-  }, [fetchChartData, timeframe]);
+  }, [fetchChartData]);
 
   return {
     chartData,

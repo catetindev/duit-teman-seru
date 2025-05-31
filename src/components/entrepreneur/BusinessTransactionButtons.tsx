@@ -111,7 +111,7 @@ export function BusinessTransactionButtons({
           onClick={handleExpenseClick} 
           className={`w-full py-6 h-auto ${
             isEntrepreneurMode 
-              ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+              ? 'bg-red-500 hover:bg-red-600 text-white' 
               : 'bg-gray-300 hover:bg-gray-400 text-gray-600 cursor-not-allowed'
           }`}
           size="lg"

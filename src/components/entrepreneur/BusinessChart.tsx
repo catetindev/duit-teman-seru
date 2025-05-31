@@ -21,6 +21,27 @@ import { Button } from '@/components/ui/button';
 export function BusinessChart() {
   const { chartData, loading, timeframe, setTimeframe } = useBusinessChartData();
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background p-3 border rounded-lg shadow-md">
+          <p className="font-medium mb-2">{label}</p>
+          <div className="space-y-1">
+            <p className="text-sm flex items-center">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2" />
+              <span>Income: {formatCurrency(payload[0].value, 'IDR')}</span>
+            </p>
+            <p className="text-sm flex items-center">
+              <span className="w-2 h-2 bg-red-500 rounded-full mr-2" />
+              <span>Expense: {formatCurrency(payload[1].value, 'IDR')}</span>
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card className="border-0 shadow-md overflow-hidden bg-white dark:bg-gray-800">
       <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
@@ -52,60 +73,48 @@ export function BusinessChart() {
           </div>
         ) : chartData.length > 0 ? (
           <div className="h-[400px]">
-            <ChartContainer 
-              config={{ 
-                income: { label: 'Income', color: '#10b981' },
-                expense: { label: 'Expense', color: '#3b82f6' }
-              }}
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsBarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => {
-                      if (value >= 1000000) return `${value / 1000000}M`;
-                      return `${value / 1000}K`;
-                    }}
-                  />
-                  <Tooltip
-                    formatter={(value: any) => [formatCurrency(value, 'IDR'), '']}
-                    contentStyle={{ 
-                      borderRadius: '6px', 
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', 
-                      border: '1px solid #e5e7eb',
-                      padding: '8px 12px'
-                    }}
-                  />
-                  <Legend iconType="circle" iconSize={8} />
-                  <Bar 
-                    dataKey="income" 
-                    name="Income" 
-                    fill="var(--color-income)" 
-                    radius={[4, 4, 0, 0]} 
-                    barSize={24}
-                    animationDuration={1000}
-                  />
-                  <Bar 
-                    dataKey="expense" 
-                    name="Expense" 
-                    fill="var(--color-expense)" 
-                    radius={[4, 4, 0, 0]} 
-                    barSize={24}
-                    animationDuration={1000}
-                    animationBegin={300}
-                  />
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsBarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="month" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => {
+                    if (value >= 1000000) return `${value / 1000000}M`;
+                    if (value >= 1000) return `${value / 1000}K`;
+                    return value;
+                  }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend 
+                  verticalAlign="top" 
+                  height={36}
+                  iconType="circle"
+                  iconSize={8}
+                />
+                <Bar 
+                  dataKey="income" 
+                  name="Income" 
+                  fill="var(--color-income, #10b981)" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={32}
+                />
+                <Bar 
+                  dataKey="expense" 
+                  name="Expense" 
+                  fill="var(--color-expense, #ef4444)" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={32}
+                />
+              </RechartsBarChart>
+            </ResponsiveContainer>
           </div>
         ) : (
           <div className="h-[400px] flex items-center justify-center">
