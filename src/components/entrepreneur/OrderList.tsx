@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Edit, Trash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatRupiah } from '@/lib/utils';
+import { formatRupiah } from '@/utils/formatRupiah';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
