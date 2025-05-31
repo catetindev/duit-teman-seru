@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { startOfMonth, endOfMonth } from 'date-fns';
@@ -21,9 +20,11 @@ import { FinanceHeader } from '@/components/finance/reports/FinanceHeader';
 import { DateRangeOptions } from '@/components/finance/reports/DateRangeOptions';
 import { RecentExpenses } from '@/components/finance/expenses/RecentExpenses';
 import { IncomeOverview } from '@/components/finance/reports/IncomeOverview';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ProfitLoss = () => {
   const { isPremium } = useAuth();
+  const isMobile = useIsMobile();
   const [selectedTab, setSelectedTab] = useState('overview');
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<BusinessExpense | undefined>(undefined);
@@ -191,78 +192,96 @@ const ProfitLoss = () => {
   return (
     <DashboardLayout isPremium={isPremium}>
       <div className="min-h-screen w-full overflow-x-hidden">
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6 space-y-3 sm:space-y-4 lg:space-y-6 pb-20 sm:pb-6">
-          {/* Header */}
-          <FinanceHeader
-            title="Laporan Untung Rugi"
-            subtitle="Track your income, expenses, and profitability over time"
-            dateRange={dateRange}
-            onDateRangeChange={handleDateRangeChange}
-            onExportExcel={handleExportExcel}
-            onExportPdf={handleExportPdf}
-          />
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-6 space-y-2 sm:space-y-3 lg:space-y-6 pb-20 sm:pb-6">
+          {/* Header - Fully Responsive */}
+          <div className="w-full">
+            <FinanceHeader
+              title="Laporan Untung Rugi"
+              subtitle="Track your income, expenses, and profitability over time"
+              dateRange={dateRange}
+              onDateRangeChange={handleDateRangeChange}
+              onExportExcel={handleExportExcel}
+              onExportPdf={handleExportPdf}
+            />
+          </div>
 
-          <DateRangeOptions onSelect={handleDateRangeChange} />
+          {/* Date Range Options - Mobile Optimized */}
+          <div className="w-full overflow-x-auto">
+            <DateRangeOptions onSelect={handleDateRangeChange} />
+          </div>
 
-          {/* Summary Cards */}
-          <FinancialSummaryCards 
-            data={summary}
-            loading={financialDataLoading} 
-          />
+          {/* Summary Cards - Responsive Grid */}
+          <div className="w-full">
+            <FinancialSummaryCards 
+              data={summary}
+              loading={financialDataLoading} 
+            />
+          </div>
 
           {/* Tabs - Mobile Optimized */}
           <Tabs 
             defaultValue="overview" 
             value={selectedTab}
             onValueChange={setSelectedTab}
-            className="w-full space-y-3 sm:space-y-4"
+            className="w-full space-y-2 sm:space-y-3 lg:space-y-4"
           >
             <div className="w-full overflow-x-auto">
-              <TabsList className="inline-flex min-w-max grid-cols-3 md:w-[400px]">
-                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-                <TabsTrigger value="income" className="text-xs sm:text-sm">Income</TabsTrigger>
-                <TabsTrigger value="expenses" className="text-xs sm:text-sm">Expenses</TabsTrigger>
+              <TabsList className="inline-flex min-w-max h-8 sm:h-9 md:h-10">
+                <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-3">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="income" className="text-xs sm:text-sm px-2 sm:px-3">
+                  Income
+                </TabsTrigger>
+                <TabsTrigger value="expenses" className="text-xs sm:text-sm px-2 sm:px-3">
+                  Expenses
+                </TabsTrigger>
               </TabsList>
             </div>
             
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="w-full space-y-3 sm:space-y-4">
-              {/* Chart */}
-              <div className="w-full overflow-x-auto">
+            {/* Overview Tab - Mobile First */}
+            <TabsContent value="overview" className="w-full space-y-2 sm:space-y-3 lg:space-y-4">
+              {/* Chart - Responsive Container */}
+              <div className="w-full overflow-hidden">
                 <IncomeExpenseChart data={chartData} />
               </div>
               
-              {/* Stats Grid */}
-              <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
+              {/* Stats Grid - Responsive */}
+              <div className="grid gap-2 sm:gap-3 lg:gap-4 grid-cols-1 md:grid-cols-2">
                 {/* Expenses by Category */}
-                <ExpenseCategoryChart data={expenseCategories} />
+                <div className="w-full overflow-hidden">
+                  <ExpenseCategoryChart data={expenseCategories} />
+                </div>
                 
                 {/* Recent Expenses */}
-                <RecentExpenses 
-                  expenses={expenses} 
-                  onViewAll={() => setSelectedTab('expenses')} 
-                />
+                <div className="w-full overflow-hidden">
+                  <RecentExpenses 
+                    expenses={expenses} 
+                    onViewAll={() => setSelectedTab('expenses')} 
+                  />
+                </div>
               </div>
             </TabsContent>
             
-            {/* Income Tab */}
-            <TabsContent value="income" className="w-full space-y-3 sm:space-y-4">
-              {/* Income Overview */}
-              <IncomeOverview summary={summary} />
+            {/* Income Tab - Mobile Optimized */}
+            <TabsContent value="income" className="w-full space-y-2 sm:space-y-3 lg:space-y-4">
+              <div className="w-full overflow-hidden">
+                <IncomeOverview summary={summary} />
+              </div>
             </TabsContent>
             
-            {/* Expenses Tab */}
-            <TabsContent value="expenses" className="w-full space-y-3 sm:space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <h3 className="text-base sm:text-lg font-medium">Expenses</h3>
+            {/* Expenses Tab - Mobile Optimized */}
+            <TabsContent value="expenses" className="w-full space-y-2 sm:space-y-3 lg:space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
+                <h3 className="text-sm sm:text-base lg:text-lg font-medium">Expenses</h3>
                 <Button 
                   onClick={() => {
                     setSelectedExpense(undefined);
                     setIsExpenseDialogOpen(true);
                   }}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto h-8 sm:h-9 lg:h-10 text-xs sm:text-sm"
                 >
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Add Expense
                 </Button>
               </div>

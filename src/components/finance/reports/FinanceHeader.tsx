@@ -10,6 +10,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type FinanceHeaderProps = {
   title: string;
@@ -28,36 +29,62 @@ export const FinanceHeader = ({
   onExportExcel,
   onExportPdf
 }: FinanceHeaderProps) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        <p className="text-muted-foreground">{subtitle}</p>
+    <div className="w-full space-y-3 sm:space-y-4">
+      {/* Title Section */}
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight truncate">
+          {title}
+        </h1>
+        <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
+          {subtitle}
+        </p>
       </div>
       
-      <div className="flex items-center gap-2">
-        <DatePickerWithRange 
-          date={dateRange} 
-          onDateChange={onDateRangeChange} 
-        />
+      {/* Controls Section - Stack on mobile, inline on desktop */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0">
+          <DatePickerWithRange 
+            date={dateRange} 
+            onDateChange={onDateRangeChange}
+            className="w-full sm:w-auto"
+          />
+        </div>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-1">
-              <Download className="h-4 w-4 mr-1" /> Export
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={onExportExcel} className="cursor-pointer">
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              <span>Export as Excel</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onExportPdf} className="cursor-pointer">
-              <FileText className="mr-2 h-4 w-4" />
-              <span>Export as PDF</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                className={`gap-1 ${isMobile ? 'w-full' : 'w-auto'} h-9 sm:h-10`}
+              >
+                <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="text-xs sm:text-sm">Export</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-48 bg-white dark:bg-gray-800 border shadow-lg z-50"
+            >
+              <DropdownMenuItem 
+                onClick={onExportExcel} 
+                className="cursor-pointer text-xs sm:text-sm"
+              >
+                <FileSpreadsheet className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Export as Excel</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={onExportPdf} 
+                className="cursor-pointer text-xs sm:text-sm"
+              >
+                <FileText className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Export as PDF</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );

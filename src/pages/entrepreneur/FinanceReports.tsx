@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -20,9 +19,11 @@ import { FinanceHeader } from '@/components/finance/reports/FinanceHeader';
 import { QuickAccessCards } from '@/components/finance/reports/QuickAccessCards';
 import { BusinessInsights } from '@/components/finance/reports/BusinessInsights';
 import { TrendingChart } from '@/components/finance/reports/TrendingChart';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const FinanceReports = () => {
   const { isPremium } = useAuth();
+  const isMobile = useIsMobile();
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date())
@@ -37,12 +38,9 @@ const FinanceReports = () => {
     fetchFinancialData
   } = useFinancialData();
 
-  // Generate chart data for the income vs expenses over time
   const [timeSeriesData, setTimeSeriesData] = useState<any[]>([]);
 
-  // Generate sample chart data
   const generateChartData = () => {
-    // For demo purposes - in a real app, this would come from API
     const currentMonth = new Date().getMonth();
     const data = [];
     
@@ -50,7 +48,6 @@ const FinanceReports = () => {
       const month = new Date();
       month.setMonth(currentMonth - 5 + i);
       
-      // Create randomized but somewhat realistic data
       const income = Math.floor(Math.random() * 10000000) + 5000000;
       const expenses = Math.floor(Math.random() * 7000000) + 3000000;
       const profit = income - expenses;
@@ -66,14 +63,12 @@ const FinanceReports = () => {
     setTimeSeriesData(data);
   };
 
-  // Handle date range change
   const handleDateRangeChange = (range: DateRange | undefined) => {
     if (range?.from) {
       setDateRange(range);
     }
   };
 
-  // Handle export actions
   const handleExportExcel = () => {
     try {
       if (!dateRange.from || !dateRange.to) {
@@ -134,7 +129,6 @@ const FinanceReports = () => {
     }
   };
 
-  // Load financial data when date range changes
   useEffect(() => {
     if (dateRange.from) {
       fetchFinancialData({
@@ -149,46 +143,58 @@ const FinanceReports = () => {
   return (
     <DashboardLayout isPremium={isPremium}>
       <div className="min-h-screen w-full overflow-x-hidden">
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6 space-y-3 sm:space-y-4 lg:space-y-6 pb-20 sm:pb-6">
-          {/* Header */}
-          <FinanceHeader
-            title="Laporan Keuangan"
-            subtitle="Comprehensive financial insights and reports for your business"
-            dateRange={dateRange}
-            onDateRangeChange={handleDateRangeChange}
-            onExportExcel={handleExportExcel}
-            onExportPdf={handleExportPdf}
-          />
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-6 space-y-2 sm:space-y-3 lg:space-y-6 pb-20 sm:pb-6">
+          {/* Header - Fully Responsive */}
+          <div className="w-full">
+            <FinanceHeader
+              title="Laporan Keuangan"
+              subtitle="Comprehensive financial insights and reports for your business"
+              dateRange={dateRange}
+              onDateRangeChange={handleDateRangeChange}
+              onExportExcel={handleExportExcel}
+              onExportPdf={handleExportPdf}
+            />
+          </div>
 
-          {/* Business Health Card */}
-          <BusinessHealthCard comparison={comparison} />
+          {/* Business Health Card - Mobile Optimized */}
+          <div className="w-full overflow-hidden">
+            <BusinessHealthCard comparison={comparison} />
+          </div>
 
-          {/* Summary */}
-          {comparison ? (
-            <ComparisonCards data={comparison} />
-          ) : (
-            <FinancialSummaryCards data={summary} loading={loading} />
-          )}
+          {/* Summary - Responsive */}
+          <div className="w-full">
+            {comparison ? (
+              <ComparisonCards data={comparison} />
+            ) : (
+              <FinancialSummaryCards data={summary} loading={loading} />
+            )}
+          </div>
 
           {/* Tabs - Mobile Optimized */}
-          <Tabs defaultValue="overview" className="w-full space-y-3 sm:space-y-4">
+          <Tabs defaultValue="overview" className="w-full space-y-2 sm:space-y-3 lg:space-y-4">
             <div className="w-full overflow-x-auto">
-              <TabsList className="inline-flex min-w-max">
-                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-                <TabsTrigger value="trends" className="text-xs sm:text-sm">Trends</TabsTrigger>
-                <TabsTrigger value="insights" className="text-xs sm:text-sm">Insights</TabsTrigger>
+              <TabsList className="inline-flex min-w-max h-8 sm:h-9 md:h-10">
+                <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-3">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="trends" className="text-xs sm:text-sm px-2 sm:px-3">
+                  Trends
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="text-xs sm:text-sm px-2 sm:px-3">
+                  Insights
+                </TabsTrigger>
               </TabsList>
             </div>
             
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="w-full space-y-3 sm:space-y-4">
-              <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-3">
+            {/* Overview Tab - Mobile First */}
+            <TabsContent value="overview" className="w-full space-y-2 sm:space-y-3 lg:space-y-4">
+              <div className="grid gap-2 sm:gap-3 lg:gap-4 grid-cols-1 lg:grid-cols-3">
                 {/* Income & Expenses Chart */}
-                <Card className="lg:col-span-2">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base sm:text-lg">Income vs Expenses</CardTitle>
+                <Card className="lg:col-span-2 overflow-hidden">
+                  <CardHeader className="pb-2 sm:pb-3">
+                    <CardTitle className="text-sm sm:text-base lg:text-lg">Income vs Expenses</CardTitle>
                   </CardHeader>
-                  <CardContent className="p-3 sm:p-6">
+                  <CardContent className="p-2 sm:p-3 lg:p-6">
                     <div className="w-full overflow-x-auto">
                       <IncomeExpenseChart 
                         data={[
@@ -199,46 +205,48 @@ const FinanceReports = () => {
                             profit: summary.netProfit
                           }
                         ]}
-                        height={300}
+                        height={isMobile ? 250 : 300}
                       />
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Expense Categories */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base sm:text-lg">Expense Breakdown</CardTitle>
+                <Card className="overflow-hidden">
+                  <CardHeader className="pb-2 sm:pb-3">
+                    <CardTitle className="text-sm sm:text-base lg:text-lg">Expense Breakdown</CardTitle>
                   </CardHeader>
-                  <CardContent className="p-3 sm:p-6">
+                  <CardContent className="p-2 sm:p-3 lg:p-6">
                     <ExpenseCategoryChart data={expenseCategories} />
                   </CardContent>
                 </Card>
               </div>
               
               {/* Quick Access Cards */}
-              <QuickAccessCards />
+              <div className="w-full overflow-hidden">
+                <QuickAccessCards />
+              </div>
             </TabsContent>
             
-            {/* Trends Tab */}
-            <TabsContent value="trends" className="w-full space-y-3 sm:space-y-4">
-              <div className="w-full overflow-x-auto">
+            {/* Trends Tab - Mobile Optimized */}
+            <TabsContent value="trends" className="w-full space-y-2 sm:space-y-3 lg:space-y-4">
+              <div className="w-full overflow-hidden">
                 <TrendingChart data={timeSeriesData} />
               </div>
             </TabsContent>
             
-            {/* Insights Tab */}
-            <TabsContent value="insights" className="w-full space-y-3 sm:space-y-4">
-              <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
+            {/* Insights Tab - Mobile Optimized */}
+            <TabsContent value="insights" className="w-full space-y-2 sm:space-y-3 lg:space-y-4">
+              <div className="grid gap-2 sm:gap-3 lg:gap-4 grid-cols-1 md:grid-cols-2">
                 {/* Top Products */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base sm:text-lg">Top Selling Products</CardTitle>
+                <Card className="overflow-hidden">
+                  <CardHeader className="pb-2 sm:pb-3">
+                    <CardTitle className="text-sm sm:text-base lg:text-lg">Top Selling Products</CardTitle>
                     <CardDescription className="text-xs sm:text-sm">
                       Your best performing products by revenue
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="p-3 sm:p-6">
+                  <CardContent className="p-2 sm:p-3 lg:p-6">
                     <div className="w-full overflow-x-auto">
                       <TopProductsTable products={topProducts} />
                     </div>
@@ -246,11 +254,13 @@ const FinanceReports = () => {
                 </Card>
                 
                 {/* Business Tips */}
-                <BusinessInsights 
-                  expenseCategories={expenseCategories}
-                  topProducts={topProducts}
-                  summary={summary}
-                />
+                <div className="w-full overflow-hidden">
+                  <BusinessInsights 
+                    expenseCategories={expenseCategories}
+                    topProducts={topProducts}
+                    summary={summary}
+                  />
+                </div>
               </div>
             </TabsContent>
           </Tabs>
