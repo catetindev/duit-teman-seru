@@ -2,8 +2,8 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
-import { Filter, Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Filter, Search, X } from 'lucide-react';
 import { Customer } from '@/types/entrepreneur';
 import { DatePicker } from '@/components/ui/date-picker';
 import { DateRange } from 'react-day-picker';
@@ -35,80 +35,94 @@ export function OrdersFilters({
 }: OrdersFiltersProps) {
   const { t } = useLanguage();
 
-  // Handle DateRange type correctly
   const handleDateChange = (newDateRange: DateRange | undefined) => {
     setDateRange(newDateRange);
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div className="space-y-4">
+      {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder={t('order.search')}
+          placeholder="Search orders..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-10 h-10 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
         />
       </div>
       
-      <Select value={statusFilter} onValueChange={setStatusFilter}>
-        <SelectTrigger>
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            <span>
-              {statusFilter === 'all' ? t('order.allStatuses') : t(`order.status.${statusFilter.toLowerCase()}`)}
-            </span>
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t('order.allStatuses')}</SelectItem>
-          <SelectItem value="Pending">{t('order.status.pending')}</SelectItem>
-          <SelectItem value="Paid">{t('order.status.paid')}</SelectItem>
-          <SelectItem value="Canceled">{t('order.status.canceled')}</SelectItem>
-        </SelectContent>
-      </Select>
-      
-      <Select value={customerFilter} onValueChange={setCustomerFilter}>
-        <SelectTrigger>
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            <span>
-              {customerFilter === 'all' ? t('order.allCustomers') : 
-               customers.find(c => c.id === customerFilter)?.name || 'Customer'}
-            </span>
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t('order.allCustomers')}</SelectItem>
-          {customers.map(customer => (
-            <SelectItem key={customer.id} value={customer.id}>
-              {customer.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      
-      <DatePicker
-        date={dateRange}
-        onSelect={handleDateChange}
-        preText="Date: "
-        placeholder={t('order.selectDates')}
-      />
-      
-      {dateRange?.from && (
-        <div className="md:col-span-4 flex items-center">
-          <span className="text-sm">
-            {t('order.filteredByDate')}: {formatDateRange(dateRange.from, dateRange.to || dateRange.from)}
-          </span>
+      {/* Filters Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Status Filter */}
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-400" />
+              <span className="text-sm">
+                {statusFilter === 'all' ? 'All Status' : statusFilter}
+              </span>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Paid">Paid</SelectItem>
+            <SelectItem value="Canceled">Canceled</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        {/* Customer Filter */}
+        <Select value={customerFilter} onValueChange={setCustomerFilter}>
+          <SelectTrigger className="h-10 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-400" />
+              <span className="text-sm truncate">
+                {customerFilter === 'all' ? 'All Customers' : 
+                 customers.find(c => c.id === customerFilter)?.name || 'Customer'}
+              </span>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Customers</SelectItem>
+            {customers.map(customer => (
+              <SelectItem key={customer.id} value={customer.id}>
+                {customer.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {/* Date Range Picker */}
+        <DatePicker
+          date={dateRange}
+          onSelect={handleDateChange}
+          preText=""
+          placeholder="Select dates"
+        />
+        
+        {/* Clear Filters Button */}
+        {(searchQuery || statusFilter !== 'all' || customerFilter !== 'all' || dateRange) && (
           <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setDateRange(undefined)}
-            className="ml-2 h-6 text-xs"
+            variant="outline" 
+            onClick={() => {
+              setSearchQuery('');
+              setStatusFilter('all');
+              setCustomerFilter('all');
+              setDateRange(undefined);
+            }}
+            className="h-10 text-sm"
           >
-            {t('order.clear')}
+            <X className="h-4 w-4 mr-2" />
+            Clear All
           </Button>
+        )}
+      </div>
+      
+      {/* Active filters indicator */}
+      {dateRange?.from && (
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <span>Date range: {formatDateRange(dateRange.from, dateRange.to || dateRange.from)}</span>
         </div>
       )}
     </div>
