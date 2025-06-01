@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -44,4 +45,22 @@ export interface OrderProduct {
   quantity: number;
   price?: number;
   name?: string;
+}
+
+export interface Invoice {
+  id: string;
+  invoice_number: string;
+  customer_id: string;
+  items: any[];
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
+  status: string;
+  payment_method?: string;
+  payment_due_date: string;
+  payment_proof_url?: string;
+  notes?: string;
+  created_at: string;
+  user_id: string;
 }
