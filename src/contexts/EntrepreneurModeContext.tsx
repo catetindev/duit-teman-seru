@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,6 +33,15 @@ export function EntrepreneurModeProvider({ children }: EntrepreneurModeProviderP
     
     setIsLoading(false);
   }, []);
+  
+  // Add or remove entrepreneur-mode class on <body>
+  useEffect(() => {
+    if (isEntrepreneurMode) {
+      document.body.classList.add('entrepreneur-mode');
+    } else {
+      document.body.classList.remove('entrepreneur-mode');
+    }
+  }, [isEntrepreneurMode]);
   
   // Function to toggle entrepreneur mode
   const toggleEntrepreneurMode = () => {

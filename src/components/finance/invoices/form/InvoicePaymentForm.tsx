@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -17,80 +16,79 @@ interface InvoicePaymentFormProps {
 
 export function InvoicePaymentForm({ form }: InvoicePaymentFormProps) {
   return (
-    <div className="space-y-4">
-      <FormField
-        control={form.control}
-        name="status"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Status</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="Paid">Paid</SelectItem>
-                <SelectItem value="Unpaid">Unpaid</SelectItem>
-                <SelectItem value="Overdue">Overdue</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Status */}
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status Pembayaran</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Paid">Lunas</SelectItem>
+                  <SelectItem value="Unpaid">Belum Bayar</SelectItem>
+                  <SelectItem value="Overdue">Terlambat</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={form.control}
-        name="payment_method"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Payment Method</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="Cash">Cash</SelectItem>
-                <SelectItem value="Transfer">Bank Transfer</SelectItem>
-                <SelectItem value="QRIS">QRIS</SelectItem>
-                <SelectItem value="Credit Card">Credit Card</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        {/* Payment Method */}
+        <FormField
+          control={form.control}
+          name="payment_method"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Metode Pembayaran</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih metode pembayaran" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Cash">Tunai</SelectItem>
+                  <SelectItem value="Transfer">Transfer Bank</SelectItem>
+                  <SelectItem value="QRIS">QRIS</SelectItem>
+                  <SelectItem value="Credit Card">Kartu Kredit</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
+      {/* Due Date */}
       <FormField
         control={form.control}
         name="payment_due_date"
         render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Due Date</FormLabel>
+          <FormItem>
+            <FormLabel>Jatuh Tempo</FormLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
-                    variant={"outline"}
+                    variant="outline"
                     className={cn(
-                      "pl-3 text-left font-normal",
+                      "w-full pl-3 text-left font-normal",
                       !field.value && "text-muted-foreground"
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "PPP")
+                      format(field.value, "dd MMMM yyyy")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>Pilih tanggal</span>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
@@ -102,6 +100,7 @@ export function InvoicePaymentForm({ form }: InvoicePaymentFormProps) {
                   selected={field.value}
                   onSelect={field.onChange}
                   initialFocus
+                  disabled={(date) => date < new Date()}
                 />
               </PopoverContent>
             </Popover>
@@ -110,16 +109,17 @@ export function InvoicePaymentForm({ form }: InvoicePaymentFormProps) {
         )}
       />
 
+      {/* Notes */}
       <FormField
         control={form.control}
         name="notes"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Notes (Optional)</FormLabel>
+            <FormLabel>Catatan (Opsional)</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Any additional notes for this invoice"
-                className="resize-none h-24"
+                placeholder="Tambahkan catatan untuk faktur ini..."
+                className="resize-none h-20"
                 {...field}
               />
             </FormControl>

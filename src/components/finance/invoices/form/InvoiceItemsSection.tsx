@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Product } from '@/types/entrepreneur';
 import { formatCurrency } from '@/utils/formatUtils';
 import { InvoiceItemRow } from './InvoiceItemRow';
-import { InvoiceItemCard } from './InvoiceItemCard'; // Import the new component
-import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile hook
+import { InvoiceItemCard } from './InvoiceItemCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface InvoiceItemsSectionProps {
   form: UseFormReturn<any>;
@@ -28,80 +28,83 @@ export function InvoiceItemsSection({
   onRemove,
   calculateItemTotal
 }: InvoiceItemsSectionProps) {
-  const isMobile = useIsMobile(); // Use the hook
+  const isMobile = useIsMobile();
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <h3 className="font-medium">Item Faktur</h3>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+      {/* Quick Actions */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
           <Select onValueChange={onAddProduct}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Tambah dari produk" />
+            <SelectTrigger>
+              <SelectValue placeholder="🔍 Cari produk..." />
             </SelectTrigger>
             <SelectContent>
-              {products.map((product) => (
-                <SelectItem key={product.id} value={product.id}>
-                  {product.name} - {formatCurrency(Number(product.price), 'IDR')}
-                </SelectItem>
-              ))}
+              <div className="max-h-[300px] overflow-y-auto">
+                {products.map((product) => (
+                  <SelectItem key={product.id} value={product.id}>
+                    <div className="flex justify-between items-center w-full">
+                      <span>{product.name}</span>
+                      <span className="text-muted-foreground">
+                        {formatCurrency(Number(product.price), 'IDR')}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </div>
             </SelectContent>
           </Select>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onAddEmptyItem}
-            className="w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 mr-1" /> Tambah Item Manual
-          </Button>
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onAddEmptyItem}
+          className="sm:w-auto"
+        >
+          <Plus className="h-4 w-4 mr-2" /> Item Baru
+        </Button>
       </div>
 
+      {/* Items List */}
       {fields.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground border rounded-md">
-          Belum ada item ditambahkan
+        <div className="text-center p-8 border-2 border-dashed rounded-lg">
+          <p className="text-muted-foreground">Belum ada item. Pilih produk atau tambahkan item baru.</p>
+        </div>
+      ) : isMobile ? (
+        // Mobile: Card View
+        <div className="space-y-4">
+          {fields.map((field, index) => (
+            <InvoiceItemCard
+              key={field.id}
+              index={index}
+              form={form}
+              onRemove={() => onRemove(index)}
+              calculateItemTotal={calculateItemTotal}
+            />
+          ))}
         </div>
       ) : (
-        // Render different view based on screen size
-        isMobile ? (
-          // Mobile Card View
-          <div className="space-y-4">
-            {fields.map((field, index) => (
-              <InvoiceItemCard
-                key={field.id}
-                index={index}
-                form={form}
-                onRemove={() => onRemove(index)}
-                calculateItemTotal={calculateItemTotal}
-              />
-            ))}
-          </div>
-        ) : (
-          // Desktop Table View
-          <div className="border rounded-md overflow-x-auto">
-            <div className="min-w-[600px]">
-              <div className="grid grid-cols-12 gap-2 p-3 bg-muted font-medium text-sm">
-                <div className="col-span-4">Item</div>
-                <div className="col-span-2">Jumlah</div>
-                <div className="col-span-2">Harga Satuan</div>
-                <div className="col-span-3">Jumlah</div>
-                <div className="col-span-1"></div>
-              </div>
-
-              {fields.map((field, index) => (
-                <InvoiceItemRow
-                  key={field.id}
-                  index={index}
-                  form={form}
-                  onRemove={() => onRemove(index)}
-                  calculateItemTotal={calculateItemTotal}
-                />
-              ))}
+        // Desktop: Table View
+        <div className="border rounded-lg overflow-hidden">
+          <div className="bg-muted px-4 py-2">
+            <div className="grid grid-cols-12 gap-4 text-sm font-medium">
+              <div className="col-span-5">Item</div>
+              <div className="col-span-2 text-center">Jumlah</div>
+              <div className="col-span-2">Harga</div>
+              <div className="col-span-2">Total</div>
+              <div className="col-span-1"></div>
             </div>
           </div>
-        )
+          {fields.map((field, index) => (
+            <InvoiceItemRow
+              key={field.id}
+              index={index}
+              form={form}
+              onRemove={() => onRemove(index)}
+              calculateItemTotal={calculateItemTotal}
+            />
+          ))}
+        </div>
       )}
 
       {form.formState.errors.items?.message && (

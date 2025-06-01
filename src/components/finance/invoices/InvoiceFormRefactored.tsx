@@ -69,7 +69,7 @@ export function InvoiceFormRefactored({
       total: defaultValues?.total || 0,
       status: defaultValues?.status || 'Unpaid',
       payment_method: defaultValues?.payment_method || 'Transfer',
-      payment_due_date: defaultValues?.payment_due_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      payment_due_date: defaultValues?.payment_due_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       notes: defaultValues?.notes || '',
     },
   });
@@ -131,11 +131,13 @@ export function InvoiceFormRefactored({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {/* Customer Selection */}
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* Step 1: Customer Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Customer</CardTitle>
+            <CardTitle className="text-lg font-medium">
+              1. Informasi Pelanggan
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <InvoiceCustomerForm 
@@ -147,11 +149,12 @@ export function InvoiceFormRefactored({
           </CardContent>
         </Card>
 
-        {/* Products */}
+        {/* Step 2: Products and Items */}
         <Card>
           <CardHeader>
-            <CardTitle>Products</CardTitle>
-            <CardDescription>Add items to the invoice</CardDescription>
+            <CardTitle className="text-lg font-medium">
+              2. Produk & Item
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <InvoiceItemsSection
@@ -169,29 +172,43 @@ export function InvoiceFormRefactored({
           </CardContent>
         </Card>
 
-        {/* Payment & Totals */}
+        {/* Step 3: Payment Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Payment & Totals</CardTitle>
+            <CardTitle className="text-lg font-medium">
+              3. Pembayaran
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <InvoicePaymentForm form={form} />
-            <InvoiceTotalsSection 
-              form={form} 
-              taxRate={taxRate} 
-              discountAmount={discountAmount}
-              setTaxRate={setTaxRate}
-              setDiscountAmount={setDiscountAmount}
-            />
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <InvoicePaymentForm form={form} />
+              <InvoiceTotalsSection 
+                form={form} 
+                taxRate={taxRate} 
+                discountAmount={discountAmount}
+                setTaxRate={setTaxRate}
+                setDiscountAmount={setDiscountAmount}
+              />
+            </div>
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+        {/* Form Actions */}
+        <div className="flex justify-end gap-3 pt-4">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            className="min-w-[100px]"
+          >
+            Batal
           </Button>
-          <Button type="submit" disabled={loading}>
-            {defaultValues?.id ? 'Update Invoice' : 'Create Invoice'}
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="min-w-[100px]"
+          >
+            {defaultValues?.id ? 'Perbarui' : 'Buat'} Faktur
           </Button>
         </div>
       </form>

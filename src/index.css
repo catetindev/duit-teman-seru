@@ -57,6 +57,12 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+  /* Entrepreneur Mode: Make all primary buttons green */
+  .entrepreneur-mode, body.entrepreneur-mode {
+    --primary: 141 80% 56%; /* #28e57d in HSL */
+    --primary-foreground: 222.2 47.4% 11.2%; /* keep text readable */
+  }
 }
 
 @layer base {
