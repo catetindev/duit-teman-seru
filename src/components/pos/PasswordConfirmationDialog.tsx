@@ -1,25 +1,17 @@
+
 import React, { useState } from 'react';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button'; // Added for consistency if needed, though AlertDialogAction is primary
+import { AlertTriangle } from 'lucide-react';
 
 interface PasswordConfirmationDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (password: string) => Promise<boolean>; // Returns true if password is correct and action should proceed
+  onConfirm: (password: string) => Promise<boolean>;
   title: string;
   description: string;
-  actionButtonText?: string;
 }
 
 export function PasswordConfirmationDialog({
@@ -27,61 +19,94 @@ export function PasswordConfirmationDialog({
   onClose,
   onConfirm,
   title,
-  description,
-  actionButtonText = "Confirm"
+  description
 }: PasswordConfirmationDialogProps) {
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isConfirming, setIsConfirming] = useState(false);
 
-  const handleConfirm = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password.trim()) {
+      setError('Password is required');
+      return;
+    }
+
+    setIsLoading(true);
     setError('');
-    setIsConfirming(true);
-    const success = await onConfirm(password);
-    setIsConfirming(false);
-    if (success) {
-      setPassword(''); // Clear password on success
-      onClose();
-    } else {
-      setError('Incorrect password. Please try again.');
+
+    try {
+      const success = await onConfirm(password);
+      if (success) {
+        setPassword('');
+        onClose();
+      } else {
+        setError('Incorrect password. Please try again.');
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDialogClose = () => {
-    if (!isConfirming) {
-      setPassword('');
-      setError('');
-      onClose();
-    }
+  const handleClose = () => {
+    setPassword('');
+    setError('');
+    onClose();
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={handleDialogClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <div className="space-y-2 py-4">
-          <Label htmlFor="password-confirm">Enter your password to continue:</Label>
-          <Input
-            id="password-confirm"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Your password"
-          />
-          {error && <p className="text-sm text-red-500">{error}</p>}
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {description}
+          </p>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                disabled={isLoading}
+              />
+              {error && (
+                <p className="text-sm text-red-600">{error}</p>
+              )}
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Confirming...' : 'Confirm'}
+              </Button>
+            </div>
+          </form>
         </div>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleDialogClose} disabled={isConfirming}>
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm} disabled={isConfirming || !password}>
-            {isConfirming ? "Confirming..." : actionButtonText}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

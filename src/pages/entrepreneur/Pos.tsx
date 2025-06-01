@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,11 +15,14 @@ import { ProductCard } from '@/components/pos/ProductCard';
 import { CartItem } from '@/components/pos/CartItem';
 import { PaymentPanel } from '@/components/pos/PaymentPanel';
 import { PosReceipt } from '@/components/pos/PosReceipt';
+import { PasswordConfirmationDialog } from '@/components/pos/PasswordConfirmationDialog';
 import { formatRupiah } from '@/utils/formatRupiah';
-import { Printer, RefreshCcw } from 'lucide-react';
+import { Printer, RefreshCcw, Trash2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useTransactionManagement } from '@/hooks/pos/useTransactionManagement';
 
 const Pos = () => {
-  const { isPremium } = useAuth();
+  const { isPremium, user } = useAuth();
   const { toast } = useToast();
   const receiptRef = useRef<HTMLDivElement>(null);
   
@@ -39,10 +42,16 @@ const Pos = () => {
     fetchProducts,
     fetchRecentTransactions,
   } = usePos();
+
+  const { deleteTransaction } = useTransactionManagement();
   
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [activeTab, setActiveTab] = React.useState('all');
-  const [receiptVisible, setReceiptVisible] = React.useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
+  const [receiptVisible, setReceiptVisible] = useState(false);
+  const [isPasswordConfirmOpen, setIsPasswordConfirmOpen] = useState(false);
+  const [actionToConfirm, setActionToConfirm] = useState<(() => Promise<void>) | null>(null);
+  const [passwordDialogTitle, setPasswordDialogTitle] = useState('');
+  const [passwordDialogDescription, setPasswordDialogDescription] = useState('');
   
   // Filter products based on search term and active tab
   const filteredProducts = products.filter(product => {
@@ -70,6 +79,45 @@ const Pos = () => {
     setTimeout(() => {
       handlePrint();
     }, 100);
+  };
+
+  const verifyPasswordAndExecute = async (password: string): Promise<boolean> => {
+    if (!user?.email) {
+      toast({ title: "Error", description: "User email not found.", variant: "destructive" });
+      return false;
+    }
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: password,
+      });
+      
+      if (error) {
+        console.error("Password verification failed:", error);
+        return false; 
+      }
+      
+      if (actionToConfirm) {
+        await actionToConfirm(); 
+      }
+      return true; 
+    } catch (e) {
+      console.error("Error during password verification:", e);
+      return false;
+    }
+  };
+
+  const handleDeleteClick = (txId: string) => {
+    setActionToConfirm(async () => {
+      const success = await deleteTransaction(txId);
+      if (success) {
+        fetchRecentTransactions(); // Refresh the list only after successful deletion
+      }
+    });
+    setPasswordDialogTitle("Konfirmasi Hapus Transaksi");
+    setPasswordDialogDescription("Tindakan ini tidak dapat dibatalkan. Masukkan kata sandi Anda untuk menghapus transaksi ini.");
+    setIsPasswordConfirmOpen(true);
   };
   
   // Fetch products on component mount
@@ -159,23 +207,37 @@ const Pos = () => {
               ) : (
                 <div className="space-y-4">
                   {recentTransactions.map((tx) => (
-                    <div key={tx.id} className="border rounded-lg p-3 hover:bg-slate-50">
-                      <div className="flex justify-between mb-1">
-                        <div className="font-medium">
-                          {tx.nama_pembeli || 'Pelanggan'}
+                    <div key={tx.id} className="border rounded-lg p-3 hover:bg-slate-50 flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="flex justify-between mb-1">
+                          <div className="font-medium">
+                            {tx.nama_pembeli || 'Pelanggan'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(tx.created_at).toLocaleDateString('id-ID')}
+                          </div>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(tx.created_at).toLocaleDateString('id-ID')}
+                        
+                        <div className="flex justify-between">
+                          <div className="text-sm text-muted-foreground">
+                            {tx.metode_pembayaran} • {tx.produk.length} items
+                          </div>
+                          <div className="font-medium text-purple-700">
+                            {formatRupiah(tx.total)}
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="flex justify-between">
-                        <div className="text-sm text-muted-foreground">
-                          {tx.metode_pembayaran} • {tx.produk.length} items
-                        </div>
-                        <div className="font-medium text-purple-700">
-                          {formatRupiah(tx.total)}
-                        </div>
+                      <div className="ml-4">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(tx.id)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          title="Hapus Transaksi"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -268,6 +330,17 @@ const Pos = () => {
           </div>
         </div>
       </div>
+
+      <PasswordConfirmationDialog
+        isOpen={isPasswordConfirmOpen}
+        onClose={() => {
+          setIsPasswordConfirmOpen(false);
+          setActionToConfirm(null);
+        }}
+        onConfirm={verifyPasswordAndExecute}
+        title={passwordDialogTitle}
+        description={passwordDialogDescription}
+      />
     </DashboardLayout>
   );
 };
