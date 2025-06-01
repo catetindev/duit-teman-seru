@@ -1,3 +1,4 @@
+
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { Order, Customer, Product } from '@/types/entrepreneur';
 import { OrdersTable } from './OrdersTable';
@@ -85,7 +86,7 @@ export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(
             setIsFormOpen(false);
             setSelectedOrder(undefined);
           }}
-          order={selectedOrder}
+          order={selectedOrder || null}
           customers={customers}
           products={products}
           onSubmitSuccess={handleFormSubmit}

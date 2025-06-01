@@ -117,12 +117,32 @@ export function useTransactionManagement() {
         if (orderError) {
           console.error("Error creating order for POS transaction:", orderError);
           toast({ title: "Partial Error", description: "POS sale recorded, but failed to sync to Orders.", variant: "destructive" });
-        } else {
-          toast({ title: "Sip! ✨", description: "Transaksi berhasil disimpan dan disinkronkan." });
+        }
+
+        // Create income transaction record for dashboard tracking
+        const incomeTransactionData = {
+          user_id: user.id,
+          type: 'income',
+          amount: transaction.total,
+          currency: 'IDR',
+          category: 'Business Sales',
+          description: `POS Sale - ${transaction.nama_pembeli || 'Customer'}`,
+          date: new Date().toISOString().split('T')[0],
+          is_business: true
+        };
+
+        const { error: incomeError } = await supabase
+          .from('transactions')
+          .insert(incomeTransactionData);
+
+        if (incomeError) {
+          console.warn("Failed to create income transaction record:", incomeError);
         }
 
         // Update product stock after successful transaction
         await updateProductStock(orderProducts, true);
+        
+        toast({ title: "Sip! ✨", description: "Transaksi berhasil disimpan dan disinkronkan ke Orders & Income." });
       }
       await fetchRecentTransactions(); 
       return true;
@@ -145,7 +165,7 @@ export function useTransactionManagement() {
       // Get the transaction data first to access the products for stock restoration
       const { data: transaction, error: fetchError } = await supabase
         .from('pos_transactions')
-        .select('produk')
+        .select('produk, total, nama_pembeli')
         .eq('id', txId)
         .eq('user_id', user.id)
         .single();
@@ -182,8 +202,22 @@ export function useTransactionManagement() {
         console.warn("Could not delete linked order, or no linked order found. POS transaction deleted.", orderDeleteError);
       }
 
-      toast({ title: "Berhasil! 👍", description: "Transaksi telah dihapus." });
-      // Removed fetchRecentTransactions() from here. It will be called by the component.
+      // Also delete corresponding income transaction
+      if (transaction) {
+        const { error: incomeDeleteError } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('type', 'income')
+          .eq('amount', transaction.total)
+          .eq('description', `POS Sale - ${transaction.nama_pembeli || 'Customer'}`);
+        
+        if (incomeDeleteError) {
+          console.warn("Could not delete corresponding income transaction:", incomeDeleteError);
+        }
+      }
+
+      toast({ title: "Berhasil! 👍", description: "Transaksi telah dihapus dari semua sistem." });
       return true;
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
