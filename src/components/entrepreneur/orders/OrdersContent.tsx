@@ -5,6 +5,9 @@ import { OrdersTable } from './OrdersTable';
 import { OrdersEmptyState } from './OrdersEmptyState';
 import { OrdersLoadingState } from './OrdersLoadingState';
 import OrderFormDialog from '@/components/entrepreneur/OrderFormDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface OrdersContentProps {
   orders: Order[];
@@ -22,6 +25,8 @@ export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(
   ({ orders, customers, products, loading, onDataChange }, ref) => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | undefined>();
+    const { toast } = useToast();
+    const { user } = useAuth();
 
     useImperativeHandle(ref, () => ({
       handleOpenForm: () => {
@@ -36,22 +41,84 @@ export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(
     };
 
     const handleDelete = async (id: string) => {
+      if (!user?.id) {
+        toast({
+          title: 'Error',
+          description: 'User not authenticated',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (confirm('Are you sure you want to delete this order?')) {
         try {
-          // Delete logic here
+          console.log('Deleting order:', id);
+          
+          const { error } = await supabase
+            .from('orders')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.id);
+          
+          if (error) {
+            console.error('Error deleting order:', error);
+            throw error;
+          }
+
+          toast({
+            title: 'Success',
+            description: 'Order deleted successfully',
+          });
+          
           onDataChange();
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error deleting order:', error);
+          toast({
+            title: 'Error',
+            description: error.message || 'Failed to delete order',
+            variant: 'destructive',
+          });
         }
       }
     };
 
     const handleStatusChange = async (id: string, status: Order['status']) => {
+      if (!user?.id) {
+        toast({
+          title: 'Error',
+          description: 'User not authenticated',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       try {
-        // Status update logic here
+        console.log('Updating order status:', id, status);
+        
+        const { error } = await supabase
+          .from('orders')
+          .update({ status })
+          .eq('id', id)
+          .eq('user_id', user.id);
+        
+        if (error) {
+          console.error('Error updating order status:', error);
+          throw error;
+        }
+
+        toast({
+          title: 'Success',
+          description: 'Order status updated successfully',
+        });
+        
         onDataChange();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error updating order status:', error);
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to update order status',
+          variant: 'destructive',
+        });
       }
     };
 
