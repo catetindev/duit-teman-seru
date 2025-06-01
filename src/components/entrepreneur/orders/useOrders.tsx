@@ -19,6 +19,7 @@ export function useOrders() {
 
   const fetchData = useCallback(async () => {
     if (!user?.id) {
+      console.log('No user ID available');
       setLoading(false);
       return;
     }
@@ -42,7 +43,7 @@ export function useOrders() {
         throw ordersError;
       }
 
-      console.log('Raw orders data:', ordersData);
+      console.log('Raw orders data from database:', ordersData);
 
       // Fetch customers for filter
       const { data: customersData, error: customersError } = await supabase
@@ -55,6 +56,8 @@ export function useOrders() {
         throw customersError;
       }
       
+      console.log('Customers data:', customersData);
+      
       // Fetch products for the form
       const { data: productsData, error: productsError } = await supabase
         .from('products')
@@ -65,6 +68,8 @@ export function useOrders() {
         console.error('Error fetching products:', productsError);
         throw productsError;
       }
+
+      console.log('Products data:', productsData);
 
       // Transform orders data to handle the customer relationship
       const transformedOrders = ordersData?.map((order: any) => {
@@ -83,18 +88,28 @@ export function useOrders() {
           parsedProducts = [];
         }
 
-        return {
+        const transformedOrder = {
           ...order,
           customer: order.customers,
           products: parsedProducts
         };
+        
+        console.log('Transformed order:', transformedOrder);
+        return transformedOrder;
       }) || [];
 
-      console.log('Transformed orders:', transformedOrders);
+      console.log('Final transformed orders:', transformedOrders);
 
       setOrders(transformedOrders);
       setCustomers(customersData as Customer[]);
       setProducts(productsData as Product[]);
+      
+      if (transformedOrders.length === 0) {
+        console.log('No orders found for user');
+      } else {
+        console.log(`Found ${transformedOrders.length} orders for user`);
+      }
+      
     } catch (error: any) {
       console.error('Error in fetchData:', error);
       toast({
@@ -108,6 +123,7 @@ export function useOrders() {
   }, [user?.id]);
 
   useEffect(() => {
+    console.log('useOrders: Effect triggered, user ID:', user?.id);
     fetchData();
   }, [fetchData]);
 
@@ -129,6 +145,8 @@ export function useOrders() {
     
     return matchesSearch && matchesStatus && matchesCustomer && matchesDate;
   });
+
+  console.log('Filtered orders:', filteredOrders);
 
   return {
     orders: filteredOrders,
