@@ -164,13 +164,19 @@ export function InvoiceFormDialog({
     setIsSubmitting(true);
 
     try {
+      // Prepare invoice data with all required fields
       const invoiceData = {
-        ...data,
-        user_id: user.id,
+        invoice_number: data.invoice_number,
+        customer_id: data.customer_id,
+        items: JSON.stringify(data.items), // Serialize items as JSON
+        subtotal: data.subtotal,
         tax: (data.subtotal * taxRate) / 100,
         discount: discountAmount,
+        total: data.total,
         status: 'Unpaid',
-        payment_due_date: data.payment_due_date.toISOString()
+        payment_due_date: data.payment_due_date.toISOString(),
+        notes: data.notes || null,
+        user_id: user.id
       };
 
       if (isEditMode && invoice) {
