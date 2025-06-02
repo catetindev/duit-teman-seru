@@ -1,25 +1,9 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Json } from '@/integrations/supabase/types';
-
-export interface PosProduct {
-  id: string;
-  nama: string;
-  harga: number;
-  qty: number;
-}
-
-export interface PosTransaction {
-  produk: PosProduct[];
-  total: number;
-  metode_pembayaran: 'Cash' | 'Bank Transfer' | 'QRIS';
-  nama_pembeli?: string;
-  uang_diterima?: number;
-  kembalian?: number;
-}
+import { PosProduct, PosTransaction } from '@/types/pos';
 
 export function usePos() {
   const [products, setProducts] = useState<PosProduct[]>([]);

@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { PosProduct } from '@/hooks/usePos';
+import { PosProduct } from '@/types/pos';
 
 export function useProductManagement() {
   const [products, setProducts] = useState<PosProduct[]>([]);

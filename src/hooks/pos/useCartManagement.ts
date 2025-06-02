@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { PosProduct, PosTransaction } from '@/hooks/usePos';
+import { PosProduct, PosTransaction } from '@/types/pos';
 
 export function useCartManagement() {
   const [transaction, setTransaction] = useState<PosTransaction>({

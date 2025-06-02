@@ -1,11 +1,10 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { PosTransaction, PosProduct } from '@/hooks/usePos'; 
+import { PosProduct, PosTransaction } from '@/types/pos';
 import { Json } from '@/integrations/supabase/types';
-import { v4 as uuidv4 } from 'uuid'; 
+import { generatePrefixedUuid, stripUuidPrefix } from '@/utils/uuidHelpers';
 import { updateProductStock } from '@/utils/inventoryUtils';
 
 export function useTransactionManagement() {
@@ -20,6 +19,7 @@ export function useTransactionManagement() {
     
     console.log('Looking for customer:', nameToUse);
     
+    // Try to find existing customer first
     let { data: existingCustomer, error: fetchError } = await supabase
       .from('customers')
       .select('id')
@@ -37,13 +37,19 @@ export function useTransactionManagement() {
       return existingCustomer.id;
     }
     
-    const newCustomerId = uuidv4();
-    console.log('Creating new customer with ID:', newCustomerId);
+    // Create new customer with prefixed UUID
+    const customerIdWithPrefix = generatePrefixedUuid('CUSTOMER');
+    const cleanCustomerId = stripUuidPrefix(customerIdWithPrefix);
+    
+    console.log('Creating new customer:', {
+      storedId: cleanCustomerId,
+      displayId: customerIdWithPrefix
+    });
     
     const { data: newCustomer, error: insertError } = await supabase
       .from('customers')
       .insert({ 
-        id: newCustomerId, 
+        id: cleanCustomerId,
         name: nameToUse, 
         user_id: user.id,
         email: null,
@@ -58,12 +64,10 @@ export function useTransactionManagement() {
     }
     
     if (!newCustomer) throw new Error("Failed to create customer and retrieve ID");
-    
-    console.log('Created new customer:', newCustomer.id);
     return newCustomer.id;
   };
 
-  const saveTransaction = async (transaction: PosTransaction, originalTxId?: string) => {
+  const saveTransaction = async (transaction: PosTransaction, originalTxId?: string): Promise<boolean> => {
     if (!user?.id) {
       toast({ title: "Error", description: "User not authenticated.", variant: "destructive" });
       return false;
@@ -82,8 +86,6 @@ export function useTransactionManagement() {
       const transactionTimestamp = new Date().toISOString();
       const customerId = await getOrCreateCustomerId(transaction.nama_pembeli);
       
-      console.log('Processing transaction with customer ID:', customerId);
-      
       const orderProducts = transaction.produk.map((p: PosProduct) => ({
         product_id: p.id, 
         quantity: p.qty, 
@@ -91,9 +93,19 @@ export function useTransactionManagement() {
         price: p.harga
       }));
 
-      console.log('Order products:', orderProducts);
-
+      // Generate or clean UUIDs
+      const cleanPosId = originalTxId ? stripUuidPrefix(originalTxId) : stripUuidPrefix(generatePrefixedUuid('POS'));
+      const orderIdWithPrefix = generatePrefixedUuid('ORDER');
+      const cleanOrderId = stripUuidPrefix(orderIdWithPrefix);
+      
+      // Log the IDs for debugging
+      console.log('Transaction IDs:', {
+        pos: { stored: cleanPosId, display: `pos-${cleanPosId}` },
+        order: { stored: cleanOrderId, display: orderIdWithPrefix }
+      });
+      
       const posTransactionData = {
+        id: cleanPosId,
         produk: transaction.produk as unknown as Json,
         total: transaction.total,
         metode_pembayaran: transaction.metode_pembayaran,
@@ -103,6 +115,7 @@ export function useTransactionManagement() {
       };
 
       const orderData = {
+        id: cleanOrderId,
         order_date: transactionTimestamp,
         customer_id: customerId,
         products: orderProducts as unknown as Json,
@@ -111,82 +124,63 @@ export function useTransactionManagement() {
         payment_method: transaction.metode_pembayaran,
         user_id: user.id,
         payment_proof_url: null,
+        pos_transaction_id: cleanPosId // Link to POS transaction using clean ID
       };
-      
-      console.log('Saving POS transaction data:', posTransactionData);
-      console.log('Saving order data:', orderData);
-      
-      let posTxIdToLink = originalTxId;
 
       if (originalTxId) { 
-        console.log('Updating existing transaction:', originalTxId);
+        const cleanOriginalId = stripUuidPrefix(originalTxId);
+        console.log('Updating existing transaction:', cleanOriginalId);
         
-        const { data: updatedPosTx, error: posUpdateError } = await supabase
+        const { error: posUpdateError } = await supabase
           .from('pos_transactions')
           .update(posTransactionData)
-          .eq('id', originalTxId)
-          .eq('user_id', user.id) 
-          .select('id')
-          .single();
+          .eq('id', cleanOriginalId)
+          .eq('user_id', user.id);
           
         if (posUpdateError) {
           console.error('Error updating POS transaction:', posUpdateError);
           throw posUpdateError;
         }
-        if (!updatedPosTx) throw new Error("Failed to update POS transaction or transaction not found for user.");
-        posTxIdToLink = updatedPosTx.id;
         
         const { error: orderUpdateError } = await supabase
           .from('orders')
           .update(orderData)
-          .eq('pos_transaction_id', originalTxId)
+          .eq('pos_transaction_id', cleanOriginalId)
           .eq('user_id', user.id); 
         
         if (orderUpdateError) {
-          console.warn("Failed to update linked order, or no linked order found. POS transaction updated.", orderUpdateError);
+          console.warn("Failed to update linked order:", orderUpdateError);
         } else {
           console.log('Successfully updated linked order');
         }
         
         toast({ title: "Sip! ✨", description: "Transaksi berhasil diupdate." });
-
       } else { 
         console.log('Creating new transaction');
         
-        const { data: newPosTx, error: posError } = await supabase
+        const { error: posError } = await supabase
           .from('pos_transactions')
-          .insert(posTransactionData)
-          .select('id')
-          .single();
+          .insert(posTransactionData);
           
         if (posError) {
           console.error('Error creating POS transaction:', posError);
           throw posError;
         }
-        if (!newPosTx) throw new Error("Failed to insert POS transaction and retrieve ID.");
-        posTxIdToLink = newPosTx.id;
 
-        const orderDataWithLink = { ...orderData, pos_transaction_id: posTxIdToLink };
-        console.log('Creating order with POS link:', orderDataWithLink);
-        
-        const { data: newOrder, error: orderError } = await supabase
+        const { error: orderError } = await supabase
           .from('orders')
-          .insert(orderDataWithLink)
-          .select('id')
-          .single();
+          .insert(orderData);
           
         if (orderError) {
           console.error("Error creating order for POS transaction:", orderError);
           toast({ 
             title: "Partial Success", 
-            description: "POS transaksi tersimpan, tapi ada masalah sinkronisasi ke Orders. Periksa menu Orders & Transactions.", 
+            description: "POS transaksi tersimpan, tapi ada masalah sinkronisasi ke Orders.", 
             variant: "destructive" 
           });
-        } else {
-          console.log('Successfully created linked order:', newOrder.id);
         }
 
-        // Create income transaction record for dashboard tracking
+        // Create income transaction record
         const incomeTransactionData = {
           user_id: user.id,
           type: 'income',
@@ -198,25 +192,21 @@ export function useTransactionManagement() {
           is_business: true
         };
 
-        console.log('Creating income transaction:', incomeTransactionData);
-
         const { error: incomeError } = await supabase
           .from('transactions')
           .insert(incomeTransactionData);
 
         if (incomeError) {
           console.warn("Failed to create income transaction record:", incomeError);
-        } else {
-          console.log('Successfully created income transaction');
         }
 
-        // Update product stock after successful transaction
+        // Update product stock
         await updateProductStock(orderProducts, true);
         
         if (orderError) {
-          toast({ title: "Transaksi Tersimpan", description: "POS transaksi berhasil, tapi ada masalah sinkronisasi. Periksa menu Orders & Transactions." });
+          toast({ title: "Transaksi Tersimpan", description: "POS transaksi berhasil, tapi ada masalah sinkronisasi." });
         } else {
-          toast({ title: "Sip! ✨", description: "Transaksi berhasil disimpan dan disinkronkan ke Orders & Income." });
+          toast({ title: "Sip! ✨", description: "Transaksi berhasil disimpan dan disinkronkan." });
         }
       }
       
@@ -230,21 +220,22 @@ export function useTransactionManagement() {
       setLoading(false);
     }
   };
-  
-  const deleteTransaction = async (txId: string): Promise<boolean> => {
+
+  const deleteTransaction = async (prefixedTxId: string): Promise<boolean> => {
     if (!user?.id) {
       toast({ title: "Error", description: "User not authenticated.", variant: "destructive" });
       return false;
     }
     setLoading(true);
     try {
-      console.log('Deleting transaction:', txId);
+      const cleanTxId = stripUuidPrefix(prefixedTxId);
+      console.log('Deleting transaction:', { prefixed: prefixedTxId, clean: cleanTxId });
       
-      // Get the transaction data first to access the products for stock restoration
+      // Get transaction data for stock restoration
       const { data: transaction, error: fetchError } = await supabase
         .from('pos_transactions')
         .select('produk, total, nama_pembeli')
-        .eq('id', txId)
+        .eq('id', cleanTxId)
         .eq('user_id', user.id)
         .single();
 
@@ -253,44 +244,34 @@ export function useTransactionManagement() {
         throw fetchError;
       }
       
-      // Restore stock for deleted transaction's products
-      if (transaction && transaction.produk) {
-        const productsToRestore = (transaction.produk as unknown as PosProduct[]).map(
-          (p: PosProduct) => ({
-            product_id: p.id,
-            quantity: p.qty
-          })
-        );
-        
-        // Restore stock (false = adding back to inventory)
+      // Restore stock
+      if (transaction?.produk) {
+        const productsToRestore = (transaction.produk as unknown as PosProduct[])
+          .map(p => ({ product_id: p.id, quantity: p.qty }));
         await updateProductStock(productsToRestore, false);
-        console.log('Stock restored for deleted transaction');
       }
 
+      // Delete POS transaction
       const { error: posDeleteError } = await supabase
         .from('pos_transactions')
         .delete()
-        .eq('id', txId)
+        .eq('id', cleanTxId)
         .eq('user_id', user.id); 
         
-      if (posDeleteError) {
-        console.error('Error deleting POS transaction:', posDeleteError);
-        throw posDeleteError;
-      }
+      if (posDeleteError) throw posDeleteError;
 
+      // Delete linked order
       const { error: orderDeleteError } = await supabase
         .from('orders')
         .delete()
-        .eq('pos_transaction_id', txId)
+        .eq('pos_transaction_id', cleanTxId)
         .eq('user_id', user.id); 
       
       if (orderDeleteError) {
-        console.warn("Could not delete linked order, or no linked order found. POS transaction deleted.", orderDeleteError);
-      } else {
-        console.log('Successfully deleted linked order');
+        console.warn("Could not delete linked order:", orderDeleteError);
       }
 
-      // Also delete corresponding income transaction
+      // Delete corresponding income transaction
       if (transaction) {
         const { error: incomeDeleteError } = await supabase
           .from('transactions')
@@ -301,13 +282,12 @@ export function useTransactionManagement() {
           .eq('description', `POS Sale - ${transaction.nama_pembeli || 'Customer'}`);
         
         if (incomeDeleteError) {
-          console.warn("Could not delete corresponding income transaction:", incomeDeleteError);
-        } else {
-          console.log('Successfully deleted income transaction');
+          console.warn("Could not delete income transaction:", incomeDeleteError);
         }
       }
 
       toast({ title: "Berhasil! 👍", description: "Transaksi telah dihapus dari semua sistem." });
+      await fetchRecentTransactions();
       return true;
     } catch (error: any) {
       console.error("Error deleting transaction:", error);
@@ -321,8 +301,6 @@ export function useTransactionManagement() {
   const fetchRecentTransactions = useCallback(async () => {
     if (!user?.id) return;
     try {
-      console.log('Fetching recent transactions for user:', user.id);
-      
       const { data, error } = await supabase
         .from('pos_transactions')
         .select('*')
@@ -330,23 +308,31 @@ export function useTransactionManagement() {
         .order('created_at', { ascending: false })
         .limit(5);
         
-      if (error) {
-        console.error('Error fetching recent transactions:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('Fetched recent transactions:', data);
-      setRecentTransactions(data || []);
+      // Add prefixes to transaction IDs for display
+      const prefixedTransactions = data?.map(tx => ({
+        ...tx,
+        id: `pos-${tx.id}`
+      })) || [];
+      
+      console.log('Fetched transactions:', {
+        raw: data,
+        prefixed: prefixedTransactions.map(tx => tx.id)
+      });
+      
+      setRecentTransactions(prefixedTransactions);
     } catch (error: any) {
       console.error("Error fetching transactions:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
-  }, [user?.id]);
+  }, [user?.id, toast]);
 
   return {
     loading,
     recentTransactions,
-    saveTransaction, 
+    saveTransaction,
     deleteTransaction,
-    fetchRecentTransactions,
+    fetchRecentTransactions
   };
 }

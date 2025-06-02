@@ -1,6 +1,6 @@
 
 import React, { forwardRef } from 'react';
-import { PosTransaction } from '@/hooks/usePos';
+import { PosTransaction } from '@/types/pos';
 import { formatRupiah } from '@/utils/formatRupiah';
 import { formatDate } from '@/utils/formatUtils';
 

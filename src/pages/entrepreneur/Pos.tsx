@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePos } from '@/hooks/usePos';
 import { useTransactionManagement } from '@/hooks/pos/useTransactionManagement';
 import { formatRupiah } from '@/utils/formatRupiah';
-import type { PosTransaction, PosProduct } from '@/hooks/usePos';
+import type { PosTransaction, PosProduct } from '@/types/pos';
 
 // Available product categories
 const categories = ['Makanan', 'Minuman', 'Snack', 'Lainnya'];
@@ -231,7 +231,7 @@ const Pos = () => {
                 ) : (
                   recentTransactions.map((tx) => (
                     <div
-                      key={tx.id}
+                      key={`pos-${tx.id}`}
                       className="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
@@ -255,7 +255,7 @@ const Pos = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDeleteClick(tx.id)}
+                            onClick={() => handleDeleteClick(`pos-${tx.id}`)}
                             className="h-8 w-8 hover:bg-red-50 hover:text-red-500"
                           >
                             <Trash2 className="h-4 w-4" />

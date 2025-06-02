@@ -16,7 +16,7 @@ import { PaymentPanel } from '@/components/pos/PaymentPanel';
 import { PosReceipt } from '@/components/pos/PosReceipt';
 import { Printer, RefreshCcw, Edit, Trash2 } from 'lucide-react';
 import { PasswordConfirmationDialog } from '@/components/pos/PasswordConfirmationDialog';
-import { PosTransaction } from '@/hooks/usePos'; 
+import { PosTransaction } from '@/types/pos'; 
 import { supabase } from '@/integrations/supabase/client'; 
 import { formatCurrency } from '@/utils/formatUtils';
 
@@ -187,7 +187,7 @@ const PosRefactored = () => {
                         </div>
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(tx.id)} title="Delete">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(`pos-${tx.id}`)} title="Delete">
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => printSpecificReceipt(tx as PosTransaction)} title="Print">

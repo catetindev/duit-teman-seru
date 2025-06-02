@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { formatRupiah, parseRupiah } from '@/utils/formatRupiah';
-import { PosTransaction } from '@/hooks/usePos';
+import { PosTransaction } from '@/types/pos';
 import { CreditCard, Banknote, QrCode, ShoppingCart, RotateCcw } from 'lucide-react';
 
 interface PaymentPanelProps {

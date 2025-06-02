@@ -1,5 +1,5 @@
 import React from 'react';
-import { PosProduct } from '@/hooks/usePos';
+import { PosProduct } from '@/types/pos';
 import { formatRupiah } from '@/utils/formatRupiah';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

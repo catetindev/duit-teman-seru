@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatRupiah } from '@/utils/formatRupiah';
-import { PosProduct } from '@/hooks/usePos';
+import { PosProduct } from '@/types/pos';
 import { Plus } from 'lucide-react';
 
 interface ProductCardProps {
