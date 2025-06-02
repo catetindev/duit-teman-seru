@@ -1,208 +1,195 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
-interface InvoiceCustomization {
+interface InvoiceCustomizationContextType {
   logoUrl: string | null;
   showLogo: boolean;
   businessName: string;
   uploading: boolean;
   uploadLogo: (file: File) => Promise<void>;
   removeLogo: () => Promise<void>;
-  toggleShowLogo: () => void;
+  toggleShowLogo: (show: boolean) => void;
   setBusinessName: (name: string) => void;
 }
 
-// Define an interface for the user_settings table including our custom_settings column
-interface UserSettings {
-  id: string;
-  user_id: string;
-  preferred_currency: string;
-  preferred_language: string;
-  custom_settings?: string; // JSON stored as string
-  created_at: string;
-  updated_at: string;
-}
+const InvoiceCustomizationContext = createContext<InvoiceCustomizationContextType | undefined>(undefined);
 
-const defaultCustomization: InvoiceCustomization = {
-  logoUrl: null,
-  showLogo: true,
-  businessName: 'Nama Bisnis Anda',
-  uploading: false,
-  uploadLogo: async () => {},
-  removeLogo: async () => {},
-  toggleShowLogo: () => {},
-  setBusinessName: () => {},
-};
-
-const InvoiceCustomizationContext = createContext<InvoiceCustomization>(defaultCustomization);
-
-export const useInvoiceCustomization = () => useContext(InvoiceCustomizationContext);
-
-export function InvoiceCustomizationProvider({ children }: { children: ReactNode }) {
+export function InvoiceCustomizationProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [showLogo, setShowLogo] = useState<boolean>(true);
-  const [businessName, setBusinessName] = useState<string>('Nama Bisnis Anda');
-  const [uploading, setUploading] = useState<boolean>(false);
+  const [showLogo, setShowLogo] = useState(true);
+  const [businessName, setBusinessName] = useState('');
+  const [uploading, setUploading] = useState(false);
 
-  // Load saved preferences when user changes
+  // Load saved settings
   useEffect(() => {
-    const loadPreferences = async () => {
-      if (!user?.id) return;
+    if (user?.id) {
+      loadSettings();
+    }
+  }, [user?.id]);
 
-      try {
-        // Check if the user has custom settings
-        const { data, error } = await supabase
-          .from('user_settings')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle(); // Use maybeSingle() to handle cases where no row is found
-
-        if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is fine here
-          console.error('Error loading user settings:', error);
-          throw error;
-        }
-        
-        if (data && data.custom_settings) {
-          const customSettings = JSON.parse(data.custom_settings as string);
-          const settings = customSettings?.invoice_settings;
-            
-          if (settings) {
-            setLogoUrl(settings.logoUrl || null);
-            setShowLogo(settings.showLogo !== undefined ? settings.showLogo : true);
-            setBusinessName(settings.businessName || 'Nama Bisnis Anda');
-          }
-        } else {
-          // No settings found, use defaults or initialize if needed
-          console.log('No user_settings found for user, using default invoice preferences.');
-        }
-      } catch (error) {
-        console.error('Error loading invoice preferences:', error);
-      }
-    };
-
-    loadPreferences();
-  }, [user]);
-
-  // Save preferences when they change
-  const savePreferences = async () => {
+  const loadSettings = async () => {
     if (!user?.id) return;
 
     try {
-      const { data: existingSettings, error: checkError } = await supabase
+      const { data, error } = await supabase
         .from('user_settings')
-        .select('*')
+        .select('invoice_logo_url, show_invoice_logo, business_name')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .single();
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading settings:', error);
+        return;
       }
 
-      let customSettings: Record<string, any> = {};
-      if (existingSettings?.custom_settings) {
-        try {
-          customSettings = JSON.parse(existingSettings.custom_settings as string);
-        } catch (e) {
-          console.warn('Failed to parse existing custom_settings, creating new object');
-        }
+      if (data) {
+        setLogoUrl(data.invoice_logo_url);
+        setShowLogo(data.show_invoice_logo ?? true);
+        setBusinessName(data.business_name || '');
       }
-
-      customSettings = {
-        ...customSettings,
-        invoice_settings: {
-          logoUrl,
-          showLogo,
-          businessName
-        }
-      };
-      
-      // Fix: Use the single object version of upsert instead of an array
-      const { error: upsertError } = await supabase
-        .from('user_settings')
-        .upsert({ 
-          user_id: user.id, 
-          custom_settings: JSON.stringify(customSettings),
-          // Safely provide default values for other required fields if inserting
-          preferred_currency: existingSettings ? (existingSettings as UserSettings).preferred_currency || 'IDR' : 'IDR',
-          preferred_language: existingSettings ? (existingSettings as UserSettings).preferred_language || 'id' : 'id',
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-
-      if (upsertError) throw upsertError;
     } catch (error) {
-      console.error('Error saving invoice preferences:', error);
+      console.error('Error loading invoice settings:', error);
     }
   };
 
-  useEffect(() => {
-    if (user?.id) {
-      savePreferences();
-    }
-  }, [logoUrl, showLogo, businessName, user?.id]);
-
   const uploadLogo = async (file: File) => {
-    if (!user?.id || !file) return;
+    if (!user?.id) return;
+
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `invoice-logos/${fileName}`;
-      const { error: uploadError } = await supabase
-        .storage
-        .from('logos')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
+      const fileName = `${user.id}/invoice-logo.${fileExt}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('invoice-logos')
+        .upload(fileName, file, { upsert: true });
+
       if (uploadError) throw uploadError;
-      const { data } = supabase
-        .storage
-        .from('logos')
-        .getPublicUrl(filePath);
-      setLogoUrl(data.publicUrl);
-    } catch (error) {
-      console.error('Error uploading logo:', error);
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('invoice-logos')
+        .getPublicUrl(fileName);
+
+      setLogoUrl(publicUrl);
+
+      // Save to user settings
+      await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          invoice_logo_url: publicUrl,
+          show_invoice_logo: showLogo,
+          business_name: businessName
+        });
+
+      toast({
+        title: 'Success',
+        description: 'Logo uploaded successfully'
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
     } finally {
       setUploading(false);
     }
   };
 
   const removeLogo = async () => {
-    if (!logoUrl || !user?.id) return;
+    if (!user?.id || !logoUrl) return;
+
     try {
-      const urlParts = logoUrl.split('/');
-      const filePath = urlParts.slice(-2).join('/');
-      await supabase
-        .storage
-        .from('logos')
-        .remove([filePath]);
       setLogoUrl(null);
-    } catch (error) {
-      console.error('Error removing logo:', error);
+
+      await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          invoice_logo_url: null,
+          show_invoice_logo: showLogo,
+          business_name: businessName
+        });
+
+      toast({
+        title: 'Success',
+        description: 'Logo removed successfully'
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   };
 
-  const toggleShowLogo = () => {
-    setShowLogo(!showLogo);
+  const toggleShowLogo = async (show: boolean) => {
+    if (!user?.id) return;
+
+    setShowLogo(show);
+
+    try {
+      await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          invoice_logo_url: logoUrl,
+          show_invoice_logo: show,
+          business_name: businessName
+        });
+    } catch (error: any) {
+      console.error('Error updating logo visibility:', error);
+    }
   };
 
-  const value = {
-    logoUrl,
-    showLogo,
-    businessName,
-    uploading,
-    uploadLogo,
-    removeLogo,
-    toggleShowLogo,
-    setBusinessName,
+  const updateBusinessName = async (name: string) => {
+    if (!user?.id) return;
+
+    setBusinessName(name);
+
+    try {
+      await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          invoice_logo_url: logoUrl,
+          show_invoice_logo: showLogo,
+          business_name: name
+        });
+    } catch (error: any) {
+      console.error('Error updating business name:', error);
+    }
   };
 
   return (
-    <InvoiceCustomizationContext.Provider value={value}>
+    <InvoiceCustomizationContext.Provider
+      value={{
+        logoUrl,
+        showLogo,
+        businessName,
+        uploading,
+        uploadLogo,
+        removeLogo,
+        toggleShowLogo,
+        setBusinessName: updateBusinessName
+      }}
+    >
       {children}
     </InvoiceCustomizationContext.Provider>
   );
+}
+
+export function useInvoiceCustomization() {
+  const context = useContext(InvoiceCustomizationContext);
+  if (!context) {
+    throw new Error('useInvoiceCustomization must be used within InvoiceCustomizationProvider');
+  }
+  return context;
 }

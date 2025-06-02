@@ -1,17 +1,17 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { TabsContent } from '@/components/ui/tabs';
 import { FileText } from 'lucide-react';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { InvoiceForm } from '@/components/finance/invoices/InvoiceForm';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { InvoiceFormModal } from '@/components/finance/invoices/InvoiceFormModal';
 import { EntrepreneurInvoicesList } from '@/components/finance/invoices/EntrepreneurInvoicesList';
 import { InvoicePdf } from '@/components/finance/invoices/InvoicePdf';
 import { InvoiceHeader } from '@/components/finance/invoices/InvoiceHeader';
 import { InvoiceStatusFilter } from '@/components/finance/invoices/InvoiceStatusFilter';
+import { InvoiceCustomizationProvider } from '@/contexts/InvoiceCustomizationContext';
 import { Button } from '@/components/ui/button';
 import { useInvoices } from '@/hooks/finance/useInvoices';
 import { Invoice, InvoiceFormData } from '@/types/finance';
@@ -104,40 +104,14 @@ const Invoices = () => {
       return;
     }
 
-    const invoiceNumber = await generateInvoiceNumber();
     setSelectedInvoice(null);
     setIsFormOpen(true);
   };
 
   // Handle form submission
-  const handleFormSubmit = async (data: InvoiceFormData) => {
-    try {
-      if (selectedInvoice) {
-        await updateInvoice({
-          ...data,
-          id: selectedInvoice.id
-        });
-        toast({
-          title: 'Invoice Updated',
-          description: `Invoice ${data.invoice_number} has been updated`
-        });
-      } else {
-        await addInvoice(data);
-        toast({
-          title: 'Invoice Created',
-          description: `Invoice ${data.invoice_number} has been created`
-        });
-      }
-      setIsFormOpen(false);
-      fetchInvoices(selectedFilter !== 'All' ? selectedFilter : undefined);
-    } catch (error: any) {
-      console.error('Error saving invoice:', error);
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive'
-      });
-    }
+  const handleFormSubmit = async () => {
+    setIsFormOpen(false);
+    fetchInvoices(selectedFilter !== 'All' ? selectedFilter : undefined);
   };
 
   // Handle invoice actions
@@ -180,118 +154,82 @@ const Invoices = () => {
   // Get customer for selected invoice
   const getCurrentCustomer = () => {
     if (!selectedInvoice) return null;
-    // Look up customer from the nested customers data in the invoice
     const customer = (selectedInvoice as any).customers || 
       customers.find(c => c.id === selectedInvoice.customer_id);
     return customer;
   };
 
-  // Create a function to properly cast Invoice to InvoiceFormData
-  const prepareInvoiceForForm = (invoice: Invoice): Partial<InvoiceFormData> => {
-    // Parse items if they're a string
-    const items = Array.isArray(invoice.items) 
-      ? invoice.items 
-      : JSON.parse(typeof invoice.items === 'string' 
-          ? invoice.items 
-          : JSON.stringify(invoice.items));
-    
-    // Ensure status is a valid InvoiceStatus type
-    const status = invoice.status as any;
-    
-    return {
-      ...invoice,
-      items,
-      status,
-      payment_due_date: new Date(invoice.payment_due_date)
-    };
-  };
-
   return (
-    <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-6">
-        {/* Header */}
-        <InvoiceHeader onAddInvoice={handleAddInvoice} />
+    <InvoiceCustomizationProvider>
+      <DashboardLayout isPremium={isPremium}>
+        <div className="space-y-6">
+          {/* Header */}
+          <InvoiceHeader onAddInvoice={handleAddInvoice} />
 
-        {/* Status Filters with the content inside it now */}
-        <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
-          <div className="space-y-4">
-            {/* Invoice List for current filter */}
-            <EntrepreneurInvoicesList 
-              invoices={selectedFilter === 'All' 
-                ? invoices 
-                : invoices.filter(inv => inv.status === selectedFilter)} 
-              onViewInvoice={handleViewInvoice}
-              onEditInvoice={handleEditInvoice}
-              onDeleteInvoice={handleDeleteInvoice}
-              onDownloadPdf={handleDownloadPdf}
-            />
-          </div>
-        </InvoiceStatusFilter>
-
-        {/* Hidden div for PDF generation */}
-        <div className="hidden">
-          {selectedInvoice && getCurrentCustomer() && (
-            <InvoicePdf 
-              ref={pdfRef}
-              invoice={selectedInvoice}
-              customer={getCurrentCustomer() as Customer}
-            />
-          )}
-        </div>
-
-        {/* Invoice Form Sheet */}
-        <Sheet 
-          open={isFormOpen} 
-          onOpenChange={setIsFormOpen}
-        >
-          <SheetContent side="right" className="w-full sm:w-[600px] md:w-[900px] overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{selectedInvoice ? 'Edit Invoice' : 'Create New Invoice'}</SheetTitle>
-              <SheetDescription>
-                {selectedInvoice
-                  ? `Editing Invoice #${selectedInvoice.invoice_number}`
-                  : 'Enter the details for your new invoice'}
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-6">
-              <InvoiceForm
-                defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : undefined}
-                customers={customers}
-                products={products}
-                onSubmit={handleFormSubmit}
-                onCancel={() => setIsFormOpen(false)}
-                loading={loading.customers || loading.products}
+          {/* Status Filters with the content inside it now */}
+          <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
+            <div className="space-y-4">
+              {/* Invoice List for current filter */}
+              <EntrepreneurInvoicesList 
+                invoices={selectedFilter === 'All' 
+                  ? invoices 
+                  : invoices.filter(inv => inv.status === selectedFilter)} 
+                onViewInvoice={handleViewInvoice}
+                onEditInvoice={handleEditInvoice}
+                onDeleteInvoice={handleDeleteInvoice}
+                onDownloadPdf={handleDownloadPdf}
               />
             </div>
-          </SheetContent>
-        </Sheet>
+          </InvoiceStatusFilter>
 
-        {/* Invoice PDF Viewer Dialog */}
-        <Dialog open={isPdfOpen} onOpenChange={setIsPdfOpen}>
-          <DialogContent className="max-w-4xl">
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                {selectedInvoice && getCurrentCustomer() && (
-                  <div className="relative">
-                    <Button
-                      className="absolute top-4 right-4"
-                      onClick={handlePrint}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Download PDF
-                    </Button>
-                    <InvoicePdf 
-                      invoice={selectedInvoice}
-                      customer={getCurrentCustomer() as Customer}
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </DashboardLayout>
+          {/* Hidden div for PDF generation */}
+          <div className="hidden">
+            {selectedInvoice && getCurrentCustomer() && (
+              <InvoicePdf 
+                ref={pdfRef}
+                invoice={selectedInvoice}
+                customer={getCurrentCustomer() as Customer}
+              />
+            )}
+          </div>
+
+          {/* Invoice Form Modal */}
+          <InvoiceFormModal
+            open={isFormOpen}
+            onClose={() => setIsFormOpen(false)}
+            customers={customers}
+            products={products}
+            invoice={selectedInvoice}
+            onSuccess={handleFormSubmit}
+          />
+
+          {/* Invoice PDF Viewer Dialog */}
+          <Dialog open={isPdfOpen} onOpenChange={setIsPdfOpen}>
+            <DialogContent className="max-w-4xl">
+              <Card className="overflow-hidden">
+                <CardContent className="p-0">
+                  {selectedInvoice && getCurrentCustomer() && (
+                    <div className="relative">
+                      <Button
+                        className="absolute top-4 right-4"
+                        onClick={handlePrint}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Download PDF
+                      </Button>
+                      <InvoicePdf 
+                        invoice={selectedInvoice}
+                        customer={getCurrentCustomer() as Customer}
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </DashboardLayout>
+    </InvoiceCustomizationProvider>
   );
 };
 
