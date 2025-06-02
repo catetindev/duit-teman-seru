@@ -105,18 +105,29 @@ export function useOrders() {
       setProducts(productsData as Product[]);
       
       if (transformedOrders.length === 0) {
-        console.log('No orders found for user');
+        console.log('No orders found for user - this is normal if no orders have been created yet');
       } else {
         console.log(`Found ${transformedOrders.length} orders for user`);
       }
       
     } catch (error: any) {
       console.error('Error in fetchData:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to fetch data',
-        variant: 'destructive',
-      });
+      
+      // More specific error handling
+      if (error.code === 'PGRST116') {
+        console.log('RLS policy might be preventing data access. Check if user is authenticated properly.');
+        toast({
+          title: 'Authentication Issue',
+          description: 'Please make sure you are logged in properly.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to fetch data',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -124,8 +135,12 @@ export function useOrders() {
 
   useEffect(() => {
     console.log('useOrders: Effect triggered, user ID:', user?.id);
-    fetchData();
-  }, [fetchData]);
+    if (user?.id) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [fetchData, user?.id]);
 
   // Filter orders based on search, status, customer and date
   const filteredOrders = orders.filter(order => {

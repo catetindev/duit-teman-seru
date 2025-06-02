@@ -177,7 +177,8 @@ export function useTransactionManagement() {
           
         if (orderError) {
           console.error("Error creating order for POS transaction:", orderError);
-          toast({ title: "Partial Error", description: "POS sale recorded, but failed to sync to Orders.", variant: "destructive" });
+          // Don't fail the entire transaction if order creation fails
+          toast({ title: "Partial Success", description: "POS transaksi tersimpan, tapi ada masalah sinkronisasi ke Orders. Periksa menu Orders & Transactions.", variant: "destructive" });
         } else {
           console.log('Successfully created order:', newOrder.id);
         }
@@ -209,7 +210,11 @@ export function useTransactionManagement() {
         // Update product stock after successful transaction
         await updateProductStock(orderProducts, true);
         
-        toast({ title: "Sip! ✨", description: "Transaksi berhasil disimpan dan disinkronkan ke Orders & Income." });
+        if (orderError) {
+          toast({ title: "Transaksi Tersimpan", description: "POS transaksi berhasil, tapi ada masalah sinkronisasi. Periksa menu Orders & Transactions." });
+        } else {
+          toast({ title: "Sip! ✨", description: "Transaksi berhasil disimpan dan disinkronkan ke Orders & Income." });
+        }
       }
       
       await fetchRecentTransactions(); 
