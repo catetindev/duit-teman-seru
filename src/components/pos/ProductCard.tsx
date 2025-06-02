@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,17 +12,23 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAdd }: ProductCardProps) {
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer bg-white">
-      <CardContent className="p-4 flex flex-col gap-3">
-        <div className="text-lg font-medium">{product.nama}</div>
-        <div className="text-lg font-bold text-purple-600">{formatRupiah(product.harga)}</div>
-        <Button 
-          onClick={() => onAdd(product)} 
-          className="w-full bg-gradient-to-r from-[#9AD0EC] to-[#B8E2F2] hover:from-[#7ABCD8] hover:to-[#A0D8E9] text-gray-800"
-        >
-          <Plus size={16} className="mr-2" />
-          Tambah
-        </Button>
+    <Card className="group overflow-hidden transition-all duration-200 hover:bg-slate-50 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm cursor-pointer">
+      <CardContent className="p-3 flex flex-col gap-2" onClick={() => onAdd(product)}>
+        <div className="flex justify-between items-start">
+          <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-base transform transition-transform duration-200 group-hover:scale-110">
+            <span role="img" aria-label="produk">🧃</span>
+          </div>
+          <div className="h-7 w-7 rounded-full bg-slate-800 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
+            <Plus size={14} />
+          </div>
+        </div>
+        
+        <div>
+          <div className="text-xs font-medium text-slate-800 line-clamp-2 min-h-[2rem]">
+            {product.nama}
+          </div>
+          <div className="mt-1 text-sm font-semibold text-slate-800">{formatRupiah(product.harga)}</div>
+        </div>
       </CardContent>
     </Card>
   );
