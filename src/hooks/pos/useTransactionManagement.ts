@@ -177,10 +177,13 @@ export function useTransactionManagement() {
           
         if (orderError) {
           console.error("Error creating order for POS transaction:", orderError);
-          // Don't fail the entire transaction if order creation fails
-          toast({ title: "Partial Success", description: "POS transaksi tersimpan, tapi ada masalah sinkronisasi ke Orders. Periksa menu Orders & Transactions.", variant: "destructive" });
+          toast({ 
+            title: "Partial Success", 
+            description: "POS transaksi tersimpan, tapi ada masalah sinkronisasi ke Orders. Periksa menu Orders & Transactions.", 
+            variant: "destructive" 
+          });
         } else {
-          console.log('Successfully created order:', newOrder.id);
+          console.log('Successfully created linked order:', newOrder.id);
         }
 
         // Create income transaction record for dashboard tracking

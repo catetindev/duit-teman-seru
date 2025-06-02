@@ -45,6 +45,20 @@ export function useOrders() {
 
       console.log('Raw orders data from database:', ordersData);
 
+      // Also fetch POS transactions that might not be linked to orders
+      const { data: posTransactions, error: posError } = await supabase
+        .from('pos_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('waktu_transaksi', { ascending: false });
+
+      if (posError) {
+        console.error('Error fetching POS transactions:', posError);
+        // Don't throw, just log the error as POS data is supplementary
+      }
+
+      console.log('POS transactions data:', posTransactions);
+
       // Fetch customers for filter
       const { data: customersData, error: customersError } = await supabase
         .from('customers')
@@ -98,16 +112,90 @@ export function useOrders() {
         return transformedOrder;
       }) || [];
 
-      console.log('Final transformed orders:', transformedOrders);
+      // Create orders from POS transactions that aren't already linked
+      const posOrdersToAdd = [];
+      if (posTransactions) {
+        for (const posTransaction of posTransactions) {
+          // Check if this POS transaction is already linked to an order
+          const existingOrder = transformedOrders.find(order => order.pos_transaction_id === posTransaction.id);
+          
+          if (!existingOrder) {
+            console.log('Creating order from unlinked POS transaction:', posTransaction.id);
+            
+            // Find or create customer for POS transaction
+            let customer = null;
+            if (posTransaction.nama_pembeli) {
+              customer = customersData?.find(c => c.name === posTransaction.nama_pembeli);
+              if (!customer) {
+                // Create a virtual customer for display purposes
+                customer = {
+                  id: 'pos-customer-' + posTransaction.id,
+                  name: posTransaction.nama_pembeli,
+                  email: null,
+                  phone: null,
+                  user_id: user.id,
+                  created_at: posTransaction.created_at,
+                  notes: null,
+                  tags: [],
+                  last_order_date: null
+                };
+              }
+            }
 
-      setOrders(transformedOrders);
-      setCustomers(customersData as Customer[]);
-      setProducts(productsData as Product[]);
+            // Parse POS products
+            let posProducts = [];
+            try {
+              if (posTransaction.produk && Array.isArray(posTransaction.produk)) {
+                posProducts = posTransaction.produk.map((item: any) => ({
+                  product_id: item.id,
+                  quantity: item.qty,
+                  name: item.nama,
+                  price: item.harga
+                }));
+              }
+            } catch (error) {
+              console.error('Error parsing POS products:', error);
+            }
+
+            const posOrder = {
+              id: 'pos-' + posTransaction.id,
+              order_date: posTransaction.waktu_transaksi,
+              customer_id: customer?.id || null,
+              customer: customer,
+              products: posProducts,
+              total: posTransaction.total,
+              status: 'Paid' as const,
+              payment_method: posTransaction.metode_pembayaran,
+              user_id: user.id,
+              payment_proof_url: null,
+              pos_transaction_id: posTransaction.id,
+              created_at: posTransaction.created_at
+            };
+
+            posOrdersToAdd.push(posOrder);
+          }
+        }
+      }
+
+      // Combine regular orders with POS orders
+      const allOrders = [...transformedOrders, ...posOrdersToAdd];
       
-      if (transformedOrders.length === 0) {
-        console.log('No orders found for user - this is normal if no orders have been created yet');
+      console.log('Final combined orders:', allOrders);
+
+      setOrders(allOrders);
+      setCustomers(customersData as Customer[]);
+      
+      // Cast products with proper type
+      const typedProducts = (productsData || []).map(product => ({
+        ...product,
+        type: product.type as 'product' | 'service'
+      })) as Product[];
+      setProducts(typedProducts);
+      
+      if (allOrders.length === 0) {
+        console.log('No orders found for user - this might be normal if no orders/POS transactions have been created yet');
       } else {
-        console.log(`Found ${transformedOrders.length} orders for user`);
+        console.log(`Found ${allOrders.length} total orders (${transformedOrders.length} regular orders + ${posOrdersToAdd.length} POS orders) for user`);
       }
       
     } catch (error: any) {

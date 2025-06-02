@@ -1,183 +1,209 @@
 
 import React from 'react';
 import { Order } from '@/types/entrepreneur';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { formatRupiah } from '@/utils/formatRupiah';
-import { OrderActions } from './OrderActions';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Edit, Trash, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { formatRupiah } from '@/utils/formatRupiah';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { OrderCard } from '../OrderCard';
 
 interface OrdersTableProps {
   orders: Order[];
   onEdit: (order: Order) => void;
   onDelete: (id: string) => void;
-  onStatusChange: (id: string, status: Order['status']) => void;
+  onStatusChange?: (id: string, status: string) => void;
 }
 
-export function OrdersTable({
-  orders,
-  onEdit,
-  onDelete,
-  onStatusChange
-}: OrdersTableProps) {
+const getStatusBadgeVariant = (status: string) => {
+  switch (status) {
+    case 'Paid':
+      return 'success';
+    case 'Pending':
+      return 'default';
+    case 'Canceled':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
+};
+
+const formatDate = (date: Date | string) => {
+  return new Date(date).toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+export function OrdersTable({ orders, onEdit, onDelete, onStatusChange }: OrdersTableProps) {
   const isMobile = useIsMobile();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Paid':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'Canceled':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default:
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-    }
-  };
-
   if (isMobile) {
-    // Mobile card layout - Fully responsive
-    return (
-      <div className="w-full">
-        <div className="space-y-2 px-1">
-          {orders.map((order) => (
-            <Card key={order.id} className="w-full shadow-sm border border-gray-200 dark:border-gray-700">
-              <CardContent className="p-3">
-                <div className="space-y-3">
-                  {/* Header Row */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-sm text-gray-900 dark:text-white truncate">
-                          #{order.id.substring(0, 8)}
-                        </h3>
-                        <Badge className={`text-xs px-2 py-0.5 ${getStatusColor(order.status)}`}>
-                          {order.status}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {order.customer?.name || 'Unknown Customer'}
-                      </p>
-                    </div>
-                    <div className="ml-2 flex-shrink-0">
-                      <OrderActions 
-                        order={order} 
-                        onEdit={onEdit} 
-                        onDelete={onDelete}
-                        onStatusChange={onStatusChange}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Details Row */}
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(order.order_date).toLocaleDateString('id-ID', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                      })}
-                    </div>
-                    <div className="font-semibold text-base text-gray-900 dark:text-white">
-                      {formatRupiah(order.total)}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+    if (orders.length === 0) {
+      return (
+        <div className="text-center p-8 border rounded-lg bg-muted/20">
+          <p className="mb-4">No orders found</p>
         </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3 p-2">
+        {orders.map((order) => (
+          <OrderCard
+            key={order.id}
+            order={order}
+            onEdit={() => onEdit(order)}
+            onDelete={() => onDelete(order.id)}
+          />
+        ))}
       </div>
     );
   }
 
-  // Desktop table layout with proper responsive scroll
+  if (orders.length === 0) {
+    return (
+      <div className="text-center p-8 border rounded-lg bg-muted/20">
+        <p className="mb-4">No orders found. Start making sales with POS or create your first order!</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full">
-      {/* Responsive table container with horizontal scroll */}
-      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
-        <ScrollArea className="w-full">
-          <div className="min-w-[800px]">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                  <TableHead className="font-semibold text-gray-900 dark:text-white w-[140px] px-4 py-3">
-                    Order ID
-                  </TableHead>
-                  <TableHead className="font-semibold text-gray-900 dark:text-white w-[120px] px-4 py-3">
-                    Date
-                  </TableHead>
-                  <TableHead className="font-semibold text-gray-900 dark:text-white min-w-[180px] px-4 py-3">
-                    Customer
-                  </TableHead>
-                  <TableHead className="font-semibold text-gray-900 dark:text-white text-right w-[140px] px-4 py-3">
-                    Total
-                  </TableHead>
-                  <TableHead className="font-semibold text-gray-900 dark:text-white w-[120px] px-4 py-3">
-                    Status
-                  </TableHead>
-                  <TableHead className="font-semibold text-gray-900 dark:text-white w-[120px] px-4 py-3">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow 
-                    key={order.id} 
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <TableCell className="px-4 py-3">
-                      <span className="font-mono text-sm text-gray-900 dark:text-white">
-                        {order.id.substring(0, 8)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <span className="text-sm text-gray-600 dark:text-gray-300">
-                        {new Date(order.order_date).toLocaleDateString('id-ID', {
-                          day: '2-digit',
-                          month: 'short'
-                        })}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <div className="max-w-[160px]">
-                        <span className="text-sm text-gray-900 dark:text-white truncate block">
-                          {order.customer?.name || "Unknown"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-right">
-                      <span className="font-semibold text-sm text-gray-900 dark:text-white">
-                        {formatRupiah(order.total)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <Badge className={`text-xs ${getStatusColor(order.status)}`}>
+    <div className="border rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[120px]">Order ID</TableHead>
+              <TableHead className="w-[140px]">Date</TableHead>
+              <TableHead className="w-[150px]">Customer</TableHead>
+              <TableHead className="w-[120px]">Items</TableHead>
+              <TableHead className="hidden md:table-cell w-[120px]">Payment</TableHead>
+              <TableHead className="text-right w-[100px]">Total</TableHead>
+              <TableHead className="w-[120px]">Status</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orders.map((order) => {
+              const isPosOrder = order.id.startsWith('pos-');
+              const displayId = isPosOrder ? `POS-${order.id.substring(4, 8)}` : order.id.substring(0, 8);
+              
+              return (
+                <TableRow key={order.id}>
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col">
+                      <span className="text-sm">{displayId}...</span>
+                      {isPosOrder && (
+                        <Badge variant="secondary" className="text-xs w-fit">POS</Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {formatDate(new Date(order.order_date))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="max-w-[150px] truncate">
+                    {order.customer?.name || 'Walk-in Customer'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {Array.isArray(order.products) ? (
+                        <div>
+                          <span className="font-medium">{order.products.length} item(s)</span>
+                          {order.products.length > 0 && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {order.products.slice(0, 2).map((product: any, index: number) => (
+                                <div key={index}>
+                                  {product.name} x{product.quantity}
+                                </div>
+                              ))}
+                              {order.products.length > 2 && (
+                                <div>+{order.products.length - 2} more...</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">No items</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <div className="space-y-1">
+                      <div className="text-sm">{order.payment_method}</div>
+                      {order.payment_proof_url && (
+                        <a
+                          href={order.payment_proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-500 hover:underline block"
+                        >
+                          View proof
+                        </a>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {formatRupiah(order.total)}
+                  </TableCell>
+                  <TableCell>
+                    {isPosOrder ? (
+                      <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
                         {order.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <OrderActions 
-                        order={order} 
-                        onEdit={onEdit} 
-                        onDelete={onDelete}
-                        onStatusChange={onStatusChange}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </ScrollArea>
+                    ) : (
+                      <Select
+                        value={order.status}
+                        onValueChange={(value: Order['status']) => onStatusChange?.(order.id, value)}
+                      >
+                        <SelectTrigger className="w-full sm:w-28 h-8 px-2 text-xs">
+                          <Badge variant={getStatusBadgeVariant(order.status)} className="truncate text-xs">
+                            {order.status}
+                          </Badge>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Paid">Paid</SelectItem>
+                          <SelectItem value="Canceled">Canceled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      {!isPosOrder && (
+                        <Button variant="ghost" size="icon" onClick={() => onEdit(order)} className="h-8 w-8">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {isPosOrder && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="View POS Transaction">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => onDelete(order.id)} 
+                        className="h-8 w-8 text-red-500 hover:text-red-700"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
