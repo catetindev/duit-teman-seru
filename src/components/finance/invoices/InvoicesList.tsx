@@ -1,225 +1,147 @@
 
-import React from 'react';
-import { format } from 'date-fns';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Invoice } from '@/types/finance';
-import { formatCurrency } from '@/utils/formatUtils';
-import {
-  CalendarClock,
-  CheckCircle2,
-  Clock,
-  Download,
-  FileText,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  XCircle
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card'; // Import Card components
-import { useIsMobile } from '@/hooks/use-mobile'; // Import useIsMobile hook
+import { Plus, Eye, Edit, Trash2, Download } from 'lucide-react';
+import { Invoice } from '@/types/finance';
+import { Customer, Product } from '@/types/entrepreneur';
+import { formatCurrency } from '@/utils/formatUtils';
+import { InvoiceFormDialog } from './InvoiceFormDialog';
 
 interface InvoicesListProps {
   invoices: Invoice[];
-  onViewInvoice: (invoice: Invoice) => void;
-  onEditInvoice: (invoice: Invoice) => void;
-  onDeleteInvoice: (id: string) => void;
-  onDownloadPdf: (invoice: Invoice) => void;
+  customers: Customer[];
+  products: Product[];
+  loading: boolean;
+  onInvoiceChange: () => void;
 }
 
-export function InvoicesList({
-  invoices,
-  onViewInvoice,
-  onEditInvoice,
-  onDeleteInvoice,
-  onDownloadPdf,
+export function InvoicesList({ 
+  invoices, 
+  customers, 
+  products, 
+  loading, 
+  onInvoiceChange 
 }: InvoicesListProps) {
-  const isMobile = useIsMobile(); // Use the hook
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  // Function to render status badge
-  const getStatusBadge = (status: string) => {
+  const handleCreateNew = () => {
+    setSelectedInvoice(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setSelectedInvoice(null);
+    onInvoiceChange();
+  };
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Paid':
-        return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Paid
-          </Badge>
-        );
+        return 'bg-green-100 text-green-800';
+      case 'Unpaid':
+        return 'bg-red-100 text-red-800';
       case 'Overdue':
-        return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            <XCircle className="h-3 w-3 mr-1" />
-            Overdue
-          </Badge>
-        );
+        return 'bg-orange-100 text-orange-800';
       default:
-        return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            <Clock className="h-3 w-3 mr-1" />
-            Unpaid
-          </Badge>
-        );
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  if (invoices.length === 0) {
+  if (loading) {
     return (
-      <div className="text-center p-8 border rounded-lg bg-muted/20">
-        <p className="mb-4">No invoices found.</p>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Loading invoices...</div>
+        </CardContent>
+      </Card>
     );
   }
 
-  // Render mobile card view
-  if (isMobile) {
-    return (
-      <div className="md:hidden space-y-4">
-        {invoices.map((invoice) => (
-          <Card
-            key={invoice.id}
-            className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => onViewInvoice(invoice)} // Click card to view
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h3 className="font-medium text-base leading-tight flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    Invoice #{invoice.invoice_number}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {(invoice as any).customers?.name || 'Unknown Customer'}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1"> {/* Reduced gap for tighter buttons */}
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onEditInvoice(invoice); }} className="h-7 w-7">
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDeleteInvoice(invoice.id); }} className="h-7 w-7 text-destructive">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-sm mb-2">
-                 <span className="text-muted-foreground">{format(new Date(invoice.created_at), 'dd MMM yyyy')}</span>
-                 <span className="font-semibold text-lg">{formatCurrency(Number(invoice.total), 'IDR')}</span>
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-1 text-muted-foreground">
-                   <CalendarClock className="h-3 w-3" />
-                   {format(new Date(invoice.payment_due_date), 'dd MMM yyyy')}
-                </div>
-                {getStatusBadge(invoice.status)}
-              </div>
-
-              {/* Download button */}
-              <div className="mt-3 pt-3 border-t border-border/50 flex justify-end">
-                 <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onDownloadPdf(invoice); }} className="h-7 text-xs">
-                    <Download className="h-3.5 w-3.5 mr-1" /> Download PDF
-                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  // Render desktop table view
   return (
-    <div className="hidden md:block rounded-md border overflow-x-auto">
-      <div className="min-w-[700px]"> {/* Ensure minimum width for the table */}
-        <Table>
-          <TableHeader className="bg-muted">
-            <TableRow>
-              <TableHead>Invoice</TableHead>
-              <TableHead className="hidden sm:table-cell">Date</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead className="hidden md:table-cell">Due Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="w-[80px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow
-                key={invoice.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => onViewInvoice(invoice)}
-              >
-                <TableCell className="font-medium">
-                  <div className="flex items-center">
-                    <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                    {invoice.invoice_number}
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Invoices</CardTitle>
+          <Button onClick={handleCreateNew} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New Invoice
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {invoices.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">No invoices found</p>
+              <Button onClick={handleCreateNew} variant="outline">
+                Create your first invoice
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {invoices.map((invoice) => {
+                const customer = customers.find(c => c.id === invoice.customer_id);
+                return (
+                  <div key={invoice.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-medium">{invoice.invoice_number}</h3>
+                          <Badge className={getStatusColor(invoice.status)}>
+                            {invoice.status}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <p>Customer: {customer?.name || 'Unknown'}</p>
+                          <p>Due: {new Date(invoice.payment_due_date).toLocaleDateString()}</p>
+                          <p className="font-medium text-purple-700">
+                            Total: {formatCurrency(Number(invoice.total), 'IDR')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" title="View">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleEdit(invoice)}
+                          title="Edit"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" title="Download">
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" title="Delete">
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  {format(new Date(invoice.created_at), 'dd MMM yyyy')}
-                </TableCell>
-                <TableCell>
-                  {(invoice as any).customers?.name || 'Unknown Customer'}
-                </TableCell>
-                <TableCell className="hidden md:table-cell flex items-center gap-1">
-                  <CalendarClock className="h-3 w-3 text-muted-foreground" />
-                  {format(new Date(invoice.payment_due_date), 'dd MMM yyyy')}
-                </TableCell>
-                <TableCell>{getStatusBadge(invoice.status)}</TableCell>
-                <TableCell className="text-right font-medium">
-                  {formatCurrency(Number(invoice.total), 'IDR')}
-                </TableCell>
-                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onViewInvoice(invoice)}>
-                        <FileText className="h-4 w-4 mr-2" />
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onDownloadPdf(invoice)}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEditInvoice(invoice)}>
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
-                        onClick={() => onDeleteInvoice(invoice.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <InvoiceFormDialog
+        open={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        customers={customers}
+        products={products}
+        invoice={selectedInvoice}
+        onSuccess={handleFormSuccess}
+      />
+    </>
   );
 }

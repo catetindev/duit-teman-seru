@@ -32,7 +32,7 @@ export function EntrepreneurDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Business Summary with animation */}
+      {/* Business Summary with improved revenue calculation */}
       <motion.div 
         initial="hidden"
         animate="visible"
