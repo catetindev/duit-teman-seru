@@ -1,12 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'; // Changed from Sheet
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
-// Removed Sheet imports: Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle
 import { InvoiceFormRefactored } from '@/components/finance/invoices/InvoiceFormRefactored';
-import { InvoicesList } from '@/components/finance/invoices/InvoicesList';
+import { EntrepreneurInvoicesList } from '@/components/finance/invoices/EntrepreneurInvoicesList';
 import { InvoicePdf } from '@/components/finance/invoices/InvoicePdf';
 import { InvoiceHeader } from '@/components/finance/invoices/InvoiceHeader';
 import { InvoiceStatusFilter } from '@/components/finance/invoices/InvoiceStatusFilter';
@@ -20,17 +20,9 @@ import { FileText } from 'lucide-react';
 import { useInvoiceCustomization } from '@/contexts/InvoiceCustomizationContext';
 
 const InvoicesRefactored = () => {
-  const {
-    isPremium
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
-  const {
-    logoUrl,
-    showLogo,
-    businessName
-  } = useInvoiceCustomization();
+  const { isPremium } = useAuth();
+  const { toast } = useToast();
+  const { logoUrl, showLogo, businessName } = useInvoiceCustomization();
 
   // States for invoice management
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -159,16 +151,19 @@ const InvoicesRefactored = () => {
     setSelectedInvoice(invoice);
     setIsPdfOpen(true);
   };
+  
   const handleEditInvoice = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setIsFormOpen(true);
   };
+  
   const handleDeleteInvoice = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus faktur ini?')) {
       await deleteInvoice(id);
       fetchInvoices(selectedFilter !== 'All' ? selectedFilter : undefined);
     }
   };
+  
   const handleDownloadPdf = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setTimeout(() => {
@@ -210,7 +205,9 @@ const InvoicesRefactored = () => {
       payment_due_date: new Date(invoice.payment_due_date)
     };
   };
-  return <DashboardLayout isPremium={isPremium}>
+  
+  return (
+    <DashboardLayout isPremium={isPremium}>
       <div className="space-y-6">
         {/* Header */}
         <InvoiceHeader onAddInvoice={handleAddInvoice} />
@@ -219,20 +216,34 @@ const InvoicesRefactored = () => {
         <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
           <div className="space-y-4">
             {/* Invoice List for current filter */}
-            <InvoicesList invoices={selectedFilter === 'All' ? invoices : invoices.filter(inv => inv.status === selectedFilter)} onViewInvoice={handleViewInvoice} onEditInvoice={handleEditInvoice} onDeleteInvoice={handleDeleteInvoice} onDownloadPdf={handleDownloadPdf} />
+            <EntrepreneurInvoicesList 
+              invoices={selectedFilter === 'All' ? invoices : invoices.filter(inv => inv.status === selectedFilter)} 
+              onViewInvoice={handleViewInvoice} 
+              onEditInvoice={handleEditInvoice} 
+              onDeleteInvoice={handleDeleteInvoice} 
+              onDownloadPdf={handleDownloadPdf} 
+            />
           </div>
         </InvoiceStatusFilter>
 
         {/* Hidden div for PDF generation */}
         <div className="hidden">
-          {selectedInvoice && getCurrentCustomer() && <InvoicePdf ref={pdfRef} invoice={selectedInvoice} customer={getCurrentCustomer() as Customer} />}
+          {selectedInvoice && getCurrentCustomer() && 
+            <InvoicePdf 
+              ref={pdfRef} 
+              invoice={selectedInvoice} 
+              customer={getCurrentCustomer() as Customer} 
+            />
+          }
         </div>
 
         {/* Invoice Form Dialog */}
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogContent className="!duration-200 !transition-all !data-[state=closed]:slide-out-to-bottom !data-[state=open]:slide-in-from-bottom w-[90vw] sm:max-w-lg lg:max-w-2xl p-0 rounded-lg border shadow-lg">
             <DialogHeader className="p-6 pb-0">
-              <DialogTitle className="text-xl font-semibold">{selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">
+                {selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}
+              </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground mt-1.5">
                 {selectedInvoice ? `Mengedit Faktur #${selectedInvoice.invoice_number}` : 'Masukkan detail faktur baru Anda'}
               </DialogDescription>
@@ -255,18 +266,22 @@ const InvoicesRefactored = () => {
           <DialogContent className="max-w-4xl">
             <Card className="overflow-hidden">
               <CardContent className="p-0">
-                {selectedInvoice && getCurrentCustomer() && <div className="relative">
+                {selectedInvoice && getCurrentCustomer() && 
+                  <div className="relative">
                     <Button className="absolute top-4 right-4" onClick={handlePrint}>
                       <FileText className="h-4 w-4 mr-2" />
                       Unduh PDF
                     </Button>
                     <InvoicePdf invoice={selectedInvoice} customer={getCurrentCustomer() as Customer} />
-                  </div>}
+                  </div>
+                }
               </CardContent>
             </Card>
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
+
 export default InvoicesRefactored;

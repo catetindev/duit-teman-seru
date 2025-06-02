@@ -48,7 +48,14 @@ export function useInvoices() {
         .eq('user_id', user.id);
       
       if (productsError) throw productsError;
-      setProducts(productsData || []);
+      
+      // Cast the type property to match our Product interface
+      const typedProducts = (productsData || []).map(product => ({
+        ...product,
+        type: product.type as 'product' | 'service'
+      })) as Product[];
+      
+      setProducts(typedProducts);
     } catch (error) {
       console.error('Error fetching customers and products:', error);
     }
