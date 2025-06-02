@@ -8,7 +8,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { FileText } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { InvoiceForm } from '@/components/finance/invoices/InvoiceForm';
-import { InvoicesList } from '@/components/finance/invoices/InvoicesList';
+import { EntrepreneurInvoicesList } from '@/components/finance/invoices/EntrepreneurInvoicesList';
 import { InvoicePdf } from '@/components/finance/invoices/InvoicePdf';
 import { InvoiceHeader } from '@/components/finance/invoices/InvoiceHeader';
 import { InvoiceStatusFilter } from '@/components/finance/invoices/InvoiceStatusFilter';
@@ -216,7 +216,7 @@ const Invoices = () => {
         <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
           <div className="space-y-4">
             {/* Invoice List for current filter */}
-            <InvoicesList 
+            <EntrepreneurInvoicesList 
               invoices={selectedFilter === 'All' 
                 ? invoices 
                 : invoices.filter(inv => inv.status === selectedFilter)} 

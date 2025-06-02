@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ interface InvoiceCustomerFormProps {
 
 export function InvoiceCustomerForm({ 
   form, 
-  customers, 
+  customers = [], // Default to empty array to prevent undefined
   defaultInvoiceNumber,
   loading
 }: InvoiceCustomerFormProps) {
@@ -58,7 +59,7 @@ export function InvoiceCustomerForm({
                 </SelectTrigger>
               </FormControl>
               <SelectContent className="max-h-[300px]">
-                {customers.length === 0 ? (
+                {!customers || customers.length === 0 ? (
                   <div className="p-2 text-sm text-muted-foreground text-center">
                     Belum ada pelanggan
                   </div>
