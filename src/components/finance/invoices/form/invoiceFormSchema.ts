@@ -16,6 +16,7 @@ export const invoiceFormSchema = z.object({
   total: z.number().min(0, 'Total must be positive'),
   payment_due_date: z.date(),
   status: z.enum(['Unpaid', 'Paid', 'Overdue']),
+  payment_method: z.string().optional(),
   notes: z.string().optional()
 });
 

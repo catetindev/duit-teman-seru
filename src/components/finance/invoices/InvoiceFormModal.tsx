@@ -51,6 +51,7 @@ export function InvoiceFormModal({
       total: 0,
       payment_due_date: new Date(),
       status: 'Unpaid',
+      payment_method: '',
       notes: ''
     }
   });
@@ -86,6 +87,7 @@ export function InvoiceFormModal({
           total: invoice.total,
           payment_due_date: new Date(invoice.payment_due_date),
           status: invoice.status as 'Unpaid' | 'Paid' | 'Overdue',
+          payment_method: invoice.payment_method || '',
           notes: invoice.notes || ''
         });
       } else {
