@@ -7,7 +7,7 @@ port = 587
 user = "your_brevo_smtp_username"
 pass = "your_brevo_smtp_password"
 sender_name = "Catatuy"
-sender_email = "no-reply@catatyo.com"
+sender_email = "noreply@catatyo.com"
 admin_email = "admin@catatyo.com"
 
 [auth.email]
