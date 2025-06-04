@@ -6,6 +6,7 @@ import { InvoiceCustomerForm } from './InvoiceCustomerForm';
 import { InvoiceItemsSection } from './InvoiceItemsSection';
 import { InvoiceTotalsSection } from './InvoiceTotalsSection';
 import { InvoicePaymentForm } from './InvoicePaymentForm';
+import { LogoUploader } from './LogoUploader';
 import { Customer, Product } from '@/types/entrepreneur';
 import { Invoice } from '@/types/finance';
 import { useInvoiceForm } from '@/hooks/finance/useInvoiceForm';
@@ -51,6 +52,9 @@ export function InvoiceForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Logo Upload Section */}
+        <LogoUploader />
+        
         <InvoiceCustomerForm 
           form={form} 
           customers={updatedCustomers}
@@ -81,7 +85,7 @@ export function InvoiceForm({
           <Button
             type="submit"
             disabled={loading}
-            className="flex-1"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
           >
             {loading ? 'Saving...' : (invoice ? 'Update Invoice' : 'Create Invoice')}
           </Button>
@@ -89,7 +93,7 @@ export function InvoiceForm({
             type="button"
             variant="outline"
             onClick={onClose}
-            className="flex-1"
+            className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
           >
             Cancel
           </Button>

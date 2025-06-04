@@ -24,7 +24,8 @@ export default function Transactions() {
     timeFilter,
     setTimeFilter,
     categoryFilter,
-    setCategoryFilter
+    setCategoryFilter,
+    refetch
   } = useTransactions(isEntrepreneurMode);
 
   return (
@@ -43,7 +44,7 @@ export default function Transactions() {
                 }
               </p>
             </div>
-            <div className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-slate-200">
+            <div className="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 text-sm font-medium text-slate-700">
               {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
             </div>
           </div>
@@ -62,7 +63,7 @@ export default function Transactions() {
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             isLoading={isLoading}
-            onUpdate={() => {}}
+            onUpdate={refetch}
           />
         </div>
       </div>
@@ -70,7 +71,7 @@ export default function Transactions() {
       <AddTransactionDialog 
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={() => {}}
+        onTransactionAdded={refetch}
       />
     </DashboardLayout>
   );

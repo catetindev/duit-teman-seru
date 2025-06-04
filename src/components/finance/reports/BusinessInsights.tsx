@@ -18,50 +18,53 @@ export const BusinessInsights = ({
 }: BusinessInsightsProps) => {
   // Generate insights based on real data
   const getTopExpenseCategory = () => {
-    if (expenseCategories.length === 0) return 'Marketing';
-    return expenseCategories[0].category;
+    if (expenseCategories.length === 0) return null;
+    return expenseCategories[0];
   };
 
   const getTopProduct = () => {
-    if (topProducts.length === 0) return 'Product A';
-    return topProducts[0].name;
+    if (topProducts.length === 0) return null;
+    return topProducts[0];
   };
 
   const getProfitStatus = () => {
-    const profitMargin = summary.totalIncome ? (((summary.totalIncome - summary.totalExpenses) / summary.totalIncome) * 100) : 0;
+    const netProfit = summary.totalIncome - summary.totalExpenses;
+    const profitMargin = summary.totalIncome > 0 ? ((netProfit / summary.totalIncome) * 100) : 0;
     return {
-      isPositive: profitMargin > 0,
+      isPositive: netProfit > 0,
       margin: profitMargin,
-      netProfit: summary.totalIncome - summary.totalExpenses
+      netProfit: netProfit
     };
   };
 
   const profitStatus = getProfitStatus();
+  const topExpenseCategory = getTopExpenseCategory();
+  const topProduct = getTopProduct();
 
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-white border border-slate-200">
       <CardHeader className="pb-3 sm:pb-4">
-        <CardTitle className="text-sm sm:text-base lg:text-lg">Business Insights</CardTitle>
-        <CardDescription className="text-xs sm:text-sm">
+        <CardTitle className="text-sm sm:text-base lg:text-lg text-slate-900">Business Insights</CardTitle>
+        <CardDescription className="text-xs sm:text-sm text-slate-600">
           Rekomendasi berdasarkan data bisnis Anda
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4">
         {/* Profit Status Insight */}
-        <div className={`p-3 sm:p-4 border rounded-lg ${
+        <div className={`p-3 sm:p-4 border border-slate-200 ${
           profitStatus.isPositive 
-            ? 'bg-emerald-50 border-emerald-200' 
-            : 'bg-red-50 border-red-200'
+            ? 'bg-green-50' 
+            : 'bg-red-50'
         }`}>
-          <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+          <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base text-slate-900">
             {profitStatus.isPositive ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
             ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4" />
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
             )}
             Status Profitabilitas
           </h3>
-          <p className="text-xs sm:text-sm mt-1">
+          <p className="text-xs sm:text-sm mt-1 text-slate-700">
             {profitStatus.isPositive ? (
               <>
                 Bisnis Anda profitable dengan margin {profitStatus.margin.toFixed(1)}% 
@@ -77,41 +80,41 @@ export const BusinessInsights = ({
         </div>
 
         {/* Expense Optimization */}
-        {expenseCategories.length > 0 && (
-          <div className="p-3 sm:p-4 border rounded-lg bg-amber-50 border-amber-200">
-            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
-              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
+        {topExpenseCategory && (
+          <div className="p-3 sm:p-4 border border-slate-200 bg-amber-50">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base text-slate-900">
+              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
               Optimasi Pengeluaran
             </h3>
-            <p className="text-xs sm:text-sm mt-1">
-              Kategori "{getTopExpenseCategory()}" merupakan pengeluaran terbesar 
-              ({expenseCategories[0]?.percentage.toFixed(1)}%). 
+            <p className="text-xs sm:text-sm mt-1 text-slate-700">
+              Kategori "{topExpenseCategory.category}" merupakan pengeluaran terbesar 
+              ({topExpenseCategory.percentage.toFixed(1)}%). 
               Evaluasi efisiensi di kategori ini untuk meningkatkan profit.
             </p>
           </div>
         )}
         
         {/* Product Performance */}
-        {topProducts.length > 0 && (
-          <div className="p-3 sm:p-4 border rounded-lg bg-blue-50 border-blue-200">
-            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
-              <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+        {topProduct && (
+          <div className="p-3 sm:p-4 border border-slate-200 bg-blue-50">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base text-slate-900">
+              <Target className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
               Peluang Pertumbuhan
             </h3>
-            <p className="text-xs sm:text-sm mt-1">
-              Produk "{getTopProduct()}" berkontribusi signifikan terhadap revenue. 
+            <p className="text-xs sm:text-sm mt-1 text-slate-700">
+              Produk "{topProduct.name}" berkontribusi signifikan terhadap revenue. 
               Pertimbangkan untuk memperluas lini produk serupa atau meningkatkan stok.
             </p>
           </div>
         )}
 
         {/* General Advice */}
-        <div className="p-3 sm:p-4 border rounded-lg bg-purple-50 border-purple-200">
-          <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
-            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+        <div className="p-3 sm:p-4 border border-slate-200 bg-purple-50">
+          <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base text-slate-900">
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
             Rekomendasi Strategis
           </h3>
-          <p className="text-xs sm:text-sm mt-1">
+          <p className="text-xs sm:text-sm mt-1 text-slate-700">
             {summary.totalIncome > 0 ? (
               <>
                 Dengan total pendapatan {formatCurrency(summary.totalIncome, 'IDR')}, 
@@ -125,6 +128,16 @@ export const BusinessInsights = ({
             )}
           </p>
         </div>
+
+        {/* No Data State */}
+        {!topExpenseCategory && !topProduct && summary.totalIncome === 0 && (
+          <div className="p-3 sm:p-4 border border-slate-200 bg-slate-50 text-center">
+            <p className="text-xs sm:text-sm text-slate-600">
+              Belum ada data yang cukup untuk memberikan insight bisnis. 
+              Mulai dengan menambah transaksi untuk mendapatkan analisis yang lebih akurat.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
