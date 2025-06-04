@@ -182,8 +182,20 @@ export function InvoiceFormModal({
         };
         await updateInvoice(updateData);
       } else {
-        // For new invoices, don't include the id
-        const { id, ...createData } = data;
+        // For new invoices, create properly typed data without id
+        const createData: Omit<InvoiceFormData, 'id'> = {
+          invoice_number: data.invoice_number,
+          customer_id: data.customer_id,
+          items: data.items,
+          subtotal: data.subtotal,
+          tax: data.tax,
+          discount: data.discount,
+          total: data.total,
+          payment_due_date: data.payment_due_date,
+          status: data.status,
+          payment_method: data.payment_method,
+          notes: data.notes
+        };
         await addInvoice(createData);
       }
       
