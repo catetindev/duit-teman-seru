@@ -181,8 +181,21 @@ export function InvoiceFormModal({
         };
         await updateInvoice(updateData);
       } else {
-        // For new invoices, pass the complete data without id - addInvoice expects InvoiceFormData but will handle the id internally
-        await addInvoice(data);
+        // For new invoices, ensure all required fields are present
+        const createData: InvoiceFormData = {
+          invoice_number: data.invoice_number,
+          customer_id: data.customer_id,
+          items: data.items,
+          subtotal: data.subtotal,
+          tax: data.tax,
+          discount: data.discount,
+          total: data.total,
+          payment_due_date: data.payment_due_date,
+          status: data.status,
+          payment_method: data.payment_method,
+          notes: data.notes || ''
+        };
+        await addInvoice(createData);
       }
       
       onSuccess();
