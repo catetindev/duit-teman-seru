@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,40 +11,24 @@ import { InvoiceReminder } from './InvoiceReminder';
 import { useBusinessStats } from '@/hooks/entrepreneur/useBusinessStats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TopProductsList } from './TopProductsList';
-
 interface EntrepreneurDashboardProps {
   onAddIncome: () => void;
   onAddExpense: () => void;
 }
-
 export function EntrepreneurDashboard({
   onAddIncome,
   onAddExpense
 }: EntrepreneurDashboardProps) {
-  const { totalCustomers, totalProducts, totalOrders, loading } = useBusinessStats();
-
-  return (
-    <div className="min-h-screen bg-slate-50">
+  const {
+    totalCustomers,
+    totalProducts,
+    totalOrders,
+    loading
+  } = useBusinessStats();
+  return <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
         {/* Header Section - Clean and minimal */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-slate-200">
-          <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800">
-                Welcome to Your Business Dashboard
-              </h1>
-              <div className="shrink-0">
-                <div className="inline-flex items-center px-3 py-1.5 rounded-xl text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                  <span className="mr-1.5">🚀</span>
-                  Business Mode
-                </div>
-              </div>
-            </div>
-            <p className="text-base text-slate-600">
-              Let's build your dream business together
-            </p>
-          </div>
-        </div>
+        
 
         {/* Business Performance Section */}
         <BusinessSummary />
@@ -60,11 +43,7 @@ export function EntrepreneurDashboard({
               <div className="flex items-center justify-between">
                 <div className="flex flex-col min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-500 mb-1 truncate">Customers</p>
-                  {loading ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <h4 className="text-2xl lg:text-3xl font-bold text-slate-800">{totalCustomers}</h4>
-                  )}
+                  {loading ? <Skeleton className="h-8 w-16" /> : <h4 className="text-2xl lg:text-3xl font-bold text-slate-800">{totalCustomers}</h4>}
                   <p className="text-xs text-emerald-600 font-medium mt-1">+12% this month</p>
                 </div>
                 <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-2xl bg-sky-100 flex items-center justify-center">
@@ -79,11 +58,7 @@ export function EntrepreneurDashboard({
               <div className="flex items-center justify-between">
                 <div className="flex flex-col min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-500 mb-1 truncate">Products</p>
-                  {loading ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <h4 className="text-2xl lg:text-3xl font-bold text-slate-800">{totalProducts}</h4>
-                  )}
+                  {loading ? <Skeleton className="h-8 w-16" /> : <h4 className="text-2xl lg:text-3xl font-bold text-slate-800">{totalProducts}</h4>}
                   <p className="text-xs text-emerald-600 font-medium mt-1">+5% this week</p>
                 </div>
                 <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-2xl bg-emerald-100 flex items-center justify-center">
@@ -98,11 +73,7 @@ export function EntrepreneurDashboard({
               <div className="flex items-center justify-between">
                 <div className="flex flex-col min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-500 mb-1 truncate">Orders</p>
-                  {loading ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <h4 className="text-2xl lg:text-3xl font-bold text-slate-800">{totalOrders}</h4>
-                  )}
+                  {loading ? <Skeleton className="h-8 w-16" /> : <h4 className="text-2xl lg:text-3xl font-bold text-slate-800">{totalOrders}</h4>}
                   <p className="text-xs text-emerald-600 font-medium mt-1">+24% today</p>
                 </div>
                 <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-2xl bg-orange-100 flex items-center justify-center">
@@ -188,6 +159,5 @@ export function EntrepreneurDashboard({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
