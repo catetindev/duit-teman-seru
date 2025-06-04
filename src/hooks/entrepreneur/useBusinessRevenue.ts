@@ -7,6 +7,7 @@ interface RevenueData {
   totalRevenue: number;
   posRevenue: number;
   orderRevenue: number;
+  transactionRevenue: number;
   monthlyGrowth: number;
 }
 
@@ -16,6 +17,7 @@ export function useBusinessRevenue() {
     totalRevenue: 0,
     posRevenue: 0,
     orderRevenue: 0,
+    transactionRevenue: 0,
     monthlyGrowth: 0
   });
   const [loading, setLoading] = useState(true);
@@ -52,12 +54,13 @@ export function useBusinessRevenue() {
         throw posError;
       }
 
-      // Fetch orders revenue for current month
+      // Fetch orders revenue for current month (only non-POS orders to avoid duplication)
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select('total, created_at')
+        .select('total, created_at, pos_transaction_id')
         .eq('user_id', user.id)
         .eq('status', 'Paid')
+        .is('pos_transaction_id', null) // Only orders that are NOT from POS to avoid duplication
         .gte('created_at', currentMonthStart.toISOString())
         .lte('created_at', currentMonthEnd.toISOString());
 
@@ -66,7 +69,7 @@ export function useBusinessRevenue() {
         throw ordersError;
       }
 
-      // Fetch business income transactions for current month
+      // Fetch manual business income transactions for current month
       const { data: incomeTransactions, error: incomeError } = await supabase
         .from('transactions')
         .select('amount, date')
@@ -81,12 +84,13 @@ export function useBusinessRevenue() {
         throw incomeError;
       }
 
-      // Calculate current month revenue
+      // Calculate current month revenue (separate sources to avoid confusion)
       const posRevenue = posTransactions?.reduce((sum, tx) => sum + Number(tx.total), 0) || 0;
       const orderRevenue = orders?.reduce((sum, order) => sum + Number(order.total), 0) || 0;
-      const manualIncomeRevenue = incomeTransactions?.reduce((sum, tx) => sum + Number(tx.amount), 0) || 0;
+      const transactionRevenue = incomeTransactions?.reduce((sum, tx) => sum + Number(tx.amount), 0) || 0;
       
-      const totalRevenue = posRevenue + orderRevenue + manualIncomeRevenue;
+      // Total revenue is sum of all sources (no duplication now)
+      const totalRevenue = posRevenue + orderRevenue + transactionRevenue;
 
       // Fetch previous month data for growth calculation
       const { data: prevPosTransactions } = await supabase
@@ -101,6 +105,7 @@ export function useBusinessRevenue() {
         .select('total')
         .eq('user_id', user.id)
         .eq('status', 'Paid')
+        .is('pos_transaction_id', null)
         .gte('created_at', previousMonthStart.toISOString())
         .lte('created_at', previousMonthEnd.toISOString());
 
@@ -128,14 +133,20 @@ export function useBusinessRevenue() {
         totalRevenue,
         posRevenue,
         orderRevenue,
-        manualIncomeRevenue,
-        monthlyGrowth
+        transactionRevenue,
+        monthlyGrowth,
+        debug: {
+          posTransactionsCount: posTransactions?.length || 0,
+          ordersCount: orders?.length || 0,
+          transactionsCount: incomeTransactions?.length || 0
+        }
       });
 
       setRevenueData({
         totalRevenue,
         posRevenue,
         orderRevenue,
+        transactionRevenue,
         monthlyGrowth
       });
 

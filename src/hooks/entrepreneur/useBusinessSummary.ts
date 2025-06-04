@@ -28,21 +28,41 @@ export function useBusinessSummary() {
     try {
       setLoading(true);
       
-      // Fetch business transactions (income and expenses)
-      const { data: transactionsData, error: transactionsError } = await supabase
+      // Fetch manual business income transactions
+      const { data: incomeTransactionsData, error: incomeTransactionsError } = await supabase
         .from('transactions')
-        .select('type, amount')
+        .select('amount')
         .eq('user_id', user.id)
+        .eq('type', 'income')
         .eq('is_business', true);
 
-      if (transactionsError) throw transactionsError;
+      if (incomeTransactionsError) throw incomeTransactionsError;
 
-      // Fetch income from orders
+      // Fetch manual business expense transactions
+      const { data: expenseTransactionsData, error: expenseTransactionsError } = await supabase
+        .from('transactions')
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('type', 'expense')
+        .eq('is_business', true);
+
+      if (expenseTransactionsError) throw expenseTransactionsError;
+
+      // Fetch income from POS transactions
+      const { data: posTransactionsData, error: posTransactionsError } = await supabase
+        .from('pos_transactions')
+        .select('total')
+        .eq('user_id', user.id);
+
+      if (posTransactionsError) throw posTransactionsError;
+
+      // Fetch income from orders (exclude POS-linked orders to avoid duplication)
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select('total')
         .eq('user_id', user.id)
-        .eq('status', 'Paid');
+        .eq('status', 'Paid')
+        .is('pos_transaction_id', null); // Only non-POS orders
 
       if (ordersError) throw ordersError;
 
@@ -54,24 +74,32 @@ export function useBusinessSummary() {
 
       if (expensesError) throw expensesError;
 
-      // Calculate totals from transactions
-      const transactionIncome = transactionsData
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Number(t.amount), 0);
-      
-      const transactionExpenses = transactionsData
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + Number(t.amount), 0);
-
-      // Calculate totals from orders and business_expenses
+      // Calculate totals from different sources
+      const manualIncomeTransactions = incomeTransactionsData.reduce((sum, t) => sum + Number(t.amount), 0);
+      const manualExpenseTransactions = expenseTransactionsData.reduce((sum, t) => sum + Number(t.amount), 0);
+      const posIncome = posTransactionsData.reduce((sum, tx) => sum + Number(tx.total), 0);
       const orderIncome = ordersData.reduce((sum, order) => sum + Number(order.total), 0);
       const businessExpenses = expensesData.reduce((sum, expense) => sum + Number(expense.amount), 0);
 
-      // Combine all income and expenses
-      const totalIncome = transactionIncome + orderIncome;
-      const totalExpenses = transactionExpenses + businessExpenses;
+      // Combine all income sources (no duplication)
+      const totalIncome = manualIncomeTransactions + posIncome + orderIncome;
+      const totalExpenses = manualExpenseTransactions + businessExpenses;
       const netProfit = totalIncome - totalExpenses;
       const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
+
+      console.log('Business summary calculated:', {
+        totalIncome,
+        totalExpenses,
+        netProfit,
+        profitMargin,
+        breakdown: {
+          manualIncomeTransactions,
+          posIncome,
+          orderIncome,
+          manualExpenseTransactions,
+          businessExpenses
+        }
+      });
 
       setSummaryData({
         totalIncome,
