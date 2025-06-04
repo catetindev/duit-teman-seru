@@ -4,26 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Wallet, DollarSign } from 'lucide-react';
 import { formatCurrency } from '@/utils/formatUtils';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface Stats {
-  totalIncome: number;
-  totalExpenses: number;
-  balance: number;
-  monthlyIncome: number;
-  monthlyExpenses: number;
-}
+import { DashboardStats } from '@/hooks/useDashboardData';
 
 interface StatCardsSectionProps {
-  stats: Stats | null;
+  stats: DashboardStats | null;
   loading: boolean;
 }
 
 const StatCardsSection = ({ stats, loading }: StatCardsSectionProps) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl">
+          <Card key={i} className="bg-white/80 backdrop-blur-sm border-0 rounded-3xl">
             <CardContent className="p-6">
               <Skeleton className="h-4 w-20 mb-3" />
               <Skeleton className="h-8 w-24 mb-2" />
@@ -64,8 +57,8 @@ const StatCardsSection = ({ stats, loading }: StatCardsSectionProps) => {
       changeColor: 'text-blue-600'
     },
     {
-      title: 'Monthly Income',
-      value: formatCurrency(stats?.monthlyIncome || 0, 'IDR'),
+      title: 'Savings Rate',
+      value: `${stats?.savingsRate || 0}%`,
       icon: DollarSign,
       gradient: 'from-purple-500 to-pink-600',
       bgGradient: 'from-purple-50 to-pink-50',
@@ -75,15 +68,15 @@ const StatCardsSection = ({ stats, loading }: StatCardsSectionProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {cards.map((card, index) => (
-        <Card key={index} className="group bg-white/70 backdrop-blur-sm border-0 rounded-2xl hover:bg-white/80 transition-all duration-300 hover:scale-[1.02]">
+        <Card key={index} className="group bg-white/80 backdrop-blur-sm border-0 rounded-3xl hover:bg-white/90 transition-all duration-300 hover:scale-[1.02]">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                 <card.icon className="h-6 w-6 text-white" />
               </div>
-              <div className={`px-2 py-1 rounded-lg text-xs font-medium ${card.changeColor} bg-gradient-to-r ${card.bgGradient}`}>
+              <div className={`px-3 py-1 rounded-xl text-xs font-medium ${card.changeColor} bg-gradient-to-r ${card.bgGradient}`}>
                 {card.change}
               </div>
             </div>
