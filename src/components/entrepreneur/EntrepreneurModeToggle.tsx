@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useEntrepreneurModeSwitcher } from '@/hooks/useEntrepreneurModeSwitcher';
 import { Switch } from '@/components/ui/switch';
@@ -25,26 +24,21 @@ export function EntrepreneurModeToggle({ className }: EntrepreneurModeToggleProp
   const navigate = useNavigate();
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center shrink-0", className)}>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-2">
-            <Brain 
-              className={cn(
-                "h-4 w-4 transition-colors", 
-                isEntrepreneurMode ? "text-amber-500" : "text-muted-foreground"
-              )}
-            />
             <Switch
+              id="entrepreneur-mode"
               checked={isEntrepreneurMode}
               onCheckedChange={toggleEntrepreneurMode}
-              className={cn(
-                isEntrepreneurMode && "data-[state=checked]:bg-amber-500"
-              )}
+              disabled={isPremiumRequired}
+              className="data-[state=checked]:bg-amber-500"
+              aria-label="Toggle entrepreneur mode"
             />
             {isPremiumRequired && (
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className="ml-1 cursor-pointer bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
                 onClick={() => navigate('/pricing')}
               >

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -62,91 +61,94 @@ const Dashboard = () => {
       <OnboardingTour />
       {isEntrepreneurMode && isPremium && <EntrepreneurOnboardingTour />}
       
-      <div className="mb-6">
-        {isMobile ? (
-          <>
-            <div data-tour="dashboard-greeting">
-              <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          {isMobile ? (
+            <div className="space-y-4">
+              <div data-tour="dashboard-greeting">
+                <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+              </div>
+              <div>
+                <EntrepreneurModeToggle />
+              </div>
             </div>
-            <div className="mt-3">
-              <EntrepreneurModeToggle />
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <EntrepreneurModeToggle />
+                <div data-tour="dashboard-greeting" className="space-y-1">
+                  <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+                </div>
+              </div>
             </div>
-          </>
+          )}
+        
+          {/* Mode indicator */}
+          <div className="mt-4">
+            <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100">
+              {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
+            </div>
+          </div>
+        </div>
+
+        {/* Dashboard Content */}
+        {isEntrepreneurMode && isPremium ? (
+          <EntrepreneurDashboard 
+            onAddIncome={handleAddBusinessIncome}
+            onAddExpense={handleAddBusinessExpense}
+          />
         ) : (
-          <div className="flex items-center gap-4">
-            <EntrepreneurModeToggle />
-            <div data-tour="dashboard-greeting">
-              <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
+          <div className="space-y-8">
+            <div data-tour="income-expense-cards">
+              <StatCardsSection 
+                stats={stats} 
+                loading={loading.stats} 
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <div data-tour="add-transaction">
+                  <TransactionsSection 
+                    transactions={transactions} 
+                    onTransactionAdded={refreshData}
+                    loading={loading.transactions} 
+                  />
+                </div>
+                
+                {isPremium && <BudgetsSection isPremium={isPremium} />}
+              </div>
+              
+              <div className="space-y-8">
+                <div data-tour="goals-section">
+                  <GoalsSection 
+                    goals={goals}
+                    isPremium={isPremium}
+                    onGoalAdded={refreshData}
+                    loading={loading.goals}
+                    onUpgradeClick={handleUpgradeClick}
+                  />
+                </div>
+                
+                {isPremium && <BadgesSection badges={mockBadges} />}
+              </div>
             </div>
           </div>
         )}
-        
-        {/* Mode indicator */}
-        <div className="mt-4">
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
-            {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
-          </div>
-        </div>
-      </div>
-      
-      {isEntrepreneurMode && isPremium ? (
-        // Entrepreneur Mode Dashboard (premium only)
-        <EntrepreneurDashboard 
-          onAddIncome={handleAddBusinessIncome}
-          onAddExpense={handleAddBusinessExpense}
+
+        <AddTransactionDialog 
+          isOpen={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onTransactionAdded={refreshData}
+          initialCategory={transactionCategory}
+          initialType={transactionType}
         />
-      ) : (
-        // Regular Dashboard (Personal Mode)
-        <>
-          <div data-tour="income-expense-cards">
-            <StatCardsSection 
-              stats={stats} 
-              loading={loading.stats} 
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-              <div data-tour="add-transaction">
-                <TransactionsSection 
-                  transactions={transactions} 
-                  onTransactionAdded={refreshData}
-                  loading={loading.transactions} 
-                />
-              </div>
-              
-              {isPremium && <BudgetsSection isPremium={isPremium} />}
-            </div>
-            
-            <div className="space-y-8">
-              <div data-tour="goals-section">
-                <GoalsSection 
-                  goals={goals}
-                  isPremium={isPremium}
-                  onGoalAdded={refreshData}
-                  loading={loading.goals}
-                  onUpgradeClick={handleUpgradeClick}
-                />
-              </div>
-              
-              {isPremium && <BadgesSection badges={mockBadges} />}
-            </div>
-          </div>
-        </>
-      )}
-
-      <AddTransactionDialog 
-        isOpen={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={refreshData}
-        initialCategory={transactionCategory}
-        initialType={transactionType}
-      />
-      
-      <PricingModal 
-        open={isPricingModalOpen}
-        onOpenChange={setIsPricingModalOpen}
-      />
+        
+        <PricingModal 
+          open={isPricingModalOpen}
+          onOpenChange={setIsPricingModalOpen}
+        />
+      </div>
     </DashboardLayout>
   );
 };

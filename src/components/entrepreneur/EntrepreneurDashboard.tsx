@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,12 +22,7 @@ export function EntrepreneurDashboard({
   onAddIncome,
   onAddExpense
 }: EntrepreneurDashboardProps) {
-  const {
-    totalCustomers,
-    totalProducts,
-    totalOrders,
-    loading
-  } = useBusinessStats();
+  const { totalCustomers, totalProducts, totalOrders, loading } = useBusinessStats();
 
   const fadeIn = {
     hidden: {
@@ -57,39 +51,51 @@ export function EntrepreneurDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Welcome Header */}
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header Section with Business Mode Badge */}
         <motion.div 
           initial="hidden" 
           animate="visible" 
           variants={fadeIn} 
-          className="text-center mb-6"
+          className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-6 border-b border-slate-200"
         >
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">
-            Welcome to Your Business Dashboard 🚀
-          </h1>
-          <p className="text-slate-600">Let's build your dream business together</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
+                Welcome to Your Business Dashboard 🚀
+              </h1>
+              <div className="shrink-0">
+                <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                  <span className="mr-1.5">💼</span>
+                  Business Mode
+                </div>
+              </div>
+            </div>
+            <p className="text-base text-slate-600">
+              Let's build your dream business together
+            </p>
+          </div>
         </motion.div>
 
-        {/* Business Summary - Full width aligned */}
+        {/* Business Performance Section */}
         <motion.div 
           initial="hidden" 
           animate="visible" 
           variants={fadeIn} 
           transition={{ delay: 0.1 }}
-          className="w-full"
+          className="rounded-xl"
         >
           <BusinessSummary />
         </motion.div>
-        
-        {/* Quick Actions - Properly aligned */}
+
+        {/* Quick Actions Section */}
         <motion.div 
           initial="hidden" 
           animate="visible" 
           variants={fadeIn} 
           transition={{ delay: 0.2 }}
-          className="w-full"
+          className="mb-4"
         >
           <BusinessTransactionButtons onAddIncome={onAddIncome} onAddExpense={onAddExpense} />
         </motion.div>

@@ -142,86 +142,91 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
   return (
     <>
       {/* Top navbar */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-background border-b flex items-center justify-between px-4 z-50">
-        {/* Left Item: Toggle */}
-        <div className="flex-shrink-0">
-            {isPremium && <EntrepreneurModeToggle />}
-        </div>
+      <div className="fixed top-0 left-0 right-0 h-16 bg-background border-b z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full">
+          <div className="h-full flex items-center justify-between relative">
+            {/* Left Item: Toggle & Greeting */}
+            <div className="flex items-center gap-x-3 flex-1 min-w-0">
+              {isPremium && <EntrepreneurModeToggle className="flex-shrink-0" />}
+              <span className="text-sm font-medium truncate">
+                Hai {profile?.full_name || 'rizqi akbar'}!
+              </span>
+            </div>
 
-        {/* Center Item: Logo */}
-        {/* The parent uses justify-between, so this div will be pushed by the left and right items.
-            To truly center it irrespective of left/right content width, absolute positioning is better. */}
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <Link to="/dashboard" className="flex items-center">
+            {/* Center Item: Logo */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <Link to="/dashboard" className="flex items-center">
                 <img 
-                    src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
-                    alt="Catatuy Logo" 
-                    className="h-8" 
+                  src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+                  alt="Catatuy Logo" 
+                  className="h-8" 
                 />
-            </Link>
-        </div>
-        
-        {/* Right Items: Notifications and Menu */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link 
-                  to="/notifications" 
-                  className={cn(
-                    "relative p-2 rounded-full hover:bg-accent", 
-                    isActive('/notifications') && "bg-accent"
-                  )}
-                >
-                  <Bell className="h-5 w-5" />
+              </Link>
+            </div>
+
+            {/* Right Items: Notifications and Menu */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link 
+                      to="/notifications" 
+                      className={cn(
+                        "relative p-2 rounded-full hover:bg-accent", 
+                        isActive('/notifications') && "bg-accent"
+                      )}
+                    >
+                      <Bell className="h-5 w-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
+                          <Badge 
+                            variant={isEntrepreneurMode ? "default" : "success"}
+                            className={cn(
+                              "px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center",
+                              isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
+                            )}
+                          >
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </Badge>
+                        </span>
+                      )}
+                    </Link>
+                  </TooltipTrigger>
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
-                      <Badge 
-                        variant={isEntrepreneurMode ? "default" : "success"}
-                        className={cn(
-                          "px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center",
-                          isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
-                        )}
-                      >
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </Badge>
-                    </span>
+                    <TooltipContent>
+                      You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                    </TooltipContent>
                   )}
-                </Link>
-              </TooltipTrigger>
-              {unreadCount > 0 && (
-                <TooltipContent>
-                  You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-          
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="ml-2">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] p-0 flex flex-col">
-              <SheetHeader className="p-4 border-b">
-                <SheetTitle className="flex items-center gap-2">
-                   <img 
-                    src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
-                    alt="Catatuy Logo" 
-                    className="h-8" 
-                  />
-                  Menu
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex-grow overflow-y-auto p-4 space-y-2">
-                {isEntrepreneurMode ? entrepreneurModeLinks : personalModeLinks}
-              </div>
-              <div className="p-4 border-t">
-                <LogoutButton variant="outline" className="w-full" />
-              </div>
-            </SheetContent>
-          </Sheet>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="ml-2">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px] p-0 flex flex-col">
+                  <SheetHeader className="p-4 border-b">
+                    <SheetTitle className="flex items-center gap-2">
+                       <img 
+                        src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
+                        alt="Catatuy Logo" 
+                        className="h-8" 
+                      />
+                      Menu
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex-grow overflow-y-auto p-4 space-y-2">
+                    {isEntrepreneurMode ? entrepreneurModeLinks : personalModeLinks}
+                  </div>
+                  <div className="p-4 border-t">
+                    <LogoutButton variant="outline" className="w-full" />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
         </div>
       </div>
       
