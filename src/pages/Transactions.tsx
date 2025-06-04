@@ -15,7 +15,7 @@ export default function Transactions() {
   const { isEntrepreneurMode } = useEntrepreneurMode();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
-  // Always show transactions based on the current mode
+  // Show transactions based on the current mode - this fixes the personal mode bug
   const {
     transactions,
     isLoading,
@@ -29,46 +29,48 @@ export default function Transactions() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">
-              {isEntrepreneurMode ? 'Business Transactions' : 'Personal Transactions'}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              {isEntrepreneurMode 
-                ? 'View and manage your business financial transactions' 
-                : 'View and manage your personal financial transactions'
-              }
-            </p>
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">
+                {isEntrepreneurMode ? 'Business Transactions' : 'Personal Transactions'}
+              </h1>
+              <p className="text-base text-slate-600">
+                {isEntrepreneurMode 
+                  ? 'View and manage your business financial transactions' 
+                  : 'View and manage your personal financial transactions'
+                }
+              </p>
+            </div>
+            <div className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-slate-200">
+              {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
+            </div>
           </div>
-          <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
-            {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
-          </div>
+
+          <TransactionHeader 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onAddTransaction={() => setIsAddDialogOpen(true)}
+          />
+
+          <TransactionLayout 
+            transactions={transactions}
+            isPremium={isPremium}
+            timeFilter={timeFilter}
+            setTimeFilter={setTimeFilter}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            isLoading={isLoading}
+            onUpdate={() => {}}
+          />
         </div>
-
-        <TransactionHeader 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onAddTransaction={() => setIsAddDialogOpen(true)}
-        />
-
-        <TransactionLayout 
-          transactions={transactions}
-          isPremium={isPremium}
-          timeFilter={timeFilter}
-          setTimeFilter={setTimeFilter}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          isLoading={isLoading}
-          onUpdate={() => {}} // The real-time updates handle this now
-        />
       </div>
       
       <AddTransactionDialog 
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={() => {}} // Real-time updates handle this now
+        onTransactionAdded={() => {}}
       />
     </DashboardLayout>
   );

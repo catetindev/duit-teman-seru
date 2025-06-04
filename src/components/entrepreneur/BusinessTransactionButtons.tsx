@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, TrendingUp, TrendingDown, Lock } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -76,60 +75,48 @@ export function BusinessTransactionButtons({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-      <motion.div 
-        whileHover={{ scale: isEntrepreneurMode ? 1.02 : 1 }} 
-        whileTap={{ scale: isEntrepreneurMode ? 0.98 : 1 }}
-        className="w-full"
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Button 
+        onClick={handleIncomeClick} 
+        className={`w-full h-12 sm:h-14 rounded-lg font-semibold text-base transition-all duration-300 border-0 ${
+          isEntrepreneurMode 
+            ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+            : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
+        }`}
+        size="lg"
+        data-tour="business-income-btn"
+        disabled={!isEntrepreneurMode}
       >
-        <Button 
-          onClick={handleIncomeClick} 
-          className={`w-full h-14 sm:h-16 rounded-2xl sm:rounded-3xl font-semibold text-base sm:text-lg transition-all duration-300 border-0 ${
-            isEntrepreneurMode 
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white' 
-              : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
-          }`}
-          size="lg"
-          data-tour="business-income-btn"
-          disabled={!isEntrepreneurMode}
-        >
-          <div className="flex items-center justify-center gap-3">
-            {isEntrepreneurMode ? (
-              <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6" />
-            ) : (
-              <Lock className="h-5 w-5 sm:h-6 sm:w-6" />
-            )}
-            <span>Record Business Income</span>
-          </div>
-        </Button>
-      </motion.div>
+        <div className="flex items-center justify-center gap-3">
+          {isEntrepreneurMode ? (
+            <TrendingUp className="h-5 w-5" />
+          ) : (
+            <Lock className="h-5 w-5" />
+          )}
+          <span>Record Business Income</span>
+        </div>
+      </Button>
       
-      <motion.div 
-        whileHover={{ scale: isEntrepreneurMode ? 1.02 : 1 }} 
-        whileTap={{ scale: isEntrepreneurMode ? 0.98 : 1 }}
-        className="w-full"
+      <Button 
+        onClick={handleExpenseClick} 
+        className={`w-full h-12 sm:h-14 rounded-lg font-semibold text-base transition-all duration-300 border-0 ${
+          isEntrepreneurMode 
+            ? 'bg-red-600 hover:bg-red-700 text-white' 
+            : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
+        }`}
+        size="lg"
+        data-tour="business-expense-btn"
+        disabled={!isEntrepreneurMode}
       >
-        <Button 
-          onClick={handleExpenseClick} 
-          className={`w-full h-14 sm:h-16 rounded-2xl sm:rounded-3xl font-semibold text-base sm:text-lg transition-all duration-300 border-0 ${
-            isEntrepreneurMode 
-              ? 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white' 
-              : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
-          }`}
-          size="lg"
-          data-tour="business-expense-btn"
-          disabled={!isEntrepreneurMode}
-        >
-          <div className="flex items-center justify-center gap-3">
-            {isEntrepreneurMode ? (
-              <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6" />
-            ) : (
-              <Lock className="h-5 w-5 sm:h-6 sm:w-6" />
-            )}
-            <span>Record Business Expense</span>
-          </div>
-        </Button>
-      </motion.div>
+        <div className="flex items-center justify-center gap-3">
+          {isEntrepreneurMode ? (
+            <TrendingDown className="h-5 w-5" />
+          ) : (
+            <Lock className="h-5 w-5" />
+          )}
+          <span>Record Business Expense</span>
+        </div>
+      </Button>
     </div>
   );
 }

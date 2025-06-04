@@ -33,7 +33,6 @@ export function CustomerOverview() {
         
       if (error) throw error;
       
-      // Get order count for each customer
       const customersWithOrderCount: CustomerData[] = [];
       
       for (const customer of customersData || []) {
@@ -59,7 +58,7 @@ export function CustomerOverview() {
   });
 
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl overflow-hidden">
+    <Card className="bg-white border border-slate-200">
       <CardHeader className="pb-2 border-b border-slate-100">
         <CardTitle className="text-base font-medium flex items-center">
           <Users className="h-4 w-4 mr-2 text-blue-500" />
@@ -99,7 +98,7 @@ export function CustomerOverview() {
             <PieChart className="h-3 w-3 mr-1" />
             <span>Customer analytics</span>
           </div>
-          <Button asChild variant="ghost" className="h-8 px-2 text-xs hover:bg-slate-100 rounded-xl">
+          <Button asChild variant="ghost" className="h-8 px-2 text-xs hover:bg-slate-100">
             <Link to="/customers" className="flex items-center">
               View All <ArrowRight className="ml-1 h-3 w-3" />
             </Link>

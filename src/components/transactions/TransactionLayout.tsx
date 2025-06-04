@@ -34,10 +34,10 @@ export default function TransactionLayout({
   return (
     <div className="space-y-4">
       {/* Mobile-friendly filters */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1">
           <Select value={timeFilter} onValueChange={setTimeFilter}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-white border-slate-200">
               <SelectValue placeholder="Time period" />
             </SelectTrigger>
             <SelectContent>
@@ -51,7 +51,7 @@ export default function TransactionLayout({
 
         <div className="flex-1">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-white border-slate-200">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -70,13 +70,13 @@ export default function TransactionLayout({
       </div>
 
       {/* Mobile-responsive tabs */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Transactions</CardTitle>
+      <Card className="bg-white border border-slate-200">
+        <CardHeader className="pb-3 border-b border-slate-100">
+          <CardTitle className="text-lg font-semibold text-slate-900">Transactions</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100">
               <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
               <TabsTrigger value="income" className="text-xs sm:text-sm">Income</TabsTrigger>
               <TabsTrigger value="expense" className="text-xs sm:text-sm">Expenses</TabsTrigger>

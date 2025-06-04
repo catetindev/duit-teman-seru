@@ -11,7 +11,7 @@ export function TopProductsList() {
 
   if (loading) {
     return (
-      <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl">
+      <Card className="bg-white border border-slate-200">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-medium">Top Performing Products</CardTitle>
         </CardHeader>
@@ -31,7 +31,7 @@ export function TopProductsList() {
 
   if (!topProducts.length) {
     return (
-      <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl">
+      <Card className="bg-white border border-slate-200">
         <CardHeader className="pb-2 border-b border-slate-100">
           <CardTitle className="text-base font-medium">Top Performing Products</CardTitle>
         </CardHeader>
@@ -46,7 +46,7 @@ export function TopProductsList() {
   }
 
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl">
+    <Card className="bg-white border border-slate-200">
       <CardHeader className="pb-2 border-b border-slate-100">
         <CardTitle className="text-base font-medium flex items-center">
           <TrendingUp className="h-4 w-4 mr-2 text-amber-500" />
@@ -56,7 +56,7 @@ export function TopProductsList() {
       <CardContent>
         <div className="space-y-3">
           {topProducts.slice(0, 3).map((product, index) => (
-            <div key={product.name} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors">
+            <div key={product.name} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
               <div className="flex items-center">
                 <div className={`w-6 h-6 flex items-center justify-center rounded-full mr-2 text-xs font-bold ${
                   index === 0 

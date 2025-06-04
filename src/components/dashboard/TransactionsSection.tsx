@@ -19,7 +19,6 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
   const { t } = useLanguage();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
-  // Memoize filtered transactions to prevent unnecessary rerenders
   const incomeTransactions = useMemo(() => 
     transactions.filter(t => t.type === 'income'),
     [transactions]
@@ -31,19 +30,19 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
   );
   
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl overflow-hidden">
-      <CardHeader className="pb-4 border-b border-slate-100/50">
+    <Card className="bg-white border border-slate-200">
+      <CardHeader className="pb-3 border-b border-slate-100">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold flex items-center text-slate-900">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3">
-              <TrendingUp className="h-5 w-5 text-white" />
+          <CardTitle className="text-lg font-semibold flex items-center text-slate-900">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+              <TrendingUp className="h-4 w-4 text-blue-600" />
             </div>
             Recent Transactions
           </CardTitle>
           <Button 
             variant="outline" 
             size="sm" 
-            className="gap-2 border-slate-200 hover:bg-slate-50 rounded-xl"
+            className="gap-2 border-slate-200 hover:bg-slate-50"
             onClick={() => setIsAddDialogOpen(true)}
           >
             <PlusCircle size={16} />
@@ -54,21 +53,21 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
       
       <CardContent className="p-0">
         <Tabs defaultValue="all" className="w-full">
-          <div className="px-6 pt-4">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-100/50 rounded-xl">
-              <TabsTrigger value="all" className="rounded-lg">All</TabsTrigger>
-              <TabsTrigger value="income" className="rounded-lg">Income</TabsTrigger>
-              <TabsTrigger value="expense" className="rounded-lg">Expenses</TabsTrigger>
+          <div className="px-4 pt-3">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="income">Income</TabsTrigger>
+              <TabsTrigger value="expense">Expenses</TabsTrigger>
             </TabsList>
           </div>
           
           {loading ? (
-            <div className="py-12 px-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
-              <p className="text-sm text-muted-foreground">Loading transactions...</p>
+            <div className="py-8 px-4 text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-3"></div>
+              <p className="text-sm text-slate-500">Loading transactions...</p>
             </div>
           ) : (
-            <div className="px-6 py-4">
+            <div className="px-4 py-3">
               <TabsContent value="all" className="mt-0">
                 <TransactionList transactions={transactions.slice(0, 5)} />
               </TabsContent>
@@ -81,11 +80,11 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
             </div>
           )}
           
-          <div className="bg-slate-50/50 px-6 py-4 border-t border-slate-100/50">
+          <div className="bg-slate-50 px-4 py-3 border-t border-slate-100">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full justify-center hover:bg-slate-100 rounded-xl"
+              className="w-full justify-center hover:bg-slate-100"
               asChild
             >
               <a href="/transactions" className="flex items-center">

@@ -20,7 +20,7 @@ export function InvoiceReminder() {
       
       const today = new Date();
       const futureDate = new Date();
-      futureDate.setDate(today.getDate() + 14); // Get invoices due within next 14 days
+      futureDate.setDate(today.getDate() + 14);
       
       const { data, error } = await supabase
         .from('invoices')
@@ -47,7 +47,7 @@ export function InvoiceReminder() {
   });
 
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl overflow-hidden">
+    <Card className="bg-white border border-slate-200">
       <CardHeader className="pb-2 border-b border-slate-100">
         <CardTitle className="text-base font-medium flex items-center">
           <Calendar className="h-4 w-4 mr-2 text-red-500" />
@@ -68,7 +68,7 @@ export function InvoiceReminder() {
           <div className="divide-y divide-slate-100">
             {upcomingInvoices.map((invoice: any) => {
               const dueDate = new Date(invoice.payment_due_date);
-              const isUrgent = dueDate.getTime() - Date.now() < 3 * 24 * 60 * 60 * 1000; // Less than 3 days
+              const isUrgent = dueDate.getTime() - Date.now() < 3 * 24 * 60 * 60 * 1000;
               
               return (
                 <div key={invoice.id} className="flex justify-between items-center p-3 hover:bg-slate-50 transition-colors">
@@ -109,7 +109,7 @@ export function InvoiceReminder() {
           <div className="text-xs text-slate-500">
             Manage your pending invoices
           </div>
-          <Button asChild variant="ghost" className="h-8 px-2 text-xs hover:bg-slate-100 rounded-xl">
+          <Button asChild variant="ghost" className="h-8 px-2 text-xs hover:bg-slate-100">
             <Link to="/invoices" className="flex items-center">
               View All <ArrowRight className="ml-1 h-3 w-3" />
             </Link>
