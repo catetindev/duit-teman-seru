@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { invoiceFormSchema, InvoiceFormData } from '@/components/finance/invoices/form/invoiceFormSchema';
 import { Customer, Product } from '@/types/entrepreneur';
-import { Invoice } from '@/types/finance';
+import { Invoice, InvoiceItem } from '@/types/finance';
 import { useInvoices } from '@/hooks/finance/useInvoices';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,10 +69,18 @@ export function useInvoiceForm({
           parsedItems = [];
         }
 
+        // Map InvoiceItem to form schema format
+        const formItems = parsedItems.map((item: InvoiceItem) => ({
+          description: item.name || item.description || '',
+          quantity: item.quantity,
+          price: item.unit_price,
+          total: item.total
+        }));
+
         form.reset({
           invoice_number: invoice.invoice_number,
           customer_id: invoice.customer_id,
-          items: parsedItems,
+          items: formItems,
           subtotal: invoice.subtotal,
           tax: invoice.tax,
           discount: invoice.discount,
@@ -155,13 +163,22 @@ export function useInvoiceForm({
     setLoading(true);
     
     try {
+      // Map form items to InvoiceItem format
+      const mappedItems: InvoiceItem[] = data.items.map(item => ({
+        name: item.description,
+        description: '',
+        quantity: item.quantity,
+        unit_price: item.price,
+        total: item.total
+      }));
+
       if (invoice) {
         // For updates, create a properly typed update object with id
         const updateData = {
           id: invoice.id,
           invoice_number: data.invoice_number,
           customer_id: data.customer_id,
-          items: data.items,
+          items: mappedItems,
           subtotal: data.subtotal,
           tax: data.tax,
           discount: data.discount,
@@ -174,10 +191,10 @@ export function useInvoiceForm({
         await updateInvoice(updateData);
       } else {
         // For new invoices, ensure all required fields are present and properly typed
-        const createData: InvoiceFormData = {
+        const createData = {
           invoice_number: data.invoice_number,
           customer_id: data.customer_id,
-          items: data.items,
+          items: mappedItems,
           subtotal: data.subtotal,
           tax: data.tax,
           discount: data.discount,
