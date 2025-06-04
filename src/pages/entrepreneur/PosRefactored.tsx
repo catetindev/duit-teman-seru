@@ -1,35 +1,29 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useReactToPrint } from 'react-to-print';
+import React, { useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingCart, Plus, Minus, Trash2, Receipt, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { usePosRefactored } from '@/hooks/pos/usePosRefactored';
-import { ProductCard } from '@/components/pos/ProductCard';
-import { CartItem } from '@/components/pos/CartItem';
-import { PaymentPanel } from '@/components/pos/PaymentPanel';
-import { PosReceipt } from '@/components/pos/PosReceipt';
-import { Printer, RefreshCcw, Edit, Trash2 } from 'lucide-react';
-import { PasswordConfirmationDialog } from '@/components/pos/PasswordConfirmationDialog';
-import { PosTransaction } from '@/types/pos'; 
-import { supabase } from '@/integrations/supabase/client'; 
 import { formatCurrency } from '@/utils/formatUtils';
+import { useReactToPrint } from 'react-to-print';
+import { PosReceipt } from '@/components/pos/PosReceipt';
 
-const PosRefactored = () => {
-  const { isPremium, user } = useAuth(); 
-  const { toast } = useToast();
+export default function PosRefactored() {
+  const { isPremium } = useAuth();
   const receiptRef = useRef<HTMLDivElement>(null);
   
   const {
     products,
+    cart,
     transaction,
     loading,
-    recentTransactions,
+    showReceipt,
     addToCart,
     updateQuantity,
     removeFromCart,
@@ -37,245 +31,282 @@ const PosRefactored = () => {
     updateCashReceived,
     updateCustomerName,
     saveTransaction,
-    resetTransaction,
-    fetchRecentTransactions,
-    deleteTransaction, 
+    resetTransaction
   } = usePosRefactored();
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const [receiptVisible, setReceiptVisible] = useState(false);
-  const [selectedTxForPrint, setSelectedTxForPrint] = useState<PosTransaction | null>(null);
-  const [isPasswordConfirmOpen, setIsPasswordConfirmOpen] = useState(false);
-  const [actionToConfirm, setActionToConfirm] = useState<(() => Promise<void>) | null>(null);
-  const [passwordDialogTitle, setPasswordDialogTitle] = useState('');
-  const [passwordDialogDescription, setPasswordDialogDescription] = useState('');
 
   const handlePrint = useReactToPrint({
-    documentTitle: `Struk_${selectedTxForPrint?.nama_pembeli || new Date().toISOString()}`,
-    onAfterPrint: () => {
-      setReceiptVisible(false);
-      setSelectedTxForPrint(null);
-      toast({ title: 'Struk Siap!', description: 'Struk berhasil dicetak' });
-    },
     contentRef: receiptRef,
+    documentTitle: `Receipt-${new Date().toISOString().split('T')[0]}`,
   });
-  
-  const printSpecificReceipt = (tx: PosTransaction) => {
-    setSelectedTxForPrint(tx);
-    setReceiptVisible(true);
-    setTimeout(() => {
-      handlePrint();
-    }, 100);
-  };
 
-  const verifyPasswordAndExecute = async (password: string): Promise<boolean> => {
-    if (!user?.email) {
-      toast({ title: "Error", description: "User email not found.", variant: "destructive" });
-      return false;
+  useEffect(() => {
+    if (showReceipt && receiptRef.current) {
+      setTimeout(() => {
+        handlePrint();
+      }, 100);
     }
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: password,
-      });
-      if (error) {
-        console.error("Password verification failed:", error);
-        return false; 
-      }
-      if (actionToConfirm) {
-        await actionToConfirm(); 
-      }
-      return true; 
-    } catch (e) {
-      console.error("Error during password verification:", e);
-      return false;
-    }
-  };
+  }, [showReceipt, handlePrint]);
 
-  const handleDeleteClick = (txId: string) => {
-    setActionToConfirm(async () => {
-      const success = await deleteTransaction(txId);
-      if (success) {
-        fetchRecentTransactions(); // Refresh the list only after successful deletion
-      }
-    });
-    setPasswordDialogTitle("Konfirmasi Hapus Transaksi");
-    setPasswordDialogDescription("Tindakan ini tidak dapat dibatalkan. Masukkan kata sandi Anda untuk menghapus transaksi ini.");
-    setIsPasswordConfirmOpen(true);
-  };
-  
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.nama.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = activeTab === 'all' || activeTab === 'favorit';
-    return matchesSearch && matchesCategory;
-  });
-  
+  const cartTotal = cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+  const cartItemCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gradient">POS / Kasir</h1>
-        <p className="text-muted-foreground">Kelola penjualan dan transaksi dengan mudah</p>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-white">
-            <CardHeader className="pb-3">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <CardTitle className="text-xl">Daftar Produk</CardTitle>
-                  <CardDescription>Pilih produk untuk ditambahkan ke keranjang</CardDescription>
-                </div>
-                <div className="w-full md:w-auto">
-                  <Input
-                    type="search"
-                    placeholder="Cari produk..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="mb-3"
-                  />
-                  <Tabs defaultValue="all" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="w-full">
-                      <TabsTrigger value="all" className="flex-1">Semua</TabsTrigger>
-                      <TabsTrigger value="favorit" className="flex-1">Favorit</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {!loading && filteredProducts.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-lg text-muted-foreground">Belum ada produk</p>
-                  <p className="text-sm text-muted-foreground">Tambahkan produk terlebih dahulu di menu Produk</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} onAdd={addToCart} />
-                  ))}
-                </div>
-              )}
-              {loading && <div className="text-center py-10"><p className="text-muted-foreground">Memuat produk...</p></div>}
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex justify-between items-center">
-                <span>Transaksi Terbaru</span>
-                <Button variant="ghost" size="icon" onClick={fetchRecentTransactions}><RefreshCcw size={18} /></Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {recentTransactions.length === 0 ? (
-                <p className="text-center text-muted-foreground py-4">Belum ada transaksi</p>
-              ) : (
-                <div className="space-y-2">
-                  {recentTransactions.map((tx) => (
-                    <div key={tx.id} className="border rounded-lg p-3 hover:bg-slate-50 flex justify-between items-center">
-                      <div>
-                        <div className="font-medium">{tx.nama_pembeli || 'Pelanggan'}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(tx.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                          {' - '}
-                          {tx.metode_pembayaran} • {tx.produk.length} items
-                        </div>
-                        <div className="font-medium text-purple-700">
-                          {formatCurrency(tx.total, 'IDR')}
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(`pos-${tx.id}`)} title="Delete">
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => printSpecificReceipt(tx as PosTransaction)} title="Print">
-                          <Printer className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="space-y-6">
-          <Card className="bg-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex justify-between items-center">
-                <span>Keranjang</span>
-                <span className="text-muted-foreground text-sm font-normal">{transaction.produk.length} item</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {transaction.produk.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-muted-foreground">Keranjang kosong</p>
-                  <p className="text-xs text-muted-foreground mt-1">Pilih produk dari daftar di samping</p>
-                </div>
-              ) : (
-                <>
-                  <ScrollArea className="h-[300px]">
-                    <div className="px-6 py-1">
-                      {transaction.produk.map((item) => (
-                        <CartItem key={item.id} product={item} onUpdateQuantity={updateQuantity} onRemove={removeFromCart} />
+      <div className="min-h-screen bg-slate-50 p-2 sm:p-4 lg:p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
+              POS / Kasir 🛒
+            </h1>
+            <p className="text-slate-600 text-sm sm:text-base">
+              Manage your point of sale transactions
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+            {/* Products Section */}
+            <div className="lg:col-span-2 space-y-4">
+              <Card className="bg-white border-0 shadow-sm rounded-2xl">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg sm:text-xl font-semibold text-slate-800">
+                    Products
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="h-24 sm:h-32 bg-slate-200 rounded-xl animate-pulse"></div>
                       ))}
                     </div>
-                  </ScrollArea>
-                  <div className="p-6 pt-3 border-t">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-medium">{formatCurrency(transaction.total, 'IDR')}</span>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {products.map((product) => (
+                        <Card 
+                          key={product.id} 
+                          className="cursor-pointer hover:shadow-md transition-all duration-200 border border-slate-200 rounded-xl overflow-hidden group"
+                          onClick={() => addToCart(product)}
+                        >
+                          <CardContent className="p-3 sm:p-4">
+                            <div className="flex flex-col h-full">
+                              <h3 className="font-semibold text-slate-800 text-sm sm:text-base mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                {product.nama}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-slate-500 mb-2">
+                                {product.kategori}
+                              </p>
+                              <div className="mt-auto flex items-center justify-between">
+                                <span className="font-bold text-emerald-600 text-sm sm:text-base">
+                                  {formatCurrency(product.harga, 'IDR')}
+                                </span>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg h-7 w-7 p-0 sm:h-8 sm:w-8"
+                                >
+                                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Total Bayar</span>
-                      <span className="font-bold text-lg text-purple-700">{formatCurrency(transaction.total, 'IDR')}</span>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Cart & Payment Section */}
+            <div className="lg:col-span-1 space-y-4">
+              {/* Cart */}
+              <Card className="bg-white border-0 shadow-sm rounded-2xl sticky top-4">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5" />
+                    Cart
+                    {cartItemCount > 0 && (
+                      <Badge className="bg-blue-100 text-blue-600 rounded-full">
+                        {cartItemCount}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {cart.length === 0 ? (
+                    <div className="text-center py-6 sm:py-8 text-slate-500">
+                      <ShoppingCart className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-slate-300" />
+                      <p className="text-sm sm:text-base">Your cart is empty</p>
                     </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-          
-          <PaymentPanel
-            transaction={transaction}
-            onPaymentMethodChange={updatePaymentMethod}
-            onCashReceivedChange={updateCashReceived}
-            onCustomerNameChange={updateCustomerName}
-            onSaveTransaction={saveTransaction}
-            onResetTransaction={resetTransaction}
-            loading={loading}
-          />
-          
-          {transaction.produk.length > 0 && (
-            <Button onClick={() => printSpecificReceipt(transaction)} className="w-full bg-gradient-to-r from-[#E5E0FF] to-[#CAB8FF] hover:from-[#CAB8FF] hover:to-[#B69FFF] text-purple-900">
-              <Printer size={18} className="mr-2" /> Cetak Struk
-            </Button>
-          )}
-          
+                  ) : (
+                    <div className="space-y-3 max-h-64 sm:max-h-80 overflow-y-auto">
+                      {cart.map((item) => (
+                        <div key={item.id} className="bg-slate-50 rounded-xl p-3">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-slate-800 text-sm flex-1 pr-2">
+                              {item.nama}
+                            </h4>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeFromCart(item.id)}
+                              className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg flex-shrink-0"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateQuantity(item.id, item.qty - 1)}
+                                className="h-7 w-7 p-0 rounded-lg"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="font-medium text-sm w-8 text-center">
+                                {item.qty}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateQuantity(item.id, item.qty + 1)}
+                                className="h-7 w-7 p-0 rounded-lg"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <span className="font-semibold text-emerald-600 text-sm">
+                              {formatCurrency(item.harga * item.qty, 'IDR')}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {cart.length > 0 && (
+                    <>
+                      <Separator />
+                      
+                      {/* Customer Name */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700">
+                          Customer Name (Optional)
+                        </label>
+                        <Input
+                          placeholder="Enter customer name"
+                          value={transaction.nama_pembeli || ''}
+                          onChange={(e) => updateCustomerName(e.target.value)}
+                          className="rounded-xl"
+                        />
+                      </div>
+
+                      {/* Payment Method */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700">
+                          Payment Method
+                        </label>
+                        <Select
+                          value={transaction.metode_pembayaran}
+                          onValueChange={(value: 'Cash' | 'Bank Transfer' | 'QRIS') => updatePaymentMethod(value)}
+                        >
+                          <SelectTrigger className="rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Cash">
+                              <div className="flex items-center gap-2">
+                                <Banknote className="h-4 w-4" />
+                                Cash
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="Bank Transfer">
+                              <div className="flex items-center gap-2">
+                                <CreditCard className="h-4 w-4" />
+                                Bank Transfer
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="QRIS">
+                              <div className="flex items-center gap-2">
+                                <Smartphone className="h-4 w-4" />
+                                QRIS
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Cash Payment */}
+                      {transaction.metode_pembayaran === 'Cash' && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-slate-700">
+                            Cash Received
+                          </label>
+                          <Input
+                            type="number"
+                            placeholder="Enter cash amount"
+                            value={transaction.uang_diterima || ''}
+                            onChange={(e) => updateCashReceived(Number(e.target.value))}
+                            className="rounded-xl"
+                          />
+                          {transaction.kembalian !== undefined && transaction.kembalian >= 0 && (
+                            <p className="text-sm text-emerald-600 font-medium">
+                              Change: {formatCurrency(transaction.kembalian, 'IDR')}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <Separator />
+                      
+                      {/* Total */}
+                      <div className="bg-emerald-50 rounded-xl p-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-lg font-semibold text-slate-800">Total:</span>
+                          <span className="text-xl font-bold text-emerald-600">
+                            {formatCurrency(cartTotal, 'IDR')}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="space-y-2">
+                        <Button 
+                          onClick={saveTransaction}
+                          disabled={loading}
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 font-semibold"
+                        >
+                          {loading ? 'Processing...' : 'Complete Transaction'}
+                        </Button>
+                        <Button 
+                          onClick={resetTransaction}
+                          variant="outline"
+                          className="w-full rounded-xl h-10"
+                        >
+                          Clear Cart
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Hidden Receipt for Printing */}
           <div className="hidden">
-            {receiptVisible && selectedTxForPrint && (
-              <PosReceipt ref={receiptRef} transaction={selectedTxForPrint} />
+            {showReceipt && (
+              <PosReceipt 
+                ref={receiptRef}
+                transaction={transaction}
+              />
             )}
           </div>
         </div>
       </div>
-
-      <PasswordConfirmationDialog
-        isOpen={isPasswordConfirmOpen}
-        onClose={() => {
-          setIsPasswordConfirmOpen(false);
-          setActionToConfirm(null);
-        }}
-        onConfirm={verifyPasswordAndExecute}
-        title={passwordDialogTitle}
-        description={passwordDialogDescription}
-      />
     </DashboardLayout>
   );
-};
-
-export default PosRefactored;
+}
