@@ -616,29 +616,38 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          business_name: string | null
           created_at: string
           custom_settings: Json | null
           id: string
+          invoice_logo_url: string | null
           preferred_currency: string
           preferred_language: string
+          show_invoice_logo: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          business_name?: string | null
           created_at?: string
           custom_settings?: Json | null
           id?: string
+          invoice_logo_url?: string | null
           preferred_currency?: string
           preferred_language?: string
+          show_invoice_logo?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          business_name?: string | null
           created_at?: string
           custom_settings?: Json | null
           id?: string
+          invoice_logo_url?: string | null
           preferred_currency?: string
           preferred_language?: string
+          show_invoice_logo?: boolean | null
           updated_at?: string
           user_id?: string
         }

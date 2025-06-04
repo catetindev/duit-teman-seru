@@ -11,26 +11,28 @@ export function BusinessSummary() {
 
   if (loading) {
     return (
-      <Card className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+      <Card className="bg-white border-0 shadow-sm rounded-2xl">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-slate-800">
+            <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-emerald-600" />
+            </div>
             Business Performance
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center">
-              <Skeleton className="h-8 w-24 mx-auto mb-2 bg-white/20" />
-              <Skeleton className="h-4 w-16 mx-auto bg-white/20" />
+        <CardContent className="pt-0 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-4 bg-slate-50 rounded-xl">
+              <Skeleton className="h-8 w-24 mx-auto mb-2" />
+              <Skeleton className="h-4 w-16 mx-auto" />
             </div>
-            <div className="text-center">
-              <Skeleton className="h-8 w-24 mx-auto mb-2 bg-white/20" />
-              <Skeleton className="h-4 w-16 mx-auto bg-white/20" />
+            <div className="text-center p-4 bg-slate-50 rounded-xl">
+              <Skeleton className="h-8 w-24 mx-auto mb-2" />
+              <Skeleton className="h-4 w-16 mx-auto" />
             </div>
-            <div className="text-center">
-              <Skeleton className="h-8 w-24 mx-auto mb-2 bg-white/20" />
-              <Skeleton className="h-4 w-16 mx-auto bg-white/20" />
+            <div className="text-center p-4 bg-slate-50 rounded-xl">
+              <Skeleton className="h-8 w-24 mx-auto mb-2" />
+              <Skeleton className="h-4 w-16 mx-auto" />
             </div>
           </div>
         </CardContent>
@@ -41,48 +43,52 @@ export function BusinessSummary() {
   const isGrowthPositive = revenueData.monthlyGrowth >= 0;
 
   return (
-    <Card className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5" />
+    <Card className="bg-white border-0 shadow-sm rounded-2xl overflow-hidden">
+      <CardHeader className="pb-4 bg-emerald-50">
+        <CardTitle className="flex items-center gap-3 text-slate-800">
+          <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+            <DollarSign className="h-5 w-5 text-emerald-600" />
+          </div>
           Business Performance
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold">
+      <CardContent className="pt-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center p-4 bg-emerald-50 rounded-xl">
+            <div className="text-2xl font-bold text-slate-800 mb-1">
               {formatCurrency(revenueData.totalRevenue, 'IDR')}
             </div>
-            <div className="text-sm opacity-90">Total Income</div>
+            <div className="text-sm font-medium text-slate-600">Total Income</div>
           </div>
           
-          <div className="text-center">
-            <div className="text-2xl font-bold">
+          <div className="text-center p-4 bg-blue-50 rounded-xl">
+            <div className="text-2xl font-bold text-slate-800 mb-1">
               {formatCurrency(revenueData.posRevenue, 'IDR')}
             </div>
-            <div className="text-sm opacity-90">POS Sales</div>
+            <div className="text-sm font-medium text-slate-600">POS Sales</div>
           </div>
           
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-xl font-bold">
+          <div className="text-center p-4 bg-violet-50 rounded-xl">
+            <div className="flex items-center justify-center gap-2 text-xl font-bold text-slate-800 mb-1">
               {isGrowthPositive ? (
-                <TrendingUp className="h-5 w-5" />
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
               ) : (
-                <TrendingDown className="h-5 w-5" />
+                <TrendingDown className="h-5 w-5 text-red-500" />
               )}
-              {Math.abs(revenueData.monthlyGrowth).toFixed(1)}%
+              <span className={isGrowthPositive ? 'text-emerald-600' : 'text-red-500'}>
+                {Math.abs(revenueData.monthlyGrowth).toFixed(1)}%
+              </span>
             </div>
-            <div className="text-sm opacity-90">Monthly Growth</div>
+            <div className="text-sm font-medium text-slate-600">Monthly Growth</div>
           </div>
         </div>
         
-        <div className="pt-4 border-t border-white/20">
-          <div className="text-center">
-            <div className="text-lg font-semibold">
+        <div className="pt-4 border-t border-slate-100">
+          <div className="text-center p-4 bg-sky-50 rounded-xl">
+            <div className="text-lg font-semibold text-slate-800 mb-1">
               Orders Revenue: {formatCurrency(revenueData.orderRevenue, 'IDR')}
             </div>
-            <div className="text-sm opacity-90">From completed orders</div>
+            <div className="text-sm text-slate-600">From completed orders</div>
           </div>
         </div>
       </CardContent>

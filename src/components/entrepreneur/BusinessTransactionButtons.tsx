@@ -76,54 +76,58 @@ export function BusinessTransactionButtons({
   };
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <motion.div 
         whileHover={{ scale: isEntrepreneurMode ? 1.02 : 1 }} 
         whileTap={{ scale: isEntrepreneurMode ? 0.98 : 1 }}
-        className="flex-1"
+        className="w-full"
       >
         <Button 
           onClick={handleIncomeClick} 
-          className={`w-full py-6 h-auto ${
+          className={`w-full h-16 rounded-2xl font-semibold text-lg transition-all duration-300 ${
             isEntrepreneurMode 
-              ? 'bg-green-500 hover:bg-green-600 text-white' 
-              : 'bg-gray-300 hover:bg-gray-400 text-gray-600 cursor-not-allowed'
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm hover:shadow-md' 
+              : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
           }`}
           size="lg"
           data-tour="business-income-btn"
           disabled={!isEntrepreneurMode}
         >
-          {isEntrepreneurMode ? (
-            <TrendingUp className="mr-2 h-5 w-5" />
-          ) : (
-            <Lock className="mr-2 h-5 w-5" />
-          )}
-          <span className="text-base">Record Business Income</span>
+          <div className="flex items-center justify-center gap-3">
+            {isEntrepreneurMode ? (
+              <TrendingUp className="h-6 w-6" />
+            ) : (
+              <Lock className="h-6 w-6" />
+            )}
+            <span>Record Business Income</span>
+          </div>
         </Button>
       </motion.div>
       
       <motion.div 
         whileHover={{ scale: isEntrepreneurMode ? 1.02 : 1 }} 
         whileTap={{ scale: isEntrepreneurMode ? 0.98 : 1 }}
-        className="flex-1"
+        className="w-full"
       >
         <Button 
           onClick={handleExpenseClick} 
-          className={`w-full py-6 h-auto ${
+          className={`w-full h-16 rounded-2xl font-semibold text-lg transition-all duration-300 ${
             isEntrepreneurMode 
-              ? 'bg-red-500 hover:bg-red-600 text-white' 
-              : 'bg-gray-300 hover:bg-gray-400 text-gray-600 cursor-not-allowed'
+              ? 'bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow-md' 
+              : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
           }`}
           size="lg"
           data-tour="business-expense-btn"
           disabled={!isEntrepreneurMode}
         >
-          {isEntrepreneurMode ? (
-            <TrendingDown className="mr-2 h-5 w-5" />
-          ) : (
-            <Lock className="mr-2 h-5 w-5" />
-          )}
-          <span className="text-base">Record Business Expense</span>
+          <div className="flex items-center justify-center gap-3">
+            {isEntrepreneurMode ? (
+              <TrendingDown className="h-6 w-6" />
+            ) : (
+              <Lock className="h-6 w-6" />
+            )}
+            <span>Record Business Expense</span>
+          </div>
         </Button>
       </motion.div>
     </div>
