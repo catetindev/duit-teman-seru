@@ -1,12 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  BarChart2, Bell, LayoutDashboard, MessageSquare, PieChart, 
-  Settings, ShieldAlert, Target, Package, ShoppingCart, 
-  Users, Calculator, FileText, FileBarChart, CreditCard, ArrowDownUp,
-  Menu, X, LogOut
-} from 'lucide-react';
+import { BarChart2, Bell, LayoutDashboard, MessageSquare, PieChart, Settings, ShieldAlert, Target, Package, ShoppingCart, Users, Calculator, FileText, FileBarChart, CreditCard, ArrowDownUp, Menu, X, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EntrepreneurModeToggle } from '@/components/entrepreneur/EntrepreneurModeToggle';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
@@ -19,54 +13,49 @@ import { SidebarNavLink } from '@/components/ui/sidebar';
 import LogoutButton from '@/components/ui/LogoutButton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
 interface MobileNavbarProps {
   isPremium?: boolean;
   isAdmin?: boolean;
 }
-
-const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
+const MobileNavbar = ({
+  isPremium,
+  isAdmin
+}: MobileNavbarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth(); 
-  const { unreadCount } = useNotifications(user?.id); 
-  const { isEntrepreneurMode } = useEntrepreneurMode();
-  const { t } = useLanguage();
+  const {
+    user
+  } = useAuth();
+  const {
+    unreadCount
+  } = useNotifications(user?.id);
+  const {
+    isEntrepreneurMode
+  } = useEntrepreneurMode();
+  const {
+    t
+  } = useLanguage();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
-
   const handleLinkClick = () => {
     setIsSheetOpen(false);
   };
-  
-  const commonUserLinks = (
-    <>
+  const commonUserLinks = <>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />} onClick={handleLinkClick}>
               Notifikasi
-              {unreadCount > 0 && (
-                <Badge 
-                  variant={isEntrepreneurMode ? "default" : "success"}
-                  className={cn(
-                    "ml-auto text-xs py-0 px-1.5 min-w-5 h-5 flex items-center justify-center rounded-full",
-                    isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
-                  )}
-                >
+              {unreadCount > 0 && <Badge variant={isEntrepreneurMode ? "default" : "success"} className={cn("ml-auto text-xs py-0 px-1.5 min-w-5 h-5 flex items-center justify-center rounded-full", isEntrepreneurMode ? "bg-amber-500" : "bg-green-500")}>
                   {unreadCount > 99 ? '99+' : unreadCount}
-                </Badge>
-              )}
+                </Badge>}
             </SidebarNavLink>
           </TooltipTrigger>
-          {unreadCount > 0 && (
-            <TooltipContent>
+          {unreadCount > 0 && <TooltipContent>
               You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-            </TooltipContent>
-          )}
+            </TooltipContent>}
         </Tooltip>
       </TooltipProvider>
       <SidebarNavLink to="/feedback" icon={<MessageSquare className="h-5 w-5" />} onClick={handleLinkClick}>
@@ -75,16 +64,11 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
       <SidebarNavLink to="/settings" icon={<Settings className="h-5 w-5" />} onClick={handleLinkClick}>
         {t('nav.settings')}
       </SidebarNavLink>
-      {isAdmin && (
-        <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />} onClick={handleLinkClick}>
+      {isAdmin && <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />} onClick={handleLinkClick}>
           Admin
-        </SidebarNavLink>
-      )}
-    </>
-  );
-
-  const entrepreneurModeLinks = (
-    <>
+        </SidebarNavLink>}
+    </>;
+  const entrepreneurModeLinks = <>
       <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} onClick={handleLinkClick} end>
         Dashboard
       </SidebarNavLink>
@@ -113,11 +97,8 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
         Laporan Keuangan
       </SidebarNavLink>
       {commonUserLinks}
-    </>
-  );
-
-  const personalModeLinks = (
-     <>
+    </>;
+  const personalModeLinks = <>
       <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} onClick={handleLinkClick} end>
         {t('nav.dashboard')}
       </SidebarNavLink>
@@ -130,17 +111,12 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
       <SidebarNavLink to="/budget" icon={<BarChart2 className="h-5 w-5" />} onClick={handleLinkClick}>
         {t('nav.budget')}
       </SidebarNavLink>
-      {isPremium && (
-        <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />} onClick={handleLinkClick}>
+      {isPremium && <SidebarNavLink to="/analytics" icon={<PieChart className="h-5 w-5" />} onClick={handleLinkClick}>
           {t('nav.analytics')}
-        </SidebarNavLink>
-      )}
+        </SidebarNavLink>}
       {commonUserLinks}
-    </>
-  );
-
-  return (
-    <>
+    </>;
+  return <>
       {/* Top navbar */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full">
@@ -148,19 +124,13 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
             {/* Left Item: Toggle & Greeting */}
             <div className="flex items-center gap-x-3 flex-1 min-w-0">
               {isPremium && <EntrepreneurModeToggle className="flex-shrink-0" />}
-              <span className="text-sm font-medium text-gray-700 truncate">
-                Hai {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}!
-              </span>
+              
             </div>
 
             {/* Center Item: Logo */}
             <div className="flex items-center justify-center">
               <Link to="/dashboard" className="flex items-center">
-                <img 
-                  src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
-                  alt="Catatuy Logo" 
-                  className="h-8" 
-                />
+                <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-8" />
               </Link>
             </div>
 
@@ -169,34 +139,18 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link 
-                      to="/notifications" 
-                      className={cn(
-                        "relative p-2 rounded-full hover:bg-gray-100 transition-colors", 
-                        isActive('/notifications') && "bg-gray-100"
-                      )}
-                    >
+                    <Link to="/notifications" className={cn("relative p-2 rounded-full hover:bg-gray-100 transition-colors", isActive('/notifications') && "bg-gray-100")}>
                       <Bell className="h-5 w-5 text-gray-600" />
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
-                          <Badge 
-                            variant={isEntrepreneurMode ? "default" : "success"}
-                            className={cn(
-                              "px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center",
-                              isEntrepreneurMode ? "bg-amber-500" : "bg-green-500"
-                            )}
-                          >
+                      {unreadCount > 0 && <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
+                          <Badge variant={isEntrepreneurMode ? "default" : "success"} className={cn("px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center", isEntrepreneurMode ? "bg-amber-500" : "bg-green-500")}>
                             {unreadCount > 99 ? '99+' : unreadCount}
                           </Badge>
-                        </span>
-                      )}
+                        </span>}
                     </Link>
                   </TooltipTrigger>
-                  {unreadCount > 0 && (
-                    <TooltipContent>
+                  {unreadCount > 0 && <TooltipContent>
                       You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-                    </TooltipContent>
-                  )}
+                    </TooltipContent>}
                 </Tooltip>
               </TooltipProvider>
               
@@ -209,11 +163,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
                 <SheetContent side="right" className="w-[280px] p-0 flex flex-col bg-white">
                   <SheetHeader className="p-4 border-b border-gray-200">
                     <SheetTitle className="flex items-center gap-2">
-                       <img 
-                        src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
-                        alt="Catatuy Logo" 
-                        className="h-8" 
-                      />
+                       <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-8" />
                       Menu
                     </SheetTitle>
                   </SheetHeader>
@@ -232,146 +182,58 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
       
       {/* Bottom navbar */}
       <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex items-center justify-around px-2 z-50">
-        {isEntrepreneurMode && isPremium ? (
-          <>
-            <Link 
-              to="/dashboard" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/dashboard') 
-                  ? "text-amber-600 bg-amber-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+        {isEntrepreneurMode && isPremium ? <>
+            <Link to="/dashboard" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/dashboard') ? "text-amber-600 bg-amber-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <LayoutDashboard className="h-5 w-5 mb-1" />
               <span className="text-xs">Dashboard</span>
             </Link>
             
-            <Link 
-              to="/products" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/products') 
-                  ? "text-amber-600 bg-amber-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+            <Link to="/products" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/products') ? "text-amber-600 bg-amber-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <Package className="h-5 w-5 mb-1" />
               <span className="text-xs">Produk</span>
             </Link>
             
-            <Link 
-              to="/orders" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/orders') 
-                  ? "text-amber-600 bg-amber-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+            <Link to="/orders" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/orders') ? "text-amber-600 bg-amber-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <ShoppingCart className="h-5 w-5 mb-1" />
               <span className="text-xs">Pesanan</span>
             </Link>
             
-            <Link 
-              to="/profit-loss" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/profit-loss') 
-                  ? "text-amber-600 bg-amber-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+            <Link to="/profit-loss" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/profit-loss') ? "text-amber-600 bg-amber-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <PieChart className="h-5 w-5 mb-1" />
               <span className="text-xs">Laporan</span>
             </Link>
             
-            <Link 
-              to="/pos" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/pos') 
-                  ? "text-amber-600 bg-amber-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+            <Link to="/pos" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/pos') ? "text-amber-600 bg-amber-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <CreditCard className="h-5 w-5 mb-1" />
               <span className="text-xs">POS</span>
             </Link>
-          </>
-        ) : (
-          <>
-            <Link 
-              to="/dashboard" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/dashboard') 
-                  ? "text-blue-600 bg-blue-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+          </> : <>
+            <Link to="/dashboard" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/dashboard') ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <LayoutDashboard className="h-5 w-5 mb-1" />
               <span className="text-xs">Dashboard</span>
             </Link>
             
-            <Link 
-              to="/transactions" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/transactions') 
-                  ? "text-blue-600 bg-blue-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+            <Link to="/transactions" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/transactions') ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <ArrowDownUp className="h-5 w-5 mb-1" />
               <span className="text-xs">Transaksi</span>
             </Link>
             
-            <Link 
-              to="/goals" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/goals') 
-                  ? "text-blue-600 bg-blue-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+            <Link to="/goals" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/goals') ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <Target className="h-5 w-5 mb-1" />
               <span className="text-xs">Target</span>
             </Link>
             
-            <Link 
-              to="/budget" 
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                isActive('/budget') 
-                  ? "text-blue-600 bg-blue-50" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
+            <Link to="/budget" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/budget') ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
               <BarChart2 className="h-5 w-5 mb-1" />
               <span className="text-xs">Budget</span>
             </Link>
             
-            {isPremium && (
-              <Link 
-                to="/analytics" 
-                className={cn(
-                  "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
-                  isActive('/analytics') 
-                    ? "text-blue-600 bg-blue-50" 
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                )}
-              >
+            {isPremium && <Link to="/analytics" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/analytics') ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")}>
                 <PieChart className="h-5 w-5 mb-1" />
                 <span className="text-xs">Analitik</span>
-              </Link>
-            )}
-          </>
-        )}
+              </Link>}
+          </>}
       </div>
-    </>
-  );
+    </>;
 };
-
 export default MobileNavbar;
