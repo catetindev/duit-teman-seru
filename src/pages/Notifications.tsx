@@ -66,16 +66,16 @@ export default function Notifications() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="p-4 md:p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-2xl font-bold mb-4 md:mb-0 flex items-center gap-2">
-            <Bell className="h-6 w-6" />
+      <div className="space-y-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Bell className="h-8 w-8" />
             Notifications
             {unreadCount > 0 && (
               <Badge 
                 variant="default" 
                 className={cn(
-                  "ml-2 px-2 py-0.5 rounded-full text-xs font-semibold",
+                  "px-3 py-1 rounded-full text-sm font-semibold",
                   "bg-purple-500 text-white"
                 )}
               >
@@ -83,27 +83,28 @@ export default function Notifications() {
               </Badge>
             )}
           </h1>
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex items-center space-x-3">
               <Switch
                 id="unread-only"
                 checked={unreadOnly}
                 onCheckedChange={setUnreadOnly}
               />
-              <Label htmlFor="unread-only">Show unread only</Label>
+              <Label htmlFor="unread-only" className="text-base">Show unread only</Label>
             </div>
             
             <Button
               variant="outline"
               onClick={markAllAsRead}
               disabled={loading || notifications.every((n) => n.is_read)}
+              className="px-6 py-3"
             >
               Mark all as read
             </Button>
             
             {/* Only show the Create Sample button for admin users */}
             {isAdmin && (
-              <Button variant="outline" onClick={createSampleNotification}>
+              <Button variant="outline" onClick={createSampleNotification} className="px-6 py-3">
                 Create sample notification
               </Button>
             )}
@@ -114,14 +115,14 @@ export default function Notifications() {
           defaultValue="all"
           value={activeTab}
           onValueChange={setActiveTab}
-          className="mb-6"
+          className="w-full"
         >
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="info">Info</TabsTrigger>
-            <TabsTrigger value="warning">Warnings</TabsTrigger>
-            <TabsTrigger value="success">Success</TabsTrigger>
-            <TabsTrigger value="error">Errors</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 sm:w-auto sm:grid-cols-none">
+            <TabsTrigger value="all" className="px-4 py-3">All</TabsTrigger>
+            <TabsTrigger value="info" className="px-4 py-3">Info</TabsTrigger>
+            <TabsTrigger value="warning" className="px-4 py-3">Warnings</TabsTrigger>
+            <TabsTrigger value="success" className="px-4 py-3">Success</TabsTrigger>
+            <TabsTrigger value="error" className="px-4 py-3">Errors</TabsTrigger>
           </TabsList>
         </Tabs>
 

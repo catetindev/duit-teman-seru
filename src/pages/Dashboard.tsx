@@ -62,96 +62,92 @@ const Dashboard = () => {
       <OnboardingTour />
       {isEntrepreneurMode && isPremium && <EntrepreneurOnboardingTour />}
       
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-          {/* Header Section */}
-          <div className="mb-8">
-            {isMobile ? (
-              <div className="space-y-4">
-                <div data-tour="dashboard-greeting">
-                  <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
-                </div>
-                <div>
-                  <EntrepreneurModeToggle />
-                </div>
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="space-y-6">
+          {isMobile ? (
+            <div className="space-y-4">
+              <div data-tour="dashboard-greeting">
+                <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
               </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <EntrepreneurModeToggle />
-                  <div data-tour="dashboard-greeting" className="space-y-1">
-                    <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
-                  </div>
-                </div>
-              </div>
-            )}
-          
-            {/* Mode indicator */}
-            <div className="mt-4">
-              <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100">
-                {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
+              <div>
+                <EntrepreneurModeToggle />
               </div>
             </div>
-          </div>
-
-          {/* Dashboard Content */}
-          {isEntrepreneurMode && isPremium ? (
-            <EntrepreneurDashboard 
-              onAddIncome={handleAddBusinessIncome}
-              onAddExpense={handleAddBusinessExpense}
-            />
           ) : (
-            <div className="space-y-8">
-              <div data-tour="income-expense-cards">
-                <StatCardsSection 
-                  stats={stats} 
-                  loading={loading.stats} 
-                />
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-8">
-                  <div data-tour="add-transaction">
-                    <TransactionsSection 
-                      transactions={transactions} 
-                      onTransactionAdded={refreshData}
-                      loading={loading.transactions} 
-                    />
-                  </div>
-                  
-                  {isPremium && <BudgetsSection isPremium={isPremium} />}
-                </div>
-                
-                <div className="space-y-8">
-                  <div data-tour="goals-section">
-                    <GoalsSection 
-                      goals={goals}
-                      isPremium={isPremium}
-                      onGoalAdded={refreshData}
-                      loading={loading.goals}
-                      onUpgradeClick={handleUpgradeClick}
-                    />
-                  </div>
-                  
-                  {isPremium && <BadgesSection badges={mockBadges} />}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <EntrepreneurModeToggle />
+                <div data-tour="dashboard-greeting" className="space-y-1">
+                  <DashboardHeader isPremium={isPremium} onUpgradeClick={handleUpgradeClick} />
                 </div>
               </div>
             </div>
           )}
-
-          <AddTransactionDialog 
-            isOpen={isAddDialogOpen}
-            onClose={() => setIsAddDialogOpen(false)}
-            onTransactionAdded={refreshData}
-            initialCategory={transactionCategory}
-            initialType={transactionType}
-          />
-          
-          <PricingModal 
-            open={isPricingModalOpen}
-            onOpenChange={setIsPricingModalOpen}
-          />
+        
+          {/* Mode indicator */}
+          <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100">
+            {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
+          </div>
         </div>
+
+        {/* Dashboard Content */}
+        {isEntrepreneurMode && isPremium ? (
+          <EntrepreneurDashboard 
+            onAddIncome={handleAddBusinessIncome}
+            onAddExpense={handleAddBusinessExpense}
+          />
+        ) : (
+          <div className="space-y-8">
+            <div data-tour="income-expense-cards">
+              <StatCardsSection 
+                stats={stats} 
+                loading={loading.stats} 
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <div data-tour="add-transaction">
+                  <TransactionsSection 
+                    transactions={transactions} 
+                    onTransactionAdded={refreshData}
+                    loading={loading.transactions} 
+                  />
+                </div>
+                
+                {isPremium && <BudgetsSection isPremium={isPremium} />}
+              </div>
+              
+              <div className="space-y-8">
+                <div data-tour="goals-section">
+                  <GoalsSection 
+                    goals={goals}
+                    isPremium={isPremium}
+                    onGoalAdded={refreshData}
+                    loading={loading.goals}
+                    onUpgradeClick={handleUpgradeClick}
+                  />
+                </div>
+                
+                {isPremium && <BadgesSection badges={mockBadges} />}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <AddTransactionDialog 
+          isOpen={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onTransactionAdded={refreshData}
+          initialCategory={transactionCategory}
+          initialType={transactionType}
+        />
+        
+        <PricingModal 
+          open={isPricingModalOpen}
+          onOpenChange={setIsPricingModalOpen}
+        />
       </div>
     </DashboardLayout>
   );

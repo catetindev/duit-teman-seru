@@ -25,8 +25,8 @@ export default function Invoices() {
   if (!isEntrepreneurMode) {
     return (
       <DashboardLayout isPremium={isPremium}>
-        <div className="p-6">
-          <Card className="max-w-md mx-auto">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md">
             <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
               <Lock className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-xl font-bold mb-2">Invoice Generator</h3>
@@ -48,33 +48,22 @@ export default function Invoices() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="min-h-screen w-full">
-        <div className="w-full max-w-full mx-auto space-y-4 sm:space-y-6">
-          {/* Header Section */}
-          <div className="px-3 sm:px-4 lg:px-6 pt-4 sm:pt-6">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gradient">Invoice Generator</h1>
-              <p className="text-muted-foreground">Create and manage professional invoices for your business</p>
-            </div>
-          </div>
-          
-          {/* Content Section */}
-          <div className="w-full">
-            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 sm:mx-3 sm:border sm:rounded-lg sm:shadow-sm lg:mx-6">
-              <div className="p-3 sm:p-4 lg:p-6">
-                <InvoicesList
-                  invoices={invoices}
-                  customers={customers}
-                  products={products}
-                  loading={loading}
-                  onInvoiceChange={fetchInvoices}
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Bottom padding for mobile navigation */}
-          <div className="pb-20 sm:pb-6" />
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="space-y-4">
+          <h1 className="text-3xl font-bold text-gradient">Invoice Generator</h1>
+          <p className="text-muted-foreground text-lg">Create and manage professional invoices for your business</p>
+        </div>
+        
+        {/* Content Section */}
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-6 sm:p-8">
+          <InvoicesList
+            invoices={invoices}
+            customers={customers}
+            products={products}
+            loading={loading}
+            onInvoiceChange={fetchInvoices}
+          />
         </div>
       </div>
     </DashboardLayout>

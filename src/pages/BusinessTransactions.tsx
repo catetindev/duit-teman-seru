@@ -17,8 +17,8 @@ export default function BusinessTransactions() {
   if (!isEntrepreneurMode || !isPremium) {
     return (
       <DashboardLayout isPremium={isPremium}>
-        <div className="p-6">
-          <Card className="max-w-md mx-auto">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md">
             <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
               <Lock className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-xl font-bold mb-2">Business Transactions</h3>
@@ -42,11 +42,11 @@ export default function BusinessTransactions() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Business Transactions</h1>
-            <p className="text-muted-foreground">
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">Business Transactions</h1>
+            <p className="text-muted-foreground text-lg">
               View and manage all your business income and expenses
             </p>
           </div>

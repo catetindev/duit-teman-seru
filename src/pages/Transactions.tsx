@@ -29,20 +29,20 @@ export default function Transactions() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="p-4 md:p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">
               {isEntrepreneurMode ? 'Business Transactions' : 'Personal Transactions'}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               {isEntrepreneurMode 
                 ? 'View and manage your business financial transactions' 
                 : 'View and manage your personal financial transactions'
               }
             </p>
           </div>
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+          <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
             {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
           </div>
         </div>

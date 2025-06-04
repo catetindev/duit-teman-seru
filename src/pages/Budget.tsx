@@ -91,11 +91,14 @@ const BudgetPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{t('budget.title')}</h1>
-          <Button onClick={openNewBudgetDialog}>
-            <Plus className="mr-2 h-4 w-4" /> {t('budget.create')}
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">{t('budget.title')}</h1>
+            <p className="text-muted-foreground text-lg">Manage your budgets and spending limits</p>
+          </div>
+          <Button onClick={openNewBudgetDialog} className="w-full sm:w-auto px-6 py-3">
+            <Plus className="mr-2 h-5 w-5" /> {t('budget.create')}
           </Button>
         </div>
 

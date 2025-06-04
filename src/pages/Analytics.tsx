@@ -52,39 +52,41 @@ const AnalyticsPage = () => {
   
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Grafik Transaksi Kamu</h1>
-        <p className="text-muted-foreground mt-1">Visualize and analyze your financial data</p>
-      </div>
-      
-      <Tabs defaultValue="month" className="mb-6">
-        <TabsList>
-          <TabsTrigger value="month" onClick={() => setTimeframe('month')}>This Month</TabsTrigger>
-          <TabsTrigger value="quarter" onClick={() => setTimeframe('quarter')}>Last 3 Months</TabsTrigger>
-          <TabsTrigger value="year" onClick={() => setTimeframe('year')}>This Year</TabsTrigger>
-        </TabsList>
-      </Tabs>
-      
-      {/* Summary Cards */}
-      <AnalyticsSummary transactions={transactions} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Income vs Expense Chart */}
-        <IncomeExpenseChart 
-          transactions={transactions}
-          timeframe={timeframe}
-          isLoading={isLoading}
-        />
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <h1 className="text-3xl font-bold">Grafik Transaksi Kamu</h1>
+          <p className="text-muted-foreground text-lg">Visualize and analyze your financial data</p>
+        </div>
         
-        {/* Expense Breakdown */}
-        <ExpenseBreakdownChart 
-          transactions={transactions}
-          isLoading={isLoading}
-        />
+        <Tabs defaultValue="month" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-none">
+            <TabsTrigger value="month" onClick={() => setTimeframe('month')} className="px-6 py-3">This Month</TabsTrigger>
+            <TabsTrigger value="quarter" onClick={() => setTimeframe('quarter')} className="px-6 py-3">Last 3 Months</TabsTrigger>
+            <TabsTrigger value="year" onClick={() => setTimeframe('year')} className="px-6 py-3">This Year</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
+        {/* Summary Cards */}
+        <AnalyticsSummary transactions={transactions} />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Income vs Expense Chart */}
+          <IncomeExpenseChart 
+            transactions={transactions}
+            timeframe={timeframe}
+            isLoading={isLoading}
+          />
+          
+          {/* Expense Breakdown */}
+          <ExpenseBreakdownChart 
+            transactions={transactions}
+            isLoading={isLoading}
+          />
+        </div>
+        
+        {/* Highlights Section */}
+        <AnalyticsHighlights transactions={transactions} />
       </div>
-      
-      {/* Highlights Section */}
-      <AnalyticsHighlights transactions={transactions} />
     </DashboardLayout>
   );
 };

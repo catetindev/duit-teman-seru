@@ -108,39 +108,39 @@ export default function Customers() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Customers</h1>
-            <p className="text-slate-600 mt-1">Manage your customer database</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-slate-800">Customers</h1>
+            <p className="text-slate-600 text-lg">Manage your customer database</p>
           </div>
-          <Button onClick={handleAddNew} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" /> Add New Customer
+          <Button onClick={handleAddNew} className="w-full sm:w-auto px-6 py-3">
+            <Plus className="h-5 w-5 mr-2" /> Add New Customer
           </Button>
         </div>
         
         {/* Search and Filters */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search customers..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-12 py-3 text-base"
             />
           </div>
           
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              <span className="text-sm font-medium">Filter by tag:</span>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Filter className="h-5 w-5" />
+              <span className="text-base font-medium">Filter by tag:</span>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {tagFilter && (
                 <Badge 
-                  className="cursor-pointer"
+                  className="cursor-pointer px-4 py-2 text-sm"
                   onClick={() => setTagFilter(null)}
                   variant="default"
                 >
@@ -150,7 +150,7 @@ export default function Customers() {
               {availableTags.map(tag => (
                 <Badge 
                   key={tag} 
-                  className="cursor-pointer"
+                  className="cursor-pointer px-4 py-2 text-sm"
                   onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
                   variant={tagFilter === tag ? 'default' : 'outline'}
                 >

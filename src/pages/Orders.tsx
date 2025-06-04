@@ -41,8 +41,8 @@ export default function Orders() {
   if (!isEntrepreneurMode) {
     return (
       <DashboardLayout isPremium={isPremium}>
-        <div className="p-6">
-          <Card className="max-w-md mx-auto">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md">
             <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
               <Lock className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-xl font-bold mb-2">Orders & Transactions</h3>
@@ -64,49 +64,35 @@ export default function Orders() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="min-h-screen w-full">
-        {/* Main container with proper responsive spacing */}
-        <div className="w-full max-w-full mx-auto space-y-4 sm:space-y-6">
-          {/* Header Section - Fixed padding */}
-          <div className="px-3 sm:px-4 lg:px-6 pt-4 sm:pt-6">
-            <OrdersHeader onAddNew={handleAddNew} />
-          </div>
-          
-          {/* Filters Section - Responsive container */}
-          <div className="px-3 sm:px-4 lg:px-6">
-            <div className="w-full bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-              <div className="p-3 sm:p-4">
-                <OrdersFilters
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  statusFilter={statusFilter}
-                  setStatusFilter={setStatusFilter}
-                  customerFilter={customerFilter}
-                  setCustomerFilter={setCustomerFilter}
-                  dateRange={dateRange}
-                  setDateRange={setDateRange}
-                  customers={customers}
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Content Section - Full width with responsive padding */}
-          <div className="w-full">
-            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 sm:mx-3 sm:border sm:rounded-lg sm:shadow-sm lg:mx-6">
-              <OrdersContent
-                ref={contentRef}
-                orders={filteredOrders}
-                customers={customers}
-                products={products}
-                loading={loading}
-                onDataChange={fetchData}
-              />
-            </div>
-          </div>
-          
-          {/* Bottom padding for mobile navigation */}
-          <div className="pb-20 sm:pb-6" />
+      <div className="space-y-8">
+        {/* Header Section */}
+        <OrdersHeader onAddNew={handleAddNew} />
+        
+        {/* Filters Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+          <OrdersFilters
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            customerFilter={customerFilter}
+            setCustomerFilter={setCustomerFilter}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            customers={customers}
+          />
+        </div>
+        
+        {/* Content Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+          <OrdersContent
+            ref={contentRef}
+            orders={filteredOrders}
+            customers={customers}
+            products={products}
+            loading={loading}
+            onDataChange={fetchData}
+          />
         </div>
       </div>
     </DashboardLayout>
