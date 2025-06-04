@@ -10,12 +10,20 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import AuthIllustration from '@/components/auth/AuthIllustration';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Mail } from 'lucide-react';
 
 const Login = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     // If already logged in, redirect to dashboard
@@ -96,8 +104,100 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast.success('Password reset email sent! Check your inbox.');
+      setShowForgotPassword(false);
+      setResetEmail('');
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      toast.error(err.message || 'Failed to send reset email');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+        <Navbar />
+        
+        <div className="flex flex-1 w-full mt-16 md:mt-20 items-center justify-center p-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md"
+          >
+            <Card>
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                  <Mail className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle className="text-2xl">Reset Password</CardTitle>
+                <p className="text-muted-foreground">
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={resetLoading}
+                    >
+                      {resetLoading ? 'Sending...' : 'Send Reset Email'}
+                    </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowForgotPassword(false)}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back to Login
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+        
+        <Footer />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
       <Navbar />
       
       <div className="flex flex-1 w-full mt-16 md:mt-20">
@@ -111,23 +211,33 @@ const Login = () => {
           >
             <div className="text-center md:text-left mb-8">
               <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome Back</h1>
-              <p className="text-gray-500">Sign in to your account to continue</p>
+              <p className="text-gray-500 dark:text-gray-400">Sign in to your account to continue</p>
             </div>
             
             {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
+              <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
                 {error}
               </div>
             )}
 
             <LoginForm onLogin={handleLogin} loading={loading} />
             
+            <div className="mt-4 text-center">
+              <Button
+                variant="link"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm text-[#28e57d] hover:underline"
+              >
+                Forgot your password?
+              </Button>
+            </div>
+            
             <div className="mt-6">
               <SocialLoginButtons onSocialLogin={handleSocialLogin} loading={loading} />
             </div>
             
             <div className="text-center mt-6">
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 Don't have an account?{' '}
                 <Link to="/signup" className="text-[#28e57d] hover:underline font-medium">
                   Sign up
