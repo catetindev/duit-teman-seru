@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { invoiceFormSchema } from './form/invoiceFormSchema';
 import { InvoiceCustomerForm } from './form/InvoiceCustomerForm';
@@ -36,6 +37,8 @@ export function InvoiceFormModal({
   const { generateInvoiceNumber, addInvoice, updateInvoice } = useInvoices();
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [loading, setLoading] = useState(false);
+  const [taxRate, setTaxRate] = useState(11);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const form = useForm({
     resolver: zodResolver(invoiceFormSchema),
@@ -53,13 +56,31 @@ export function InvoiceFormModal({
     }
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'items'
+  });
+
   useEffect(() => {
     const initializeForm = async () => {
       if (invoice) {
+        // Parse items safely
+        let parsedItems = [];
+        try {
+          if (typeof invoice.items === 'string') {
+            parsedItems = JSON.parse(invoice.items);
+          } else if (Array.isArray(invoice.items)) {
+            parsedItems = invoice.items;
+          }
+        } catch (error) {
+          console.error('Error parsing invoice items:', error);
+          parsedItems = [];
+        }
+
         form.reset({
           invoice_number: invoice.invoice_number,
           customer_id: invoice.customer_id,
-          items: invoice.items ? JSON.parse(invoice.items) : [],
+          items: parsedItems,
           subtotal: invoice.subtotal,
           tax: invoice.tax,
           discount: invoice.discount,
@@ -95,6 +116,48 @@ export function InvoiceFormModal({
     }
   };
 
+  const addProduct = (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    append({
+      description: product.name,
+      quantity: 1,
+      price: Number(product.price),
+      total: Number(product.price)
+    });
+  };
+
+  const addEmptyItem = () => {
+    append({
+      description: '',
+      quantity: 1,
+      price: 0,
+      total: 0
+    });
+  };
+
+  const calculateItemTotal = (index: number) => {
+    const items = form.getValues('items');
+    const item = items[index];
+    const total = item.quantity * item.price;
+    
+    form.setValue(`items.${index}.total`, total);
+    calculateTotals();
+  };
+
+  const calculateTotals = () => {
+    const items = form.getValues('items');
+    const subtotal = items.reduce((sum, item) => sum + (item.total || 0), 0);
+    const taxAmount = (subtotal * taxRate) / 100;
+    const total = subtotal + taxAmount - discountAmount;
+
+    form.setValue('subtotal', subtotal);
+    form.setValue('tax', taxAmount);
+    form.setValue('discount', discountAmount);
+    form.setValue('total', Math.max(0, total));
+  };
+
   const onSubmit = async (data: any) => {
     setLoading(true);
     
@@ -102,7 +165,7 @@ export function InvoiceFormModal({
       if (invoice) {
         await updateInvoice({ ...data, id: invoice.id });
       } else {
-        await addInvoice(user?.id || '', data);
+        await addInvoice(data);
       }
       
       onSuccess();
@@ -134,10 +197,21 @@ export function InvoiceFormModal({
             
             <InvoiceItemsSection 
               form={form} 
-              products={products} 
+              fields={fields}
+              products={products}
+              onAddProduct={addProduct}
+              onAddEmptyItem={addEmptyItem}
+              onRemove={remove}
+              calculateItemTotal={calculateItemTotal}
             />
             
-            <InvoiceTotalsSection form={form} />
+            <InvoiceTotalsSection 
+              form={form}
+              taxRate={taxRate}
+              discountAmount={discountAmount}
+              setTaxRate={setTaxRate}
+              setDiscountAmount={setDiscountAmount}
+            />
             
             <InvoicePaymentForm form={form} />
 

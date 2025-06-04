@@ -2,7 +2,7 @@
 import { useProductManagement } from './useProductManagement';
 import { useCartManagement } from './useCartManagement';
 import { useTransactionManagement } from './useTransactionManagement';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 
 export function usePosRefactored() {
   const { 
@@ -30,13 +30,23 @@ export function usePosRefactored() {
     fetchRecentTransactions
   } = useTransactionManagement();
 
+  const [showReceipt, setShowReceipt] = useState(false);
+
   // Combined loading state
   const loading = productsLoading || transactionLoading;
+
+  // Create cart from transaction products
+  const cart = transaction.produk || [];
 
   // Wrapper for saving transaction
   const handleSaveTransaction = useCallback(async () => {
     const success = await saveTransaction(transaction);
     if (success) {
+      setShowReceipt(true);
+      // Hide receipt after a delay
+      setTimeout(() => {
+        setShowReceipt(false);
+      }, 3000);
       resetTransaction();
     }
     return success;
@@ -50,8 +60,10 @@ export function usePosRefactored() {
 
   return {
     products,
+    cart,
     transaction,
     loading,
+    showReceipt,
     recentTransactions,
     addToCart,
     updateQuantity,
