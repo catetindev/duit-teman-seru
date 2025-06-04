@@ -27,7 +27,6 @@ import Invoices from "@/pages/Invoices";
 import Calculator from "@/pages/entrepreneur/Calculator";
 import Pos from "@/pages/entrepreneur/Pos";
 import PosRefactored from "@/pages/entrepreneur/PosRefactored";
-import FinancialReports from "@/pages/FinancialReports";
 import ProfitLoss from "@/pages/entrepreneur/ProfitLoss";
 import BusinessIncome from "@/pages/BusinessIncome";
 import BusinessExpenses from "@/pages/BusinessExpenses";
@@ -69,8 +68,7 @@ function App() {
         <Route path="/business-income" element={<ProtectedRoute><BusinessIncome /></ProtectedRoute>} />
         <Route path="/business-expenses" element={<ProtectedRoute><BusinessExpenses /></ProtectedRoute>} />
         
-        {/* Financial Reports */}
-        <Route path="/financial-reports" element={<ProtectedRoute><FinancialReports /></ProtectedRoute>} />
+        {/* Profit Loss Report */}
         <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
       </Routes>
     </>

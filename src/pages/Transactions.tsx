@@ -25,7 +25,7 @@ export default function Transactions() {
     setTimeFilter,
     categoryFilter,
     setCategoryFilter,
-    refetch
+    refreshTransactions
   } = useTransactions(isEntrepreneurMode);
 
   return (
@@ -63,7 +63,7 @@ export default function Transactions() {
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             isLoading={isLoading}
-            onUpdate={refetch}
+            onUpdate={refreshTransactions}
           />
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function Transactions() {
       <AddTransactionDialog 
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={refetch}
+        onTransactionAdded={refreshTransactions}
       />
     </DashboardLayout>
   );
