@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 
 const Login = () => {
   const { user, login } = useAuth();
@@ -24,6 +24,7 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   useEffect(() => {
     // If already logged in, redirect to dashboard
@@ -106,25 +107,47 @@ const Login = () => {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!resetEmail) {
       toast.error('Please enter your email address');
       return;
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(resetEmail)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     setResetLoading(true);
+    
     try {
+      console.log('Sending password reset email to:', resetEmail);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Password reset error:', error);
+        throw error;
+      }
 
-      toast.success('Password reset email sent! Check your inbox.');
-      setShowForgotPassword(false);
-      setResetEmail('');
+      console.log('Password reset email sent successfully');
+      setResetEmailSent(true);
+      toast.success('Password reset email sent! Check your inbox and spam folder.');
+      
+      // Reset form after successful send
+      setTimeout(() => {
+        setResetEmail('');
+        setResetEmailSent(false);
+        setShowForgotPassword(false);
+      }, 3000);
+      
     } catch (err: any) {
       console.error('Password reset error:', err);
-      toast.error(err.message || 'Failed to send reset email');
+      toast.error(err.message || 'Failed to send reset email. Please try again.');
     } finally {
       setResetLoading(false);
     }
@@ -145,38 +168,79 @@ const Login = () => {
             <Card>
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                  <Mail className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  {resetEmailSent ? (
+                    <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <Mail className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  )}
                 </div>
-                <CardTitle className="text-2xl">Reset Password</CardTitle>
+                <CardTitle className="text-2xl">
+                  {resetEmailSent ? 'Email Sent!' : 'Reset Password'}
+                </CardTitle>
                 <p className="text-muted-foreground">
-                  Enter your email address and we'll send you a link to reset your password.
+                  {resetEmailSent 
+                    ? 'We have sent a password reset link to your email address. Please check your inbox and spam folder.'
+                    : 'Enter your email address and we\'ll send you a link to reset your password.'
+                  }
                 </p>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleForgotPassword} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="reset-email">Email</Label>
-                    <Input
-                      id="reset-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Button 
-                      type="submit" 
+                {!resetEmailSent ? (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        required
+                        disabled={resetLoading}
+                      />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <Button 
+                        type="submit" 
+                        className="w-full"
+                        disabled={resetLoading || !resetEmail}
+                      >
+                        {resetLoading ? 'Sending...' : 'Send Reset Email'}
+                      </Button>
+                      
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full"
+                        onClick={() => setShowForgotPassword(false)}
+                        disabled={resetLoading}
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Login
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Didn't receive the email? Check your spam folder or try again.
+                      </p>
+                    </div>
+                    
+                    <Button
+                      variant="outline"
                       className="w-full"
-                      disabled={resetLoading}
+                      onClick={() => {
+                        setResetEmailSent(false);
+                        setResetEmail('');
+                      }}
                     >
-                      {resetLoading ? 'Sending...' : 'Send Reset Email'}
+                      Try Again
                     </Button>
                     
                     <Button
-                      type="button"
                       variant="ghost"
                       className="w-full"
                       onClick={() => setShowForgotPassword(false)}
@@ -185,7 +249,7 @@ const Login = () => {
                       Back to Login
                     </Button>
                   </div>
-                </form>
+                )}
               </CardContent>
             </Card>
           </motion.div>
