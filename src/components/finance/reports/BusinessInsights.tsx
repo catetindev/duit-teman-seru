@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ExpenseCategory, TopProduct, FinanceSummary } from '@/types/finance';
-import { ArrowDownToLine, LineChart, File } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertTriangle, Target } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/formatUtils';
 
@@ -16,48 +16,114 @@ export const BusinessInsights = ({
   topProducts,
   summary
 }: BusinessInsightsProps) => {
+  // Generate insights based on real data
+  const getTopExpenseCategory = () => {
+    if (expenseCategories.length === 0) return 'Marketing';
+    return expenseCategories[0].category;
+  };
+
+  const getTopProduct = () => {
+    if (topProducts.length === 0) return 'Product A';
+    return topProducts[0].name;
+  };
+
+  const getProfitStatus = () => {
+    const profitMargin = summary.totalIncome ? (((summary.totalIncome - summary.totalExpenses) / summary.totalIncome) * 100) : 0;
+    return {
+      isPositive: profitMargin > 0,
+      margin: profitMargin,
+      netProfit: summary.totalIncome - summary.totalExpenses
+    };
+  };
+
+  const profitStatus = getProfitStatus();
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Business Insights</CardTitle>
-        <CardDescription>
-          Personalized recommendations for your business
+    <Card className="h-full">
+      <CardHeader className="pb-3 sm:pb-4">
+        <CardTitle className="text-sm sm:text-base lg:text-lg">Business Insights</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
+          Rekomendasi berdasarkan data bisnis Anda
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="p-4 border rounded-lg bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900">
-            <h3 className="font-medium flex items-center gap-2">
-              <ArrowDownToLine className="h-4 w-4" />
-              Expense Optimization
+      <CardContent className="space-y-3 sm:space-y-4">
+        {/* Profit Status Insight */}
+        <div className={`p-3 sm:p-4 border rounded-lg ${
+          profitStatus.isPositive 
+            ? 'bg-emerald-50 border-emerald-200' 
+            : 'bg-red-50 border-red-200'
+        }`}>
+          <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+            {profitStatus.isPositive ? (
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+            ) : (
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4" />
+            )}
+            Status Profitabilitas
+          </h3>
+          <p className="text-xs sm:text-sm mt-1">
+            {profitStatus.isPositive ? (
+              <>
+                Bisnis Anda profitable dengan margin {profitStatus.margin.toFixed(1)}% 
+                dan laba bersih {formatCurrency(profitStatus.netProfit, 'IDR')}.
+              </>
+            ) : (
+              <>
+                Bisnis mengalami kerugian {formatCurrency(Math.abs(profitStatus.netProfit), 'IDR')}. 
+                Perlu evaluasi strategi bisnis dan efisiensi operasional.
+              </>
+            )}
+          </p>
+        </div>
+
+        {/* Expense Optimization */}
+        {expenseCategories.length > 0 && (
+          <div className="p-3 sm:p-4 border rounded-lg bg-amber-50 border-amber-200">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
+              Optimasi Pengeluaran
             </h3>
-            <p className="text-sm mt-1">
-              Your "{expenseCategories[0]?.category || 'Marketing'}" expenses are higher than average. 
-              Consider reviewing your spending in this category to improve profitability.
+            <p className="text-xs sm:text-sm mt-1">
+              Kategori "{getTopExpenseCategory()}" merupakan pengeluaran terbesar 
+              ({expenseCategories[0]?.percentage.toFixed(1)}%). 
+              Evaluasi efisiensi di kategori ini untuk meningkatkan profit.
             </p>
           </div>
-          
-          <div className="p-4 border rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900">
-            <h3 className="font-medium flex items-center gap-2">
-              <LineChart className="h-4 w-4" />
-              Growth Opportunity
+        )}
+        
+        {/* Product Performance */}
+        {topProducts.length > 0 && (
+          <div className="p-3 sm:p-4 border rounded-lg bg-blue-50 border-blue-200">
+            <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+              <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+              Peluang Pertumbuhan
             </h3>
-            <p className="text-sm mt-1">
-              Your top product "{topProducts[0]?.name || 'Product A'}" contributes 
-              significantly to your revenue. Consider expanding this product line.
+            <p className="text-xs sm:text-sm mt-1">
+              Produk "{getTopProduct()}" berkontribusi signifikan terhadap revenue. 
+              Pertimbangkan untuk memperluas lini produk serupa atau meningkatkan stok.
             </p>
           </div>
-          
-          <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
-            <h3 className="font-medium flex items-center gap-2">
-              <File className="h-4 w-4" />
-              Tax Planning
-            </h3>
-            <p className="text-sm mt-1">
-              Based on your current income of {formatCurrency(summary.totalIncome)}, 
-              consider scheduling a tax planning session before the quarter ends.
-            </p>
-          </div>
+        )}
+
+        {/* General Advice */}
+        <div className="p-3 sm:p-4 border rounded-lg bg-purple-50 border-purple-200">
+          <h3 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+            Rekomendasi Strategis
+          </h3>
+          <p className="text-xs sm:text-sm mt-1">
+            {summary.totalIncome > 0 ? (
+              <>
+                Dengan total pendapatan {formatCurrency(summary.totalIncome, 'IDR')}, 
+                fokus pada diversifikasi produk dan optimasi margin profit.
+              </>
+            ) : (
+              <>
+                Mulai dengan mencatat semua transaksi bisnis untuk mendapatkan 
+                insight yang lebih akurat tentang performa keuangan.
+              </>
+            )}
+          </p>
         </div>
       </CardContent>
     </Card>

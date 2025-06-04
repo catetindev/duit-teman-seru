@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { ExpenseCategory } from '@/types/finance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/formatUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ExpenseCategoryChartProps {
   data: ExpenseCategory[];
@@ -15,14 +17,19 @@ const COLORS = [
 ];
 
 export function ExpenseCategoryChart({ data }: ExpenseCategoryChartProps) {
+  const isMobile = useIsMobile();
+
   if (data.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Expense Categories</CardTitle>
+      <Card className="h-full">
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="text-sm sm:text-base lg:text-lg">Kategori Pengeluaran</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[300px]">
-          <p className="text-muted-foreground">No expense data available</p>
+        <CardContent className="flex items-center justify-center h-[250px] sm:h-[300px]">
+          <div className="text-center">
+            <div className="text-2xl sm:text-3xl lg:text-4xl mb-2 sm:mb-3">💰</div>
+            <p className="text-gray-500 text-xs sm:text-sm">Belum ada data pengeluaran</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -33,36 +40,40 @@ export function ExpenseCategoryChart({ data }: ExpenseCategoryChartProps) {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background p-3 border rounded-lg shadow-md">
-          <p className="font-medium">{data.category}</p>
-          <p className="text-sm">{formatCurrency(data.amount, 'IDR')}</p>
-          <p className="text-xs text-muted-foreground">{data.percentage.toFixed(1)}% of expenses</p>
+        <div className="bg-white p-2 sm:p-3 border rounded-lg shadow-md">
+          <p className="font-medium text-xs sm:text-sm">{data.category}</p>
+          <p className="text-xs sm:text-sm">{formatCurrency(data.amount, 'IDR')}</p>
+          <p className="text-xs text-gray-500">{data.percentage.toFixed(1)}% dari total</p>
         </div>
       );
     }
     return null;
   };
 
+  const chartHeight = isMobile ? 200 : 250;
+  const outerRadius = isMobile ? 70 : 90;
+  const innerRadius = isMobile ? 40 : 50;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Expense Categories</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="pb-3 sm:pb-4">
+        <CardTitle className="text-sm sm:text-base lg:text-lg">Kategori Pengeluaran</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
+      <CardContent className="p-3 sm:p-4 lg:p-6">
+        <div style={{ height: chartHeight }} className="w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
                 fill="#8884d8"
                 paddingAngle={2}
                 dataKey="amount"
                 nameKey="category"
-                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                label={isMobile ? false : ({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                 labelLine={false}
               >
                 {data.map((entry, index) => (
@@ -76,16 +87,20 @@ export function ExpenseCategoryChart({ data }: ExpenseCategoryChartProps) {
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        
+        {/* Legend - Responsive Grid */}
+        <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
           {data.map((category, index) => (
             <div key={category.category} className="flex items-center">
               <div 
-                className="w-3 h-3 rounded-full mr-2" 
+                className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" 
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
               ></div>
-              <div className="flex justify-between w-full">
+              <div className="flex justify-between w-full min-w-0">
                 <span className="text-xs truncate">{category.category}</span>
-                <span className="text-xs font-medium">{category.percentage.toFixed(1)}%</span>
+                <span className="text-xs font-medium ml-1 flex-shrink-0">
+                  {category.percentage.toFixed(1)}%
+                </span>
               </div>
             </div>
           ))}
