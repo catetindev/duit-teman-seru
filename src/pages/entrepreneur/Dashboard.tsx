@@ -59,13 +59,13 @@ export default function EntrepreneurDashboard() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
+      <div className="min-h-screen bg-slate-50">
         {/* Header Section */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-10">
+        <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
           <div className="p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-slate-800">
                   Business Dashboard
                 </h1>
                 <p className="text-slate-600 mt-1">
@@ -73,12 +73,12 @@ export default function EntrepreneurDashboard() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <Badge variant="outline" className="bg-slate-50 border-slate-200">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full mr-2 animate-pulse"></div>
                   Live Data
                 </Badge>
                 {isEntrepreneurMode && (
-                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                  <Badge className="bg-slate-800 text-white">
                     💼 Business Mode
                   </Badge>
                 )}
@@ -91,7 +91,7 @@ export default function EntrepreneurDashboard() {
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {statsCards.map((stat, index) => (
-              <Card key={index} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card key={index} className="relative overflow-hidden border border-slate-200 bg-white">
                 <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-5`}></div>
                 <CardContent className="p-6 relative">
                   <div className="flex items-center justify-between">
@@ -112,7 +112,7 @@ export default function EntrepreneurDashboard() {
                         <span className="text-slate-500 text-sm ml-1">vs last month</span>
                       </div>
                     </div>
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
                       <stat.icon className="h-6 w-6 text-white" />
                     </div>
                   </div>
@@ -123,14 +123,14 @@ export default function EntrepreneurDashboard() {
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="bg-white/60 backdrop-blur-sm border border-purple-100 shadow-sm">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">
+            <TabsList className="bg-white border border-slate-200">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">
                 📊 Overview
               </TabsTrigger>
-              <TabsTrigger value="transactions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">
+              <TabsTrigger value="transactions" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">
                 💰 Transactions
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">
                 📈 Analytics
               </TabsTrigger>
             </TabsList>
@@ -138,20 +138,20 @@ export default function EntrepreneurDashboard() {
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Quick Actions */}
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50/30">
+                <Card className="border border-slate-200 bg-white">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-semibold text-slate-800">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button className="w-full justify-start bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg">
+                    <Button className="w-full justify-start bg-emerald-500 hover:bg-emerald-600 text-white">
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       New Sale
                     </Button>
-                    <Button className="w-full justify-start bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg">
+                    <Button className="w-full justify-start bg-blue-500 hover:bg-blue-600 text-white">
                       <Users className="mr-2 h-4 w-4" />
                       Add Customer
                     </Button>
-                    <Button className="w-full justify-start bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white shadow-lg">
+                    <Button className="w-full justify-start bg-violet-500 hover:bg-violet-600 text-white">
                       <Eye className="mr-2 h-4 w-4" />
                       View Reports
                     </Button>
@@ -159,14 +159,14 @@ export default function EntrepreneurDashboard() {
                 </Card>
 
                 {/* Recent Activity */}
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-pink-50/30">
+                <Card className="border border-slate-200 bg-white">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-semibold text-slate-800">Recent Activity</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       {recentBusinessTransactions.map((transaction, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-white/60 backdrop-blur-sm border border-purple-100">
+                        <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
                           <div className="flex items-center gap-3">
                             <div className={`w-2 h-2 rounded-full ${
                               transaction.type === 'income' ? 'bg-emerald-400' : 'bg-rose-400'
@@ -190,7 +190,7 @@ export default function EntrepreneurDashboard() {
             </TabsContent>
 
             <TabsContent value="transactions">
-              <Card className="border-0 shadow-lg">
+              <Card className="border border-slate-200 bg-white">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold text-slate-800">Business Transactions</CardTitle>
                 </CardHeader>
@@ -201,7 +201,7 @@ export default function EntrepreneurDashboard() {
             </TabsContent>
 
             <TabsContent value="analytics">
-              <Card className="border-0 shadow-lg">
+              <Card className="border border-slate-200 bg-white">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold text-slate-800">Business Analytics</CardTitle>
                 </CardHeader>
