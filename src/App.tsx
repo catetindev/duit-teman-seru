@@ -32,6 +32,7 @@ import BusinessExpenses from "@/pages/BusinessExpenses";
 import ResetPassword from "@/pages/ResetPassword";
 import Feedback from "@/pages/Feedback";
 import Transactions from "@/pages/Transactions";
+import Notifications from "@/pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ function App() {
         {/* Profit Loss Report */}
         <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       </Routes>
     </>
   );
