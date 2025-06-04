@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -164,10 +165,20 @@ export function InvoiceFormModal({
     
     try {
       if (invoice) {
-        // For updates, include the invoice ID
-        const updateData = {
-          ...data,
-          id: invoice.id
+        // For updates, create a properly typed update object
+        const updateData: InvoiceFormData = {
+          id: invoice.id,
+          invoice_number: data.invoice_number,
+          customer_id: data.customer_id,
+          items: data.items,
+          subtotal: data.subtotal,
+          tax: data.tax,
+          discount: data.discount,
+          total: data.total,
+          payment_due_date: data.payment_due_date,
+          status: data.status,
+          payment_method: data.payment_method,
+          notes: data.notes
         };
         await updateInvoice(updateData);
       } else {
