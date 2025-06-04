@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -119,16 +118,44 @@ const InvoicesRefactored = () => {
   const handleFormSubmit = async (data: InvoiceFormData) => {
     try {
       if (selectedInvoice) {
-        await updateInvoice({
-          ...data,
-          id: selectedInvoice.id
-        });
+        // Transform data for update - convert Date to string and ensure all required fields
+        const updateData = {
+          id: selectedInvoice.id,
+          invoice_number: data.invoice_number,
+          customer_id: data.customer_id,
+          items: data.items,
+          subtotal: data.subtotal,
+          tax: data.tax,
+          discount: data.discount,
+          total: data.total,
+          payment_due_date: data.payment_due_date.toISOString(),
+          status: data.status,
+          payment_method: data.payment_method,
+          payment_proof_url: selectedInvoice.payment_proof_url || '',
+          notes: data.notes || ''
+        };
+        await updateInvoice(updateData);
         toast({
           title: 'Faktur Diperbarui',
           description: `Faktur ${data.invoice_number} telah diperbarui`
         });
       } else {
-        await addInvoice(data);
+        // Transform data for creation - convert Date to string and ensure all required fields
+        const createData = {
+          invoice_number: data.invoice_number,
+          customer_id: data.customer_id,
+          items: data.items,
+          subtotal: data.subtotal,
+          tax: data.tax,
+          discount: data.discount,
+          total: data.total,
+          payment_due_date: data.payment_due_date.toISOString(),
+          status: data.status,
+          payment_method: data.payment_method,
+          payment_proof_url: '',
+          notes: data.notes || ''
+        };
+        await addInvoice(createData);
         toast({
           title: 'Faktur Dibuat',
           description: `Faktur ${data.invoice_number} telah dibuat`

@@ -173,7 +173,7 @@ export function useInvoiceForm({
       }));
 
       if (invoice) {
-        // For updates, create a properly typed update object with id
+        // For updates, transform data to match database schema
         const updateData = {
           id: invoice.id,
           invoice_number: data.invoice_number,
@@ -183,14 +183,15 @@ export function useInvoiceForm({
           tax: data.tax,
           discount: data.discount,
           total: data.total,
-          payment_due_date: data.payment_due_date,
+          payment_due_date: data.payment_due_date.toISOString(),
           status: data.status,
           payment_method: data.payment_method,
+          payment_proof_url: invoice.payment_proof_url || '',
           notes: data.notes || ''
         };
         await updateInvoice(updateData);
       } else {
-        // For new invoices, ensure all required fields are present and properly typed
+        // For new invoices, transform data to match database schema
         const createData = {
           invoice_number: data.invoice_number,
           customer_id: data.customer_id,
@@ -199,9 +200,10 @@ export function useInvoiceForm({
           tax: data.tax,
           discount: data.discount,
           total: data.total,
-          payment_due_date: data.payment_due_date,
+          payment_due_date: data.payment_due_date.toISOString(),
           status: data.status,
           payment_method: data.payment_method,
+          payment_proof_url: '',
           notes: data.notes || ''
         };
         await addInvoice(createData);
