@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,26 +12,27 @@ import { InvoiceCustomerForm } from './form/InvoiceCustomerForm';
 import { InvoiceItemsSection } from './form/InvoiceItemsSection';
 import { InvoicePaymentForm } from './form/InvoicePaymentForm';
 import { InvoiceTotalsSection } from './form/InvoiceTotalsSection';
+import { LogoUploader } from './form/LogoUploader';
 import { cn } from '@/lib/utils';
 
 // Define schema for invoice form
 const invoiceItemSchema = z.object({
-  name: z.string().min(1, 'Nama item diperlukan'),
+  name: z.string().min(1, 'Nama produk wajib diisi'),
   description: z.string().optional(),
-  quantity: z.coerce.number().positive('Jumlah harus positif'),
-  unit_price: z.coerce.number().nonnegative('Harga tidak boleh negatif'),
-  total: z.coerce.number().nonnegative('Total tidak boleh negatif'),
+  quantity: z.coerce.number().positive('Jumlah harus lebih dari 0'),
+  unit_price: z.coerce.number().nonnegative('Harga tidak boleh minus'),
+  total: z.coerce.number().nonnegative('Total tidak boleh minus'),
 });
 
 const formSchema = z.object({
-  invoice_number: z.string().min(1, 'Nomor faktur diperlukan'),
-  customer_id: z.string().min(1, 'Pelanggan diperlukan'),
-  items: z.array(invoiceItemSchema).min(1, 'Minimal satu item diperlukan'),
+  invoice_number: z.string().min(1, 'Nomor faktur wajib diisi'),
+  customer_id: z.string().min(1, 'Pelanggan wajib dipilih'),
+  items: z.array(invoiceItemSchema).min(1, 'Minimal 1 produk harus ditambahkan'),
   subtotal: z.coerce.number().nonnegative(),
   tax: z.coerce.number().nonnegative(),
   discount: z.coerce.number().nonnegative(),
-  total: z.coerce.number().positive('Total harus lebih besar dari nol'),
-  payment_method: z.string().min(1, 'Metode pembayaran diperlukan'),
+  total: z.coerce.number().positive('Total harus lebih dari 0'),
+  payment_method: z.string().min(1, 'Cara bayar wajib dipilih'),
   payment_due_date: z.date(),
   notes: z.string().optional(),
   status: z.enum(['Paid', 'Unpaid', 'Overdue']),
@@ -53,7 +55,7 @@ export function InvoiceFormRefactored({
   onCancel,
   loading = false,
 }: InvoiceFormRefactoredProps) {
-  const [taxRate, setTaxRate] = useState(10); // Default 10%
+  const [taxRate, setTaxRate] = useState(11); // PPN 11%
   const [discountAmount, setDiscountAmount] = useState(0);
 
   // Initialize form with default values
@@ -68,7 +70,7 @@ export function InvoiceFormRefactored({
       discount: defaultValues?.discount || 0,
       total: defaultValues?.total || 0,
       status: defaultValues?.status || 'Unpaid',
-      payment_method: defaultValues?.payment_method || 'Transfer',
+      payment_method: defaultValues?.payment_method || 'Transfer Bank',
       payment_due_date: defaultValues?.payment_due_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       notes: defaultValues?.notes || '',
     },
@@ -130,88 +132,114 @@ export function InvoiceFormRefactored({
   }, [taxRate, discountAmount]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Step 1: Customer Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">
-              1. Informasi Pelanggan
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <InvoiceCustomerForm 
-              form={form} 
-              customers={customers} 
-              defaultInvoiceNumber={defaultValues?.invoice_number}
-              loading={loading}
-            />
-          </CardContent>
-        </Card>
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          📄 Buat Faktur Baru
+        </h1>
+        <p className="text-slate-600">Isi form di bawah untuk membuat faktur</p>
+      </div>
 
-        {/* Step 2: Products and Items */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">
-              2. Produk & Item
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <InvoiceItemsSection
-              form={form}
-              fields={fields}
-              products={products}
-              onAddProduct={handleAddProduct}
-              onAddEmptyItem={() => append({ name: '', description: '', quantity: 1, unit_price: 0, total: 0 })}
-              onRemove={(index) => {
-                remove(index);
-                setTimeout(() => calculateTotals(), 0);
-              }}
-              calculateItemTotal={calculateItemTotal}
-            />
-          </CardContent>
-        </Card>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          {/* Step 0: Logo Upload */}
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                🎨 Logo Bisnis (Opsional)
+              </CardTitle>
+              <CardDescription>Upload logo untuk tampil di faktur</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LogoUploader />
+            </CardContent>
+          </Card>
 
-        {/* Step 3: Payment Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">
-              3. Pembayaran
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <InvoicePaymentForm form={form} />
-              <InvoiceTotalsSection 
+          {/* Step 1: Customer Information */}
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                👤 1. Data Pelanggan
+              </CardTitle>
+              <CardDescription>Pilih atau isi data pelanggan</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <InvoiceCustomerForm 
                 form={form} 
-                taxRate={taxRate} 
-                discountAmount={discountAmount}
-                setTaxRate={setTaxRate}
-                setDiscountAmount={setDiscountAmount}
+                customers={customers} 
+                defaultInvoiceNumber={defaultValues?.invoice_number}
+                loading={loading}
               />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Form Actions */}
-        <div className="flex justify-end gap-3 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onCancel}
-            className="min-w-[100px]"
-          >
-            Batal
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={loading}
-            className="min-w-[100px]"
-          >
-            {defaultValues?.id ? 'Perbarui' : 'Buat'} Faktur
-          </Button>
-        </div>
-      </form>
-    </Form>
+          {/* Step 2: Products and Items */}
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                🛍️ 2. Produk & Layanan
+              </CardTitle>
+              <CardDescription>Tambah produk yang dibeli pelanggan</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <InvoiceItemsSection
+                form={form}
+                fields={fields}
+                products={products}
+                onAddProduct={handleAddProduct}
+                onAddEmptyItem={() => append({ name: '', description: '', quantity: 1, unit_price: 0, total: 0 })}
+                onRemove={(index) => {
+                  remove(index);
+                  setTimeout(() => calculateTotals(), 0);
+                }}
+                calculateItemTotal={calculateItemTotal}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Step 3: Payment Details */}
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                💰 3. Info Pembayaran
+              </CardTitle>
+              <CardDescription>Atur cara bayar dan total tagihan</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <InvoicePaymentForm form={form} />
+                <InvoiceTotalsSection 
+                  form={form} 
+                  taxRate={taxRate} 
+                  discountAmount={discountAmount}
+                  setTaxRate={setTaxRate}
+                  setDiscountAmount={setDiscountAmount}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Form Actions */}
+          <div className="flex justify-end gap-3 pt-6">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onCancel}
+              className="min-w-[120px] border-slate-300 hover:bg-slate-50"
+            >
+              ❌ Batal
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="min-w-[120px] bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+            >
+              {defaultValues?.id ? '✅ Update' : '✨ Buat'} Faktur
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }
