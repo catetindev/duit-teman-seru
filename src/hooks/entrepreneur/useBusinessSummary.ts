@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,11 +6,9 @@ import { useToast } from '@/hooks/use-toast';
 interface BusinessSummaryData {
   totalIncome: number; // Only manual business income transactions
   totalExpenses: number;
-  netProfit: number;
-  profitMargin: number;
   posRevenue: number; // Separate POS revenue
   orderRevenue: number; // Separate order revenue
-  totalRevenue: number; // Combined revenue from ALL sources
+  totalRevenue: number; // Combined revenue from POS + Orders only
 }
 
 export function useBusinessSummary() {
@@ -20,8 +17,6 @@ export function useBusinessSummary() {
   const [summaryData, setSummaryData] = useState<BusinessSummaryData>({
     totalIncome: 0,
     totalExpenses: 0,
-    netProfit: 0,
-    profitMargin: 0,
     posRevenue: 0,
     orderRevenue: 0,
     totalRevenue: 0
@@ -96,11 +91,6 @@ export function useBusinessSummary() {
       
       // Total Expenses = All expenses combined
       const totalExpenses = manualExpenseTransactions + businessExpenses;
-      
-      // Net profit calculation: All revenue sources minus all expenses
-      const allRevenueSources = totalIncome + posRevenue + orderRevenue;
-      const netProfit = allRevenueSources - totalExpenses;
-      const profitMargin = allRevenueSources > 0 ? (netProfit / allRevenueSources) * 100 : 0;
 
       console.log('Business summary calculated:', {
         totalIncome, // Manual income only
@@ -108,23 +98,18 @@ export function useBusinessSummary() {
         posRevenue,
         orderRevenue,
         totalExpenses,
-        netProfit,
-        profitMargin,
         breakdown: {
           manualIncomeTransactions,
           posRevenue,
           orderRevenue,
           manualExpenseTransactions,
-          businessExpenses,
-          allRevenueSources
+          businessExpenses
         }
       });
 
       setSummaryData({
         totalIncome,
         totalExpenses,
-        netProfit,
-        profitMargin,
         posRevenue,
         orderRevenue,
         totalRevenue
