@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +30,8 @@ import ProfitLoss from "@/pages/entrepreneur/ProfitLoss";
 import BusinessIncome from "@/pages/BusinessIncome";
 import BusinessExpenses from "@/pages/BusinessExpenses";
 import ResetPassword from "@/pages/ResetPassword";
+import Feedback from "@/pages/Feedback";
+import Transactions from "@/pages/Transactions";
 
 const queryClient = new QueryClient();
 
@@ -46,12 +47,14 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/feedback" element={<Feedback />} />
         
         {/* Protected routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/dashboard/:type" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
         <Route path="/budgets" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
+        <Route path="/budget" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
         <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
@@ -70,6 +73,7 @@ function App() {
         
         {/* Profit Loss Report */}
         <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
+        <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
       </Routes>
     </>
   );

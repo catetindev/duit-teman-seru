@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,29 +63,27 @@ const Feedback = () => {
 
           {/* Content Container */}
           <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-            {!isScriptLoaded ? (
-              <div className="h-[600px] flex items-center justify-center">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mx-auto mb-4"></div>
-                  <p className="text-slate-600">Loading feedback form...</p>
-                </div>
-              </div>
-            ) : (
-              <div className="h-[calc(100vh-300px)] min-h-[600px] relative">
-                <iframe
-                  data-tally-src="https://tally.so/r/3xozjr?transparentBackground=1"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  marginHeight={0}
-                  marginWidth={0}
-                  title="Form Feedback🙏"
-                  className="absolute top-0 left-0 w-full h-full border-0"
-                  onLoad={() => console.log('Tally iframe loaded')}
-                  onError={() => console.error('Tally iframe failed to load')}
-                />
-              </div>
-            )}
+            <div className="h-[calc(100vh-300px)] min-h-[600px] relative">
+              <iframe
+                data-tally-src="https://tally.so/r/3xozjr?transparentBackground=1"
+                width="100%"
+                height="100%"
+                frameBorder={0}
+                marginHeight={0}
+                marginWidth={0}
+                title="Form Feedback🙏"
+                className="absolute top-0 left-0 w-full h-full border-0"
+                onLoad={() => console.log('Tally iframe loaded')}
+                onError={(e) => {
+                  const el = e.target as HTMLIFrameElement;
+                  el.style.display = 'none';
+                  const errorDiv = document.createElement('div');
+                  errorDiv.className = 'flex items-center justify-center h-full text-red-500';
+                  errorDiv.innerText = 'Gagal memuat form feedback. Silakan coba lagi nanti.';
+                  if (el.parentNode) el.parentNode.appendChild(errorDiv);
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
