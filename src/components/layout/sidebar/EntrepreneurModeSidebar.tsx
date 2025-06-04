@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarNavLink } from "@/components/ui/sidebar";
@@ -9,24 +8,28 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useEntrepreneurMode } from '@/hooks/useEntrepreneurMode';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
 interface EntrepreneurModeSidebarProps {
   isAdmin?: boolean;
 }
-
 const EntrepreneurModeSidebar = ({
   isAdmin
 }: EntrepreneurModeSidebarProps) => {
-  const { t } = useLanguage();
-  const { user } = useAuth();
-  const { unreadCount } = useNotifications(user?.id);
-  const { isEntrepreneurMode } = useEntrepreneurMode();
+  const {
+    t
+  } = useLanguage();
+  const {
+    user
+  } = useAuth();
+  const {
+    unreadCount
+  } = useNotifications(user?.id);
+  const {
+    isEntrepreneurMode
+  } = useEntrepreneurMode();
 
   // Define common styles for nav links
   const navLinkStyles = "font-medium";
-  
-  return (
-    <SidebarContent>
+  return <SidebarContent>
       {/* Core Navigation */}
       <SidebarGroup>
         <SidebarGroupLabel>{t('entrepreneur.business')}</SidebarGroupLabel>
@@ -71,9 +74,7 @@ const EntrepreneurModeSidebar = ({
       <SidebarGroup>
         <SidebarGroupLabel>{t('entrepreneur.financial')}</SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarNavLink to="/financial-reports" icon={<FileBarChart className="h-5 w-5" />}>
-            <span className={navLinkStyles}>Laporan Keuangan</span>
-          </SidebarNavLink>
+          
           
           <SidebarNavLink to="/profit-loss" icon={<PieChart className="h-5 w-5" />}>
             <span className={navLinkStyles}>{t('entrepreneur.profitLoss')}</span>
@@ -98,18 +99,14 @@ const EntrepreneurModeSidebar = ({
               <TooltipTrigger asChild>
                 <SidebarNavLink to="/notifications" icon={<Bell className="h-5 w-5" />}>
                   <span className={navLinkStyles}>{t('entrepreneur.notifications')}</span>
-                  {unreadCount > 0 && (
-                    <Badge variant="default" className={cn("ml-auto bg-amber-500 text-xs py-0 px-1.5 min-w-5 h-5 flex items-center justify-center rounded-full")}>
+                  {unreadCount > 0 && <Badge variant="default" className={cn("ml-auto bg-amber-500 text-xs py-0 px-1.5 min-w-5 h-5 flex items-center justify-center rounded-full")}>
                       {unreadCount > 99 ? '99+' : unreadCount}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </SidebarNavLink>
               </TooltipTrigger>
-              {unreadCount > 0 && (
-                <TooltipContent>
+              {unreadCount > 0 && <TooltipContent>
                   You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-                </TooltipContent>
-              )}
+                </TooltipContent>}
             </Tooltip>
           </TooltipProvider>
           
@@ -121,15 +118,11 @@ const EntrepreneurModeSidebar = ({
             <span className={navLinkStyles}>{t('nav.settings')}</span>
           </SidebarNavLink>
           
-          {isAdmin && (
-            <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
+          {isAdmin && <SidebarNavLink to="/admin" icon={<ShieldAlert className="h-5 w-5" />}>
               <span className={navLinkStyles}>{t('entrepreneur.admin')}</span>
-            </SidebarNavLink>
-          )}
+            </SidebarNavLink>}
         </SidebarGroupContent>
       </SidebarGroup>
-    </SidebarContent>
-  );
+    </SidebarContent>;
 };
-
 export default EntrepreneurModeSidebar;
