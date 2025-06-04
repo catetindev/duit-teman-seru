@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -114,14 +113,14 @@ export function usePos() {
   };
 
   // Save transaction to database
-  const saveTransaction = async () => {
+  const saveTransaction = async (): Promise<boolean> => {
     if (transaction.produk.length === 0) {
       toast({
         title: "Transaksi Kosong",
         description: "Tambahkan produk ke keranjang terlebih dahulu",
         variant: "destructive"
       });
-      return;
+      return false;
     }
 
     if (transaction.metode_pembayaran === 'Cash' && 
@@ -131,7 +130,7 @@ export function usePos() {
         description: "Cek dulu nominal uangnya ya...",
         variant: "destructive"
       });
-      return;
+      return false;
     }
 
     setLoading(true);
@@ -159,6 +158,7 @@ export function usePos() {
       
       // Reset the transaction
       resetTransaction();
+      return true;
     } catch (error: any) {
       toast({
         title: "Error",
@@ -166,6 +166,7 @@ export function usePos() {
         variant: "destructive"
       });
       console.error("Error saving transaction:", error);
+      return false;
     } finally {
       setLoading(false);
     }

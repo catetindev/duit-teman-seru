@@ -98,7 +98,7 @@ const Pos = () => {
     }, 100);
   };
 
-  const handleSaveTransaction = async () => {
+  const handleSaveTransaction = async (): Promise<boolean> => {
     const success = await saveTransaction(transaction);
     if (success) {
       const savedTransaction = { ...transaction };
@@ -108,7 +108,9 @@ const Pos = () => {
       // Show receipt after successful save
       setCompletedTransaction(savedTransaction);
       setReceiptVisible(true);
+      return true;
     }
+    return false;
   };
 
   const handleDeleteClick = async (txId: string) => {

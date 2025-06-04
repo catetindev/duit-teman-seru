@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
-import { CartItem } from '@/types/pos';
+import { PosProduct } from '@/types/pos';
 import { formatRupiah } from '@/utils/formatRupiah';
 
 interface CartPanelProps {
-  cart: CartItem[];
+  cart: PosProduct[];
   onUpdateQuantity: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
   total: number;
