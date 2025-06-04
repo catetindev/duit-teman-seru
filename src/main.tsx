@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './hooks/useLanguage'
+import { EntrepreneurModeProvider } from './contexts/EntrepreneurModeContext'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
@@ -17,11 +18,13 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <AuthProvider>
         <LanguageProvider>
-          <TooltipProvider>
-            <InvoiceCustomizationProvider>
-              <App />
-            </InvoiceCustomizationProvider>
-          </TooltipProvider>
+          <EntrepreneurModeProvider>
+            <TooltipProvider>
+              <InvoiceCustomizationProvider>
+                <App />
+              </InvoiceCustomizationProvider>
+            </TooltipProvider>
+          </EntrepreneurModeProvider>
         </LanguageProvider>
       </AuthProvider>
     </BrowserRouter>
