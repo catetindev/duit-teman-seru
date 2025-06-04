@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -31,11 +32,15 @@ interface PageBudget {
 
 const BudgetPage = () => {
   const { t } = useLanguage();
+  const { isPremium } = useAuth();
   const { budgets, loading, addUpdateBudget, deleteBudget } = useDashboardData();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<PageBudget | null>(null);
+
+  console.log('Budget page - budgets:', budgets);
+  console.log('Budget page - loading:', loading);
 
   // Convert budgets to the correct type with explicit user_id
   const typedBudgets: PageBudget[] = budgets.map(budget => ({
@@ -90,40 +95,42 @@ const BudgetPage = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">{t('budget.title')}</h1>
-            <p className="text-muted-foreground text-lg">Manage your budgets and spending limits</p>
+    <DashboardLayout isPremium={isPremium}>
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="space-y-2">
+              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">{t('budget.title')}</h1>
+              <p className="text-slate-600 text-base">Manage your budgets and spending limits</p>
+            </div>
+            <Button onClick={openNewBudgetDialog} className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+              <Plus className="mr-2 h-5 w-5" /> {t('budget.create')}
+            </Button>
           </div>
-          <Button onClick={openNewBudgetDialog} className="w-full sm:w-auto px-6 py-3">
-            <Plus className="mr-2 h-5 w-5" /> {t('budget.create')}
-          </Button>
+
+          <BudgetList 
+            budgets={typedBudgets}
+            loading={loading.budgets}
+            onAddNew={openNewBudgetDialog}
+            onEdit={handleEditBudget}
+            onDelete={handleDeleteBudget}
+          />
+
+          {/* Budget Form Dialog */}
+          <BudgetForm 
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            onSubmit={onSubmit}
+            selectedBudget={selectedBudget}
+          />
+
+          {/* Delete Confirmation Dialog */}
+          <DeleteBudgetDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            onConfirm={confirmDelete}
+          />
         </div>
-
-        <BudgetList 
-          budgets={typedBudgets}
-          loading={loading.budgets}
-          onAddNew={openNewBudgetDialog}
-          onEdit={handleEditBudget}
-          onDelete={handleDeleteBudget}
-        />
-
-        {/* Budget Form Dialog */}
-        <BudgetForm 
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          onSubmit={onSubmit}
-          selectedBudget={selectedBudget}
-        />
-
-        {/* Delete Confirmation Dialog */}
-        <DeleteBudgetDialog
-          open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
-          onConfirm={confirmDelete}
-        />
       </div>
     </DashboardLayout>
   );

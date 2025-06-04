@@ -15,7 +15,7 @@ export default function Transactions() {
   const { isEntrepreneurMode } = useEntrepreneurMode();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
-  // Show transactions based on the current mode - this fixes the personal mode bug
+  // Show transactions based on the current mode
   const {
     transactions,
     isLoading,
@@ -27,6 +27,10 @@ export default function Transactions() {
     setCategoryFilter,
     refreshTransactions
   } = useTransactions(isEntrepreneurMode);
+
+  console.log('Transactions page - isEntrepreneurMode:', isEntrepreneurMode);
+  console.log('Transactions page - transactions:', transactions);
+  console.log('Transactions page - isLoading:', isLoading);
 
   return (
     <DashboardLayout isPremium={isPremium}>
@@ -44,7 +48,7 @@ export default function Transactions() {
                 }
               </p>
             </div>
-            <div className="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 text-sm font-medium text-slate-700">
+            <div className="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 text-sm font-medium text-slate-700 rounded-lg">
               {isEntrepreneurMode ? '💼 Business Mode' : '👤 Personal Mode'}
             </div>
           </div>

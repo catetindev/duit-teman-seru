@@ -27,13 +27,14 @@ export const useTransactions = (isBusinessMode: boolean = false) => {
   
   const fetchTransactions = useCallback(async () => {
     if (!user) {
+      console.log('useTransactions: No user found');
       setIsLoading(false);
       return;
     }
     
     setIsLoading(true);
     try {
-      console.log('Fetching transactions for user:', user.id, 'Business mode:', isBusinessMode);
+      console.log('useTransactions: Fetching transactions for user:', user.id, 'Business mode:', isBusinessMode);
       
       // Build query based on filters and business mode
       let query = supabase
@@ -42,6 +43,8 @@ export const useTransactions = (isBusinessMode: boolean = false) => {
         .eq('user_id', user.id)
         .eq('is_business', isBusinessMode)
         .order('date', { ascending: false });
+      
+      console.log('useTransactions: Query filters - user_id:', user.id, 'is_business:', isBusinessMode);
       
       // Apply time filter if premium user
       if (isPremium && timeFilter !== 'all') {
@@ -67,10 +70,11 @@ export const useTransactions = (isBusinessMode: boolean = false) => {
       const { data, error } = await query;
       
       if (error) {
+        console.error('useTransactions: Database error:', error);
         throw error;
       }
       
-      console.log('Fetched transactions:', data);
+      console.log('useTransactions: Fetched raw data:', data);
       
       // Format transactions
       const formattedTransactions = (data || []).map(item => ({
@@ -85,9 +89,10 @@ export const useTransactions = (isBusinessMode: boolean = false) => {
         is_business: item.is_business || false
       }));
       
+      console.log('useTransactions: Formatted transactions:', formattedTransactions);
       setTransactions(formattedTransactions);
     } catch (error: any) {
-      console.error('Error fetching transactions:', error);
+      console.error('useTransactions: Error fetching transactions:', error);
       toast({
         title: "Error",
         description: "Failed to fetch transactions: " + (error.message || "Unknown error"),
@@ -118,7 +123,12 @@ export const useTransactions = (isBusinessMode: boolean = false) => {
   
   // Set up real-time transaction subscription
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      console.log('useTransactions: No user for subscription');
+      return;
+    }
+    
+    console.log('useTransactions: Setting up subscription and initial fetch');
     
     // Initial fetch
     fetchTransactions();
@@ -135,7 +145,7 @@ export const useTransactions = (isBusinessMode: boolean = false) => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log('Transaction change detected:', payload);
+          console.log('useTransactions: Transaction change detected:', payload);
           
           // Handle different types of changes
           if (payload.eventType === 'INSERT') {
@@ -203,6 +213,7 @@ export const useTransactions = (isBusinessMode: boolean = false) => {
     
     // Cleanup function
     return () => {
+      console.log('useTransactions: Cleaning up subscription');
       supabase.removeChannel(channel);
     };
   }, [user, fetchTransactions, isBusinessMode]);
