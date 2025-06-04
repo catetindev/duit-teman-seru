@@ -28,6 +28,7 @@ import Calculator from "@/pages/entrepreneur/Calculator";
 import Pos from "@/pages/entrepreneur/Pos";
 import PosRefactored from "@/pages/entrepreneur/PosRefactored";
 import FinancialReports from "@/pages/FinancialReports";
+import ProfitLoss from "@/pages/entrepreneur/ProfitLoss";
 import BusinessIncome from "@/pages/BusinessIncome";
 import BusinessExpenses from "@/pages/BusinessExpenses";
 import ResetPassword from "@/pages/ResetPassword";
@@ -70,9 +71,7 @@ function App() {
         
         {/* Financial Reports */}
         <Route path="/financial-reports" element={<ProtectedRoute><FinancialReports /></ProtectedRoute>} />
-        
-        {/* Legacy routes for backwards compatibility */}
-        <Route path="/profit-loss" element={<ProtectedRoute><FinancialReports /></ProtectedRoute>} />
+        <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
       </Routes>
     </>
   );
