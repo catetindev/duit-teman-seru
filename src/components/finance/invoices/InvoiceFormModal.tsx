@@ -164,24 +164,16 @@ export function InvoiceFormModal({
     
     try {
       if (invoice) {
-        // Ensure all required fields are present for update
-        const updateData: InvoiceFormData = {
-          id: invoice.id,
-          invoice_number: data.invoice_number,
-          customer_id: data.customer_id,
-          items: data.items,
-          subtotal: data.subtotal,
-          tax: data.tax,
-          discount: data.discount,
-          total: data.total,
-          payment_due_date: data.payment_due_date,
-          status: data.status,
-          payment_method: data.payment_method,
-          notes: data.notes
+        // For updates, include the invoice ID
+        const updateData = {
+          ...data,
+          id: invoice.id
         };
         await updateInvoice(updateData);
       } else {
-        await addInvoice(data);
+        // For new invoices, don't include the id
+        const { id, ...createData } = data;
+        await addInvoice(createData);
       }
       
       onSuccess();
