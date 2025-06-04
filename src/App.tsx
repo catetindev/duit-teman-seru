@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { EntrepreneurModeProvider } from '@/contexts/EntrepreneurModeContext';
@@ -58,51 +58,49 @@ function App() {
             <EntrepreneurModeProvider>
               <GoalsProvider>
                 <InvoiceCustomizationProvider>
-                  <Router>
-                    <ScrollToTop />
-                    <Routes>
-                      {/* Public routes */}
-                      <Route path="/" element={<Index />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
-                      <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/pricing" element={<Pricing />} />
-                      <Route path="/contact" element={<Contact />} />
-                      <Route path="/about" element={<About />} />
-                      <Route path="/privacy" element={<Privacy />} />
-                      <Route path="/terms" element={<Terms />} />
-                      <Route path="/feedback" element={<Feedback />} />
-                      <Route path="/goals-collaboration" element={<GoalsCollaborationDocs />} />
-                      
-                      {/* Protected routes */}
-                      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                      <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
-                      <Route path="/budget" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
-                      <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
-                      <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                      
-                      {/* Entrepreneur routes */}
-                      <Route path="/entrepreneur" element={<ProtectedRoute><EntrepreneurDashboard /></ProtectedRoute>} />
-                      <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-                      <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-                      <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
-                      <Route path="/invoices" element={<ProtectedRoute><EntrepreneurInvoices /></ProtectedRoute>} />
-                      <Route path="/pos" element={<ProtectedRoute><EntrepreneurPosRefactored /></ProtectedRoute>} />
-                      <Route path="/business-transactions" element={<ProtectedRoute><BusinessTransactions /></ProtectedRoute>} />
-                      <Route path="/business-income" element={<ProtectedRoute><BusinessIncome /></ProtectedRoute>} />
-                      <Route path="/business-expenses" element={<ProtectedRoute><BusinessExpenses /></ProtectedRoute>} />
-                      <Route path="/finance-reports" element={<ProtectedRoute><FinanceReports /></ProtectedRoute>} />
-                      <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
-                      <Route path="/calculator" element={<ProtectedRoute><Calculator /></ProtectedRoute>} />
-                      
-                      {/* 404 route */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                    <Toaster position="top-right" />
-                  </Router>
+                  <ScrollToTop />
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/feedback" element={<Feedback />} />
+                    <Route path="/goals-collaboration" element={<GoalsCollaborationDocs />} />
+                    
+                    {/* Protected routes */}
+                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+                    <Route path="/budget" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
+                    <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+                    <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                    <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                    <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                    <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                    
+                    {/* Entrepreneur routes */}
+                    <Route path="/entrepreneur" element={<ProtectedRoute><EntrepreneurDashboard /></ProtectedRoute>} />
+                    <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+                    <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+                    <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+                    <Route path="/invoices" element={<ProtectedRoute><EntrepreneurInvoices /></ProtectedRoute>} />
+                    <Route path="/pos" element={<ProtectedRoute><EntrepreneurPosRefactored /></ProtectedRoute>} />
+                    <Route path="/business-transactions" element={<ProtectedRoute><BusinessTransactions /></ProtectedRoute>} />
+                    <Route path="/business-income" element={<ProtectedRoute><BusinessIncome /></ProtectedRoute>} />
+                    <Route path="/business-expenses" element={<ProtectedRoute><BusinessExpenses /></ProtectedRoute>} />
+                    <Route path="/finance-reports" element={<ProtectedRoute><FinanceReports /></ProtectedRoute>} />
+                    <Route path="/profit-loss" element={<ProtectedRoute><ProfitLoss /></ProtectedRoute>} />
+                    <Route path="/calculator" element={<ProtectedRoute><Calculator /></ProtectedRoute>} />
+                    
+                    {/* 404 route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Toaster position="top-right" />
                 </InvoiceCustomizationProvider>
               </GoalsProvider>
             </EntrepreneurModeProvider>
