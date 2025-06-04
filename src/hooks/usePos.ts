@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -190,12 +191,15 @@ export function usePos() {
       
       if (error) throw error;
 
-      // Convert to PosProduct format
+      // Convert to PosProduct format with all required properties
       const posProducts: PosProduct[] = (data || []).map(product => ({
         id: product.id,
         nama: product.name,
         harga: product.price,
+        kategori: product.category || 'Lainnya',
+        stok: 0, // Default stock value for POS
         qty: 0,
+        image: product.image_url || undefined,
       }));
 
       setProducts(posProducts);
