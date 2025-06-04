@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -24,52 +23,53 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, ArrowRight, Target, PlusCircle } from 'lucide-react';
-
 const Dashboard = () => {
-  const { type } = useParams();
+  const {
+    type
+  } = useParams();
   const navigate = useNavigate();
-  const { isPremium, user } = useAuth();
-  const { t } = useLanguage();
-  const { isEntrepreneurMode } = useEntrepreneurMode();
+  const {
+    isPremium,
+    user
+  } = useAuth();
+  const {
+    t
+  } = useLanguage();
+  const {
+    isEntrepreneurMode
+  } = useEntrepreneurMode();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [transactionCategory, setTransactionCategory] = useState('');
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
   const isMobile = useIsMobile();
-  
-  const { 
-    transactions, 
-    goals, 
-    stats, 
-    loading, 
-    refreshData 
+  const {
+    transactions,
+    goals,
+    stats,
+    loading,
+    refreshData
   } = useDashboardData();
-
   const handleAddBusinessIncome = () => {
     setTransactionType('income');
     setTransactionCategory('Business');
     setIsAddDialogOpen(true);
   };
-
   const handleAddBusinessExpense = () => {
     setTransactionType('expense');
     setTransactionCategory('Business');
     setIsAddDialogOpen(true);
   };
-
   const handleUpgradeClick = () => {
     setIsPricingModalOpen(true);
   };
-
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good Morning';
     if (hour < 18) return 'Good Afternoon';
     return 'Good Evening';
   };
-
-  return (
-    <DashboardLayout isPremium={isPremium}>
+  return <DashboardLayout isPremium={isPremium}>
       <OnboardingTour />
       {isEntrepreneurMode && isPremium && <EntrepreneurOnboardingTour />}
       
@@ -89,91 +89,39 @@ const Dashboard = () => {
                 {getGreeting()}, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}!
               </h1>
               <p className="text-lg text-slate-600 max-w-2xl">
-                {isEntrepreneurMode 
-                  ? 'Manage your business finances and track your entrepreneurial journey'
-                  : 'Track your personal finances and achieve your financial goals'
-                }
+                {isEntrepreneurMode ? 'Manage your business finances and track your entrepreneurial journey' : 'Track your personal finances and achieve your financial goals'}
               </p>
             </div>
             
             {/* Profile Section */}
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm text-slate-600">Continue Your Journey And Achieve</p>
-                <p className="text-sm text-slate-500">Your Financial Target</p>
+                
+                
               </div>
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-semibold text-lg">
-                  {(user?.user_metadata?.full_name || user?.email || 'U')[0].toUpperCase()}
-                </span>
-              </div>
+              
             </div>
           </div>
 
           {/* Hero Banner - Similar to course platform */}
           <Card className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 border-0 rounded-3xl">
-            <CardContent className="p-8 lg:p-12">
-              <div className="flex flex-col lg:flex-row items-center justify-between">
-                <div className="text-white space-y-4 flex-1">
-                  <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/20 backdrop-blur-sm text-white/90 mb-2">
-                    {isEntrepreneurMode ? 'BUSINESS FINANCES' : 'PERSONAL FINANCES'}
-                  </div>
-                  <h2 className="text-2xl lg:text-4xl font-bold leading-tight">
-                    {isEntrepreneurMode 
-                      ? 'Grow Your Business With Smart Financial Management'
-                      : 'Achieve Financial Freedom With Smart Money Management'
-                    }
-                  </h2>
-                  <p className="text-blue-100 text-lg max-w-xl">
-                    {isEntrepreneurMode
-                      ? 'Track revenue, manage expenses, and scale your business with professional financial tools.'
-                      : 'Track expenses, save money, and reach your financial goals with our comprehensive tools.'
-                    }
-                  </p>
-                  <Button 
-                    onClick={() => setIsAddDialogOpen(true)}
-                    className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-xl"
-                  >
-                    <PlusCircle className="w-5 h-5 mr-2" />
-                    Add Transaction
-                  </Button>
-                </div>
-                <div className="hidden lg:block">
-                  <div className="w-32 h-32 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                    <TrendingUp className="w-16 h-16 text-white/80" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
+            
           </Card>
 
           {/* Dashboard Content */}
-          {isEntrepreneurMode && isPremium ? (
-            <div className="space-y-8">
-              <EntrepreneurDashboard 
-                onAddIncome={handleAddBusinessIncome}
-                onAddExpense={handleAddBusinessExpense}
-              />
-            </div>
-          ) : (
-            <div className="space-y-8">
+          {isEntrepreneurMode && isPremium ? <div className="space-y-8">
+              <EntrepreneurDashboard onAddIncome={handleAddBusinessIncome} onAddExpense={handleAddBusinessExpense} />
+            </div> : <div className="space-y-8">
               {/* Stats Cards */}
               <div data-tour="income-expense-cards">
-                <StatCardsSection 
-                  stats={stats} 
-                  loading={loading.stats} 
-                />
+                <StatCardsSection stats={stats} loading={loading.stats} />
               </div>
 
               {/* Main Content Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
                   <div data-tour="add-transaction">
-                    <TransactionsSection 
-                      transactions={transactions} 
-                      onTransactionAdded={refreshData}
-                      loading={loading.transactions} 
-                    />
+                    <TransactionsSection transactions={transactions} onTransactionAdded={refreshData} loading={loading.transactions} />
                   </div>
                   
                   {isPremium && <BudgetsSection isPremium={isPremium} />}
@@ -181,37 +129,19 @@ const Dashboard = () => {
                 
                 <div className="space-y-8">
                   <div data-tour="goals-section">
-                    <GoalsSection 
-                      goals={goals}
-                      isPremium={isPremium}
-                      onGoalAdded={refreshData}
-                      loading={loading.goals}
-                      onUpgradeClick={handleUpgradeClick}
-                    />
+                    <GoalsSection goals={goals} isPremium={isPremium} onGoalAdded={refreshData} loading={loading.goals} onUpgradeClick={handleUpgradeClick} />
                   </div>
                   
                   {isPremium && <BadgesSection badges={mockBadges} />}
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
 
-          <AddTransactionDialog 
-            isOpen={isAddDialogOpen}
-            onClose={() => setIsAddDialogOpen(false)}
-            onTransactionAdded={refreshData}
-            initialCategory={transactionCategory}
-            initialType={transactionType}
-          />
+          <AddTransactionDialog isOpen={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)} onTransactionAdded={refreshData} initialCategory={transactionCategory} initialType={transactionType} />
           
-          <PricingModal 
-            open={isPricingModalOpen}
-            onOpenChange={setIsPricingModalOpen}
-          />
+          <PricingModal open={isPricingModalOpen} onOpenChange={setIsPricingModalOpen} />
         </div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Dashboard;
