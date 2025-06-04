@@ -4,10 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface RevenueData {
-  totalRevenue: number;
+  totalRevenue: number; // Combined all sources
   posRevenue: number;
   orderRevenue: number;
-  transactionRevenue: number;
+  manualIncomeRevenue: number; // Only manual business income
   monthlyGrowth: number;
 }
 
@@ -17,7 +17,7 @@ export function useBusinessRevenue() {
     totalRevenue: 0,
     posRevenue: 0,
     orderRevenue: 0,
-    transactionRevenue: 0,
+    manualIncomeRevenue: 0,
     monthlyGrowth: 0
   });
   const [loading, setLoading] = useState(true);
@@ -69,7 +69,7 @@ export function useBusinessRevenue() {
         throw ordersError;
       }
 
-      // Fetch manual business income transactions for current month
+      // Fetch ONLY manual business income transactions for current month
       const { data: incomeTransactions, error: incomeError } = await supabase
         .from('transactions')
         .select('amount, date')
@@ -84,13 +84,13 @@ export function useBusinessRevenue() {
         throw incomeError;
       }
 
-      // Calculate current month revenue (separate sources to avoid confusion)
+      // Calculate current month revenue (separate sources)
       const posRevenue = posTransactions?.reduce((sum, tx) => sum + Number(tx.total), 0) || 0;
       const orderRevenue = orders?.reduce((sum, order) => sum + Number(order.total), 0) || 0;
-      const transactionRevenue = incomeTransactions?.reduce((sum, tx) => sum + Number(tx.amount), 0) || 0;
+      const manualIncomeRevenue = incomeTransactions?.reduce((sum, tx) => sum + Number(tx.amount), 0) || 0;
       
-      // Total revenue is sum of all sources (no duplication now)
-      const totalRevenue = posRevenue + orderRevenue + transactionRevenue;
+      // Total revenue is sum of all sources
+      const totalRevenue = posRevenue + orderRevenue + manualIncomeRevenue;
 
       // Fetch previous month data for growth calculation
       const { data: prevPosTransactions } = await supabase
@@ -133,12 +133,12 @@ export function useBusinessRevenue() {
         totalRevenue,
         posRevenue,
         orderRevenue,
-        transactionRevenue,
+        manualIncomeRevenue,
         monthlyGrowth,
         debug: {
           posTransactionsCount: posTransactions?.length || 0,
           ordersCount: orders?.length || 0,
-          transactionsCount: incomeTransactions?.length || 0
+          incomeTransactionsCount: incomeTransactions?.length || 0
         }
       });
 
@@ -146,7 +146,7 @@ export function useBusinessRevenue() {
         totalRevenue,
         posRevenue,
         orderRevenue,
-        transactionRevenue,
+        manualIncomeRevenue,
         monthlyGrowth
       });
 

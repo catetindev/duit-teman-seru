@@ -5,10 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface BusinessSummaryData {
-  totalIncome: number;
+  totalIncome: number; // Only manual business income transactions
   totalExpenses: number;
   netProfit: number;
   profitMargin: number;
+  posRevenue: number; // Separate POS revenue
+  orderRevenue: number; // Separate order revenue
+  totalRevenue: number; // Combined all revenue sources
 }
 
 export function useBusinessSummary() {
@@ -18,7 +21,10 @@ export function useBusinessSummary() {
     totalIncome: 0,
     totalExpenses: 0,
     netProfit: 0,
-    profitMargin: 0
+    profitMargin: 0,
+    posRevenue: 0,
+    orderRevenue: 0,
+    totalRevenue: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +34,7 @@ export function useBusinessSummary() {
     try {
       setLoading(true);
       
-      // Fetch manual business income transactions
+      // Fetch ONLY manual business income transactions (form-based)
       const { data: incomeTransactionsData, error: incomeTransactionsError } = await supabase
         .from('transactions')
         .select('amount')
@@ -48,7 +54,7 @@ export function useBusinessSummary() {
 
       if (expenseTransactionsError) throw expenseTransactionsError;
 
-      // Fetch income from POS transactions
+      // Fetch POS revenue (separate from manual income)
       const { data: posTransactionsData, error: posTransactionsError } = await supabase
         .from('pos_transactions')
         .select('total')
@@ -56,7 +62,7 @@ export function useBusinessSummary() {
 
       if (posTransactionsError) throw posTransactionsError;
 
-      // Fetch income from orders (exclude POS-linked orders to avoid duplication)
+      // Fetch order revenue (exclude POS-linked orders to avoid duplication)
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select('total')
@@ -74,28 +80,38 @@ export function useBusinessSummary() {
 
       if (expensesError) throw expensesError;
 
-      // Calculate totals from different sources
+      // Calculate separate revenue streams
       const manualIncomeTransactions = incomeTransactionsData.reduce((sum, t) => sum + Number(t.amount), 0);
       const manualExpenseTransactions = expenseTransactionsData.reduce((sum, t) => sum + Number(t.amount), 0);
-      const posIncome = posTransactionsData.reduce((sum, tx) => sum + Number(tx.total), 0);
-      const orderIncome = ordersData.reduce((sum, order) => sum + Number(order.total), 0);
+      const posRevenue = posTransactionsData.reduce((sum, tx) => sum + Number(tx.total), 0);
+      const orderRevenue = ordersData.reduce((sum, order) => sum + Number(order.total), 0);
       const businessExpenses = expensesData.reduce((sum, expense) => sum + Number(expense.amount), 0);
 
-      // Combine all income sources (no duplication)
-      const totalIncome = manualIncomeTransactions + posIncome + orderIncome;
+      // Total Income = ONLY manual business income (from forms)
+      const totalIncome = manualIncomeTransactions;
+      
+      // Total Revenue = All revenue sources combined (for reference)
+      const totalRevenue = manualIncomeTransactions + posRevenue + orderRevenue;
+      
+      // Total Expenses = All expenses combined
       const totalExpenses = manualExpenseTransactions + businessExpenses;
-      const netProfit = totalIncome - totalExpenses;
-      const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
+      
+      // Net profit calculation based on total revenue vs total expenses
+      const netProfit = totalRevenue - totalExpenses;
+      const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
       console.log('Business summary calculated:', {
-        totalIncome,
+        totalIncome, // Manual income only
+        totalRevenue, // All revenue sources
+        posRevenue,
+        orderRevenue,
         totalExpenses,
         netProfit,
         profitMargin,
         breakdown: {
           manualIncomeTransactions,
-          posIncome,
-          orderIncome,
+          posRevenue,
+          orderRevenue,
           manualExpenseTransactions,
           businessExpenses
         }
@@ -105,7 +121,10 @@ export function useBusinessSummary() {
         totalIncome,
         totalExpenses,
         netProfit,
-        profitMargin
+        profitMargin,
+        posRevenue,
+        orderRevenue,
+        totalRevenue
       });
       
     } catch (error: any) {
