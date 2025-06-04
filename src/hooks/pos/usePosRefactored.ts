@@ -43,14 +43,16 @@ export function usePosRefactored() {
     const success = await saveTransaction(transaction);
     if (success) {
       setShowReceipt(true);
-      // Hide receipt after a delay
-      setTimeout(() => {
-        setShowReceipt(false);
-      }, 3000);
+      // Reset transaction after successful save
       resetTransaction();
     }
     return success;
   }, [saveTransaction, transaction, resetTransaction]);
+
+  // Function to handle receipt close
+  const handleCloseReceipt = useCallback(() => {
+    setShowReceipt(false);
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -76,5 +78,6 @@ export function usePosRefactored() {
     resetTransaction,
     fetchProducts,
     fetchRecentTransactions,
+    handleCloseReceipt,
   };
 }

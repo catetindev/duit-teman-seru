@@ -15,6 +15,7 @@ interface OrdersContentProps {
   products: Product[];
   loading: boolean;
   onDataChange: () => void;
+  onDelete?: (id: string) => Promise<boolean>;
 }
 
 export interface OrdersContentRef {
@@ -22,7 +23,7 @@ export interface OrdersContentRef {
 }
 
 export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(
-  ({ orders, customers, products, loading, onDataChange }, ref) => {
+  ({ orders, customers, products, loading, onDataChange, onDelete }, ref) => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | undefined>();
     const { toast } = useToast();
@@ -41,6 +42,16 @@ export const OrdersContent = forwardRef<OrdersContentRef, OrdersContentProps>(
     };
 
     const handleDelete = async (id: string) => {
+      if (onDelete) {
+        // Use the provided delete function from useOrders
+        const success = await onDelete(id);
+        if (success) {
+          onDataChange();
+        }
+        return;
+      }
+
+      // Fallback to original delete logic
       if (!user?.id) {
         toast({
           title: 'Error',

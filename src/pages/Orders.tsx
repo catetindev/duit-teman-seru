@@ -28,7 +28,8 @@ export default function Orders() {
     setCustomerFilter,
     dateRange,
     setDateRange,
-    fetchData
+    fetchData,
+    deleteOrder
   } = useOrders();
 
   const contentRef = React.useRef<{ handleOpenForm: () => void } | null>(null);
@@ -92,6 +93,7 @@ export default function Orders() {
             products={products}
             loading={loading}
             onDataChange={fetchData}
+            onDelete={deleteOrder}
           />
         </div>
       </div>

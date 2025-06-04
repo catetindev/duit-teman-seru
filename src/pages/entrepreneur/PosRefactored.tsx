@@ -8,6 +8,7 @@ import { ProductsGrid } from '@/components/pos/ProductsGrid';
 import { CartPanel } from '@/components/pos/CartPanel';
 import { PaymentPanel } from '@/components/pos/PaymentPanel';
 import { PosReceipt } from '@/components/pos/PosReceipt';
+import { RecentTransactions } from '@/components/pos/RecentTransactions';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
@@ -19,6 +20,7 @@ const PosRefactored = () => {
     transaction,
     loading,
     showReceipt,
+    recentTransactions,
     addToCart,
     updateQuantity,
     removeFromCart,
@@ -26,14 +28,16 @@ const PosRefactored = () => {
     updateCashReceived,
     updateCustomerName,
     saveTransaction,
+    deleteTransaction,
     resetTransaction,
+    handleCloseReceipt,
   } = usePosRefactored();
 
   if (showReceipt && transaction.produk.length > 0) {
     return (
       <DashboardLayout isPremium={isPremium}>
         <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
-          <PosReceipt transaction={transaction} onClose={resetTransaction} />
+          <PosReceipt transaction={transaction} onClose={handleCloseReceipt} />
         </div>
       </DashboardLayout>
     );
@@ -41,44 +45,54 @@ const PosRefactored = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <PosLayout
-        title="Point of Sale"
-        leftPanel={
-          <ProductsGrid
-            products={products}
-            onAddToCart={addToCart}
-            loading={loading}
-          />
-        }
-        rightPanel={
-          <div className="space-y-4 h-full flex flex-col">
-            {/* Cart Section */}
-            <div className="flex-1">
-              <CartPanel
-                cart={cart}
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeFromCart}
-                total={transaction.total}
+      <div className="space-y-6">
+        <PosLayout
+          title="Point of Sale"
+          leftPanel={
+            <div className="space-y-6">
+              <ProductsGrid
+                products={products}
+                onAddToCart={addToCart}
+                loading={loading}
               />
-            </div>
-            
-            <Separator className="my-4" />
-            
-            {/* Payment Section */}
-            <div className="flex-shrink-0">
-              <PaymentPanel
-                transaction={transaction}
-                onPaymentMethodChange={updatePaymentMethod}
-                onCashReceivedChange={updateCashReceived}
-                onCustomerNameChange={updateCustomerName}
-                onSaveTransaction={saveTransaction}
-                onResetTransaction={resetTransaction}
+              
+              <RecentTransactions
+                transactions={recentTransactions}
+                onDelete={deleteTransaction}
                 loading={loading}
               />
             </div>
-          </div>
-        }
-      />
+          }
+          rightPanel={
+            <div className="space-y-4 h-full flex flex-col">
+              {/* Cart Section */}
+              <div className="flex-1">
+                <CartPanel
+                  cart={cart}
+                  onUpdateQuantity={updateQuantity}
+                  onRemove={removeFromCart}
+                  total={transaction.total}
+                />
+              </div>
+              
+              <Separator className="my-4" />
+              
+              {/* Payment Section */}
+              <div className="flex-shrink-0">
+                <PaymentPanel
+                  transaction={transaction}
+                  onPaymentMethodChange={updatePaymentMethod}
+                  onCashReceivedChange={updateCashReceived}
+                  onCustomerNameChange={updateCustomerName}
+                  onSaveTransaction={saveTransaction}
+                  onResetTransaction={resetTransaction}
+                  loading={loading}
+                />
+              </div>
+            </div>
+          }
+        />
+      </div>
     </DashboardLayout>
   );
 };

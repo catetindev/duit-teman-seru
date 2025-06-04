@@ -17,6 +17,72 @@ export function useOrders() {
   const [customerFilter, setCustomerFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
+  const deleteOrder = useCallback(async (orderId: string) => {
+    if (!user?.id) {
+      toast({
+        title: 'Error',
+        description: 'User not authenticated',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    try {
+      console.log('Deleting order:', orderId);
+      
+      // Check if this is a POS order
+      if (orderId.startsWith('pos-')) {
+        const cleanId = orderId.replace('pos-', '');
+        
+        // Delete POS transaction
+        const { error: posError } = await supabase
+          .from('pos_transactions')
+          .delete()
+          .eq('id', cleanId)
+          .eq('user_id', user.id);
+          
+        if (posError) throw posError;
+        
+        // Delete linked order if exists
+        const { error: orderError } = await supabase
+          .from('orders')
+          .delete()
+          .eq('pos_transaction_id', cleanId)
+          .eq('user_id', user.id);
+          
+        if (orderError) {
+          console.warn('Could not delete linked order:', orderError);
+        }
+      } else {
+        // Regular order deletion
+        const { error } = await supabase
+          .from('orders')
+          .delete()
+          .eq('id', orderId)
+          .eq('user_id', user.id);
+          
+        if (error) throw error;
+      }
+      
+      toast({
+        title: 'Success',
+        description: 'Order deleted successfully',
+      });
+      
+      // Refresh data
+      await fetchData();
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting order:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete order',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  }, [user?.id]);
+
   const fetchData = useCallback(async () => {
     if (!user?.id) {
       console.log('No user ID available');
@@ -266,5 +332,6 @@ export function useOrders() {
     dateRange,
     setDateRange,
     fetchData,
+    deleteOrder,
   };
 }
