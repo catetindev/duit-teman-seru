@@ -11,8 +11,11 @@ export const invoiceFormSchema = z.object({
     total: z.number().min(0, 'Total must be positive')
   })).min(1, 'At least one item is required'),
   subtotal: z.number().min(0, 'Subtotal must be positive'),
+  tax: z.number().min(0, 'Tax must be positive'),
+  discount: z.number().min(0, 'Discount must be positive'),
   total: z.number().min(0, 'Total must be positive'),
   payment_due_date: z.date(),
+  status: z.enum(['Unpaid', 'Paid', 'Overdue']),
   notes: z.string().optional()
 });
 
