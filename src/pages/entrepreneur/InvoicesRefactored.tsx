@@ -9,13 +9,14 @@ import { EntrepreneurInvoicesList } from '@/components/finance/invoices/Entrepre
 import { InvoicePdf } from '@/components/finance/invoices/InvoicePdf';
 import { InvoiceHeader } from '@/components/finance/invoices/InvoiceHeader';
 import { InvoiceStatusFilter } from '@/components/finance/invoices/InvoiceStatusFilter';
+import { InvoiceLayoutWrapper } from '@/components/finance/invoices/InvoiceLayoutWrapper';
 import { Button } from '@/components/ui/button';
 import { useInvoices } from '@/hooks/finance/useInvoices';
 import { Invoice, InvoiceFormData } from '@/types/finance';
 import { Customer, Product } from '@/types/entrepreneur';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { FileText } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { useInvoiceCustomization } from '@/contexts/InvoiceCustomizationContext';
 
 const InvoicesRefactored = () => {
@@ -235,78 +236,89 @@ const InvoicesRefactored = () => {
   
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-6">
-        {/* Header */}
-        <InvoiceHeader onAddInvoice={handleAddInvoice} />
-
-        {/* Status Filters with the content inside it now */}
-        <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
-          <div className="space-y-4">
-            {/* Invoice List for current filter */}
-            <EntrepreneurInvoicesList 
-              invoices={selectedFilter === 'All' ? invoices : invoices.filter(inv => inv.status === selectedFilter)} 
-              onViewInvoice={handleViewInvoice} 
-              onEditInvoice={handleEditInvoice} 
-              onDeleteInvoice={handleDeleteInvoice} 
-              onDownloadPdf={handleDownloadPdf} 
-            />
-          </div>
-        </InvoiceStatusFilter>
-
-        {/* Hidden div for PDF generation */}
-        <div className="hidden">
-          {selectedInvoice && getCurrentCustomer() && 
-            <InvoicePdf 
-              ref={pdfRef} 
-              invoice={selectedInvoice} 
-              customer={getCurrentCustomer() as Customer} 
-            />
-          }
-        </div>
-
-        {/* Invoice Form Dialog */}
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogContent className="!duration-200 !transition-all !data-[state=closed]:slide-out-to-bottom !data-[state=open]:slide-in-from-bottom w-[90vw] sm:max-w-lg lg:max-w-2xl p-0 rounded-lg border shadow-lg">
-            <DialogHeader className="p-6 pb-0">
-              <DialogTitle className="text-xl font-semibold">
-                {selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground mt-1.5">
-                {selectedInvoice ? `Mengedit Faktur #${selectedInvoice.invoice_number}` : 'Masukkan detail faktur baru Anda'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="px-6 pb-6 overflow-y-auto scrollbar-thin max-h-[calc(100vh-12rem)]">
-              <InvoiceFormRefactored 
-                defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : { invoice_number: invoicesLoading ? 'Loading...' : generateInvoiceNumber() } as Partial<InvoiceFormData>}
-                customers={customers} 
-                products={products} 
-                onSubmit={handleFormSubmit} 
-                onCancel={() => setIsFormOpen(false)} 
-                loading={loading.customers || loading.products || invoicesLoading}
+      <InvoiceLayoutWrapper
+        title="Invoice Generator"
+        description="Kelola dan buat faktur untuk bisnis Anda"
+        actions={
+          <Button onClick={handleAddInvoice} className="bg-amber-600 hover:bg-amber-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Buat Invoice
+          </Button>
+        }
+      >
+        <div className="space-y-6">
+          {/* Status Filters */}
+          <InvoiceStatusFilter value={selectedFilter} onChange={handleFilterChange}>
+            <div className="space-y-4">
+              {/* Invoice List */}
+              <EntrepreneurInvoicesList 
+                invoices={selectedFilter === 'All' ? invoices : invoices.filter(inv => inv.status === selectedFilter)} 
+                onViewInvoice={handleViewInvoice} 
+                onEditInvoice={handleEditInvoice} 
+                onDeleteInvoice={handleDeleteInvoice} 
+                onDownloadPdf={handleDownloadPdf} 
               />
             </div>
-          </DialogContent>
-        </Dialog>
+          </InvoiceStatusFilter>
 
-        {/* Invoice PDF Viewer Dialog */}
-        <Dialog open={isPdfOpen} onOpenChange={setIsPdfOpen}>
-          <DialogContent className="max-w-4xl">
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                {selectedInvoice && getCurrentCustomer() && 
-                  <div className="relative">
-                    <Button className="absolute top-4 right-4" onClick={handlePrint}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Unduh PDF
-                    </Button>
-                    <InvoicePdf invoice={selectedInvoice} customer={getCurrentCustomer() as Customer} />
-                  </div>
-                }
-              </CardContent>
-            </Card>
-          </DialogContent>
-        </Dialog>
-      </div>
+          {/* Hidden PDF for printing */}
+          <div className="hidden">
+            {selectedInvoice && getCurrentCustomer() && 
+              <InvoicePdf 
+                ref={pdfRef} 
+                invoice={selectedInvoice} 
+                customer={getCurrentCustomer() as Customer} 
+              />
+            }
+          </div>
+
+          {/* Invoice Form Dialog */}
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+              <DialogHeader className="pb-4">
+                <DialogTitle className="text-xl font-semibold">
+                  {selectedInvoice ? 'Edit Faktur' : 'Buat Faktur Baru'}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {selectedInvoice ? `Mengedit Faktur #${selectedInvoice.invoice_number}` : 'Masukkan detail faktur baru Anda'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
+                <InvoiceFormRefactored 
+                  defaultValues={selectedInvoice ? prepareInvoiceForForm(selectedInvoice) : { invoice_number: invoicesLoading ? 'Loading...' : generateInvoiceNumber() } as Partial<InvoiceFormData>}
+                  customers={customers} 
+                  products={products} 
+                  onSubmit={handleFormSubmit} 
+                  onCancel={() => setIsFormOpen(false)} 
+                  loading={loading.customers || loading.products || invoicesLoading}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Invoice PDF Viewer Dialog */}
+          <Dialog open={isPdfOpen} onOpenChange={setIsPdfOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh]">
+              <Card className="overflow-hidden">
+                <CardContent className="p-0">
+                  {selectedInvoice && getCurrentCustomer() && 
+                    <div className="relative">
+                      <Button 
+                        className="absolute top-4 right-4 z-10 bg-white shadow-md hover:bg-gray-50 text-gray-700 border" 
+                        onClick={handlePrint}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Unduh PDF
+                      </Button>
+                      <InvoicePdf invoice={selectedInvoice} customer={getCurrentCustomer() as Customer} />
+                    </div>
+                  }
+                </CardContent>
+              </Card>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </InvoiceLayoutWrapper>
     </DashboardLayout>
   );
 };
