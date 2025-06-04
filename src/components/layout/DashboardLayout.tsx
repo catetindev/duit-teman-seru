@@ -48,13 +48,12 @@ const DashboardLayout = ({
           />
         )}
 
-        <div className={cn("flex-1 transition-all duration-300", !isMobile && "ml-64")}> 
-          <main 
-            className={cn(
-              "w-full h-full overflow-y-auto",
-              isMobile && "pt-16 pb-20" // Padding for mobile nav bars
-            )}
-          >
+        <div className={cn(
+          "flex-1 transition-all duration-300", 
+          !isMobile && "ml-64",
+          isMobile && "pt-16 pb-20"
+        )}> 
+          <main className="w-full h-full overflow-y-auto">
             {children}
           </main>
         </div>

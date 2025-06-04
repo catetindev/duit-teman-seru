@@ -1,94 +1,44 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { formatRupiah, parseRupiah } from '@/utils/formatRupiah';
+import { CreditCard, DollarSign, RotateCcw } from 'lucide-react';
 import { PosTransaction } from '@/types/pos';
-import { CreditCard, Banknote, QrCode, ShoppingCart, RotateCcw } from 'lucide-react';
+import { formatRupiah } from '@/utils/formatRupiah';
 
 interface PaymentPanelProps {
   transaction: PosTransaction;
-  onPaymentMethodChange: (method: 'Cash' | 'Bank Transfer' | 'QRIS') => void;
+  onPaymentMethodChange: (method: string) => void;
   onCashReceivedChange: (amount: number) => void;
   onCustomerNameChange: (name: string) => void;
-  onSaveTransaction: () => void;
+  onSaveTransaction: () => Promise<boolean>;
   onResetTransaction: () => void;
-  loading: boolean;
+  loading?: boolean;
 }
 
-export function PaymentPanel({ 
-  transaction, 
+export function PaymentPanel({
+  transaction,
   onPaymentMethodChange,
   onCashReceivedChange,
-  onCustomerNameChange, 
+  onCustomerNameChange,
   onSaveTransaction,
   onResetTransaction,
-  loading
+  loading = false
 }: PaymentPanelProps) {
-  const [cashReceived, setCashReceived] = useState<string>('');
+  const handleSave = async () => {
+    await onSaveTransaction();
+  };
+
+  const isDisabled = transaction.produk.length === 0 || loading;
+  const showCashFields = transaction.metode_pembayaran === 'Cash';
   
-  useEffect(() => {
-    if (transaction.uang_diterima) {
-      setCashReceived(formatRupiah(transaction.uang_diterima));
-    } else {
-      setCashReceived('');
-    }
-  }, [transaction.uang_diterima]);
-
-  const handleCashReceivedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setCashReceived(value);
-    
-    const numericValue = parseRupiah(value);
-    if (!isNaN(numericValue)) {
-      onCashReceivedChange(numericValue);
-    }
-  };
-
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSaveTransaction();
-  };
-
-  const isPaymentValid = () => {
-    if (transaction.produk.length === 0) return false;
-    if (transaction.metode_pembayaran === 'Cash') {
-      return transaction.uang_diterima && transaction.uang_diterima >= transaction.total;
-    }
-    return true;
-  };
-
-  const paymentMethods = [
-    {
-      value: 'Cash' as const,
-      label: 'Tunai',
-      icon: Banknote,
-      color: 'emerald',
-      description: 'Pembayaran dengan uang tunai'
-    },
-    {
-      value: 'Bank Transfer' as const,
-      label: 'Transfer Bank',
-      icon: CreditCard,
-      color: 'blue',
-      description: 'Transfer melalui rekening bank'
-    },
-    {
-      value: 'QRIS' as const,
-      label: 'QRIS',
-      icon: QrCode,
-      color: 'purple',
-      description: 'Scan QRIS untuk pembayaran digital'
-    }
-  ];
-
   return (
     <Card className="bg-white shadow-sm border-slate-200">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-3">
         <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
           Pembayaran
@@ -97,132 +47,110 @@ export function PaymentPanel({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          {/* Customer Name */}
-          <div className="space-y-2">
-            <Label htmlFor="customer-name" className="text-sm font-medium text-slate-700">
-              Nama Pembeli (Opsional)
-            </Label>
-            <Input
-              id="customer-name"
-              placeholder="Masukkan nama pembeli..."
-              value={transaction.nama_pembeli || ''}
-              onChange={(e) => onCustomerNameChange(e.target.value)}
-              className="h-10"
-            />
-          </div>
+        {/* Customer Name */}
+        <div className="space-y-2">
+          <Label htmlFor="customer-name" className="text-sm font-medium text-slate-700">
+            Nama Pembeli (Opsional)
+          </Label>
+          <Input
+            id="customer-name"
+            placeholder="Masukkan nama pembeli..."
+            value={transaction.nama_pembeli || ''}
+            onChange={(e) => onCustomerNameChange(e.target.value)}
+            className="h-10"
+          />
+        </div>
 
-          {/* Payment Method */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-slate-700">Metode Pembayaran</Label>
-            <RadioGroup 
-              value={transaction.metode_pembayaran} 
-              onValueChange={onPaymentMethodChange}
-              className="space-y-2"
-            >
-              {paymentMethods.map((method) => {
-                const Icon = method.icon;
-                const isSelected = transaction.metode_pembayaran === method.value;
-                
-                return (
-                  <div key={method.value} className={`flex items-center space-x-3 border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:bg-slate-50 ${
-                    isSelected 
-                      ? `border-${method.color}-500 bg-${method.color}-50/50` 
-                      : 'border-slate-200'
-                  }`}>
-                    <RadioGroupItem value={method.value} id={method.value} />
-                    <Label htmlFor={method.value} className="flex items-center cursor-pointer flex-1">
-                      <div className={`h-8 w-8 rounded-lg bg-${method.color}-50 flex items-center justify-center mr-3`}>
-                        <Icon className={`h-4 w-4 text-${method.color}-500`} />
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-slate-700">{method.label}</span>
-                        <p className="text-xs text-slate-500">{method.description}</p>
-                      </div>
-                    </Label>
-                  </div>
-                );
-              })}
-            </RadioGroup>
-          </div>
+        {/* Payment Method */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700">
+            Metode Pembayaran
+          </Label>
+          <Select
+            value={transaction.metode_pembayaran}
+            onValueChange={onPaymentMethodChange}
+          >
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Pilih metode pembayaran" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Cash">Tunai</SelectItem>
+              <SelectItem value="Transfer">Transfer Bank</SelectItem>
+              <SelectItem value="E-Wallet">E-Wallet</SelectItem>
+              <SelectItem value="Debit Card">Kartu Debit</SelectItem>
+              <SelectItem value="Credit Card">Kartu Kredit</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          {/* Cash Input */}
-          {transaction.metode_pembayaran === 'Cash' && (
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="cash-received" className="text-sm font-medium text-slate-700">
-                  Uang Diterima
-                </Label>
-                <Input
-                  id="cash-received"
-                  placeholder="Rp 0"
-                  value={cashReceived}
-                  onChange={handleCashReceivedChange}
-                  className="h-10"
-                />
-              </div>
-              
-              {transaction.kembalian !== undefined && (
-                <div className="bg-slate-50 rounded-lg border p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-600">Kembalian</span>
-                    <span className={`font-bold ${
-                      transaction.kembalian >= 0 
-                        ? 'text-emerald-600' 
-                        : 'text-red-500'
-                    }`}>
-                      {transaction.kembalian >= 0 
-                        ? formatRupiah(transaction.kembalian)
-                        : `Kurang ${formatRupiah(Math.abs(transaction.kembalian))}`
-                      }
-                    </span>
-                  </div>
-                </div>
-              )}
+        {/* Cash Payment Fields */}
+        {showCashFields && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="cash-received" className="text-sm font-medium text-slate-700">
+                Uang Diterima
+              </Label>
+              <Input
+                id="cash-received"
+                type="number"
+                placeholder="0"
+                value={transaction.uang_diterima || ''}
+                onChange={(e) => onCashReceivedChange(Number(e.target.value))}
+                className="h-10"
+              />
             </div>
-          )}
 
+            {transaction.uang_diterima && transaction.uang_diterima >= transaction.total && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-green-800 font-medium">Kembalian:</span>
+                  <span className="text-green-900 font-bold">
+                    {formatRupiah(transaction.kembalian || 0)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Total Summary */}
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-slate-600">Subtotal:</span>
+            <span className="font-medium text-slate-800">
+              {formatRupiah(transaction.total)}
+            </span>
+          </div>
           <Separator />
-
-          {/* Total & Actions */}
-          <div className="space-y-4">
-            <div className="bg-slate-50 rounded-lg border p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium text-slate-600">Total Pembayaran</div>
-                  <div className="text-xl font-bold text-slate-800">
-                    {formatRupiah(transaction.total)}
-                  </div>
-                </div>
-                {transaction.produk.length > 0 && (
-                  <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <ShoppingCart className="h-5 w-5 text-emerald-600" />
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                className="flex-1 h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
-                disabled={loading || !isPaymentValid()}
-              >
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                {loading ? 'Menyimpan...' : 'Simpan Transaksi'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onResetTransaction}
-                className="h-11 w-11"
-                title="Reset transaksi"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-semibold text-slate-800">Total:</span>
+            <span className="text-xl font-bold text-blue-600">
+              {formatRupiah(transaction.total)}
+            </span>
           </div>
-        </form>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-2 pt-2">
+          <Button
+            onClick={handleSave}
+            disabled={isDisabled}
+            className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          >
+            <DollarSign className="mr-2 h-4 w-4" />
+            {loading ? 'Memproses...' : 'Selesaikan Transaksi'}
+          </Button>
+          
+          <Button
+            onClick={onResetTransaction}
+            variant="outline"
+            className="w-full h-11"
+            disabled={loading}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset Transaksi
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
