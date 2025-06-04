@@ -10,7 +10,7 @@ import { PaymentPanel } from '@/components/pos/PaymentPanel';
 import { PosReceipt } from '@/components/pos/PosReceipt';
 import { RecentTransactions } from '@/components/pos/RecentTransactions';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { ShoppingBag, ShoppingCart, CreditCard, Receipt, Clock } from 'lucide-react';
 
 const PosRefactored = () => {
   const { isPremium } = useAuth();
@@ -36,7 +36,7 @@ const PosRefactored = () => {
   if (showReceipt && transaction.produk.length > 0) {
     return (
       <DashboardLayout isPremium={isPremium}>
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
           <PosReceipt transaction={transaction} onClose={handleCloseReceipt} />
         </div>
       </DashboardLayout>
@@ -45,20 +45,20 @@ const PosRefactored = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        {/* Modern Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50 px-6 py-4 mb-6">
+      <div className="min-h-screen bg-gray-50">
+        {/* Clean Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 mb-6">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  💳 Kasir Digital
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  Point of Sale
                 </h1>
-                <p className="text-slate-600 mt-1">Kelola penjualan dengan mudah dan cepat</p>
+                <p className="text-gray-600 mt-1">Kelola penjualan dengan mudah dan cepat</p>
               </div>
               <div className="hidden md:flex items-center gap-4">
-                <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-full border border-green-200">
-                  <span className="text-green-700 font-medium text-sm">🟢 Siap Melayani</span>
+                <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+                  <span className="text-green-700 font-medium text-sm">Online</span>
                 </div>
               </div>
             </div>
@@ -70,15 +70,15 @@ const PosRefactored = () => {
             {/* Left Panel - Products & Transactions */}
             <div className="xl:col-span-8 space-y-6">
               {/* Products Section */}
-              <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg shadow-blue-100/50">
+              <Card className="bg-white border border-gray-200">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                      <span className="text-white text-lg">🛍️</span>
+                    <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                      <ShoppingBag className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-slate-800">Produk</h2>
-                      <p className="text-slate-500 text-sm">Tap produk untuk menambah ke keranjang</p>
+                      <h2 className="text-xl font-semibold text-gray-900">Produk</h2>
+                      <p className="text-gray-500 text-sm">Pilih produk untuk menambah ke keranjang</p>
                     </div>
                   </div>
                   
@@ -91,15 +91,15 @@ const PosRefactored = () => {
               </Card>
               
               {/* Recent Transactions */}
-              <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg shadow-purple-100/50">
+              <Card className="bg-white border border-gray-200">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                      <span className="text-white text-lg">📋</span>
+                    <div className="h-10 w-10 rounded-lg bg-gray-700 flex items-center justify-center">
+                      <Clock className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-slate-800">Transaksi Terbaru</h2>
-                      <p className="text-slate-500 text-sm">Riwayat penjualan hari ini</p>
+                      <h2 className="text-xl font-semibold text-gray-900">Transaksi Terbaru</h2>
+                      <p className="text-gray-500 text-sm">Riwayat penjualan hari ini</p>
                     </div>
                   </div>
 
@@ -116,16 +116,16 @@ const PosRefactored = () => {
             <div className="xl:col-span-4">
               <div className="sticky top-6 space-y-6">
                 {/* Cart Section */}
-                <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg shadow-orange-100/50">
+                <Card className="bg-white border border-gray-200">
                   <CardContent className="p-0">
-                    <div className="p-6 border-b border-slate-100">
+                    <div className="p-6 border-b border-gray-100">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
-                          <span className="text-white text-lg">🛒</span>
+                        <div className="h-10 w-10 rounded-lg bg-orange-600 flex items-center justify-center">
+                          <ShoppingCart className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-slate-800">Keranjang</h2>
-                          <p className="text-slate-500 text-sm">{transaction.produk.length} item</p>
+                          <h2 className="text-xl font-semibold text-gray-900">Keranjang</h2>
+                          <p className="text-gray-500 text-sm">{transaction.produk.length} item</p>
                         </div>
                       </div>
                     </div>
@@ -140,16 +140,16 @@ const PosRefactored = () => {
                 </Card>
 
                 {/* Payment Section */}
-                <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg shadow-green-100/50">
+                <Card className="bg-white border border-gray-200">
                   <CardContent className="p-0">
-                    <div className="p-6 border-b border-slate-100">
+                    <div className="p-6 border-b border-gray-100">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                          <span className="text-white text-lg">💰</span>
+                        <div className="h-10 w-10 rounded-lg bg-green-600 flex items-center justify-center">
+                          <CreditCard className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-slate-800">Pembayaran</h2>
-                          <p className="text-slate-500 text-sm">Pilih metode bayar</p>
+                          <h2 className="text-xl font-semibold text-gray-900">Pembayaran</h2>
+                          <p className="text-gray-500 text-sm">Pilih metode bayar</p>
                         </div>
                       </div>
                     </div>

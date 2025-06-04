@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import { EntrepreneurModeProvider } from "@/contexts/EntrepreneurModeContext";
 import { InvoiceCustomizationProvider } from "@/contexts/InvoiceCustomizationContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -29,6 +28,8 @@ import Calculator from "@/pages/entrepreneur/Calculator";
 import Pos from "@/pages/entrepreneur/Pos";
 import PosRefactored from "@/pages/entrepreneur/PosRefactored";
 import FinancialReports from "@/pages/FinancialReports";
+import BusinessIncome from "@/pages/BusinessIncome";
+import BusinessExpenses from "@/pages/BusinessExpenses";
 import ResetPassword from "@/pages/ResetPassword";
 
 const queryClient = new QueryClient();
@@ -52,7 +53,7 @@ function App() {
         <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
         <Route path="/budgets" element={<ProtectedRoute><Budget /></ProtectedRoute>} />
         <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         
         {/* Entrepreneur routes */}
@@ -62,6 +63,10 @@ function App() {
         <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
         <Route path="/calculator" element={<ProtectedRoute><Calculator /></ProtectedRoute>} />
         <Route path="/pos" element={<ProtectedRoute><PosRefactored /></ProtectedRoute>} />
+        
+        {/* Business Finance routes */}
+        <Route path="/business-income" element={<ProtectedRoute><BusinessIncome /></ProtectedRoute>} />
+        <Route path="/business-expenses" element={<ProtectedRoute><BusinessExpenses /></ProtectedRoute>} />
         
         {/* Financial Reports */}
         <Route path="/financial-reports" element={<ProtectedRoute><FinancialReports /></ProtectedRoute>} />

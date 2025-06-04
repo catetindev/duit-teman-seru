@@ -21,9 +21,6 @@ import AddTransactionDialog from '@/components/dashboard/AddTransactionDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PricingModal from '@/components/pricing/PricingModal';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Users, Package, ShoppingCart } from 'lucide-react';
 
 const Dashboard = () => {
   const { type } = useParams();
@@ -60,26 +57,6 @@ const Dashboard = () => {
   const handleUpgradeClick = () => {
     setIsPricingModalOpen(true);
   };
-
-  // Quick navigation cards for business features
-  const QuickNavCard = ({ title, description, icon, onClick, gradient }: any) => (
-    <Card 
-      className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-white/70 backdrop-blur-sm border-0 shadow-md hover:scale-105"
-      onClick={onClick}
-    >
-      <CardContent className="p-6">
-        <div className="flex items-center gap-4">
-          <div className={`h-12 w-12 rounded-xl ${gradient} flex items-center justify-center`}>
-            {icon}
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-800">{title}</h3>
-            <p className="text-sm text-slate-600">{description}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <DashboardLayout isPremium={isPremium}>
@@ -123,43 +100,6 @@ const Dashboard = () => {
               onAddIncome={handleAddBusinessIncome}
               onAddExpense={handleAddBusinessExpense}
             />
-            
-            {/* Quick Navigation for Business Features */}
-            <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  🚀 Fitur Bisnis
-                </CardTitle>
-                <p className="text-slate-600">Akses cepat ke fitur utama bisnis Anda</p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <QuickNavCard
-                    title="👥 Kelola Pelanggan"
-                    description="Lihat & tambah data pelanggan"
-                    icon={<Users className="h-6 w-6 text-white" />}
-                    gradient="bg-gradient-to-r from-blue-500 to-indigo-500"
-                    onClick={() => navigate('/customers')}
-                  />
-                  
-                  <QuickNavCard
-                    title="📦 Kelola Produk"
-                    description="Atur produk & layanan"
-                    icon={<Package className="h-6 w-6 text-white" />}
-                    gradient="bg-gradient-to-r from-green-500 to-emerald-500"
-                    onClick={() => navigate('/products')}
-                  />
-                  
-                  <QuickNavCard
-                    title="🛒 Pesanan & Transaksi"
-                    description="Kelola order dan transaksi"
-                    icon={<ShoppingCart className="h-6 w-6 text-white" />}
-                    gradient="bg-gradient-to-r from-purple-500 to-pink-500"
-                    onClick={() => navigate('/orders')}
-                  />
-                </div>
-              </CardContent>
-            </Card>
           </div>
         ) : (
           <div className="space-y-6">
