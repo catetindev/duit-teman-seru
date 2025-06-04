@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { invoiceFormSchema } from './form/invoiceFormSchema';
+import { invoiceFormSchema, InvoiceFormData } from './form/invoiceFormSchema';
 import { InvoiceCustomerForm } from './form/InvoiceCustomerForm';
 import { InvoiceItemsSection } from './form/InvoiceItemsSection';
 import { InvoiceTotalsSection } from './form/InvoiceTotalsSection';
@@ -39,7 +39,7 @@ export function InvoiceFormModal({
   const [taxRate, setTaxRate] = useState(11);
   const [discountAmount, setDiscountAmount] = useState(0);
 
-  const form = useForm({
+  const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
       invoice_number: '',
@@ -50,7 +50,7 @@ export function InvoiceFormModal({
       discount: 0,
       total: 0,
       payment_due_date: new Date(),
-      status: 'Unpaid' as const,
+      status: 'Unpaid',
       notes: ''
     }
   });
@@ -85,7 +85,7 @@ export function InvoiceFormModal({
           discount: invoice.discount,
           total: invoice.total,
           payment_due_date: new Date(invoice.payment_due_date),
-          status: invoice.status as "Paid" | "Unpaid" | "Overdue",
+          status: invoice.status as 'Unpaid' | 'Paid' | 'Overdue',
           notes: invoice.notes || ''
         });
       } else {
@@ -157,7 +157,7 @@ export function InvoiceFormModal({
     form.setValue('total', Math.max(0, total));
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: InvoiceFormData) => {
     setLoading(true);
     
     try {
