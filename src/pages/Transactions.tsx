@@ -15,7 +15,7 @@ export default function Transactions() {
   const { isEntrepreneurMode } = useEntrepreneurMode();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
-  // Filter transactions based on current mode (personal vs business)
+  // Always show transactions based on the current mode
   const {
     transactions,
     isLoading,

@@ -2,8 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import TransactionList from '@/components/ui/TransactionList';
-import { PlusCircle, ChevronRight } from 'lucide-react';
+import { PlusCircle, ChevronRight, TrendingUp } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AddTransactionDialog from './AddTransactionDialog';
 import { Transaction } from '@/components/dashboard/DashboardData';
@@ -30,65 +31,78 @@ const TransactionsSection = ({ transactions, onTransactionAdded, loading = false
   );
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">{t('transactions.title')}</h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-1"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <PlusCircle size={16} />
-          <span>{t('transactions.add')}</span>
-        </Button>
-      </div>
+    <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl overflow-hidden">
+      <CardHeader className="pb-4 border-b border-slate-100/50">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-semibold flex items-center text-slate-900">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            Recent Transactions
+          </CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2 border-slate-200 hover:bg-slate-50 rounded-xl"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <PlusCircle size={16} />
+            <span className="hidden sm:inline">Add Transaction</span>
+          </Button>
+        </div>
+      </CardHeader>
       
-      <Tabs defaultValue="all">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="income">{t('transactions.income')}</TabsTrigger>
-          <TabsTrigger value="expense">{t('transactions.expense')}</TabsTrigger>
-        </TabsList>
-        
-        {loading ? (
-          <div className="py-10 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-sm text-muted-foreground">{t('transactions.loading')}</p>
+      <CardContent className="p-0">
+        <Tabs defaultValue="all" className="w-full">
+          <div className="px-6 pt-4">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100/50 rounded-xl">
+              <TabsTrigger value="all" className="rounded-lg">All</TabsTrigger>
+              <TabsTrigger value="income" className="rounded-lg">Income</TabsTrigger>
+              <TabsTrigger value="expense" className="rounded-lg">Expenses</TabsTrigger>
+            </TabsList>
           </div>
-        ) : (
-          <>
-            <TabsContent value="all">
-              <TransactionList transactions={transactions} />
-            </TabsContent>
-            <TabsContent value="income">
-              <TransactionList transactions={incomeTransactions} />
-            </TabsContent>
-            <TabsContent value="expense">
-              <TransactionList transactions={expenseTransactions} />
-            </TabsContent>
-          </>
-        )}
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="w-full mt-4"
-          asChild
-        >
-          <a href="/transactions">
-            {t('order.viewAll')}
-            <ChevronRight size={16} className="ml-1" />
-          </a>
-        </Button>
-      </Tabs>
+          
+          {loading ? (
+            <div className="py-12 px-6 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+              <p className="text-sm text-muted-foreground">Loading transactions...</p>
+            </div>
+          ) : (
+            <div className="px-6 py-4">
+              <TabsContent value="all" className="mt-0">
+                <TransactionList transactions={transactions.slice(0, 5)} />
+              </TabsContent>
+              <TabsContent value="income" className="mt-0">
+                <TransactionList transactions={incomeTransactions.slice(0, 5)} />
+              </TabsContent>
+              <TabsContent value="expense" className="mt-0">
+                <TransactionList transactions={expenseTransactions.slice(0, 5)} />
+              </TabsContent>
+            </div>
+          )}
+          
+          <div className="bg-slate-50/50 px-6 py-4 border-t border-slate-100/50">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-center hover:bg-slate-100 rounded-xl"
+              asChild
+            >
+              <a href="/transactions" className="flex items-center">
+                View All Transactions
+                <ChevronRight size={16} className="ml-1" />
+              </a>
+            </Button>
+          </div>
+        </Tabs>
 
-      <AddTransactionDialog 
-        isOpen={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
-        onTransactionAdded={onTransactionAdded}
-      />
-    </div>
+        <AddTransactionDialog 
+          isOpen={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onTransactionAdded={onTransactionAdded}
+        />
+      </CardContent>
+    </Card>
   );
 };
 
