@@ -156,7 +156,7 @@ export function useInvoiceForm({
     
     try {
       if (invoice) {
-        // For updates, ensure all required fields are properly typed and present
+        // For updates, create a properly typed update object
         const updateData: InvoiceFormData & { id: string } = {
           id: invoice.id,
           invoice_number: data.invoice_number,
