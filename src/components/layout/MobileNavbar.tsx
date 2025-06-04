@@ -13,7 +13,6 @@ import { SidebarNavLink } from '@/components/ui/sidebar';
 import LogoutButton from '@/components/ui/LogoutButton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ModeToggle } from '@/components/ui/ModeToggle';
 
 interface MobileNavbarProps {
   isPremium?: boolean;
@@ -126,30 +125,28 @@ const MobileNavbar = ({
     </>;
   
   return <>
-      {/* Top navbar - Fixed positioning for logo */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-50">
+      {/* Top navbar - Simplified and cleaner */}
+      <div className="fixed top-0 left-0 right-0 h-16 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full">
           <div className="h-full flex items-center justify-between">
-            {/* Left Item: Toggle */}
+            {/* Left Item: Toggle - only for premium users */}
             <div className="flex items-center gap-x-3 flex-1 min-w-0">
               {isPremium && <EntrepreneurModeToggle className="flex-shrink-0" />}
             </div>
 
-            {/* Center Item: Logo - Better centering */}
+            {/* Center Item: Logo - Perfect centering */}
             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <Link to="/dashboard" className="flex items-center">
+              <Link to="/dashboard" className="flex items-center transition-opacity hover:opacity-80">
                 <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-8" />
               </Link>
             </div>
 
-            {/* Right Items: Theme Toggle, Notifications and Menu */}
+            {/* Right Items: Notifications and Menu only */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              <ModeToggle />
-              
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link to="/notifications" className={cn("relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors", isActive('/notifications') && "bg-gray-100 dark:bg-gray-800")}>
+                    <Link to="/notifications" className={cn("relative p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200", isActive('/notifications') && "bg-gray-50 dark:bg-gray-800")}>
                       <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                       {unreadCount > 0 && <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
                           <Badge variant={isEntrepreneurMode ? "default" : "success"} className={cn("px-1.5 py-0.5 min-w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center", isEntrepreneurMode ? "bg-amber-500" : "bg-green-500")}>
@@ -166,7 +163,7 @@ const MobileNavbar = ({
               
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="ml-2 hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <Button variant="ghost" size="icon" className="ml-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all duration-200">
                     <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                   </Button>
                 </SheetTrigger>
@@ -190,57 +187,57 @@ const MobileNavbar = ({
         </div>
       </div>
       
-      {/* Bottom navbar - Updated styling for dark mode */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-around px-2 z-50">
+      {/* Bottom navbar - Modern and clean */}
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 flex items-center justify-around px-2 z-50">
         {isEntrepreneurMode && isPremium ? <>
-            <Link to="/dashboard" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/dashboard') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/dashboard" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/dashboard') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <LayoutDashboard className="h-5 w-5 mb-1" />
-              <span className="text-xs">Dashboard</span>
+              <span className="text-xs font-medium">Dashboard</span>
             </Link>
             
-            <Link to="/products" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/products') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/products" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/products') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <Package className="h-5 w-5 mb-1" />
-              <span className="text-xs">Produk</span>
+              <span className="text-xs font-medium">Produk</span>
             </Link>
             
-            <Link to="/orders" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/orders') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/orders" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/orders') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <ShoppingCart className="h-5 w-5 mb-1" />
-              <span className="text-xs">Pesanan</span>
+              <span className="text-xs font-medium">Pesanan</span>
             </Link>
             
-            <Link to="/profit-loss" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/profit-loss') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/profit-loss" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/profit-loss') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <PieChart className="h-5 w-5 mb-1" />
-              <span className="text-xs">Laporan</span>
+              <span className="text-xs font-medium">Laporan</span>
             </Link>
             
-            <Link to="/pos" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/pos') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/pos" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/pos') ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <CreditCard className="h-5 w-5 mb-1" />
-              <span className="text-xs">POS</span>
+              <span className="text-xs font-medium">POS</span>
             </Link>
           </> : <>
-            <Link to="/dashboard" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/dashboard') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/dashboard" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/dashboard') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <LayoutDashboard className="h-5 w-5 mb-1" />
-              <span className="text-xs">Dashboard</span>
+              <span className="text-xs font-medium">Dashboard</span>
             </Link>
             
-            <Link to="/transactions" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/transactions') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/transactions" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/transactions') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <ArrowDownUp className="h-5 w-5 mb-1" />
-              <span className="text-xs">Transaksi</span>
+              <span className="text-xs font-medium">Transaksi</span>
             </Link>
             
-            <Link to="/goals" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/goals') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/goals" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/goals') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <Target className="h-5 w-5 mb-1" />
-              <span className="text-xs">Target</span>
+              <span className="text-xs font-medium">Target</span>
             </Link>
             
-            <Link to="/budget" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/budget') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            <Link to="/budget" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/budget') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
               <BarChart2 className="h-5 w-5 mb-1" />
-              <span className="text-xs">Budget</span>
+              <span className="text-xs font-medium">Budget</span>
             </Link>
             
-            {isPremium && <Link to="/analytics" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", isActive('/analytics') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
+            {isPremium && <Link to="/analytics" className={cn("flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-xl transition-all duration-200", isActive('/analytics') ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800")}>
                 <PieChart className="h-5 w-5 mb-1" />
-                <span className="text-xs">Analitik</span>
+                <span className="text-xs font-medium">Analitik</span>
               </Link>}
           </>}
       </div>

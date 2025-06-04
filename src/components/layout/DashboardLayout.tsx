@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import DashboardSidebar from './DashboardSidebar';
 import MobileNavbar from './MobileNavbar';
@@ -28,24 +29,75 @@ const DashboardLayout = ({
   const { user, isLoading } = useAuth();
   const isMobile = useIsMobile();
   
+  // Page transition animations
+  const pageVariants = {
+    initial: { 
+      opacity: 0, 
+      y: 20,
+      scale: 0.98
+    },
+    in: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: [0.25, 0.25, 0, 1]
+      }
+    },
+    out: { 
+      opacity: 0, 
+      y: -20,
+      scale: 0.98,
+      transition: {
+        duration: 0.3,
+        ease: [0.25, 0.25, 0, 1]
+      }
+    }
+  };
+
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <LoadingSpinner />
+      </motion.div>
+    );
   }
 
   if (!user) {
-    return <LoginRequired />;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <LoginRequired />
+      </motion.div>
+    );
   }
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full relative bg-slate-50">
+      <div className="min-h-screen flex w-full relative bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
         {isMobile && <MobileNavbar isPremium={isPremium} isAdmin={isAdmin} />}
         
         {!isMobile && (
-          <DashboardSidebar 
-            isPremium={isPremium} 
-            isAdmin={isAdmin} 
-          />
+          <motion.div
+            initial={{ x: -260 }}
+            animate={{ x: 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.25, 0, 1] }}
+          >
+            <DashboardSidebar 
+              isPremium={isPremium} 
+              isAdmin={isAdmin} 
+            />
+          </motion.div>
         )}
 
         <div className={cn(
@@ -54,9 +106,18 @@ const DashboardLayout = ({
           isMobile && "pt-16 pb-20"
         )}> 
           <main className="w-full h-full overflow-y-auto">
-            <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto">
-              {children}
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                variants={pageVariants}
+                initial="initial"
+                animate="in"
+                exit="out"
+                className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </div>
       </div>
