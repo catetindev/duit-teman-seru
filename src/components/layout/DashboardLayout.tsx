@@ -54,7 +54,9 @@ const DashboardLayout = ({
           isMobile && "pt-16 pb-20"
         )}> 
           <main className="w-full h-full overflow-y-auto">
-            {children}
+            <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+              {children}
+            </div>
           </main>
         </div>
       </div>

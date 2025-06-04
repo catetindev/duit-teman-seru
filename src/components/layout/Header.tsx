@@ -12,18 +12,18 @@ const Header = () => {
   const { user } = useAuth();
   
   return (
-    <header className="h-16 border-b flex items-center px-4 justify-between">
+    <header className="h-16 border-b bg-white flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-2">
         <button 
           onClick={() => navigate('/')}
-          className="font-bold text-lg flex items-center gap-2"
+          className="font-bold text-lg flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <span className="text-xl">💰</span>
-          <span className="hidden md:inline">Catatyo</span>
+          <span className="hidden sm:inline text-slate-800">Catatyo</span>
         </button>
       </div>
       
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <LanguageToggle />
         <NotificationsPopover />
         <ModeToggle />

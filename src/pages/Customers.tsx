@@ -108,16 +108,20 @@ export default function Customers() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold mb-4 md:mb-0">Customers</h1>
-          <Button onClick={handleAddNew} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add New Customer
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Customers</h1>
+            <p className="text-slate-600 mt-1">Manage your customer database</p>
+          </div>
+          <Button onClick={handleAddNew} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" /> Add New Customer
           </Button>
         </div>
         
         {/* Search and Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -128,8 +132,8 @@ export default function Customers() {
             />
           </div>
           
-          <div>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               <span className="text-sm font-medium">Filter by tag:</span>
             </div>
@@ -158,12 +162,14 @@ export default function Customers() {
         </div>
         
         {/* Customer List */}
-        <CustomerList 
-          customers={filteredCustomers}
-          loading={loading} 
-          onEdit={handleEdit} 
-          onDelete={handleDelete} 
-        />
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <CustomerList 
+            customers={filteredCustomers}
+            loading={loading} 
+            onEdit={handleEdit} 
+            onDelete={handleDelete} 
+          />
+        </div>
 
         {/* Customer Form Dialog */}
         <CustomerFormDialog 

@@ -15,23 +15,25 @@ const DashboardSidebar = ({ isPremium, isAdmin }: DashboardSidebarProps) => {
 
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="p-4">
         <div className="flex items-center justify-center w-full">
           <div className="flex items-center gap-2">
-            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-10" />
+            <img src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" alt="Catatuy Logo" className="h-8 sm:h-10" />
           </div>
         </div>
       </SidebarHeader>
       
-      <SidebarContents 
-        isEntrepreneurMode={isEntrepreneurMode}
-        isPremium={isPremium}
-        isAdmin={isAdmin}
-      />
+      <SidebarContent className="px-2">
+        <SidebarContents 
+          isEntrepreneurMode={isEntrepreneurMode}
+          isPremium={isPremium}
+          isAdmin={isAdmin}
+        />
+      </SidebarContent>
       
-      <SidebarFooter>
-        <div className="px-3 py-2">
-          <LogoutButton variant="outline" className="w-full rounded-full" />
+      <SidebarFooter className="p-2">
+        <div className="px-2 py-2">
+          <LogoutButton variant="outline" className="w-full rounded-full text-sm" />
         </div>
       </SidebarFooter>
     </Sidebar>

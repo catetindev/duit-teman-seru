@@ -172,7 +172,7 @@ export default function CustomerFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md md:max-w-lg">
+      <DialogContent className="sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto">
         <CustomerFormHeader isEditMode={isEditMode} />
         
         <CustomerForm
