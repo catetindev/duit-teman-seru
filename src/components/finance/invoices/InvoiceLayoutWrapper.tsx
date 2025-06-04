@@ -18,10 +18,10 @@ export function InvoiceLayoutWrapper({
   actions 
 }: InvoiceLayoutWrapperProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 px-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">{title}</h1>
@@ -38,11 +38,13 @@ export function InvoiceLayoutWrapper({
         </div>
 
         {/* Content */}
-        <Card className="bg-white shadow-sm border-slate-200">
-          <CardContent className="p-6">
-            {children}
-          </CardContent>
-        </Card>
+        <div className="px-2">
+          <Card className="bg-white shadow-sm border-slate-200">
+            <CardContent className="p-4 sm:p-6">
+              {children}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

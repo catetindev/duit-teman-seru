@@ -1,143 +1,146 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Calculator as CalculatorIcon, TrendingUp, Percent } from 'lucide-react';
-import { formatRupiah, parseRupiah } from '@/utils/formatRupiah';
-import { useAuth } from '@/contexts/AuthContext';
+import { Calculator as CalculatorIcon, Percent, TrendingUp, DollarSign } from 'lucide-react';
+import { formatRupiah } from '@/utils/formatRupiah';
 
 const Calculator = () => {
   const { isPremium } = useAuth();
-  const [modalAwal, setModalAwal] = useState<string>('');
-  const [biayaProduksi, setBiayaProduksi] = useState<string>('');
-  const [biayaOperasional, setBiayaOperasional] = useState<string>('');
-  const [marginKeuntungan, setMarginKeuntungan] = useState<string>('20');
-  const [hasil, setHasil] = useState<{
-    hpp: number;
-    hargaJual: number;
-    keuntungan: number;
-  } | null>(null);
+  
+  // State for basic calculations
+  const [costPrice, setCostPrice] = useState<string>('');
+  const [desiredMargin, setDesiredMargin] = useState<string>('');
+  const [sellingPrice, setSellingPrice] = useState<number>(0);
+  const [profit, setProfit] = useState<number>(0);
+  const [marginPercentage, setMarginPercentage] = useState<number>(0);
 
-  const hitungHPP = () => {
-    const modal = parseRupiah(modalAwal);
-    const produksi = parseRupiah(biayaProduksi);
-    const operasional = parseRupiah(biayaOperasional);
-    const margin = parseFloat(marginKeuntungan) || 0;
+  // State for bulk calculations
+  const [quantity, setQuantity] = useState<string>('');
+  const [totalCost, setTotalCost] = useState<number>(0);
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [totalProfit, setTotalProfit] = useState<number>(0);
 
-    if (modal > 0) {
-      const hpp = modal + produksi + operasional;
-      const hargaJual = hpp + (hpp * margin / 100);
-      const keuntungan = hargaJual - hpp;
-
-      setHasil({
-        hpp,
-        hargaJual,
-        keuntungan
-      });
+  const calculatePricing = () => {
+    const cost = parseFloat(costPrice) || 0;
+    const margin = parseFloat(desiredMargin) || 0;
+    
+    if (cost > 0 && margin > 0) {
+      const selling = cost + (cost * margin / 100);
+      const profitAmount = selling - cost;
+      
+      setSellingPrice(selling);
+      setProfit(profitAmount);
+      setMarginPercentage(margin);
+      
+      // Calculate bulk if quantity is provided
+      const qty = parseFloat(quantity) || 1;
+      setTotalCost(cost * qty);
+      setTotalRevenue(selling * qty);
+      setTotalProfit(profitAmount * qty);
     }
   };
 
-  const resetForm = () => {
-    setModalAwal('');
-    setBiayaProduksi('');
-    setBiayaOperasional('');
-    setMarginKeuntungan('20');
-    setHasil(null);
+  const resetCalculator = () => {
+    setCostPrice('');
+    setDesiredMargin('');
+    setQuantity('');
+    setSellingPrice(0);
+    setProfit(0);
+    setMarginPercentage(0);
+    setTotalCost(0);
+    setTotalRevenue(0);
+    setTotalProfit(0);
   };
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-6 px-2">
             <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2 flex items-center gap-3">
-              <CalculatorIcon className="h-8 w-8 text-amber-600" />
-              Kalkulator HPP
+              <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <CalculatorIcon className="h-6 w-6 text-emerald-600" />
+              </div>
+              Kalkulator Harga
             </h1>
-            <p className="text-slate-600">Hitung Harga Pokok Penjualan dan tentukan harga jual yang optimal</p>
+            <p className="text-slate-600">Hitung harga jual optimal untuk produk Anda</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Content */}
+          <div className="px-2 space-y-6">
             {/* Input Form */}
             <Card className="bg-white shadow-sm border-slate-200">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800">Input Biaya</CardTitle>
+                <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-emerald-600" />
+                  Input Perhitungan
+                </CardTitle>
                 <Separator />
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="modal-awal" className="text-sm font-medium text-slate-700">
-                    Modal Awal / Harga Beli
-                  </Label>
-                  <Input
-                    id="modal-awal"
-                    placeholder="Rp 0"
-                    value={modalAwal}
-                    onChange={(e) => setModalAwal(e.target.value)}
-                    className="h-12 text-base"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="biaya-produksi" className="text-sm font-medium text-slate-700">
-                    Biaya Produksi (Opsional)
-                  </Label>
-                  <Input
-                    id="biaya-produksi"
-                    placeholder="Rp 0"
-                    value={biayaProduksi}
-                    onChange={(e) => setBiayaProduksi(e.target.value)}
-                    className="h-12 text-base"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="biaya-operasional" className="text-sm font-medium text-slate-700">
-                    Biaya Operasional (Opsional)
-                  </Label>
-                  <Input
-                    id="biaya-operasional"
-                    placeholder="Rp 0"
-                    value={biayaOperasional}
-                    onChange={(e) => setBiayaOperasional(e.target.value)}
-                    className="h-12 text-base"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="margin-keuntungan" className="text-sm font-medium text-slate-700">
-                    Margin Keuntungan (%)
-                  </Label>
-                  <div className="relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="cost-price" className="text-sm font-medium text-slate-700">
+                      Harga Pokok/Modal (Rp)
+                    </Label>
                     <Input
-                      id="margin-keuntungan"
+                      id="cost-price"
                       type="number"
-                      placeholder="20"
-                      value={marginKeuntungan}
-                      onChange={(e) => setMarginKeuntungan(e.target.value)}
-                      className="h-12 text-base pr-10"
+                      placeholder="Masukkan harga modal..."
+                      value={costPrice}
+                      onChange={(e) => setCostPrice(e.target.value)}
+                      className="h-11"
                     />
-                    <Percent className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="desired-margin" className="text-sm font-medium text-slate-700">
+                      Margin Keuntungan (%)
+                    </Label>
+                    <Input
+                      id="desired-margin"
+                      type="number"
+                      placeholder="Masukkan persentase margin..."
+                      value={desiredMargin}
+                      onChange={(e) => setDesiredMargin(e.target.value)}
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="quantity" className="text-sm font-medium text-slate-700">
+                      Kuantitas (opsional)
+                    </Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      placeholder="Masukkan jumlah produk..."
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      className="h-11"
+                    />
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Button 
-                    onClick={hitungHPP} 
-                    className="flex-1 h-12 bg-amber-600 hover:bg-amber-700 text-white"
+                    onClick={calculatePricing}
+                    className="flex-1 h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
                   >
                     <CalculatorIcon className="mr-2 h-4 w-4" />
-                    Hitung HPP
+                    Hitung Harga
                   </Button>
                   <Button 
-                    variant="outline" 
-                    onClick={resetForm}
-                    className="h-12 px-6 border-slate-300"
+                    onClick={resetCalculator}
+                    variant="outline"
+                    className="h-11"
                   >
                     Reset
                   </Button>
@@ -146,78 +149,111 @@ const Calculator = () => {
             </Card>
 
             {/* Results */}
-            <Card className="bg-white shadow-sm border-slate-200">
+            {sellingPrice > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Single Product Results */}
+                <Card className="bg-white shadow-sm border-slate-200">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                      Hasil Per Unit
+                    </CardTitle>
+                    <Separator />
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                        <div className="text-sm font-medium text-emerald-800 mb-1">Harga Jual</div>
+                        <div className="text-2xl font-bold text-emerald-900">
+                          {formatRupiah(sellingPrice)}
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="text-sm font-medium text-blue-800 mb-1">Keuntungan</div>
+                        <div className="text-xl font-bold text-blue-900">
+                          {formatRupiah(profit)}
+                        </div>
+                      </div>
+
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <div className="text-sm font-medium text-purple-800 mb-1">Margin</div>
+                        <div className="text-xl font-bold text-purple-900 flex items-center gap-1">
+                          <Percent className="h-5 w-5" />
+                          {marginPercentage.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Bulk Results */}
+                {quantity && parseFloat(quantity) > 1 && (
+                  <Card className="bg-white shadow-sm border-slate-200">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-slate-800">
+                        Hasil Total ({quantity} unit)
+                      </CardTitle>
+                      <Separator />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <div className="text-sm font-medium text-red-800 mb-1">Total Modal</div>
+                          <div className="text-xl font-bold text-red-900">
+                            {formatRupiah(totalCost)}
+                          </div>
+                        </div>
+
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="text-sm font-medium text-green-800 mb-1">Total Pendapatan</div>
+                          <div className="text-xl font-bold text-green-900">
+                            {formatRupiah(totalRevenue)}
+                          </div>
+                        </div>
+
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                          <div className="text-sm font-medium text-amber-800 mb-1">Total Keuntungan</div>
+                          <div className="text-2xl font-bold text-amber-900">
+                            {formatRupiah(totalProfit)}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {/* Tips */}
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-emerald-600" />
-                  Hasil Perhitungan
-                </CardTitle>
-                <Separator />
+                <CardTitle className="text-lg text-blue-800">💡 Tips Pricing</CardTitle>
               </CardHeader>
               <CardContent>
-                {hasil ? (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="bg-slate-50 rounded-xl p-4 border">
-                        <div className="text-sm font-medium text-slate-600 mb-1">Harga Pokok Penjualan (HPP)</div>
-                        <div className="text-xl font-bold text-slate-800">
-                          {formatRupiah(hasil.hpp)}
-                        </div>
-                      </div>
-
-                      <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-                        <div className="text-sm font-medium text-emerald-700 mb-1">Harga Jual Disarankan</div>
-                        <div className="text-2xl font-bold text-emerald-800">
-                          {formatRupiah(hasil.hargaJual)}
-                        </div>
-                      </div>
-
-                      <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-                        <div className="text-sm font-medium text-amber-700 mb-1">Keuntungan per Unit</div>
-                        <div className="text-xl font-bold text-amber-800">
-                          {formatRupiah(hasil.keuntungan)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                      <h4 className="font-medium text-blue-800 mb-2">Analisis:</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Margin keuntungan: {marginKeuntungan}%</li>
-                        <li>• HPP mencakup semua biaya produksi</li>
-                        <li>• Harga jual sudah termasuk margin keuntungan</li>
-                      </ul>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+                  <div>
+                    <h4 className="font-medium mb-2">Margin yang Disarankan:</h4>
+                    <ul className="space-y-1 text-blue-600">
+                      <li>• Produk digital: 70-90%</li>
+                      <li>• Makanan/minuman: 60-80%</li>
+                      <li>• Fashion: 50-100%</li>
+                      <li>• Elektronik: 10-30%</li>
+                    </ul>
                   </div>
-                ) : (
-                  <div className="flex items-center justify-center h-64">
-                    <div className="text-center">
-                      <CalculatorIcon className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                      <p className="text-slate-500">Hasil perhitungan akan muncul di sini</p>
-                      <p className="text-sm text-slate-400 mt-1">Masukkan nilai dan klik "Hitung HPP"</p>
-                    </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Faktor Pertimbangan:</h4>
+                    <ul className="space-y-1 text-blue-600">
+                      <li>• Kompetitor pricing</li>
+                      <li>• Target market</li>
+                      <li>• Brand positioning</li>
+                      <li>• Volume penjualan</li>
+                    </ul>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Tips */}
-          <Card className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-blue-800 mb-3">💡 Tips Menentukan Harga Jual:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
-                <div>
-                  <p>• <strong>Riset pasar:</strong> Bandingkan dengan kompetitor</p>
-                  <p>• <strong>Margin fleksibel:</strong> Sesuaikan dengan target market</p>
-                </div>
-                <div>
-                  <p>• <strong>Biaya tersembunyi:</strong> Jangan lupa biaya marketing</p>
-                  <p>• <strong>Volume penjualan:</strong> Pertimbangkan quantity discount</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </DashboardLayout>

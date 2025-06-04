@@ -12,16 +12,16 @@ interface PosLayoutProps {
 
 export function PosLayout({ leftPanel, rightPanel, title = "Point of Sale" }: PosLayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 px-2">
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">{title}</h1>
           <p className="text-slate-600">Kelola transaksi penjualan dengan mudah</p>
         </div>
 
         {/* Main Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-[calc(100vh-240px)] px-2">
           {/* Left Panel - Products */}
           <div className="lg:col-span-2">
             <Card className="h-full bg-white shadow-sm border-slate-200">
@@ -30,7 +30,7 @@ export function PosLayout({ leftPanel, rightPanel, title = "Point of Sale" }: Po
                 <Separator />
               </CardHeader>
               <CardContent className="p-0">
-                <ScrollArea className="h-[calc(100vh-320px)] px-6 pb-6">
+                <ScrollArea className="h-[calc(100vh-360px)] px-4 sm:px-6 pb-6">
                   {leftPanel}
                 </ScrollArea>
               </CardContent>

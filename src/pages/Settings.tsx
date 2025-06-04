@@ -51,114 +51,130 @@ const Settings = () => {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Pengaturan</h1>
-          <p className="text-gray-500 mt-2">Kelola preferensi dan pengaturan akun Anda</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-6 px-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">Pengaturan</h1>
+            <p className="text-slate-600">Kelola preferensi dan pengaturan akun Anda</p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Profile Settings - Active */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handleCardClick('profile')}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Profil
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Kelola informasi profil dan preferensi akun Anda.
-              </p>
-            </CardContent>
-          </Card>
+          {/* Content */}
+          <div className="px-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {/* Profile Settings - Active */}
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                onClick={() => handleCardClick('profile')}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <User className="h-5 w-5 text-blue-600" />
+                    </div>
+                    Profil
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Kelola informasi profil dan preferensi akun Anda.
+                  </p>
+                </CardContent>
+              </Card>
 
-          {/* Notification Settings - Disabled */}
-          <Card className="opacity-50 cursor-not-allowed">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Notifikasi
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Atur preferensi notifikasi dan reminder.
-              </p>
-              <p className="text-xs text-gray-400 mt-2">
-                Fitur belum tersedia
-              </p>
-            </CardContent>
-          </Card>
+              {/* Notification Settings - Disabled */}
+              <Card className="opacity-50 cursor-not-allowed">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="h-10 w-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                      <Bell className="h-5 w-5 text-yellow-600" />
+                    </div>
+                    Notifikasi
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Atur preferensi notifikasi dan reminder.
+                  </p>
+                  <p className="text-xs text-slate-400 mt-2 bg-slate-50 px-2 py-1 rounded">
+                    Fitur belum tersedia
+                  </p>
+                </CardContent>
+              </Card>
 
-          {/* Privacy Settings - Active */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handleCardClick('privacy')}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Privasi & Keamanan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Kelola pengaturan privasi dan keamanan akun.
-              </p>
-            </CardContent>
-          </Card>
+              {/* Privacy Settings - Active */}
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                onClick={() => handleCardClick('privacy')}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-green-600" />
+                    </div>
+                    Privasi & Keamanan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Kelola pengaturan privasi dan keamanan akun.
+                  </p>
+                </CardContent>
+              </Card>
 
-          {/* Theme Settings - Active */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handleCardClick('appearance')}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Tampilan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Sesuaikan tema dan tampilan aplikasi.
-              </p>
-            </CardContent>
-          </Card>
+              {/* Theme Settings - Active */}
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                onClick={() => handleCardClick('appearance')}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                      <Palette className="h-5 w-5 text-purple-600" />
+                    </div>
+                    Tampilan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Sesuaikan tema dan tampilan aplikasi.
+                  </p>
+                </CardContent>
+              </Card>
 
-          {/* Onboarding Section */}
-          <OnboardingSection />
+              {/* Onboarding Section */}
+              <OnboardingSection />
 
-          {/* Entrepreneur Onboarding Section */}
-          <EntrepreneurOnboardingSection />
+              {/* Entrepreneur Onboarding Section */}
+              <EntrepreneurOnboardingSection />
 
-          {/* Help Settings - Disabled */}
-          <Card className="opacity-50 cursor-not-allowed">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <HelpCircle className="h-5 w-5" />
-                Bantuan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Dapatkan bantuan dan dukungan untuk menggunakan aplikasi.
-              </p>
-              <p className="text-xs text-gray-400 mt-2">
-                Fitur belum tersedia
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+              {/* Help Settings - Disabled */}
+              <Card className="opacity-50 cursor-not-allowed">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="h-10 w-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                      <HelpCircle className="h-5 w-5 text-orange-600" />
+                    </div>
+                    Bantuan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Dapatkan bantuan dan dukungan untuk menggunakan aplikasi.
+                  </p>
+                  <p className="text-xs text-slate-400 mt-2 bg-slate-50 px-2 py-1 rounded">
+                    Fitur belum tersedia
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-        <Separator />
-
-        <div className="text-center text-sm text-gray-500">
-          <p>Catatyo v1.0 - Aplikasi Keuangan untuk Gen Z</p>
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <div className="text-center text-sm text-slate-500">
+                <p>Catatyo v1.0 - Aplikasi Keuangan untuk Gen Z</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </DashboardLayout>
