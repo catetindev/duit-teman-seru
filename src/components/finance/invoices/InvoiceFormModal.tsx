@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -51,7 +52,7 @@ export function InvoiceFormModal({
       total: 0,
       payment_due_date: new Date(),
       status: 'Unpaid',
-      payment_method: '',
+      payment_method: 'Cash',
       notes: ''
     }
   });
@@ -87,7 +88,7 @@ export function InvoiceFormModal({
           total: invoice.total,
           payment_due_date: new Date(invoice.payment_due_date),
           status: invoice.status as 'Unpaid' | 'Paid' | 'Overdue',
-          payment_method: invoice.payment_method || '',
+          payment_method: invoice.payment_method || 'Cash',
           notes: invoice.notes || ''
         });
       } else {
