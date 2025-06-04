@@ -11,7 +11,7 @@ interface BusinessSummaryData {
   profitMargin: number;
   posRevenue: number; // Separate POS revenue
   orderRevenue: number; // Separate order revenue
-  totalRevenue: number; // Combined all revenue sources
+  totalRevenue: number; // Combined revenue from ALL sources
 }
 
 export function useBusinessSummary() {
@@ -80,7 +80,7 @@ export function useBusinessSummary() {
 
       if (expensesError) throw expensesError;
 
-      // Calculate separate revenue streams
+      // Calculate revenue sources separately
       const manualIncomeTransactions = incomeTransactionsData.reduce((sum, t) => sum + Number(t.amount), 0);
       const manualExpenseTransactions = expenseTransactionsData.reduce((sum, t) => sum + Number(t.amount), 0);
       const posRevenue = posTransactionsData.reduce((sum, tx) => sum + Number(tx.total), 0);
@@ -90,19 +90,21 @@ export function useBusinessSummary() {
       // Total Income = ONLY manual business income (from forms)
       const totalIncome = manualIncomeTransactions;
       
-      // Total Revenue = All revenue sources combined (for reference)
-      const totalRevenue = manualIncomeTransactions + posRevenue + orderRevenue;
+      // Total Revenue = POS + Orders (NOT including manual income to prevent confusion)
+      // Manual income is already tracked separately as "Business Income"
+      const totalRevenue = posRevenue + orderRevenue;
       
       // Total Expenses = All expenses combined
       const totalExpenses = manualExpenseTransactions + businessExpenses;
       
-      // Net profit calculation based on total revenue vs total expenses
-      const netProfit = totalRevenue - totalExpenses;
-      const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+      // Net profit calculation: All revenue sources minus all expenses
+      const allRevenueSources = totalIncome + posRevenue + orderRevenue;
+      const netProfit = allRevenueSources - totalExpenses;
+      const profitMargin = allRevenueSources > 0 ? (netProfit / allRevenueSources) * 100 : 0;
 
       console.log('Business summary calculated:', {
         totalIncome, // Manual income only
-        totalRevenue, // All revenue sources
+        totalRevenue, // POS + Orders only
         posRevenue,
         orderRevenue,
         totalExpenses,
@@ -113,7 +115,8 @@ export function useBusinessSummary() {
           posRevenue,
           orderRevenue,
           manualExpenseTransactions,
-          businessExpenses
+          businessExpenses,
+          allRevenueSources
         }
       });
 

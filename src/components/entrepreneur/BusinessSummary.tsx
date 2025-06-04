@@ -45,8 +45,8 @@ export function BusinessSummary() {
       change: '+12.5%'
     },
     {
-      title: 'Total Revenue',
-      tooltip: 'Gabungan semua sumber pendapatan: Business Income + POS Sales + Orders',
+      title: 'Sales Revenue',
+      tooltip: 'Pendapatan dari POS Sales dan Orders (tidak termasuk manual income untuk menghindari duplikasi)',
       value: formatCurrency(totalRevenue, 'IDR'),
       icon: DollarSign,
       color: 'blue',
@@ -62,7 +62,7 @@ export function BusinessSummary() {
     },
     {
       title: 'Net Profit',
-      tooltip: 'Laba bersih dihitung dari Total Revenue dikurangi Total Expenses',
+      tooltip: 'Laba bersih dihitung dari semua sumber pendapatan (Business Income + Sales) dikurangi Total Expenses',
       value: formatCurrency(netProfit, 'IDR'),
       icon: netProfit >= 0 ? TrendingUp : TrendingDown,
       color: netProfit >= 0 ? 'emerald' : 'red',
