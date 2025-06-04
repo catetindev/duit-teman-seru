@@ -76,7 +76,7 @@ export function BusinessTransactionButtons({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
       <motion.div 
         whileHover={{ scale: isEntrepreneurMode ? 1.02 : 1 }} 
         whileTap={{ scale: isEntrepreneurMode ? 0.98 : 1 }}
@@ -84,9 +84,9 @@ export function BusinessTransactionButtons({
       >
         <Button 
           onClick={handleIncomeClick} 
-          className={`w-full h-16 rounded-2xl font-semibold text-lg transition-all duration-300 ${
+          className={`w-full h-14 sm:h-16 rounded-2xl sm:rounded-3xl font-semibold text-base sm:text-lg transition-all duration-300 border-0 ${
             isEntrepreneurMode 
-              ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm hover:shadow-md' 
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white' 
               : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
           }`}
           size="lg"
@@ -95,9 +95,9 @@ export function BusinessTransactionButtons({
         >
           <div className="flex items-center justify-center gap-3">
             {isEntrepreneurMode ? (
-              <TrendingUp className="h-6 w-6" />
+              <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6" />
             ) : (
-              <Lock className="h-6 w-6" />
+              <Lock className="h-5 w-5 sm:h-6 sm:w-6" />
             )}
             <span>Record Business Income</span>
           </div>
@@ -111,9 +111,9 @@ export function BusinessTransactionButtons({
       >
         <Button 
           onClick={handleExpenseClick} 
-          className={`w-full h-16 rounded-2xl font-semibold text-lg transition-all duration-300 ${
+          className={`w-full h-14 sm:h-16 rounded-2xl sm:rounded-3xl font-semibold text-base sm:text-lg transition-all duration-300 border-0 ${
             isEntrepreneurMode 
-              ? 'bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow-md' 
+              ? 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white' 
               : 'bg-slate-200 hover:bg-slate-300 text-slate-500 cursor-not-allowed'
           }`}
           size="lg"
@@ -122,9 +122,9 @@ export function BusinessTransactionButtons({
         >
           <div className="flex items-center justify-center gap-3">
             {isEntrepreneurMode ? (
-              <TrendingDown className="h-6 w-6" />
+              <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6" />
             ) : (
-              <Lock className="h-6 w-6" />
+              <Lock className="h-5 w-5 sm:h-6 sm:w-6" />
             )}
             <span>Record Business Expense</span>
           </div>

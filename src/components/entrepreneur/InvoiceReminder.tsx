@@ -47,8 +47,8 @@ export function InvoiceReminder() {
   });
 
   return (
-    <Card className="border shadow-sm overflow-hidden">
-      <CardHeader className="pb-2 border-b">
+    <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl overflow-hidden">
+      <CardHeader className="pb-2 border-b border-slate-100">
         <CardTitle className="text-base font-medium flex items-center">
           <Calendar className="h-4 w-4 mr-2 text-red-500" />
           Upcoming Payments
@@ -65,18 +65,18 @@ export function InvoiceReminder() {
             ))}
           </div>
         ) : upcomingInvoices && upcomingInvoices.length > 0 ? (
-          <div className="divide-y">
+          <div className="divide-y divide-slate-100">
             {upcomingInvoices.map((invoice: any) => {
               const dueDate = new Date(invoice.payment_due_date);
               const isUrgent = dueDate.getTime() - Date.now() < 3 * 24 * 60 * 60 * 1000; // Less than 3 days
               
               return (
-                <div key={invoice.id} className="flex justify-between items-center p-3 hover:bg-muted/50 transition-colors">
+                <div key={invoice.id} className="flex justify-between items-center p-3 hover:bg-slate-50 transition-colors">
                   <div>
                     <p className="font-medium text-sm truncate max-w-[150px]">
                       {invoice.customers?.name || 'Customer'}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-500">
                       #{invoice.invoice_number} • {
                       formatDistanceToNow(new Date(invoice.payment_due_date), { addSuffix: true })
                       }
@@ -86,10 +86,10 @@ export function InvoiceReminder() {
                     {isUrgent && (
                       <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
                     )}
-                    <span className={`text-xs px-2 py-1 rounded-full ${
+                    <span className={`text-xs px-2 py-1 rounded-full border ${
                       isUrgent 
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' 
-                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                        ? 'bg-red-50 text-red-700 border-red-200' 
+                        : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}>
                       Due soon
                     </span>
@@ -100,16 +100,16 @@ export function InvoiceReminder() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-6 text-center">
-            <Calendar className="h-8 w-8 text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground">No upcoming payments</p>
+            <Calendar className="h-8 w-8 text-slate-400 mb-2" />
+            <p className="text-sm text-slate-500">No upcoming payments</p>
           </div>
         )}
         
-        <div className="bg-muted/20 p-3 flex justify-between items-center">
-          <div className="text-xs text-muted-foreground">
+        <div className="bg-slate-50 p-3 flex justify-between items-center">
+          <div className="text-xs text-slate-500">
             Manage your pending invoices
           </div>
-          <Button asChild variant="ghost" className="h-8 px-2 text-xs">
+          <Button asChild variant="ghost" className="h-8 px-2 text-xs hover:bg-slate-100 rounded-xl">
             <Link to="/invoices" className="flex items-center">
               View All <ArrowRight className="ml-1 h-3 w-3" />
             </Link>

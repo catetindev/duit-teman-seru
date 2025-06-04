@@ -11,7 +11,7 @@ export function TopProductsList() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-medium">Top Performing Products</CardTitle>
         </CardHeader>
@@ -31,14 +31,14 @@ export function TopProductsList() {
 
   if (!topProducts.length) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
+      <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl">
+        <CardHeader className="pb-2 border-b border-slate-100">
           <CardTitle className="text-base font-medium">Top Performing Products</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center p-4 text-center">
-            <Package className="h-10 w-10 text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground">No product data available</p>
+            <Package className="h-10 w-10 text-slate-400 mb-2" />
+            <p className="text-sm text-slate-500">No product data available</p>
           </div>
         </CardContent>
       </Card>
@@ -46,8 +46,8 @@ export function TopProductsList() {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <Card className="bg-white/70 backdrop-blur-sm border-0 rounded-2xl sm:rounded-3xl">
+      <CardHeader className="pb-2 border-b border-slate-100">
         <CardTitle className="text-base font-medium flex items-center">
           <TrendingUp className="h-4 w-4 mr-2 text-amber-500" />
           Top Performing Products
@@ -56,20 +56,20 @@ export function TopProductsList() {
       <CardContent>
         <div className="space-y-3">
           {topProducts.slice(0, 3).map((product, index) => (
-            <div key={product.name} className="flex items-center justify-between">
+            <div key={product.name} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors">
               <div className="flex items-center">
-                <div className={`w-6 h-6 flex items-center justify-center rounded-full mr-2 ${
+                <div className={`w-6 h-6 flex items-center justify-center rounded-full mr-2 text-xs font-bold ${
                   index === 0 
                     ? 'bg-amber-100 text-amber-700' 
                     : index === 1 
-                    ? 'bg-gray-100 text-gray-700' 
-                    : 'bg-amber-50 text-amber-600'
+                    ? 'bg-slate-100 text-slate-700' 
+                    : 'bg-orange-100 text-orange-700'
                 }`}>
                   {index + 1}
                 </div>
                 <span className="font-medium text-sm truncate max-w-[140px]">{product.name}</span>
               </div>
-              <span className="text-right text-sm font-semibold">
+              <span className="text-right text-sm font-semibold text-slate-700">
                 {formatCurrency(product.revenue, 'IDR')}
               </span>
             </div>
