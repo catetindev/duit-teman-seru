@@ -1,84 +1,59 @@
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useInvoicesFetch } from './useInvoicesFetch';
-import { useInvoiceOperations } from './useInvoiceOperations';
-import { useInvoiceAnalytics } from './useInvoiceAnalytics';
-import { Customer, Product } from '@/types/entrepreneur';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Invoice } from '@/types/finance';
+import { Customer, Product } from '@/types/entrepreneur';
 
-export function useInvoices() {
-  const { user } = useAuth();
-  const { invoices, loading, setInvoices, fetchInvoices } = useInvoicesFetch();
-  const { operationLoading, generateInvoiceNumber, addInvoice, updateInvoice, deleteInvoice } = 
-    useInvoiceOperations(setInvoices);
-  const { calculateInvoiceTotals } = useInvoiceAnalytics(invoices);
-  
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+export const useInvoices = () => {
+  const { data: invoices = [], isLoading: invoicesLoading, refetch: refetchInvoices } = useQuery({
+    queryKey: ['invoices'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  // Wrap fetchInvoices with user context
-  const fetchUserInvoices = async (status?: string) => {
-    return user ? await fetchInvoices(user.id, status) : [];
-  };
+      if (error) throw error;
+      return data as Invoice[];
+    },
+  });
 
-  // Wrap addInvoice with user context
-  const addUserInvoice = async (data: any) => {
-    return user ? await addInvoice(user.id, data) : null;
-  };
-
-  // Fetch customers and products
-  const fetchCustomersAndProducts = async () => {
-    if (!user?.id) return;
-    
-    try {
-      // Fetch customers
-      const { data: customersData, error: customersError } = await supabase
+  const { data: customers = [], isLoading: customersLoading } = useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .eq('user_id', user.id);
-      
-      if (customersError) throw customersError;
-      setCustomers(customersData || []);
+        .order('name');
 
-      // Fetch products
-      const { data: productsData, error: productsError } = await supabase
+      if (error) throw error;
+      return data as Customer[];
+    },
+  });
+
+  const { data: products = [], isLoading: productsLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('user_id', user.id);
-      
-      if (productsError) throw productsError;
-      
-      // Cast the type property to match our Product interface
-      const typedProducts = (productsData || []).map(product => ({
-        ...product,
-        type: product.type as 'product' | 'service'
-      })) as Product[];
-      
-      setProducts(typedProducts);
-    } catch (error) {
-      console.error('Error fetching customers and products:', error);
-    }
-  };
+        .order('name');
 
-  // Load invoices, customers, and products when user changes
-  useEffect(() => {
-    if (user) {
-      fetchUserInvoices();
-      fetchCustomersAndProducts();
-    }
-  }, [user]);
+      if (error) throw error;
+      return data as Product[];
+    },
+  });
+
+  // Function to manually trigger refetch
+  const fetchInvoices = () => {
+    refetchInvoices();
+  };
 
   return {
     invoices,
     customers,
     products,
-    loading: loading || operationLoading,
-    fetchInvoices: fetchUserInvoices,
-    generateInvoiceNumber,
-    addInvoice: addUserInvoice,
-    updateInvoice,
-    deleteInvoice,
-    calculateInvoiceTotals
+    loading: invoicesLoading || customersLoading || productsLoading,
+    fetchInvoices,
   };
-}
+};

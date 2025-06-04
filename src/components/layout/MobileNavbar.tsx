@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -16,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { SidebarNavLink } from '@/components/ui/sidebar';
 import LogoutButton from '@/components/ui/LogoutButton';
-import { Badge } from '@/components/ui/badge'; // Import Badge
+import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MobileNavbarProps {
@@ -87,7 +88,6 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
       <SidebarNavLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} onClick={handleLinkClick} end>
         Dashboard
       </SidebarNavLink>
-      {/* Removed Transaction and Analytics links */}
       <SidebarNavLink to="/products" icon={<Package className="h-5 w-5" />} onClick={handleLinkClick}>
         Produk & Layanan
       </SidebarNavLink>
@@ -142,19 +142,19 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
   return (
     <>
       {/* Top navbar */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-background border-b z-50">
+      <div className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full">
-          <div className="h-full flex items-center justify-between relative">
+          <div className="h-full flex items-center justify-between">
             {/* Left Item: Toggle & Greeting */}
             <div className="flex items-center gap-x-3 flex-1 min-w-0">
               {isPremium && <EntrepreneurModeToggle className="flex-shrink-0" />}
-              <span className="text-sm font-medium truncate">
-                Hai {profile?.full_name || 'rizqi akbar'}!
+              <span className="text-sm font-medium text-gray-700 truncate">
+                Hai {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}!
               </span>
             </div>
 
             {/* Center Item: Logo */}
-            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex items-center justify-center">
               <Link to="/dashboard" className="flex items-center">
                 <img 
                   src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
@@ -172,11 +172,11 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
                     <Link 
                       to="/notifications" 
                       className={cn(
-                        "relative p-2 rounded-full hover:bg-accent", 
-                        isActive('/notifications') && "bg-accent"
+                        "relative p-2 rounded-full hover:bg-gray-100 transition-colors", 
+                        isActive('/notifications') && "bg-gray-100"
                       )}
                     >
-                      <Bell className="h-5 w-5" />
+                      <Bell className="h-5 w-5 text-gray-600" />
                       {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
                           <Badge 
@@ -202,12 +202,12 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
               
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="ml-2">
-                    <Menu className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" className="ml-2 hover:bg-gray-100">
+                    <Menu className="h-5 w-5 text-gray-600" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[280px] p-0 flex flex-col">
-                  <SheetHeader className="p-4 border-b">
+                <SheetContent side="right" className="w-[280px] p-0 flex flex-col bg-white">
+                  <SheetHeader className="p-4 border-b border-gray-200">
                     <SheetTitle className="flex items-center gap-2">
                        <img 
                         src="/lovable-uploads/b28e4def-5cbc-49d0-b60d-a1bf06d6d0b5.png" 
@@ -220,7 +220,7 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
                   <div className="flex-grow overflow-y-auto p-4 space-y-2">
                     {isEntrepreneurMode ? entrepreneurModeLinks : personalModeLinks}
                   </div>
-                  <div className="p-4 border-t">
+                  <div className="p-4 border-t border-gray-200">
                     <LogoutButton variant="outline" className="w-full" />
                   </div>
                 </SheetContent>
@@ -230,141 +230,141 @@ const MobileNavbar = ({ isPremium, isAdmin }: MobileNavbarProps) => {
         </div>
       </div>
       
-      {/* Bottom navbar - display different navigation based on mode */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t flex items-center justify-around px-2 z-50">
-        {isEntrepreneurMode && isPremium ? ( // Only show entrepreneur bottom nav if premium
+      {/* Bottom navbar */}
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex items-center justify-around px-2 z-50">
+        {isEntrepreneurMode && isPremium ? (
           <>
             <Link 
               to="/dashboard" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/dashboard') 
-                  ? "text-amber-500" 
-                  : "text-muted-foreground"
+                  ? "text-amber-600 bg-amber-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <LayoutDashboard className="h-5 w-5 mb-0.5" />
-              Dashboard
+              <LayoutDashboard className="h-5 w-5 mb-1" />
+              <span className="text-xs">Dashboard</span>
             </Link>
             
             <Link 
               to="/products" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/products') 
-                  ? "text-amber-500" 
-                  : "text-muted-foreground"
+                  ? "text-amber-600 bg-amber-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <Package className="h-5 w-5 mb-0.5" />
-              Produk
+              <Package className="h-5 w-5 mb-1" />
+              <span className="text-xs">Produk</span>
             </Link>
             
             <Link 
               to="/orders" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/orders') 
-                  ? "text-amber-500" 
-                  : "text-muted-foreground"
+                  ? "text-amber-600 bg-amber-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <ShoppingCart className="h-5 w-5 mb-0.5" />
-              Pesanan
+              <ShoppingCart className="h-5 w-5 mb-1" />
+              <span className="text-xs">Pesanan</span>
             </Link>
             
             <Link 
               to="/profit-loss" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/profit-loss') 
-                  ? "text-amber-500" 
-                  : "text-muted-foreground"
+                  ? "text-amber-600 bg-amber-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <PieChart className="h-5 w-5 mb-0.5" />
-              Laporan
+              <PieChart className="h-5 w-5 mb-1" />
+              <span className="text-xs">Laporan</span>
             </Link>
             
             <Link 
               to="/pos" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/pos') 
-                  ? "text-amber-500" 
-                  : "text-muted-foreground"
+                  ? "text-amber-600 bg-amber-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <CreditCard className="h-5 w-5 mb-0.5" />
-              POS
+              <CreditCard className="h-5 w-5 mb-1" />
+              <span className="text-xs">POS</span>
             </Link>
           </>
-        ) : ( // Show personal mode bottom nav for free or premium users in personal mode
+        ) : (
           <>
             <Link 
               to="/dashboard" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/dashboard') 
-                  ? "text-primary" 
-                  : "text-muted-foreground"
+                  ? "text-blue-600 bg-blue-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <LayoutDashboard className="h-5 w-5 mb-0.5" />
-              Dashboard
+              <LayoutDashboard className="h-5 w-5 mb-1" />
+              <span className="text-xs">Dashboard</span>
             </Link>
             
             <Link 
               to="/transactions" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/transactions') 
-                  ? "text-primary" 
-                  : "text-muted-foreground"
+                  ? "text-blue-600 bg-blue-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <ArrowDownUp className="h-5 w-5 mb-0.5" />
-              Transaksi
+              <ArrowDownUp className="h-5 w-5 mb-1" />
+              <span className="text-xs">Transaksi</span>
             </Link>
             
             <Link 
               to="/goals" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/goals') 
-                  ? "text-primary" 
-                  : "text-muted-foreground"
+                  ? "text-blue-600 bg-blue-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <Target className="h-5 w-5 mb-0.5" />
-              Target
+              <Target className="h-5 w-5 mb-1" />
+              <span className="text-xs">Target</span>
             </Link>
             
             <Link 
               to="/budget" 
               className={cn(
-                "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                 isActive('/budget') 
-                  ? "text-primary" 
-                  : "text-muted-foreground"
+                  ? "text-blue-600 bg-blue-50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               )}
             >
-              <BarChart2 className="h-5 w-5 mb-0.5" />
-              Budget
+              <BarChart2 className="h-5 w-5 mb-1" />
+              <span className="text-xs">Budget</span>
             </Link>
             
             {isPremium && (
               <Link 
                 to="/analytics" 
                 className={cn(
-                  "flex flex-1 flex-col items-center justify-center text-xs px-1 py-1", 
+                  "flex flex-1 flex-col items-center justify-center text-xs px-2 py-2 rounded-lg transition-colors", 
                   isActive('/analytics') 
-                    ? "text-primary" 
-                    : "text-muted-foreground"
+                    ? "text-blue-600 bg-blue-50" 
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                 )}
               >
-                <PieChart className="h-5 w-5 mb-0.5" />
-                Analitik
+                <PieChart className="h-5 w-5 mb-1" />
+                <span className="text-xs">Analitik</span>
               </Link>
             )}
           </>
