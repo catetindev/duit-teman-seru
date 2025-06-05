@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import LoginForm from '@/components/auth/LoginForm';
+import { useSecureAuth } from '@/hooks/auth/useSecureAuth';
+import SecureLoginForm from '@/components/auth/SecureLoginForm';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -14,10 +15,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Mail, CheckCircle, Shield } from 'lucide-react';
 
 const Login = () => {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
+  const { secureLogin } = useSecureAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,22 +52,26 @@ const Login = () => {
     checkForRedirectResponse();
   }, [user, navigate]);
 
-  const handleLogin = async (email: string, password: string) => {
+  const handleSecureLogin = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      const error = await login(email, password);
+      await secureLogin(email, password);
       
-      if (error) {
-        throw error;
-      }
+      // Add security log
+      console.log('Secure login successful for:', email);
+      toast.success('Login successful! Welcome back.');
       
       navigate('/dashboard');
     } catch (err: any) {
-      console.error('Login error:', err);
+      console.error('Secure login error:', err);
       setError(err.message || 'Failed to login');
-      toast.error(err.message || 'Failed to login');
+      
+      // Don't show toast for validation errors as they're shown in the form
+      if (!err.message?.includes('required') && !err.message?.includes('valid email')) {
+        toast.error(err.message || 'Failed to login');
+      }
     } finally {
       setLoading(false);
     }
@@ -76,7 +82,6 @@ const Login = () => {
     setError(null);
     
     try {
-      // Use current origin for redirectTo to ensure proper redirect back
       const redirectTo = `${window.location.origin}/dashboard`;
       console.log('Redirecting to:', redirectTo);
       
@@ -95,8 +100,7 @@ const Login = () => {
         throw error;
       }
       
-      // Redirect is handled by Supabase automatically
-      console.log('Auth response:', data);
+      console.log('Social auth response:', data);
     } catch (err: any) {
       console.error('Social login error:', err);
       setError(err.message || `Failed to login with ${provider}`);
@@ -265,7 +269,7 @@ const Login = () => {
       <Navbar />
       
       <div className="flex flex-1 w-full mt-16 md:mt-20">
-        {/* Left side - Form */}
+        {/* Left side - Secure Form */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -274,17 +278,20 @@ const Login = () => {
             className="w-full max-w-md"
           >
             <div className="text-center md:text-left mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome Back</h1>
-              <p className="text-gray-500 dark:text-gray-400">Sign in to your account to continue</p>
-            </div>
-            
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
-                {error}
+              <div className="flex items-center justify-center md:justify-start mb-4">
+                <Shield className="h-8 w-8 text-[#28e57d] mr-2" />
+                <h1 className="text-3xl md:text-4xl font-bold">Secure Login</h1>
               </div>
-            )}
+              <p className="text-gray-500 dark:text-gray-400">
+                Sign in to your account with enhanced security
+              </p>
+            </div>
 
-            <LoginForm onLogin={handleLogin} loading={loading} />
+            <SecureLoginForm 
+              onLogin={handleSecureLogin} 
+              loading={loading} 
+              error={error}
+            />
             
             <div className="mt-4 text-center">
               <Button
