@@ -19,6 +19,17 @@ import {
 
 import { cn } from "@/lib/utils"
 
+// Type declaration for Intl.Segmenter
+declare namespace Intl {
+  interface Segmenter {
+    segment(input: string): IterableIterator<{segment: string}>
+  }
+  interface SegmenterConstructor {
+    new(locale?: string, options?: {granularity?: string}): Segmenter
+  }
+  var Segmenter: SegmenterConstructor | undefined
+}
+
 interface TextRotateProps {
   texts: string[]
   rotationInterval?: number
@@ -79,7 +90,7 @@ const TextRotate = forwardRef<TextRotateRef, TextRotateProps>(
 
     // handy function to split text into characters with support for unicode and emojis
     const splitIntoCharacters = (text: string): string[] => {
-      if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
+      if (typeof Intl !== "undefined" && Intl.Segmenter) {
         const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" })
         return Array.from(segmenter.segment(text), ({ segment }) => segment)
       }
