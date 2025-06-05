@@ -134,15 +134,15 @@ const HeroSection = () => {
               <TextRotate
                 texts={[
                   "mudah",
-                  "praktis ✨",
-                  "visual 📊",
+                  "praktis",
+                  "visual",
                   "efisien",
-                  "cerdas 🧠",
-                  "modern 💫",
+                  "cerdas",
+                  "modern",
                   "akurat",
-                  "terpercaya 🛡️",
+                  "terpercaya",
                   "profesional",
-                  "🚀 canggih",
+                  "canggih",
                 ]}
                 mainClassName="overflow-hidden pr-3 text-[#28e57d] py-0 pb-2 md:pb-4 rounded-xl"
                 staggerDuration={0.03}
