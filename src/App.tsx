@@ -33,6 +33,9 @@ import ResetPassword from "@/pages/ResetPassword";
 import Feedback from "@/pages/Feedback";
 import Transactions from "@/pages/Transactions";
 import Notifications from "@/pages/Notifications";
+import Pricing from "@/pages/Pricing";
+import About from "@/pages/About";
+import Terms from "@/pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +52,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<Terms />} />
         
         {/* Protected routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

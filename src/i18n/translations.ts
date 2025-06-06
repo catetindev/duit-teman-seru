@@ -1,4 +1,3 @@
-
 // Common translation keys for the application
 export const translations = {
   // Common
@@ -9,6 +8,14 @@ export const translations = {
   'app.tagline': {
     en: 'Make money management fun!',
     id: 'Bikin atur uang jadi seru!'
+  },
+  'common.cancel': {
+    en: 'Cancel',
+    id: 'Batal'
+  },
+  'common.delete': {
+    en: 'Delete',
+    id: 'Hapus'
   },
   
   // Navigation
