@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import LoginForm from '@/components/auth/LoginForm';
+import SecureLoginForm from '@/components/auth/SecureLoginForm';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import { logSecurityEvent } from '@/utils/securityUtils';
 
 const Login = () => {
   const { user, login } = useAuth();
@@ -38,11 +38,13 @@ const Login = () => {
       
       if (data?.session) {
         console.log('User is authenticated after redirect');
+        await logSecurityEvent('oauth_login_success');
         navigate('/dashboard');
       }
       
       if (error) {
         console.error('Auth error after redirect:', error);
+        await logSecurityEvent('oauth_login_error', { error: error.message });
         toast.error('Authentication error: ' + error.message);
       }
     };
@@ -66,6 +68,7 @@ const Login = () => {
       console.error('Login error:', err);
       setError(err.message || 'Failed to login');
       toast.error(err.message || 'Failed to login');
+      throw err; // Re-throw for SecureLoginForm to handle
     } finally {
       setLoading(false);
     }
@@ -76,7 +79,8 @@ const Login = () => {
     setError(null);
     
     try {
-      // Use current origin for redirectTo to ensure proper redirect back
+      await logSecurityEvent('oauth_login_attempt', { provider });
+      
       const redirectTo = `${window.location.origin}/dashboard`;
       console.log('Redirecting to:', redirectTo);
       
@@ -92,10 +96,10 @@ const Login = () => {
       });
       
       if (error) {
+        await logSecurityEvent('oauth_login_error', { provider, error: error.message });
         throw error;
       }
       
-      // Redirect is handled by Supabase automatically
       console.log('Auth response:', data);
     } catch (err: any) {
       console.error('Social login error:', err);
@@ -113,7 +117,6 @@ const Login = () => {
       return;
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(resetEmail)) {
       toast.error('Please enter a valid email address');
@@ -124,6 +127,7 @@ const Login = () => {
     
     try {
       console.log('Sending password reset email to:', resetEmail);
+      await logSecurityEvent('password_reset_request', { email: resetEmail });
       
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -131,14 +135,15 @@ const Login = () => {
 
       if (error) {
         console.error('Password reset error:', error);
+        await logSecurityEvent('password_reset_error', { email: resetEmail, error: error.message });
         throw error;
       }
 
       console.log('Password reset email sent successfully');
+      await logSecurityEvent('password_reset_sent', { email: resetEmail });
       setResetEmailSent(true);
       toast.success('Password reset email sent! Check your inbox and spam folder.');
       
-      // Reset form after successful send
       setTimeout(() => {
         setResetEmail('');
         setResetEmailSent(false);
@@ -265,7 +270,6 @@ const Login = () => {
       <Navbar />
       
       <div className="flex flex-1 w-full mt-16 md:mt-20">
-        {/* Left side - Form */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -284,7 +288,7 @@ const Login = () => {
               </div>
             )}
 
-            <LoginForm onLogin={handleLogin} loading={loading} />
+            <SecureLoginForm onLogin={handleLogin} loading={loading} />
             
             <div className="mt-4 text-center">
               <Button
@@ -311,7 +315,6 @@ const Login = () => {
           </motion.div>
         </div>
         
-        {/* Right side - Image as background */}
         <AuthIllustration />
       </div>
       

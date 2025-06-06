@@ -36,6 +36,39 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          target_user_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          target_user_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          target_user_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       budgets: {
         Row: {
           amount: number
@@ -658,6 +691,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_assign_admin_role: {
+        Args: { _target_user_id: string }
+        Returns: boolean
+      }
       admin_create_user: {
         Args: {
           _email: string
@@ -688,6 +725,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: { _action: string; _limit_count: number; _time_window: unknown }
+        Returns: boolean
+      }
       check_user_role: {
         Args: { required_role: Database["public"]["Enums"]["user_role"] }
         Returns: boolean
@@ -703,6 +744,14 @@ export type Database = {
       }
       is_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      log_security_event: {
+        Args: { _event_type: string; _details?: Json }
+        Returns: string
+      }
+      validate_json_array: {
+        Args: { _json_data: Json; _required_fields: string[] }
         Returns: boolean
       }
     }
