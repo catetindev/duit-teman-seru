@@ -8,6 +8,8 @@ import { LanguageProvider } from "@/hooks/useLanguage";
 import { InvoiceCustomizationProvider } from "@/contexts/InvoiceCustomizationContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
+import { SecurityHeaders } from "@/components/security/SecurityHeaders";
+import SecurityMonitor from "@/components/security/SecurityMonitor";
 
 // Pages
 import Index from "@/pages/Index";
@@ -42,6 +44,8 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <>
+      <SecurityHeaders />
+      <SecurityMonitor />
       <Toaster />
       <Sonner />
       <ScrollToTop />

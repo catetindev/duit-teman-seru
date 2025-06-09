@@ -1,7 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { logSecurityEvent, checkRateLimit, getSessionInfo } from '@/utils/securityUtils';
+import { trackSecurityEvent, detectSuspiciousActivity, generateSessionFingerprint } from '@/utils/enhancedSecurityUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -10,6 +10,7 @@ interface SecureAuthState {
   isBlocked: boolean;
   blockUntil: number | null;
   lastActivity: number;
+  sessionFingerprint: string;
 }
 
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -22,7 +23,8 @@ export const useSecureAuth = () => {
     loginAttempts: 0,
     isBlocked: false,
     blockUntil: null,
-    lastActivity: Date.now()
+    lastActivity: Date.now(),
+    sessionFingerprint: generateSessionFingerprint()
   });
 
   // Session timeout management
@@ -72,11 +74,19 @@ export const useSecureAuth = () => {
   const handleFailedLogin = useCallback(async (error: any) => {
     const newAttempts = authState.loginAttempts + 1;
     
-    // Log the failed attempt
-    await logSecurityEvent('failed_login_attempt', {
+    // Enhanced logging with suspicious activity detection
+    await trackSecurityEvent('failed_login_attempt', {
       attempts: newAttempts,
       error: error.message,
+      sessionFingerprint: authState.sessionFingerprint,
       ...getSessionInfo()
+    });
+
+    // Detect if this is suspicious activity
+    await detectSuspiciousActivity('failed_login', {
+      attemptCount: newAttempts,
+      sessionFingerprint: authState.sessionFingerprint,
+      timeWindow: Date.now() - authState.lastActivity
     });
 
     setAuthState(prev => ({
@@ -91,7 +101,7 @@ export const useSecureAuth = () => {
     } else {
       toast.error(`Login failed. ${MAX_LOGIN_ATTEMPTS - newAttempts} attempts remaining.`);
     }
-  }, [authState.loginAttempts]);
+  }, [authState.loginAttempts, authState.sessionFingerprint, authState.lastActivity]);
 
   const handleSuccessfulLogin = useCallback(async () => {
     // Reset login attempts on successful login
@@ -103,9 +113,12 @@ export const useSecureAuth = () => {
       lastActivity: Date.now()
     }));
 
-    // Log successful login
-    await logSecurityEvent('successful_login', getSessionInfo());
-  }, []);
+    // Enhanced logging
+    await trackSecurityEvent('successful_login', {
+      sessionFingerprint: authState.sessionFingerprint,
+      ...getSessionInfo()
+    });
+  }, [authState.sessionFingerprint]);
 
   const checkLoginAllowed = useCallback(async (): Promise<boolean> => {
     // Check if currently blocked
@@ -125,24 +138,28 @@ export const useSecureAuth = () => {
       }
     }
 
-    // Check rate limiting
+    // Enhanced rate limiting
     const isAllowed = await checkRateLimit('login_attempt', 10, 15);
     if (!isAllowed) {
       toast.error('Too many login attempts. Please try again later.');
-      await logSecurityEvent('rate_limit_exceeded', {
+      await trackSecurityEvent('rate_limit_exceeded', {
         action: 'login_attempt',
+        sessionFingerprint: authState.sessionFingerprint,
         ...getSessionInfo()
       });
       return false;
     }
 
     return true;
-  }, [authState.isBlocked, authState.blockUntil]);
+  }, [authState.isBlocked, authState.blockUntil, authState.sessionFingerprint]);
 
   const secureSignOut = useCallback(async () => {
     try {
-      // Log the sign out
-      await logSecurityEvent('user_signout', getSessionInfo());
+      // Enhanced logging
+      await trackSecurityEvent('user_signout', {
+        sessionFingerprint: authState.sessionFingerprint,
+        ...getSessionInfo()
+      });
       
       // Clear any stored session data
       localStorage.removeItem('supabase.auth.token');
@@ -156,7 +173,7 @@ export const useSecureAuth = () => {
       console.error('Error during secure sign out:', error);
       toast.error('Error signing out');
     }
-  }, []);
+  }, [authState.sessionFingerprint]);
 
   return {
     authState,
