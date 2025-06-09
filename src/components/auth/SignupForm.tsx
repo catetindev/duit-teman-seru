@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useBrandingAssets } from '@/hooks/useBrandingAssets';
+import { supabase } from '@/integrations/supabase/client';
 import SecureSignupFormEnhanced from './SecureSignupFormEnhanced';
 import SocialLoginButtons from './SocialLoginButtons';
 import { validateCSRFToken } from '@/utils/enhancedSecurityUtils';
