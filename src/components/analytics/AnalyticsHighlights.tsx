@@ -1,178 +1,122 @@
 
 import React, { useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { TrendingUp, TrendingDown, AlertCircle, Target } from 'lucide-react';
 import { formatCurrency } from '@/utils/formatUtils';
 import { Transaction } from '@/hooks/useDashboardData';
-
-interface TopSpendingCategory {
-  category: string;
-  amount: number;
-  icon: string;
-}
-
-interface HighestSpendingDay {
-  date: Date;
-  amount: number;
-  count: number;
-}
 
 interface AnalyticsHighlightsProps {
   transactions: Transaction[];
 }
 
 export const AnalyticsHighlights: React.FC<AnalyticsHighlightsProps> = ({ transactions }) => {
-  const categoryIcons: Record<string, string> = {
-    'food': '🍔',
-    'transport': '🚗',
-    'entertainment': '🎬',
-    'shopping': '🛍️',
-    'bills': '📄',
-    'housing': '🏠',
-    'health': '🏥',
-    'education': '🎓',
-    'travel': '✈️',
-    'other': '📦'
-  };
-  
-  // Top spending categories
-  const topSpendingCategories = useMemo(() => {
+  const insights = useMemo(() => {
     if (!transactions.length) return [];
     
-    const expensesByCategory: Record<string, number> = {};
+    const expenses = transactions.filter(t => t.type === 'expense');
+    const income = transactions.filter(t => t.type === 'income');
     
-    transactions
-      .filter(t => t.type === 'expense')
-      .forEach(transaction => {
-        const category = transaction.category;
-        if (!expensesByCategory[category]) {
-          expensesByCategory[category] = 0;
-        }
-        expensesByCategory[category] += Number(transaction.amount);
+    // Calculate category insights
+    const categorySpending: Record<string, number> = {};
+    expenses.forEach(t => {
+      categorySpending[t.category] = (categorySpending[t.category] || 0) + Number(t.amount);
+    });
+    
+    const topCategory = Object.entries(categorySpending)
+      .sort(([,a], [,b]) => b - a)[0];
+    
+    const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0);
+    const totalExpense = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
+    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0;
+    
+    const insights = [];
+    
+    if (topCategory) {
+      insights.push({
+        icon: TrendingDown,
+        title: "Highest Spending Category",
+        description: `${topCategory[0]}: ${formatCurrency(topCategory[1], 'IDR')}`,
+        type: "warning" as const
       });
+    }
     
-    return Object.entries(expensesByCategory)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([category, amount]) => ({
-        category,
-        amount,
-        icon: categoryIcons[category.toLowerCase()] || '📊'
-      }));
+    if (savingsRate > 20) {
+      insights.push({
+        icon: TrendingUp,
+        title: "Great Savings Rate!",
+        description: `You're saving ${savingsRate.toFixed(1)}% of your income`,
+        type: "success" as const
+      });
+    } else if (savingsRate < 0) {
+      insights.push({
+        icon: AlertCircle,
+        title: "Spending Alert",
+        description: "You're spending more than you earn this period",
+        type: "danger" as const
+      });
+    }
+    
+    const avgDailyExpense = totalExpense / 30;
+    insights.push({
+      icon: Target,
+      title: "Daily Spending Average",
+      description: `${formatCurrency(avgDailyExpense, 'IDR')} per day`,
+      type: "info" as const
+    });
+    
+    return insights;
   }, [transactions]);
   
-  // Day with highest spending
-  const highestSpendingDay = useMemo(() => {
-    if (!transactions.length) return null;
-    
-    const expensesByDay: Record<string, { total: number, count: number, date: Date }> = {};
-    
-    transactions
-      .filter(t => t.type === 'expense')
-      .forEach(transaction => {
-        const day = transaction.date;
-        if (!expensesByDay[day]) {
-          expensesByDay[day] = { total: 0, count: 0, date: new Date(day) };
-        }
-        expensesByDay[day].total += Number(transaction.amount);
-        expensesByDay[day].count++;
-      });
-    
-    const highestDay = Object.values(expensesByDay)
-      .sort((a, b) => b.total - a.total)[0];
-    
-    if (!highestDay) return null;
-    
-    return {
-      date: highestDay.date,
-      amount: highestDay.total,
-      count: highestDay.count
-    };
-  }, [transactions]);
-  
-  // Average expense per day
-  const averageDailyExpense = useMemo(() => {
-    if (!transactions.length) return 0;
-    
-    const expenseTransactions = transactions.filter(t => t.type === 'expense');
-    if (!expenseTransactions.length) return 0;
-    
-    const totalExpense = expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-    const days = new Set(expenseTransactions.map(t => t.date)).size;
-    return days > 0 ? totalExpense / days : 0;
-  }, [transactions]);
+  if (!insights.length) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-base md:text-lg">Financial Insights</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center py-8">
+            Add more transactions to see personalized insights
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Highlights</CardTitle>
-        <CardDescription>Key insights from your financial data</CardDescription>
+        <CardTitle className="text-base md:text-lg">Financial Insights</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Top Spending Categories */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Top Spending Categories</h3>
-            {topSpendingCategories.length > 0 ? (
-              <div className="space-y-3">
-                {topSpendingCategories.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{item.icon}</span>
-                      <span>{item.category}</span>
-                    </div>
-                    <span className="font-medium">{formatCurrency(item.amount, 'IDR')}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-3 bg-muted rounded-md text-center">
-                <p>No data available</p>
-              </div>
-            )}
-          </div>
-          
-          {/* Highest Spending Day */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Highest Spending Day</h3>
-            {highestSpendingDay ? (
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-sm">
-                  {highestSpendingDay.date.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'short'
-                  })}
-                </p>
-                <p className="font-medium text-lg mt-1">
-                  {formatCurrency(highestSpendingDay.amount, 'IDR')}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {highestSpendingDay.count} transactions
-                </p>
-              </div>
-            ) : (
-              <div className="p-3 bg-muted rounded-md text-center">
-                <p>No data available</p>
-              </div>
-            )}
-          </div>
-          
-          {/* Transaction Stats */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">Transaction Stats</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-xs text-muted-foreground">Transactions</p>
-                <p className="font-medium text-lg">{transactions.length}</p>
-              </div>
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-xs text-muted-foreground">Avg Per Day</p>
-                <p className="font-medium text-lg">
-                  {formatCurrency(averageDailyExpense, 'IDR')}
-                </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {insights.map((insight, index) => (
+            <div 
+              key={index}
+              className={`p-4 rounded-lg border-l-4 ${
+                insight.type === 'success' ? 'bg-green-50 border-green-500 dark:bg-green-900/20' :
+                insight.type === 'warning' ? 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20' :
+                insight.type === 'danger' ? 'bg-red-50 border-red-500 dark:bg-red-900/20' :
+                'bg-blue-50 border-blue-500 dark:bg-blue-900/20'
+              }`}
+            >
+              <div className="flex items-start space-x-3">
+                <insight.icon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
+                  insight.type === 'success' ? 'text-green-600' :
+                  insight.type === 'warning' ? 'text-yellow-600' :
+                  insight.type === 'danger' ? 'text-red-600' :
+                  'text-blue-600'
+                }`} />
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-medium text-sm md:text-base text-gray-900 dark:text-gray-100">
+                    {insight.title}
+                  </h4>
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {insight.description}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </CardContent>
     </Card>

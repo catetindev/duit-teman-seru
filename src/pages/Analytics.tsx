@@ -52,40 +52,77 @@ const AnalyticsPage = () => {
   
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="space-y-8">
+      <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+        {/* Header Section */}
         <div className="space-y-4">
-          <h1 className="text-3xl font-bold">Grafik Transaksi Kamu</h1>
-          <p className="text-muted-foreground text-lg">Visualize and analyze your financial data</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Grafik Transaksi Kamu
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-1">
+                Visualize and analyze your financial data
+              </p>
+            </div>
+            
+            {/* Time filter tabs */}
+            <Tabs value={timeframe} className="w-full sm:w-auto">
+              <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-none">
+                <TabsTrigger 
+                  value="month" 
+                  onClick={() => setTimeframe('month')} 
+                  className="text-xs sm:text-sm px-3 py-2"
+                >
+                  This Month
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="quarter" 
+                  onClick={() => setTimeframe('quarter')} 
+                  className="text-xs sm:text-sm px-3 py-2"
+                >
+                  Last 3 Months
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="year" 
+                  onClick={() => setTimeframe('year')} 
+                  className="text-xs sm:text-sm px-3 py-2"
+                >
+                  This Year
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
         
-        <Tabs defaultValue="month" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-none">
-            <TabsTrigger value="month" onClick={() => setTimeframe('month')} className="px-6 py-3">This Month</TabsTrigger>
-            <TabsTrigger value="quarter" onClick={() => setTimeframe('quarter')} className="px-6 py-3">Last 3 Months</TabsTrigger>
-            <TabsTrigger value="year" onClick={() => setTimeframe('year')} className="px-6 py-3">This Year</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        
         {/* Summary Cards */}
-        <AnalyticsSummary transactions={transactions} />
+        <div className="w-full">
+          <AnalyticsSummary transactions={transactions} />
+        </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Income vs Expense Chart */}
-          <IncomeExpenseChart 
-            transactions={transactions}
-            timeframe={timeframe}
-            isLoading={isLoading}
-          />
+          <div className="w-full">
+            <IncomeExpenseChart 
+              transactions={transactions}
+              timeframe={timeframe}
+              isLoading={isLoading}
+            />
+          </div>
           
           {/* Expense Breakdown */}
-          <ExpenseBreakdownChart 
-            transactions={transactions}
-            isLoading={isLoading}
-          />
+          <div className="w-full">
+            <ExpenseBreakdownChart 
+              transactions={transactions}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
         
         {/* Highlights Section */}
-        <AnalyticsHighlights transactions={transactions} />
+        <div className="w-full">
+          <AnalyticsHighlights transactions={transactions} />
+        </div>
       </div>
     </DashboardLayout>
   );
