@@ -53,7 +53,10 @@ export function InvoiceForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Logo Upload Section */}
-        <LogoUploader />
+        <div className="border-b pb-4">
+          <h3 className="text-lg font-medium mb-4">Logo & Business Info</h3>
+          <LogoUploader />
+        </div>
         
         <InvoiceCustomerForm 
           form={form} 
@@ -81,13 +84,13 @@ export function InvoiceForm({
         
         <InvoicePaymentForm form={form} />
 
-        <div className="flex gap-3 pt-4">
+        <div className="flex gap-3 pt-4 border-t">
           <Button
             type="submit"
             disabled={loading}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {loading ? 'Saving...' : (invoice ? 'Update Invoice' : 'Create Invoice')}
+            {loading ? 'Menyimpan...' : (invoice ? 'Update Invoice' : 'Buat Invoice')}
           </Button>
           <Button
             type="button"
@@ -95,7 +98,7 @@ export function InvoiceForm({
             onClick={onClose}
             className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
           >
-            Cancel
+            Batal
           </Button>
         </div>
       </form>

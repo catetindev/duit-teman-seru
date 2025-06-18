@@ -28,7 +28,7 @@ export function InvoiceFormModal({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {invoice ? 'Edit Invoice' : 'Create New Invoice'}
+            {invoice ? 'Edit Invoice' : 'Buat Invoice Baru'}
           </DialogTitle>
         </DialogHeader>
 

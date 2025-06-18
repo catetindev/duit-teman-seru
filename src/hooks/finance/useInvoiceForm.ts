@@ -8,6 +8,7 @@ import { Invoice, InvoiceItem } from '@/types/finance';
 import { useInvoices } from '@/hooks/finance/useInvoices';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface UseInvoiceFormProps {
   customers: Customer[];
@@ -25,6 +26,7 @@ export function useInvoiceForm({
   onClose
 }: UseInvoiceFormProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { generateInvoiceNumber, addInvoice, updateInvoice } = useInvoices();
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [loading, setLoading] = useState(false);
@@ -36,12 +38,12 @@ export function useInvoiceForm({
     defaultValues: {
       invoice_number: '',
       customer_id: '',
-      items: [],
+      items: [{ description: '', quantity: 1, price: 0, total: 0 }],
       subtotal: 0,
       tax: 0,
       discount: 0,
       total: 0,
-      payment_due_date: new Date(),
+      payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       status: 'Unpaid',
       payment_method: 'Cash',
       notes: ''
@@ -55,49 +57,70 @@ export function useInvoiceForm({
 
   useEffect(() => {
     const initializeForm = async () => {
-      if (invoice) {
-        // Parse items safely
-        let parsedItems = [];
-        try {
-          if (typeof invoice.items === 'string') {
-            parsedItems = JSON.parse(invoice.items);
-          } else if (Array.isArray(invoice.items)) {
-            parsedItems = invoice.items;
+      try {
+        if (invoice) {
+          // Parse items safely for editing
+          let parsedItems = [];
+          try {
+            if (typeof invoice.items === 'string') {
+              parsedItems = JSON.parse(invoice.items);
+            } else if (Array.isArray(invoice.items)) {
+              parsedItems = invoice.items;
+            }
+          } catch (error) {
+            console.error('Error parsing invoice items:', error);
+            parsedItems = [];
           }
-        } catch (error) {
-          console.error('Error parsing invoice items:', error);
-          parsedItems = [];
+
+          // Map InvoiceItem to form schema format
+          const formItems = parsedItems.map((item: InvoiceItem) => ({
+            description: item.name || item.description || '',
+            quantity: item.quantity,
+            price: item.unit_price,
+            total: item.total
+          }));
+
+          form.reset({
+            invoice_number: invoice.invoice_number,
+            customer_id: invoice.customer_id,
+            items: formItems.length > 0 ? formItems : [{ description: '', quantity: 1, price: 0, total: 0 }],
+            subtotal: invoice.subtotal,
+            tax: invoice.tax,
+            discount: invoice.discount,
+            total: invoice.total,
+            payment_due_date: new Date(invoice.payment_due_date),
+            status: invoice.status as 'Unpaid' | 'Paid' | 'Overdue',
+            payment_method: invoice.payment_method || 'Cash',
+            notes: invoice.notes || ''
+          });
+          
+          // Set tax rate and discount from existing invoice
+          if (invoice.subtotal > 0) {
+            setTaxRate((invoice.tax / invoice.subtotal) * 100);
+          }
+          setDiscountAmount(invoice.discount);
+        } else {
+          // Generate new invoice number for new invoices
+          const newInvoiceNumber = await generateInvoiceNumber();
+          form.setValue('invoice_number', newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`);
+          
+          // Ensure at least one empty item exists
+          if (fields.length === 0) {
+            append({ description: '', quantity: 1, price: 0, total: 0 });
+          }
         }
-
-        // Map InvoiceItem to form schema format
-        const formItems = parsedItems.map((item: InvoiceItem) => ({
-          description: item.name || item.description || '',
-          quantity: item.quantity,
-          price: item.unit_price,
-          total: item.total
-        }));
-
-        form.reset({
-          invoice_number: invoice.invoice_number,
-          customer_id: invoice.customer_id,
-          items: formItems,
-          subtotal: invoice.subtotal,
-          tax: invoice.tax,
-          discount: invoice.discount,
-          total: invoice.total,
-          payment_due_date: new Date(invoice.payment_due_date),
-          status: invoice.status as 'Unpaid' | 'Paid' | 'Overdue',
-          payment_method: invoice.payment_method || 'Cash',
-          notes: invoice.notes || ''
+      } catch (error) {
+        console.error('Error initializing form:', error);
+        toast({
+          title: 'Error',
+          description: 'Gagal menginisialisasi form invoice',
+          variant: 'destructive'
         });
-      } else {
-        const newInvoiceNumber = await generateInvoiceNumber();
-        form.setValue('invoice_number', newInvoiceNumber || '');
       }
     };
 
     initializeForm();
-  }, [invoice, form, generateInvoiceNumber]);
+  }, [invoice, form, generateInvoiceNumber, append, fields.length, toast]);
 
   const refreshCustomers = async () => {
     if (!user?.id) return;
@@ -114,6 +137,11 @@ export function useInvoiceForm({
       setCustomers(data || []);
     } catch (error) {
       console.error('Error refreshing customers:', error);
+      toast({
+        title: 'Error',
+        description: 'Gagal memuat data customer',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -127,6 +155,9 @@ export function useInvoiceForm({
       price: Number(product.price),
       total: Number(product.price)
     });
+    
+    // Recalculate totals after adding product
+    setTimeout(calculateTotals, 0);
   };
 
   const addEmptyItem = () => {
@@ -159,21 +190,56 @@ export function useInvoiceForm({
     form.setValue('total', Math.max(0, total));
   };
 
+  // Watch for tax rate and discount changes
+  useEffect(() => {
+    calculateTotals();
+  }, [taxRate, discountAmount]);
+
   const onSubmit = async (data: InvoiceFormData) => {
+    if (!user?.id) {
+      toast({
+        title: 'Error',
+        description: 'User tidak terautentikasi',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
+      // Validate that we have at least one item with content
+      if (!data.items || data.items.length === 0 || data.items.every(item => !item.description.trim())) {
+        toast({
+          title: 'Error',
+          description: 'Harap tambahkan minimal satu item',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       // Map form items to InvoiceItem format
-      const mappedItems: InvoiceItem[] = data.items.map(item => ({
-        name: item.description,
-        description: '',
-        quantity: item.quantity,
-        unit_price: item.price,
-        total: item.total
-      }));
+      const mappedItems: InvoiceItem[] = data.items
+        .filter(item => item.description.trim()) // Only include items with descriptions
+        .map(item => ({
+          name: item.description,
+          description: '',
+          quantity: item.quantity,
+          unit_price: item.price,
+          total: item.total
+        }));
+
+      if (mappedItems.length === 0) {
+        toast({
+          title: 'Error',
+          description: 'Harap tambahkan minimal satu item dengan deskripsi',
+          variant: 'destructive'
+        });
+        return;
+      }
 
       if (invoice) {
-        // For updates, transform data to match database schema
+        // For updates
         const updateData = {
           id: invoice.id,
           invoice_number: data.invoice_number,
@@ -190,8 +256,13 @@ export function useInvoiceForm({
           notes: data.notes || ''
         };
         await updateInvoice(updateData);
+        
+        toast({
+          title: 'Berhasil',
+          description: 'Invoice berhasil diupdate'
+        });
       } else {
-        // For new invoices, transform data to match database schema
+        // For new invoices
         const createData = {
           invoice_number: data.invoice_number,
           customer_id: data.customer_id,
@@ -207,13 +278,22 @@ export function useInvoiceForm({
           notes: data.notes || ''
         };
         await addInvoice(createData);
+        
+        toast({
+          title: 'Berhasil',
+          description: 'Invoice berhasil dibuat'
+        });
       }
       
       onSuccess();
       onClose();
-      form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving invoice:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Gagal menyimpan invoice',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
