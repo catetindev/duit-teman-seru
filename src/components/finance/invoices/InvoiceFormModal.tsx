@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Customer, Product } from '@/types/entrepreneur';
 import { Invoice } from '@/types/finance';
 import { InvoiceForm } from './form/InvoiceForm';
+import { InvoiceCustomizationProvider } from '@/contexts/InvoiceCustomizationContext';
 
 interface InvoiceFormModalProps {
   open: boolean;
@@ -31,13 +32,15 @@ export function InvoiceFormModal({
           </DialogTitle>
         </DialogHeader>
 
-        <InvoiceForm
-          customers={customers}
-          products={products}
-          invoice={invoice}
-          onSuccess={onSuccess}
-          onClose={onClose}
-        />
+        <InvoiceCustomizationProvider>
+          <InvoiceForm
+            customers={customers}
+            products={products}
+            invoice={invoice}
+            onSuccess={onSuccess}
+            onClose={onClose}
+          />
+        </InvoiceCustomizationProvider>
       </DialogContent>
     </Dialog>
   );

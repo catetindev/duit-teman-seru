@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InvoicesList } from '@/components/finance/invoices/InvoicesList';
+import { InvoiceCustomizationProvider } from '@/contexts/InvoiceCustomizationContext';
 import { useInvoices } from '@/hooks/finance/useInvoices';
 
 export default function Invoices() {
@@ -51,26 +52,28 @@ export default function Invoices() {
 
   return (
     <DashboardLayout isPremium={isPremium}>
-      <div className="min-h-screen bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Header Section */}
-          <div className="space-y-4">
-            <h1 className="text-3xl font-bold text-slate-900">Invoice Generator</h1>
-            <p className="text-slate-600 text-lg">Create and manage professional invoices for your business</p>
-          </div>
-          
-          {/* Content Section */}
-          <div className="bg-white border border-slate-200 p-6 sm:p-8">
-            <InvoicesList
-              invoices={invoices}
-              customers={customers}
-              products={products}
-              loading={loading}
-              onInvoiceChange={fetchInvoices}
-            />
+      <InvoiceCustomizationProvider>
+        <div className="min-h-screen bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            {/* Header Section */}
+            <div className="space-y-4">
+              <h1 className="text-3xl font-bold text-slate-900">Invoice Generator</h1>
+              <p className="text-slate-600 text-lg">Create and manage professional invoices for your business</p>
+            </div>
+            
+            {/* Content Section */}
+            <div className="bg-white border border-slate-200 p-6 sm:p-8">
+              <InvoicesList
+                invoices={invoices}
+                customers={customers}
+                products={products}
+                loading={loading}
+                onInvoiceChange={fetchInvoices}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </InvoiceCustomizationProvider>
     </DashboardLayout>
   );
 }
