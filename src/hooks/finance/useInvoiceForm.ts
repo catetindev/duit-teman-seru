@@ -102,12 +102,8 @@ export function useInvoiceForm({
         } else {
           // Generate new invoice number for new invoices
           const newInvoiceNumber = await generateInvoiceNumber();
+          console.log('Generated invoice number:', newInvoiceNumber);
           form.setValue('invoice_number', newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`);
-          
-          // Ensure at least one empty item exists
-          if (fields.length === 0) {
-            append({ description: '', quantity: 1, price: 0, total: 0 });
-          }
         }
       } catch (error) {
         console.error('Error initializing form:', error);
@@ -120,7 +116,7 @@ export function useInvoiceForm({
     };
 
     initializeForm();
-  }, [invoice, form, generateInvoiceNumber, append, fields.length, toast]);
+  }, [invoice, form, generateInvoiceNumber, toast]);
 
   const refreshCustomers = async () => {
     if (!user?.id) return;
@@ -205,38 +201,32 @@ export function useInvoiceForm({
       return;
     }
 
+    console.log('Form data submitted:', data);
     setLoading(true);
     
     try {
       // Validate that we have at least one item with content
-      if (!data.items || data.items.length === 0 || data.items.every(item => !item.description.trim())) {
-        toast({
-          title: 'Error',
-          description: 'Harap tambahkan minimal satu item',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      // Map form items to InvoiceItem format
-      const mappedItems: InvoiceItem[] = data.items
-        .filter(item => item.description.trim()) // Only include items with descriptions
-        .map(item => ({
-          name: item.description,
-          description: '',
-          quantity: item.quantity,
-          unit_price: item.price,
-          total: item.total
-        }));
-
-      if (mappedItems.length === 0) {
+      const validItems = data.items.filter(item => item.description.trim());
+      if (validItems.length === 0) {
         toast({
           title: 'Error',
           description: 'Harap tambahkan minimal satu item dengan deskripsi',
           variant: 'destructive'
         });
+        setLoading(false);
         return;
       }
+
+      // Map form items to InvoiceItem format
+      const mappedItems: InvoiceItem[] = validItems.map(item => ({
+        name: item.description,
+        description: '',
+        quantity: item.quantity,
+        unit_price: item.price,
+        total: item.total
+      }));
+
+      console.log('Mapped items:', mappedItems);
 
       if (invoice) {
         // For updates
@@ -255,6 +245,8 @@ export function useInvoiceForm({
           payment_proof_url: invoice.payment_proof_url || '',
           notes: data.notes || ''
         };
+        
+        console.log('Update data:', updateData);
         await updateInvoice(updateData);
         
         toast({
@@ -277,6 +269,8 @@ export function useInvoiceForm({
           payment_proof_url: '',
           notes: data.notes || ''
         };
+        
+        console.log('Create data:', createData);
         await addInvoice(createData);
         
         toast({

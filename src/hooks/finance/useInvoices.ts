@@ -14,52 +14,70 @@ export const useInvoices = () => {
   const { data: invoices = [], isLoading: invoicesLoading, refetch: refetchInvoices } = useQuery({
     queryKey: ['invoices'],
     queryFn: async () => {
+      if (!user?.id) return [];
+      
       const { data, error } = await supabase
         .from('invoices')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as Invoice[];
     },
+    enabled: !!user?.id,
   });
 
   const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ['customers'],
     queryFn: async () => {
+      if (!user?.id) return [];
+      
       const { data, error } = await supabase
         .from('customers')
         .select('*')
+        .eq('user_id', user.id)
         .order('name');
 
       if (error) throw error;
       return data as Customer[];
     },
+    enabled: !!user?.id,
   });
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
+      if (!user?.id) return [];
+      
       const { data, error } = await supabase
         .from('products')
         .select('*')
+        .eq('user_id', user.id)
         .order('name');
 
       if (error) throw error;
       return data as Product[];
     },
+    enabled: !!user?.id,
   });
 
   // Generate invoice number
   const generateInvoiceNumber = async () => {
     try {
+      if (!user?.id) return `INV-${Date.now()}`;
+      
       const { data: existingInvoices, error } = await supabase
         .from('invoices')
         .select('invoice_number')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching existing invoices:', error);
+        return `INV-${Date.now()}`;
+      }
 
       const currentDate = new Date();
       const year = currentDate.getFullYear().toString().slice(-2);
@@ -68,11 +86,16 @@ export const useInvoices = () => {
       let nextNumber = 1;
       if (existingInvoices && existingInvoices.length > 0) {
         const lastInvoice = existingInvoices[0];
-        const lastNumber = parseInt(lastInvoice.invoice_number.split('-').pop() || '0');
-        nextNumber = lastNumber + 1;
+        const match = lastInvoice.invoice_number.match(/INV-(\d{2})(\d{2})-(\d{4})/);
+        if (match) {
+          const lastNumber = parseInt(match[3]);
+          nextNumber = lastNumber + 1;
+        }
       }
 
-      return `INV-${year}${month}-${nextNumber.toString().padStart(4, '0')}`;
+      const invoiceNumber = `INV-${year}${month}-${nextNumber.toString().padStart(4, '0')}`;
+      console.log('Generated invoice number:', invoiceNumber);
+      return invoiceNumber;
     } catch (error) {
       console.error('Error generating invoice number:', error);
       return `INV-${Date.now()}`;
@@ -84,6 +107,8 @@ export const useInvoices = () => {
     mutationFn: async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'user_id'>) => {
       if (!user?.id) throw new Error('User not authenticated');
 
+      console.log('Adding invoice with data:', invoiceData);
+
       const { data, error } = await supabase
         .from('invoices')
         .insert({
@@ -94,7 +119,12 @@ export const useInvoices = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Invoice added successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -118,6 +148,8 @@ export const useInvoices = () => {
   const updateInvoiceMutation = useMutation({
     mutationFn: async (invoiceData: Partial<Invoice> & { id: string }) => {
       const { id, ...updateData } = invoiceData;
+      console.log('Updating invoice with data:', updateData);
+      
       const { data, error } = await supabase
         .from('invoices')
         .update({
@@ -128,7 +160,12 @@ export const useInvoices = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Invoice updated successfully:', data);
       return data;
     },
     onSuccess: () => {
