@@ -62,7 +62,6 @@ export const useInvoices = () => {
     enabled: !!user?.id,
   });
 
-  // Generate invoice number
   const generateInvoiceNumber = async () => {
     try {
       if (!user?.id) return `INV-${Date.now()}`;
@@ -102,7 +101,6 @@ export const useInvoices = () => {
     }
   };
 
-  // Add invoice mutation
   const addInvoiceMutation = useMutation({
     mutationFn: async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'user_id'>) => {
       if (!user?.id) throw new Error('User not authenticated');
@@ -129,22 +127,12 @@ export const useInvoices = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast({
-        title: "Success",
-        description: "Invoice created successfully",
-      });
     },
     onError: (error) => {
       console.error('Add invoice error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create invoice",
-        variant: "destructive",
-      });
     },
   });
 
-  // Update invoice mutation
   const updateInvoiceMutation = useMutation({
     mutationFn: async (invoiceData: Partial<Invoice> & { id: string }) => {
       const { id, ...updateData } = invoiceData;
@@ -170,22 +158,12 @@ export const useInvoices = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast({
-        title: "Success",
-        description: "Invoice updated successfully",
-      });
     },
     onError: (error) => {
       console.error('Update invoice error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update invoice",
-        variant: "destructive",
-      });
     },
   });
 
-  // Delete invoice mutation
   const deleteInvoiceMutation = useMutation({
     mutationFn: async (invoiceId: string) => {
       const { error } = await supabase
@@ -212,7 +190,6 @@ export const useInvoices = () => {
     },
   });
 
-  // Function to manually trigger refetch with optional status filter
   const fetchInvoices = (status?: string) => {
     refetchInvoices();
   };

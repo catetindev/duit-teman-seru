@@ -57,9 +57,11 @@ export function useInvoiceForm({
 
   useEffect(() => {
     const initializeForm = async () => {
+      console.log('Initializing form, invoice:', invoice);
+      
       try {
         if (invoice) {
-          // Parse items safely for editing
+          // Edit mode - load existing invoice data
           let parsedItems = [];
           try {
             if (typeof invoice.items === 'string') {
@@ -72,38 +74,49 @@ export function useInvoiceForm({
             parsedItems = [];
           }
 
-          // Map InvoiceItem to form schema format
-          const formItems = parsedItems.map((item: InvoiceItem) => ({
+          const formItems = parsedItems.map((item: any) => ({
             description: item.name || item.description || '',
-            quantity: item.quantity,
-            price: item.unit_price,
-            total: item.total
+            quantity: item.quantity || 1,
+            price: item.unit_price || item.price || 0,
+            total: item.total || 0
           }));
 
           form.reset({
             invoice_number: invoice.invoice_number,
             customer_id: invoice.customer_id,
             items: formItems.length > 0 ? formItems : [{ description: '', quantity: 1, price: 0, total: 0 }],
-            subtotal: invoice.subtotal,
-            tax: invoice.tax,
-            discount: invoice.discount,
-            total: invoice.total,
+            subtotal: Number(invoice.subtotal) || 0,
+            tax: Number(invoice.tax) || 0,
+            discount: Number(invoice.discount) || 0,
+            total: Number(invoice.total) || 0,
             payment_due_date: new Date(invoice.payment_due_date),
             status: invoice.status as 'Unpaid' | 'Paid' | 'Overdue',
             payment_method: invoice.payment_method || 'Cash',
             notes: invoice.notes || ''
           });
           
-          // Set tax rate and discount from existing invoice
-          if (invoice.subtotal > 0) {
-            setTaxRate((invoice.tax / invoice.subtotal) * 100);
+          if (Number(invoice.subtotal) > 0) {
+            setTaxRate((Number(invoice.tax) / Number(invoice.subtotal)) * 100);
           }
-          setDiscountAmount(invoice.discount);
+          setDiscountAmount(Number(invoice.discount) || 0);
         } else {
-          // Generate new invoice number for new invoices
+          // Create mode - generate new invoice number
           const newInvoiceNumber = await generateInvoiceNumber();
           console.log('Generated invoice number:', newInvoiceNumber);
-          form.setValue('invoice_number', newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`);
+          
+          form.reset({
+            invoice_number: newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`,
+            customer_id: '',
+            items: [{ description: '', quantity: 1, price: 0, total: 0 }],
+            subtotal: 0,
+            tax: 0,
+            discount: 0,
+            total: 0,
+            payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            status: 'Unpaid',
+            payment_method: 'Cash',
+            notes: ''
+          });
         }
       } catch (error) {
         console.error('Error initializing form:', error);
@@ -152,8 +165,7 @@ export function useInvoiceForm({
       total: Number(product.price)
     });
     
-    // Recalculate totals after adding product
-    setTimeout(calculateTotals, 0);
+    setTimeout(calculateTotals, 100);
   };
 
   const addEmptyItem = () => {
@@ -186,7 +198,6 @@ export function useInvoiceForm({
     form.setValue('total', Math.max(0, total));
   };
 
-  // Watch for tax rate and discount changes
   useEffect(() => {
     calculateTotals();
   }, [taxRate, discountAmount]);
@@ -205,8 +216,8 @@ export function useInvoiceForm({
     setLoading(true);
     
     try {
-      // Validate that we have at least one item with content
-      const validItems = data.items.filter(item => item.description.trim());
+      // Validate items
+      const validItems = data.items.filter(item => item.description && item.description.trim());
       if (validItems.length === 0) {
         toast({
           title: 'Error',
@@ -217,62 +228,38 @@ export function useInvoiceForm({
         return;
       }
 
-      // Map form items to InvoiceItem format
-      const mappedItems: InvoiceItem[] = validItems.map(item => ({
-        name: item.description,
-        description: '',
-        quantity: item.quantity,
-        unit_price: item.price,
-        total: item.total
-      }));
+      // Prepare invoice data
+      const invoiceData = {
+        invoice_number: data.invoice_number,
+        customer_id: data.customer_id,
+        items: validItems.map(item => ({
+          name: item.description,
+          description: '',
+          quantity: item.quantity,
+          unit_price: item.price,
+          total: item.total
+        })),
+        subtotal: data.subtotal,
+        tax: data.tax,
+        discount: data.discount,
+        total: data.total,
+        payment_due_date: data.payment_due_date.toISOString(),
+        status: data.status,
+        payment_method: data.payment_method,
+        payment_proof_url: invoice?.payment_proof_url || '',
+        notes: data.notes || ''
+      };
 
-      console.log('Mapped items:', mappedItems);
+      console.log('Invoice data to save:', invoiceData);
 
       if (invoice) {
-        // For updates
-        const updateData = {
-          id: invoice.id,
-          invoice_number: data.invoice_number,
-          customer_id: data.customer_id,
-          items: mappedItems,
-          subtotal: data.subtotal,
-          tax: data.tax,
-          discount: data.discount,
-          total: data.total,
-          payment_due_date: data.payment_due_date.toISOString(),
-          status: data.status,
-          payment_method: data.payment_method,
-          payment_proof_url: invoice.payment_proof_url || '',
-          notes: data.notes || ''
-        };
-        
-        console.log('Update data:', updateData);
-        await updateInvoice(updateData);
-        
+        await updateInvoice({ ...invoiceData, id: invoice.id });
         toast({
           title: 'Berhasil',
           description: 'Invoice berhasil diupdate'
         });
       } else {
-        // For new invoices
-        const createData = {
-          invoice_number: data.invoice_number,
-          customer_id: data.customer_id,
-          items: mappedItems,
-          subtotal: data.subtotal,
-          tax: data.tax,
-          discount: data.discount,
-          total: data.total,
-          payment_due_date: data.payment_due_date.toISOString(),
-          status: data.status,
-          payment_method: data.payment_method,
-          payment_proof_url: '',
-          notes: data.notes || ''
-        };
-        
-        console.log('Create data:', createData);
-        await addInvoice(createData);
-        
+        await addInvoice(invoiceData);
         toast({
           title: 'Berhasil',
           description: 'Invoice berhasil dibuat'
