@@ -40,13 +40,16 @@ export function useInvoiceFormInitialization({
             parsedItems = [];
           }
 
+          // Ensure items have the correct field names for database compatibility
           const formItems = parsedItems.map((item: any) => ({
             name: item.name || item.description || '',
             description: item.description || item.name || '',
-            quantity: item.quantity || 1,
-            unit_price: item.unit_price || item.price || 0,
-            total: item.total || 0
+            quantity: Number(item.quantity) || 1,
+            unit_price: Number(item.unit_price || item.price) || 0,
+            total: Number(item.total) || 0
           }));
+
+          console.log('Formatted items for form:', formItems);
 
           form.reset({
             invoice_number: invoice.invoice_number,

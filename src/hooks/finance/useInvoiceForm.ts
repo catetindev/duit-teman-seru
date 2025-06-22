@@ -117,13 +117,11 @@ export function useInvoiceForm({
     try {
       setLoading(true);
 
-      // Transform items to ensure they match the expected database schema
+      // Transform items to ensure they match the expected database schema exactly
       const transformedItems = validItems.map(item => ({
         name: String(item.name).trim(),
-        description: String(item.description || item.name).trim(),
         quantity: Number(item.quantity),
-        unit_price: Number(item.unit_price),
-        total: Number(item.total)
+        unit_price: Number(item.unit_price)
       }));
 
       console.log('Transformed items for database:', transformedItems);
