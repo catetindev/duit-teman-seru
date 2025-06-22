@@ -98,6 +98,7 @@ export function useInvoiceForm({
       return;
     }
 
+    // Filter and validate items - ensure proper format
     const validItems = data.items.filter(item => 
       item.name && 
       item.name.trim() && 
@@ -117,7 +118,7 @@ export function useInvoiceForm({
     try {
       setLoading(true);
 
-      // Transform items to ensure they match the expected database schema exactly
+      // Transform items with exactly the fields expected by database validation
       const transformedItems = validItems.map(item => ({
         name: String(item.name).trim(),
         quantity: Number(item.quantity),

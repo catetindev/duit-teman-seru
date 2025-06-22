@@ -40,13 +40,13 @@ export function useInvoiceFormInitialization({
             parsedItems = [];
           }
 
-          // Ensure items have the correct field names for database compatibility
+          // Ensure items have the correct structure for the form
           const formItems = parsedItems.map((item: any) => ({
-            name: item.name || item.description || '',
+            name: item.name || '',
             description: item.description || item.name || '',
             quantity: Number(item.quantity) || 1,
             unit_price: Number(item.unit_price || item.price) || 0,
-            total: Number(item.total) || 0
+            total: Number(item.total) || Number(item.quantity || 1) * Number(item.unit_price || item.price || 0)
           }));
 
           console.log('Formatted items for form:', formItems);
@@ -71,23 +71,41 @@ export function useInvoiceFormInitialization({
           setDiscountAmount(Number(invoice.discount) || 0);
         } else {
           console.log('Generating new invoice number...');
-          const newInvoiceNumber = await generateInvoiceNumber();
-          console.log('Generated invoice number:', newInvoiceNumber);
-          
-          // Initialize with proper default values for new invoice
-          form.reset({
-            invoice_number: newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`,
-            customer_id: '',
-            items: [{ name: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
-            subtotal: 0,
-            tax: 0,
-            discount: 0,
-            total: 0,
-            payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            status: 'Unpaid',
-            payment_method: 'Cash',
-            notes: ''
-          });
+          try {
+            const newInvoiceNumber = await generateInvoiceNumber();
+            console.log('Generated invoice number:', newInvoiceNumber);
+            
+            // Initialize with proper default values for new invoice
+            form.reset({
+              invoice_number: newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`,
+              customer_id: '',
+              items: [{ name: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
+              subtotal: 0,
+              tax: 0,
+              discount: 0,
+              total: 0,
+              payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              status: 'Unpaid',
+              payment_method: 'Cash',
+              notes: ''
+            });
+          } catch (error) {
+            console.error('Error generating invoice number:', error);
+            // Fallback to basic invoice number
+            form.reset({
+              invoice_number: `INV-${Date.now().toString().slice(-6)}`,
+              customer_id: '',
+              items: [{ name: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
+              subtotal: 0,
+              tax: 0,
+              discount: 0,
+              total: 0,
+              payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              status: 'Unpaid',
+              payment_method: 'Cash',
+              notes: ''
+            });
+          }
         }
       } catch (error) {
         console.error('Error initializing form:', error);
