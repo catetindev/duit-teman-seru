@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Customer, Product } from '@/types/entrepreneur';
 import { Invoice } from '@/types/finance';
 import { InvoiceForm } from './form/InvoiceForm';
@@ -40,6 +40,12 @@ export function InvoiceFormModal({
           <DialogTitle>
             {invoice ? 'Edit Invoice' : 'Create New Invoice'}
           </DialogTitle>
+          <DialogDescription>
+            {invoice 
+              ? 'Update the invoice details and save your changes.' 
+              : 'Fill in the form below to create a new invoice for your customer.'
+            }
+          </DialogDescription>
         </DialogHeader>
 
         <InvoiceCustomizationProvider>

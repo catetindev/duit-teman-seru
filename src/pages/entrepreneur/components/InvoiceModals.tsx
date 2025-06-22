@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
@@ -47,6 +47,12 @@ export function InvoiceModals({
 
       <Dialog open={isPdfOpen} onOpenChange={onPdfClose}>
         <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Invoice Preview</DialogTitle>
+            <DialogDescription>
+              Preview and download your invoice as a PDF document.
+            </DialogDescription>
+          </DialogHeader>
           <Card className="overflow-hidden">
             <CardContent className="p-0">
               {selectedInvoice && currentCustomer && (
