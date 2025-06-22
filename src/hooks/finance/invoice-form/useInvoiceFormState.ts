@@ -11,6 +11,7 @@ export function useInvoiceFormState() {
 
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
+    mode: 'onBlur',
     defaultValues: {
       invoice_number: '',
       customer_id: '',

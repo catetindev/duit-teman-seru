@@ -49,79 +49,85 @@ export function InvoiceForm({
     onClose
   });
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  // Direct form submission handler
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     console.log('=== FORM SUBMIT TRIGGERED ===');
     
-    // Get current form values for debugging
+    // Get form values
     const formValues = form.getValues();
-    console.log('Current form values:', formValues);
+    console.log('Form values:', formValues);
     
     // Check for validation errors
     const errors = form.formState.errors;
+    console.log('Form errors:', errors);
+    
     if (Object.keys(errors).length > 0) {
-      console.log('Form validation errors:', errors);
+      console.log('Form has validation errors, not submitting');
       return;
     }
     
-    // Trigger form submission with validation
-    form.handleSubmit(onSubmit)(e);
+    // Call our submit handler directly
+    onSubmit(formValues);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
-        {/* Logo Upload Section */}
-        <div className="border-b pb-4">
-          <h3 className="text-lg font-medium mb-4">Logo & Business Info</h3>
-          <LogoUploader />
-        </div>
-        
-        <InvoiceCustomerForm 
-          form={form} 
-          customers={updatedCustomers}
-          onCustomerAdded={refreshCustomers}
-        />
-        
-        <InvoiceItemsSection 
-          form={form} 
-          fields={fields}
-          products={products}
-          onAddProduct={addProduct}
-          onAddEmptyItem={addEmptyItem}
-          onRemove={remove}
-          calculateItemTotal={calculateItemTotal}
-        />
-        
-        <InvoiceTotalsSection 
-          form={form}
-          taxRate={taxRate}
-          discountAmount={discountAmount}
-          setTaxRate={setTaxRate}
-          setDiscountAmount={setDiscountAmount}
-        />
-        
-        <InvoicePaymentForm form={form} />
+    <div className="space-y-6">
+      {/* Logo Upload Section */}
+      <div className="border-b pb-4">
+        <h3 className="text-lg font-medium mb-4">Logo & Business Info</h3>
+        <LogoUploader />
+      </div>
+      
+      <Form {...form}>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <InvoiceCustomerForm 
+            form={form} 
+            customers={updatedCustomers}
+            onCustomerAdded={refreshCustomers}
+          />
+          
+          <InvoiceItemsSection 
+            form={form} 
+            fields={fields}
+            products={products}
+            onAddProduct={addProduct}
+            onAddEmptyItem={addEmptyItem}
+            onRemove={remove}
+            calculateItemTotal={calculateItemTotal}
+          />
+          
+          <InvoiceTotalsSection 
+            form={form}
+            taxRate={taxRate}
+            discountAmount={discountAmount}
+            setTaxRate={setTaxRate}
+            setDiscountAmount={setDiscountAmount}
+          />
+          
+          <InvoicePaymentForm form={form} />
 
-        <div className="flex gap-3 pt-4 border-t">
-          <Button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {loading ? 'Saving...' : (invoice ? 'Update Invoice' : 'Create Invoice')}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex gap-3 pt-4 border-t">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {loading ? 'Saving...' : (invoice ? 'Update Invoice' : 'Create Invoice')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }
