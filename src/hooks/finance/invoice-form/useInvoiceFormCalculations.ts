@@ -17,7 +17,7 @@ export function useInvoiceFormCalculations({
   const calculateItemTotal = (index: number) => {
     const items = form.getValues('items');
     const item = items[index];
-    const total = item.quantity * item.price;
+    const total = item.quantity * item.unit_price;
     
     form.setValue(`items.${index}.total`, total);
     calculateTotals();

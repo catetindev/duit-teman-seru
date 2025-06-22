@@ -52,9 +52,10 @@ export function useInvoiceFormOperations({
     if (!product) return;
 
     append({
+      name: product.name,
       description: product.name,
       quantity: 1,
-      price: Number(product.price),
+      unit_price: Number(product.price),
       total: Number(product.price)
     });
     
@@ -63,9 +64,10 @@ export function useInvoiceFormOperations({
 
   const addEmptyItem = () => {
     append({
+      name: '',
       description: '',
       quantity: 1,
-      price: 0,
+      unit_price: 0,
       total: 0
     });
   };
