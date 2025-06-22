@@ -2,7 +2,6 @@
 import { z } from 'zod';
 
 export const invoiceFormSchema = z.object({
-  id: z.string().optional(),
   invoice_number: z.string().min(1, 'Invoice number is required'),
   customer_id: z.string().min(1, 'Please select a customer'),
   items: z.array(z.object({

@@ -12,28 +12,33 @@ export const useInvoiceMutations = () => {
 
   const addInvoiceMutation = useMutation({
     mutationFn: async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'user_id'>) => {
-      if (!user?.id) throw new Error('User not authenticated');
+      if (!user?.id) {
+        console.error('No user ID in mutation');
+        throw new Error('User not authenticated');
+      }
 
-      console.log('=== MUTATION START ===');
-      console.log('Invoice data received:', invoiceData);
+      console.log('=== MUTATION EXECUTION ===');
+      console.log('User ID:', user.id);
+      console.log('Invoice data received in mutation:', invoiceData);
 
+      // Ensure all required fields are present with correct types
       const completeInvoiceData = {
-        invoice_number: invoiceData.invoice_number,
-        customer_id: invoiceData.customer_id,
-        items: JSON.stringify(invoiceData.items),
-        subtotal: Number(invoiceData.subtotal),
+        invoice_number: String(invoiceData.invoice_number),
+        customer_id: String(invoiceData.customer_id),
+        items: JSON.stringify(invoiceData.items || []),
+        subtotal: Number(invoiceData.subtotal) || 0,
         tax: Number(invoiceData.tax) || 0,
         discount: Number(invoiceData.discount) || 0,
-        total: Number(invoiceData.total),
-        status: invoiceData.status || 'Unpaid',
-        payment_due_date: invoiceData.payment_due_date,
-        payment_method: invoiceData.payment_method,
+        total: Number(invoiceData.total) || 0,
+        status: String(invoiceData.status || 'Unpaid'),
+        payment_due_date: String(invoiceData.payment_due_date),
+        payment_method: String(invoiceData.payment_method || 'Cash'),
         payment_proof_url: invoiceData.payment_proof_url || null,
         notes: invoiceData.notes || null,
         user_id: user.id
       };
 
-      console.log('Complete data for Supabase:', completeInvoiceData);
+      console.log('Complete data for Supabase insert:', completeInvoiceData);
 
       const { data, error } = await supabase
         .from('invoices')
@@ -42,19 +47,26 @@ export const useInvoiceMutations = () => {
         .single();
 
       if (error) {
-        console.error('=== SUPABASE ERROR ===', error);
-        throw new Error(error.message || 'Failed to create invoice');
+        console.error('=== SUPABASE INSERT ERROR ===');
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        throw new Error(`Database error: ${error.message}`);
       }
       
-      console.log('=== SUCCESS ===', data);
+      console.log('=== INVOICE CREATED SUCCESSFULLY ===');
+      console.log('Created invoice:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      console.log('Invoice created and queries invalidated');
+      console.log('Invoice created successfully:', data);
     },
     onError: (error) => {
-      console.error('Mutation error:', error);
+      console.error('=== MUTATION ERROR ===');
+      console.error('Error in addInvoice mutation:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to create invoice',
@@ -66,6 +78,10 @@ export const useInvoiceMutations = () => {
   const updateInvoiceMutation = useMutation({
     mutationFn: async (invoiceData: Partial<Invoice> & { id: string }) => {
       const { id, ...updateData } = invoiceData;
+      
+      console.log('=== UPDATE MUTATION ===');
+      console.log('Updating invoice ID:', id);
+      console.log('Update data:', updateData);
       
       const completeUpdateData = {
         ...updateData,
@@ -83,13 +99,19 @@ export const useInvoiceMutations = () => {
         .select()
         .single();
 
-      if (error) throw new Error(error.message || 'Failed to update invoice');
+      if (error) {
+        console.error('Update error:', error);
+        throw new Error(error.message || 'Failed to update invoice');
+      }
+      
+      console.log('Invoice updated successfully:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
     },
     onError: (error) => {
+      console.error('Update mutation error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to update invoice',
@@ -100,12 +122,19 @@ export const useInvoiceMutations = () => {
 
   const deleteInvoiceMutation = useMutation({
     mutationFn: async (invoiceId: string) => {
+      console.log('Deleting invoice:', invoiceId);
+      
       const { error } = await supabase
         .from('invoices')
         .delete()
         .eq('id', invoiceId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+      
+      console.log('Invoice deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
@@ -115,6 +144,7 @@ export const useInvoiceMutations = () => {
       });
     },
     onError: (error) => {
+      console.error('Delete mutation error:', error);
       toast({
         title: "Error",
         description: "Failed to delete invoice",

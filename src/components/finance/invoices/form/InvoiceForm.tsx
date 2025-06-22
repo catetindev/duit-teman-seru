@@ -49,28 +49,30 @@ export function InvoiceForm({
     onClose
   });
 
-  // Direct form submission handler
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle form submission
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('=== FORM SUBMIT TRIGGERED ===');
+    console.log('=== FORM SUBMIT HANDLER ===');
+    console.log('Form is submitting...');
     
-    // Get form values
-    const formValues = form.getValues();
-    console.log('Form values:', formValues);
+    // Trigger form validation first
+    const isValid = await form.trigger();
+    console.log('Form validation result:', isValid);
     
-    // Check for validation errors
-    const errors = form.formState.errors;
-    console.log('Form errors:', errors);
-    
-    if (Object.keys(errors).length > 0) {
-      console.log('Form has validation errors, not submitting');
+    if (!isValid) {
+      console.log('Form validation failed:', form.formState.errors);
       return;
     }
     
-    // Call our submit handler directly
-    onSubmit(formValues);
+    // Get form values and submit
+    const formValues = form.getValues();
+    console.log('Form values before submit:', formValues);
+    
+    await onSubmit(formValues);
   };
+
+  console.log('InvoiceForm render - loading state:', loading);
 
   return (
     <div className="space-y-6">
@@ -81,7 +83,7 @@ export function InvoiceForm({
       </div>
       
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           <InvoiceCustomerForm 
             form={form} 
             customers={updatedCustomers}
