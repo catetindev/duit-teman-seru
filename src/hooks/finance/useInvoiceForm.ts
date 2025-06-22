@@ -57,11 +57,11 @@ export function useInvoiceForm({
 
   useEffect(() => {
     const initializeForm = async () => {
-      console.log('Initializing form, invoice:', invoice);
-      
       try {
         if (invoice) {
           // Edit mode - load existing invoice data
+          console.log('Loading existing invoice:', invoice);
+          
           let parsedItems = [];
           try {
             if (typeof invoice.items === 'string') {
@@ -101,28 +101,17 @@ export function useInvoiceForm({
           setDiscountAmount(Number(invoice.discount) || 0);
         } else {
           // Create mode - generate new invoice number
+          console.log('Generating new invoice number...');
           const newInvoiceNumber = await generateInvoiceNumber();
           console.log('Generated invoice number:', newInvoiceNumber);
           
-          form.reset({
-            invoice_number: newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`,
-            customer_id: '',
-            items: [{ description: '', quantity: 1, price: 0, total: 0 }],
-            subtotal: 0,
-            tax: 0,
-            discount: 0,
-            total: 0,
-            payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            status: 'Unpaid',
-            payment_method: 'Cash',
-            notes: ''
-          });
+          form.setValue('invoice_number', newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`);
         }
       } catch (error) {
         console.error('Error initializing form:', error);
         toast({
           title: 'Error',
-          description: 'Gagal menginisialisasi form invoice',
+          description: 'Failed to initialize invoice form',
           variant: 'destructive'
         });
       }
@@ -148,7 +137,7 @@ export function useInvoiceForm({
       console.error('Error refreshing customers:', error);
       toast({
         title: 'Error',
-        description: 'Gagal memuat data customer',
+        description: 'Failed to load customers',
         variant: 'destructive'
       });
     }
@@ -206,29 +195,40 @@ export function useInvoiceForm({
     if (!user?.id) {
       toast({
         title: 'Error',
-        description: 'User tidak terautentikasi',
+        description: 'User not authenticated',
         variant: 'destructive'
       });
       return;
     }
 
-    console.log('Form data submitted:', data);
+    console.log('Submitting invoice form with data:', data);
     setLoading(true);
     
     try {
-      // Validate items
+      // Validate items - ensure at least one item with description
       const validItems = data.items.filter(item => item.description && item.description.trim());
       if (validItems.length === 0) {
         toast({
           title: 'Error',
-          description: 'Harap tambahkan minimal satu item dengan deskripsi',
+          description: 'Please add at least one item with a description',
           variant: 'destructive'
         });
         setLoading(false);
         return;
       }
 
-      // Prepare invoice data
+      // Validate customer selection
+      if (!data.customer_id) {
+        toast({
+          title: 'Error',
+          description: 'Please select a customer',
+          variant: 'destructive'
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Prepare invoice data for database
       const invoiceData = {
         invoice_number: data.invoice_number,
         customer_id: data.customer_id,
@@ -250,19 +250,21 @@ export function useInvoiceForm({
         notes: data.notes || ''
       };
 
-      console.log('Invoice data to save:', invoiceData);
+      console.log('Final invoice data for submission:', invoiceData);
 
       if (invoice) {
+        console.log('Updating existing invoice...');
         await updateInvoice({ ...invoiceData, id: invoice.id });
         toast({
-          title: 'Berhasil',
-          description: 'Invoice berhasil diupdate'
+          title: 'Success',
+          description: 'Invoice updated successfully'
         });
       } else {
+        console.log('Creating new invoice...');
         await addInvoice(invoiceData);
         toast({
-          title: 'Berhasil',
-          description: 'Invoice berhasil dibuat'
+          title: 'Success',
+          description: 'Invoice created successfully'
         });
       }
       
@@ -272,7 +274,7 @@ export function useInvoiceForm({
       console.error('Error saving invoice:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Gagal menyimpan invoice',
+        description: error.message || 'Failed to save invoice',
         variant: 'destructive'
       });
     } finally {

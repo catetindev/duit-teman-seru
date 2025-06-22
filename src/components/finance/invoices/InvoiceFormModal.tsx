@@ -23,12 +23,22 @@ export function InvoiceFormModal({
   invoice,
   onSuccess
 }: InvoiceFormModalProps) {
+  const handleClose = () => {
+    console.log('Invoice form modal closing');
+    onClose();
+  };
+
+  const handleSuccess = () => {
+    console.log('Invoice form submitted successfully');
+    onSuccess();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {invoice ? 'Edit Invoice' : 'Buat Invoice Baru'}
+            {invoice ? 'Edit Invoice' : 'Create New Invoice'}
           </DialogTitle>
         </DialogHeader>
 
@@ -37,8 +47,8 @@ export function InvoiceFormModal({
             customers={customers}
             products={products}
             invoice={invoice}
-            onSuccess={onSuccess}
-            onClose={onClose}
+            onSuccess={handleSuccess}
+            onClose={handleClose}
           />
         </InvoiceCustomizationProvider>
       </DialogContent>

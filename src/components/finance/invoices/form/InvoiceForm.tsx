@@ -49,9 +49,26 @@ export function InvoiceForm({
     onClose
   });
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submission triggered');
+    
+    // Get current form values for debugging
+    const formValues = form.getValues();
+    console.log('Current form values:', formValues);
+    
+    // Check for validation errors
+    const errors = form.formState.errors;
+    if (Object.keys(errors).length > 0) {
+      console.log('Form validation errors:', errors);
+    }
+    
+    form.handleSubmit(onSubmit)(e);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         {/* Logo Upload Section */}
         <div className="border-b pb-4">
           <h3 className="text-lg font-medium mb-4">Logo & Business Info</h3>
@@ -90,15 +107,16 @@ export function InvoiceForm({
             disabled={loading}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {loading ? 'Menyimpan...' : (invoice ? 'Update Invoice' : 'Buat Invoice')}
+            {loading ? 'Saving...' : (invoice ? 'Update Invoice' : 'Create Invoice')}
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
+            disabled={loading}
             className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
           >
-            Batal
+            Cancel
           </Button>
         </div>
       </form>
