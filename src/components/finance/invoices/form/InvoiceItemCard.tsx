@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
@@ -101,7 +102,7 @@ export function InvoiceItemCard({ index, form, onRemove, calculateItemTotal }: I
       <div className="flex justify-between items-center pt-3 border-t">
         <span className="font-medium">Total:</span>
         <span className="font-bold text-lg">
-          {formatCurrency(item.total || 0, 'IDR')}
+          {formatCurrency(item?.total || 0, 'IDR')}
         </span>
       </div>
     </Card>

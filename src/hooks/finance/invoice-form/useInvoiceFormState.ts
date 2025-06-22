@@ -15,7 +15,7 @@ export function useInvoiceFormState() {
     defaultValues: {
       invoice_number: '',
       customer_id: '',
-      items: [{ description: '', quantity: 1, price: 0, total: 0 }],
+      items: [{ name: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
       subtotal: 0,
       tax: 0,
       discount: 0,

@@ -89,7 +89,6 @@ export function useInvoiceForm({
       return;
     }
 
-    // Validate required fields
     if (!data.customer_id) {
       toast({
         title: 'Error',
@@ -99,12 +98,11 @@ export function useInvoiceForm({
       return;
     }
 
-    // Validate items
     const validItems = data.items.filter(item => 
-      item.description && 
-      item.description.trim() && 
+      item.name && 
+      item.name.trim() && 
       item.quantity > 0 && 
-      item.price >= 0
+      item.unit_price >= 0
     );
 
     if (validItems.length === 0) {
@@ -121,10 +119,10 @@ export function useInvoiceForm({
 
       // Transform items to match database structure
       const transformedItems = validItems.map(item => ({
-        name: item.description,
-        description: item.description,
+        name: item.name,
+        description: item.description || item.name,
         quantity: item.quantity,
-        unit_price: item.price,
+        unit_price: item.unit_price,
         total: item.total
       }));
 
@@ -170,8 +168,6 @@ export function useInvoiceForm({
     } catch (error: any) {
       console.error('=== INVOICE SUBMISSION ERROR ===');
       console.error('Error details:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
       
       toast({
         title: 'Error',

@@ -5,9 +5,10 @@ export const invoiceFormSchema = z.object({
   invoice_number: z.string().min(1, 'Invoice number is required'),
   customer_id: z.string().min(1, 'Please select a customer'),
   items: z.array(z.object({
-    description: z.string().min(1, 'Description is required'),
+    name: z.string().min(1, 'Item name is required'),
+    description: z.string().optional(),
     quantity: z.number().min(1, 'Quantity must be at least 1'),
-    price: z.number().min(0, 'Price must be positive'),
+    unit_price: z.number().min(0, 'Price must be positive'),
     total: z.number().min(0, 'Total must be positive')
   })).min(1, 'At least one item is required'),
   subtotal: z.number().min(0, 'Subtotal must be positive'),

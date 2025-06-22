@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,6 @@ import { Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Product } from '@/types/entrepreneur';
 import { formatCurrency } from '@/utils/formatUtils';
-import { InvoiceItemRow } from './InvoiceItemRow';
 import { InvoiceItemCard } from './InvoiceItemCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -70,33 +70,10 @@ export function InvoiceItemsSection({
         <div className="text-center p-8 border-2 border-dashed rounded-lg">
           <p className="text-muted-foreground">Belum ada item. Pilih produk atau tambahkan item baru.</p>
         </div>
-      ) : isMobile ? (
-        // Mobile: Card View
+      ) : (
         <div className="space-y-4">
           {fields.map((field, index) => (
             <InvoiceItemCard
-              key={field.id}
-              index={index}
-              form={form}
-              onRemove={() => onRemove(index)}
-              calculateItemTotal={calculateItemTotal}
-            />
-          ))}
-        </div>
-      ) : (
-        // Desktop: Table View
-        <div className="border rounded-lg overflow-hidden">
-          <div className="bg-muted px-4 py-2">
-            <div className="grid grid-cols-12 gap-4 text-sm font-medium">
-              <div className="col-span-5">Item</div>
-              <div className="col-span-2 text-center">Jumlah</div>
-              <div className="col-span-2">Harga</div>
-              <div className="col-span-2">Total</div>
-              <div className="col-span-1"></div>
-            </div>
-          </div>
-          {fields.map((field, index) => (
-            <InvoiceItemRow
               key={field.id}
               index={index}
               form={form}
