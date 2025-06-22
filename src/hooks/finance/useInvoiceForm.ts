@@ -117,7 +117,7 @@ export function useInvoiceForm({
     try {
       setLoading(true);
 
-      // Transform items to match database structure
+      // Transform items to match database structure - use unit_price not price
       const transformedItems = validItems.map(item => ({
         name: item.name,
         description: item.description || item.name,

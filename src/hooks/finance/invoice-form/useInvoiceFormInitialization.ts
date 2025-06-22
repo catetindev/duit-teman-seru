@@ -41,16 +41,17 @@ export function useInvoiceFormInitialization({
           }
 
           const formItems = parsedItems.map((item: any) => ({
-            description: item.name || item.description || '',
+            name: item.name || item.description || '',
+            description: item.description || item.name || '',
             quantity: item.quantity || 1,
-            price: item.unit_price || item.price || 0,
+            unit_price: item.unit_price || item.price || 0,
             total: item.total || 0
           }));
 
           form.reset({
             invoice_number: invoice.invoice_number,
             customer_id: invoice.customer_id,
-            items: formItems.length > 0 ? formItems : [{ description: '', quantity: 1, price: 0, total: 0 }],
+            items: formItems.length > 0 ? formItems : [{ name: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
             subtotal: Number(invoice.subtotal) || 0,
             tax: Number(invoice.tax) || 0,
             discount: Number(invoice.discount) || 0,
