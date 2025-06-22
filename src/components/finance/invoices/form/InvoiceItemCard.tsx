@@ -4,7 +4,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { formatCurrency } from '@/utils/formatUtils';
 
@@ -19,6 +19,26 @@ export function InvoiceItemCard({ index, form, onRemove, calculateItemTotal }: I
   // Watch form values for this specific item
   const item = form.watch(`items.${index}`);
 
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    form.setValue(`items.${index}.quantity`, value);
+    calculateItemTotal(index);
+  };
+
+  const handleUnitPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    form.setValue(`items.${index}.unit_price`, value);
+    calculateItemTotal(index);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setValue(`items.${index}.name`, e.target.value);
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setValue(`items.${index}.description`, e.target.value);
+  };
+
   return (
     <Card className="p-4 space-y-3">
       <div className="flex justify-between items-start">
@@ -27,7 +47,8 @@ export function InvoiceItemCard({ index, form, onRemove, calculateItemTotal }: I
           <Label htmlFor={`items.${index}.name`} className="sr-only">Item Name</Label>
           <Input
             id={`items.${index}.name`}
-            {...form.register(`items.${index}.name`)}
+            value={item?.name || ''}
+            onChange={handleNameChange}
             placeholder="Nama Item"
             className="mb-1 text-base font-medium"
           />
@@ -40,7 +61,8 @@ export function InvoiceItemCard({ index, form, onRemove, calculateItemTotal }: I
           <Label htmlFor={`items.${index}.description`} className="sr-only">Description</Label>
           <Input
             id={`items.${index}.description`}
-            {...form.register(`items.${index}.description`)}
+            value={item?.description || ''}
+            onChange={handleDescriptionChange}
             placeholder="Deskripsi (opsional)"
             className="text-sm"
           />
@@ -66,10 +88,8 @@ export function InvoiceItemCard({ index, form, onRemove, calculateItemTotal }: I
             id={`items.${index}.quantity`}
             type="number"
             min="1"
-            {...form.register(`items.${index}.quantity`, {
-              valueAsNumber: true,
-              onChange: () => calculateItemTotal(index),
-            })}
+            value={item?.quantity || 1}
+            onChange={handleQuantityChange}
             className="text-center"
           />
           {form.formState.errors.items?.[index]?.quantity && (
@@ -85,10 +105,8 @@ export function InvoiceItemCard({ index, form, onRemove, calculateItemTotal }: I
             type="number"
             min="0"
             step="0.01"
-            {...form.register(`items.${index}.unit_price`, {
-              valueAsNumber: true,
-              onChange: () => calculateItemTotal(index),
-            })}
+            value={item?.unit_price || 0}
+            onChange={handleUnitPriceChange}
           />
           {form.formState.errors.items?.[index]?.unit_price && (
             <p className="text-xs text-destructive mt-1">

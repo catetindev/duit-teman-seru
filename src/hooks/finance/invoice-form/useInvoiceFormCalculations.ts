@@ -16,25 +16,40 @@ export function useInvoiceFormCalculations({
 }: UseInvoiceFormCalculationsProps) {
   const calculateItemTotal = (index: number) => {
     const items = form.getValues('items');
-    const item = items[index];
-    const total = item.quantity * item.unit_price;
+    if (!items || !items[index]) return;
     
-    form.setValue(`items.${index}.total`, total);
-    calculateTotals();
+    const item = items[index];
+    const quantity = Number(item.quantity) || 0;
+    const unitPrice = Number(item.unit_price) || 0;
+    const total = quantity * unitPrice;
+    
+    // Use setValue with shouldValidate to ensure reactivity
+    form.setValue(`items.${index}.total`, total, { shouldValidate: true });
+    
+    // Trigger recalculation after a brief delay to ensure state updates
+    setTimeout(() => calculateTotals(), 0);
   };
 
   const calculateTotals = () => {
     const items = form.getValues('items');
-    const subtotal = items.reduce((sum, item) => sum + (item.total || 0), 0);
+    if (!items || !Array.isArray(items)) return;
+    
+    const subtotal = items.reduce((sum, item) => {
+      const total = Number(item?.total) || 0;
+      return sum + total;
+    }, 0);
+    
     const taxAmount = (subtotal * taxRate) / 100;
-    const total = subtotal + taxAmount - discountAmount;
+    const total = Math.max(0, subtotal + taxAmount - discountAmount);
 
-    form.setValue('subtotal', subtotal);
-    form.setValue('tax', taxAmount);
-    form.setValue('discount', discountAmount);
-    form.setValue('total', Math.max(0, total));
+    // Update all totals with validation triggers
+    form.setValue('subtotal', subtotal, { shouldValidate: true });
+    form.setValue('tax', taxAmount, { shouldValidate: true });
+    form.setValue('discount', discountAmount, { shouldValidate: true });
+    form.setValue('total', total, { shouldValidate: true });
   };
 
+  // Recalculate when tax rate or discount changes
   useEffect(() => {
     calculateTotals();
   }, [taxRate, discountAmount]);
