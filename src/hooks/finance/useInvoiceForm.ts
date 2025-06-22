@@ -76,7 +76,12 @@ export function useInvoiceForm({
   }, [initialCustomers, setCustomers]);
 
   const onSubmit = async (data: InvoiceFormData) => {
+    console.log('=== INVOICE FORM SUBMISSION START ===');
+    console.log('User ID:', user?.id);
+    console.log('Form data received:', data);
+
     if (!user?.id) {
+      console.error('User not authenticated');
       toast({
         title: 'Error',
         description: 'User not authenticated',
@@ -85,31 +90,31 @@ export function useInvoiceForm({
       return;
     }
 
-    console.log('Submitting invoice form with data:', data);
     setLoading(true);
     
     try {
-      const validItems = data.items.filter(item => item.description && item.description.trim());
-      if (validItems.length === 0) {
-        toast({
-          title: 'Error',
-          description: 'Please add at least one item with a description',
-          variant: 'destructive'
-        });
-        setLoading(false);
-        return;
-      }
-
+      // Validate required fields
+      console.log('Validating form data...');
+      
       if (!data.customer_id) {
-        toast({
-          title: 'Error',
-          description: 'Please select a customer',
-          variant: 'destructive'
-        });
-        setLoading(false);
-        return;
+        throw new Error('Please select a customer');
       }
 
+      const validItems = data.items.filter(item => 
+        item.description && 
+        item.description.trim() && 
+        item.quantity > 0 && 
+        item.price >= 0
+      );
+
+      console.log('Valid items found:', validItems.length);
+      console.log('Valid items:', validItems);
+
+      if (validItems.length === 0) {
+        throw new Error('Please add at least one item with valid data');
+      }
+
+      // Prepare invoice data for database
       const invoiceData = {
         invoice_number: data.invoice_number,
         customer_id: data.customer_id,
@@ -121,18 +126,19 @@ export function useInvoiceForm({
           total: item.total
         })),
         subtotal: data.subtotal,
-        tax: data.tax,
-        discount: data.discount,
+        tax: data.tax || 0,
+        discount: data.discount || 0,
         total: data.total,
         payment_due_date: data.payment_due_date.toISOString(),
-        status: data.status,
-        payment_method: data.payment_method,
-        payment_proof_url: invoice?.payment_proof_url || '',
-        notes: data.notes || ''
+        status: data.status || 'Unpaid',
+        payment_method: data.payment_method || 'Cash',
+        payment_proof_url: invoice?.payment_proof_url || null,
+        notes: data.notes || null
       };
 
-      console.log('Final invoice data for submission:', invoiceData);
+      console.log('Prepared invoice data for database:', invoiceData);
 
+      // Submit to database
       if (invoice) {
         console.log('Updating existing invoice...');
         await updateInvoice({ ...invoiceData, id: invoice.id });
@@ -149,10 +155,12 @@ export function useInvoiceForm({
         });
       }
       
+      console.log('=== INVOICE SUBMISSION SUCCESS ===');
       onSuccess();
       onClose();
     } catch (error: any) {
-      console.error('Error saving invoice:', error);
+      console.error('=== INVOICE SUBMISSION ERROR ===');
+      console.error('Error details:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to save invoice',

@@ -51,7 +51,7 @@ export function InvoiceForm({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submission triggered');
+    console.log('=== FORM SUBMIT TRIGGERED ===');
     
     // Get current form values for debugging
     const formValues = form.getValues();
@@ -61,8 +61,10 @@ export function InvoiceForm({
     const errors = form.formState.errors;
     if (Object.keys(errors).length > 0) {
       console.log('Form validation errors:', errors);
+      return;
     }
     
+    // Trigger form submission with validation
     form.handleSubmit(onSubmit)(e);
   };
 
