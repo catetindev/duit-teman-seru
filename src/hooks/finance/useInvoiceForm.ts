@@ -1,14 +1,15 @@
 
-import { useState, useEffect } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { invoiceFormSchema, InvoiceFormData } from '@/components/finance/invoices/form/invoiceFormSchema';
+import { useEffect } from 'react';
 import { Customer, Product } from '@/types/entrepreneur';
-import { Invoice, InvoiceItem } from '@/types/finance';
+import { Invoice } from '@/types/finance';
+import { InvoiceFormData } from '@/components/finance/invoices/form/invoiceFormSchema';
 import { useInvoices } from '@/hooks/finance/useInvoices';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useInvoiceFormState } from './invoice-form/useInvoiceFormState';
+import { useInvoiceFormCalculations } from './invoice-form/useInvoiceFormCalculations';
+import { useInvoiceFormInitialization } from './invoice-form/useInvoiceFormInitialization';
+import { useInvoiceFormOperations } from './invoice-form/useInvoiceFormOperations';
 
 interface UseInvoiceFormProps {
   customers: Customer[];
@@ -28,168 +29,51 @@ export function useInvoiceForm({
   const { user } = useAuth();
   const { toast } = useToast();
   const { generateInvoiceNumber, addInvoice, updateInvoice } = useInvoices();
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
-  const [loading, setLoading] = useState(false);
-  const [taxRate, setTaxRate] = useState(11);
-  const [discountAmount, setDiscountAmount] = useState(0);
 
-  const form = useForm<InvoiceFormData>({
-    resolver: zodResolver(invoiceFormSchema),
-    defaultValues: {
-      invoice_number: '',
-      customer_id: '',
-      items: [{ description: '', quantity: 1, price: 0, total: 0 }],
-      subtotal: 0,
-      tax: 0,
-      discount: 0,
-      total: 0,
-      payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      status: 'Unpaid',
-      payment_method: 'Cash',
-      notes: ''
-    }
+  const {
+    form,
+    fields,
+    loading,
+    setLoading,
+    taxRate,
+    setTaxRate,
+    discountAmount,
+    setDiscountAmount,
+    append,
+    remove
+  } = useInvoiceFormState();
+
+  const { calculateItemTotal, calculateTotals } = useInvoiceFormCalculations({
+    form,
+    taxRate,
+    discountAmount
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'items'
+  const {
+    customers,
+    setCustomers,
+    refreshCustomers,
+    addProduct,
+    addEmptyItem
+  } = useInvoiceFormOperations({
+    form,
+    append,
+    products,
+    calculateTotals
   });
 
+  useInvoiceFormInitialization({
+    form,
+    invoice,
+    generateInvoiceNumber,
+    setTaxRate,
+    setDiscountAmount
+  });
+
+  // Initialize customers
   useEffect(() => {
-    const initializeForm = async () => {
-      try {
-        if (invoice) {
-          // Edit mode - load existing invoice data
-          console.log('Loading existing invoice:', invoice);
-          
-          let parsedItems = [];
-          try {
-            if (typeof invoice.items === 'string') {
-              parsedItems = JSON.parse(invoice.items);
-            } else if (Array.isArray(invoice.items)) {
-              parsedItems = invoice.items;
-            }
-          } catch (error) {
-            console.error('Error parsing invoice items:', error);
-            parsedItems = [];
-          }
-
-          const formItems = parsedItems.map((item: any) => ({
-            description: item.name || item.description || '',
-            quantity: item.quantity || 1,
-            price: item.unit_price || item.price || 0,
-            total: item.total || 0
-          }));
-
-          form.reset({
-            invoice_number: invoice.invoice_number,
-            customer_id: invoice.customer_id,
-            items: formItems.length > 0 ? formItems : [{ description: '', quantity: 1, price: 0, total: 0 }],
-            subtotal: Number(invoice.subtotal) || 0,
-            tax: Number(invoice.tax) || 0,
-            discount: Number(invoice.discount) || 0,
-            total: Number(invoice.total) || 0,
-            payment_due_date: new Date(invoice.payment_due_date),
-            status: invoice.status as 'Unpaid' | 'Paid' | 'Overdue',
-            payment_method: invoice.payment_method || 'Cash',
-            notes: invoice.notes || ''
-          });
-          
-          if (Number(invoice.subtotal) > 0) {
-            setTaxRate((Number(invoice.tax) / Number(invoice.subtotal)) * 100);
-          }
-          setDiscountAmount(Number(invoice.discount) || 0);
-        } else {
-          // Create mode - generate new invoice number
-          console.log('Generating new invoice number...');
-          const newInvoiceNumber = await generateInvoiceNumber();
-          console.log('Generated invoice number:', newInvoiceNumber);
-          
-          form.setValue('invoice_number', newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`);
-        }
-      } catch (error) {
-        console.error('Error initializing form:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to initialize invoice form',
-          variant: 'destructive'
-        });
-      }
-    };
-
-    initializeForm();
-  }, [invoice, form, generateInvoiceNumber, toast]);
-
-  const refreshCustomers = async () => {
-    if (!user?.id) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      setCustomers(data || []);
-    } catch (error) {
-      console.error('Error refreshing customers:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load customers',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const addProduct = (productId: string) => {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    append({
-      description: product.name,
-      quantity: 1,
-      price: Number(product.price),
-      total: Number(product.price)
-    });
-    
-    setTimeout(calculateTotals, 100);
-  };
-
-  const addEmptyItem = () => {
-    append({
-      description: '',
-      quantity: 1,
-      price: 0,
-      total: 0
-    });
-  };
-
-  const calculateItemTotal = (index: number) => {
-    const items = form.getValues('items');
-    const item = items[index];
-    const total = item.quantity * item.price;
-    
-    form.setValue(`items.${index}.total`, total);
-    calculateTotals();
-  };
-
-  const calculateTotals = () => {
-    const items = form.getValues('items');
-    const subtotal = items.reduce((sum, item) => sum + (item.total || 0), 0);
-    const taxAmount = (subtotal * taxRate) / 100;
-    const total = subtotal + taxAmount - discountAmount;
-
-    form.setValue('subtotal', subtotal);
-    form.setValue('tax', taxAmount);
-    form.setValue('discount', discountAmount);
-    form.setValue('total', Math.max(0, total));
-  };
-
-  useEffect(() => {
-    calculateTotals();
-  }, [taxRate, discountAmount]);
+    setCustomers(initialCustomers);
+  }, [initialCustomers, setCustomers]);
 
   const onSubmit = async (data: InvoiceFormData) => {
     if (!user?.id) {
@@ -205,7 +89,6 @@ export function useInvoiceForm({
     setLoading(true);
     
     try {
-      // Validate items - ensure at least one item with description
       const validItems = data.items.filter(item => item.description && item.description.trim());
       if (validItems.length === 0) {
         toast({
@@ -217,7 +100,6 @@ export function useInvoiceForm({
         return;
       }
 
-      // Validate customer selection
       if (!data.customer_id) {
         toast({
           title: 'Error',
@@ -228,7 +110,6 @@ export function useInvoiceForm({
         return;
       }
 
-      // Prepare invoice data for database
       const invoiceData = {
         invoice_number: data.invoice_number,
         customer_id: data.customer_id,

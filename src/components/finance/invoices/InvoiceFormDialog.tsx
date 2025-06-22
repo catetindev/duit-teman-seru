@@ -1,20 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
-import { formatCurrency } from '@/utils/formatUtils';
 import { Customer, Product } from '@/types/entrepreneur';
 import { Invoice } from '@/types/finance';
 import { InvoiceCustomerForm } from './form/InvoiceCustomerForm';
 import { InvoiceItemsSection } from './form/InvoiceItemsSection';
 import { InvoiceTotalsSection } from './form/InvoiceTotalsSection';
+import { InvoiceDialogHeader } from './dialog/InvoiceDialogHeader';
+import { InvoiceDialogActions } from './dialog/InvoiceDialogActions';
 import { invoiceFormSchema, type InvoiceFormData } from './form/invoiceFormSchema';
 
 interface InvoiceFormDialogProps {
@@ -55,7 +53,7 @@ export function InvoiceFormDialog({
     }
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'items'
   });
@@ -225,11 +223,7 @@ export function InvoiceFormDialog({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditMode ? 'Edit Invoice' : 'Create New Invoice'}
-          </DialogTitle>
-        </DialogHeader>
+        <InvoiceDialogHeader isEditMode={isEditMode} />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -261,24 +255,11 @@ export function InvoiceFormDialog({
             />
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isEditMode ? 'Update Invoice' : 'Create Invoice'}
-              </Button>
-            </div>
+            <InvoiceDialogActions
+              isEditMode={isEditMode}
+              isSubmitting={isSubmitting}
+              onCancel={onClose}
+            />
           </form>
         </Form>
       </DialogContent>
