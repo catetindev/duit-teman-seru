@@ -117,31 +117,31 @@ export function useInvoiceForm({
     try {
       setLoading(true);
 
-      // Transform items to match database structure - use unit_price not price
+      // Transform items to ensure they match the expected database schema
       const transformedItems = validItems.map(item => ({
-        name: item.name,
-        description: item.description || item.name,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        total: item.total
+        name: String(item.name).trim(),
+        description: String(item.description || item.name).trim(),
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price),
+        total: Number(item.total)
       }));
 
-      console.log('Transformed items:', transformedItems);
+      console.log('Transformed items for database:', transformedItems);
 
       // Prepare invoice data for database
       const invoiceData = {
-        invoice_number: data.invoice_number,
-        customer_id: data.customer_id,
+        invoice_number: String(data.invoice_number),
+        customer_id: String(data.customer_id),
         items: transformedItems,
-        subtotal: data.subtotal,
-        tax: data.tax || 0,
-        discount: data.discount || 0,
-        total: data.total,
+        subtotal: Number(data.subtotal),
+        tax: Number(data.tax) || 0,
+        discount: Number(data.discount) || 0,
+        total: Number(data.total),
         payment_due_date: data.payment_due_date.toISOString(),
-        status: data.status || 'Unpaid',
-        payment_method: data.payment_method,
+        status: String(data.status) || 'Unpaid',
+        payment_method: String(data.payment_method),
         payment_proof_url: null,
-        notes: data.notes || null
+        notes: data.notes ? String(data.notes) : null
       };
 
       console.log('Final invoice data for submission:', invoiceData);

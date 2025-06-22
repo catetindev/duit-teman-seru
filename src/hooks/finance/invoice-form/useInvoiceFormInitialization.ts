@@ -71,7 +71,20 @@ export function useInvoiceFormInitialization({
           const newInvoiceNumber = await generateInvoiceNumber();
           console.log('Generated invoice number:', newInvoiceNumber);
           
-          form.setValue('invoice_number', newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`);
+          // Initialize with proper default values for new invoice
+          form.reset({
+            invoice_number: newInvoiceNumber || `INV-${Date.now().toString().slice(-6)}`,
+            customer_id: '',
+            items: [{ name: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
+            subtotal: 0,
+            tax: 0,
+            discount: 0,
+            total: 0,
+            payment_due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            status: 'Unpaid',
+            payment_method: 'Cash',
+            notes: ''
+          });
         }
       } catch (error) {
         console.error('Error initializing form:', error);
