@@ -137,6 +137,7 @@ export function useInvoiceForm({
         payment_due_date: data.payment_due_date.toISOString(),
         status: data.status || 'Unpaid',
         payment_method: data.payment_method,
+        payment_proof_url: null, // Add missing field
         notes: data.notes || null
       };
 
